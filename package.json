@@ -1,0 +1,14 @@
+{
+  "name": "iotivity",
+  "version": "0.0.0",
+  "description": "IoTivity bindings",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "gypfile": true,
+  "dependencies": {
+    "bindings": "~1.2.1",
+    "commitplease": "^2.2.1"
+  }
+}
