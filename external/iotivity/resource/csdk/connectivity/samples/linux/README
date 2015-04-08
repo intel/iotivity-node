@@ -1,0 +1,26 @@
+//----------------------------------------------------------------------
+// NOTICE - Transition to SCONS
+//----------------------------------------------------------------------
+
+The IoTivity build system is transitioning to SCONS. Although the 
+makefiles are still available (until v1.0) and some developers are 
+still using them, they are currently no longer supported. To learn more 
+about building using SCONS see Readme.scons.txt in the repository root 
+directory. The build steps used in continuous integration can be found
+in auto_build.sh which is also in the the repository root directory.
+
+//----------------------------------------------------------------------
+
+#1. build "connectivity" project
+	- execute make command in "connectivity/build/" folder.
+
+#2. build "example" for linux
+	- execute make command in "connectivity/samples/linux/" folder.
+
+#3. execute sample program
+	- you should link the "connectivity_abstraction" library.
+	ex. LD_LIBRARY_PATH=../../../build/out ./sample_main
+	
+#4 	execute sample.sh in "connectivity/samples/linux/" folder
+ ex.    $./sample.sh (This will make a clean build and execute application)
+

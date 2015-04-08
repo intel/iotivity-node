@@ -1,0 +1,23 @@
+Import('env')
+
+arduino_simplecs_env = env.Clone()
+######################################################################
+# Build flags
+######################################################################
+arduino_simplecs_env.PrependUnique(CPPPATH = [
+		'../../../../../ocsocket/include',
+		'../../../../../logger/include',
+		'../../../../../stack/include',
+		'../../../../../../oc_logger/include'
+		])
+
+arduino_simplecs_env.AppendUnique(LIBPATH = [env.get('BUILD_DIR')])
+arduino_simplecs_env.PrependUnique(LIBS = ['octbstack', 'coap'])
+
+arduino_simplecs = arduino_simplecs_env.Program('SimpleClientServer', 'ocserver.cpp')
+env.CreateBin('SimpleClientServer')
+
+i_arduino_simplecs = arduino_simplecs_env.Install(env.get('BUILD_DIR'), arduino_simplecs)
+
+Alias('arduino_simplecs', i_arduino_simplecs)
+env.AppendTarget('arduino_simplecs')

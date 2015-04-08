@@ -1,0 +1,86 @@
+##
+# libcoap (share library) build script
+##
+
+Import('env')
+
+libcoap_env = env.Clone()
+
+target_os = env.get('TARGET_OS')
+# As in the source code(C) includes arduino Time library head file(C++)
+# It requires compile the .c with g++
+if target_os == 'arduino':
+	libcoap_env.Replace(CC = env.get('CXX'))
+	libcoap_env.Replace(CFLAGS = env.get('CXXFLAGS'))
+
+######################################################################
+# Build flags
+######################################################################
+libcoap_env.PrependUnique(CPPPATH = [
+		'../ocsocket/include',
+		'../ocmalloc/include',
+		'../logger/include',
+		'../ocrandom/include',
+		'../stack',
+		'../../oc_logger/include'
+		])
+
+if target_os not in ['arduino', 'windows', 'winrt']:
+	libcoap_env.AppendUnique(CPPDEFINES = ['WITH_POSIX'])
+	libcoap_env.AppendUnique(CFLAGS = ['-std=gnu99', '-fPIC'])
+
+if target_os not in ['windows', 'winrt']:
+	libcoap_env.AppendUnique(CFLAGS = ['-Wall', '-ffunction-sections',
+			'-fdata-sections', '-fno-exceptions'])
+
+if target_os == 'android':
+	libcoap_env.AppendUnique(LIBS = ['log'])
+
+if target_os == 'arduino':
+	libcoap_env.AppendUnique(CPPDEFINES = ['NDEBUG', 'WITH_ARDUINO'])
+
+if target_os in ['darwin', 'ios']:
+	libcoap_env.AppendUnique(CPPDEFINES = ['_DARWIN_C_SOURCE'])
+
+if not env.get('RELEASE'):
+	libcoap_env.AppendUnique(CPPDEFINES = ['TB_LOG'])
+
+######################################################################
+# Source files and Target(s)
+######################################################################
+libcoap_src = [
+	'pdu.c',
+	'net.c',
+	'debug.c',
+	'encode.c',
+	'uri.c',
+	'coap_list.c',
+#	'resource.c',
+	'hashkey.c',
+    'str.c',
+	'option.c',
+	'async.c',
+	'subscribe.c',
+	'block.c',
+	'../logger/src/logger.c',
+	'../ocrandom/src/ocrandom.c',
+	'../ocmalloc/src/ocmalloc.c',
+	'../../oc_logger/c/oc_logger.c',
+	'../../oc_logger/c/oc_console_logger.c'
+	]
+
+if target_os == 'arduino':
+	if env.get('NET') == 'Wifi':
+		libcoap_src.append(['../ocsocket/src/ocsocket_arduino_wifi.cpp'])
+	else:
+		libcoap_src.append(['../ocsocket/src/ocsocket_arduino.cpp'])
+else:
+	libcoap_src.append(['../ocsocket/src/ocsocket.c'])
+
+if target_os == 'arduino':
+	static_libcoap = libcoap_env.StaticLibrary('libcoap', libcoap_src, OBJPREFIX='libcoap_')
+	libcoap_env.InstallTarget(static_libcoap, 'libcoap')
+else:
+	static_libcoap = libcoap_env.StaticLibrary('libcoap', libcoap_src, OBJPREFIX='libcoap_')
+	shared_libcoap = libcoap_env.SharedLibrary('libcoap', libcoap_src, OBJPREFIX='libcoap_')
+	libcoap_env.InstallTarget([static_libcoap, shared_libcoap], 'libcoap')

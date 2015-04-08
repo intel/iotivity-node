@@ -1,0 +1,34 @@
+##
+# liboc_logger examples build script
+##
+
+Import('env')
+
+lib_env = env.Clone()
+SConscript(env.get('SRC_DIR') + '/resource/third_party_libs.scons', 'lib_env')
+
+examples_env = lib_env.Clone()
+######################################################################
+# Build flags
+######################################################################
+examples_env.PrependUnique(CPPPATH = ['../include'])
+examples_env.AppendUnique(LIBPATH = [env.get('BUILD_DIR')])
+examples_env.AppendUnique(LIBS = ['oc_logger', 'stdc++'])
+
+target_os = env.get('TARGET_OS')
+if target_os == 'android':
+	examples_env.AppendUnique(CXXFLAGS = ['-frtti', '-fexceptions'])
+	examples_env.AppendUnique(LIBS = ['gnustl_static'])
+
+if target_os not in ['arduino', 'windows', 'winrt']:
+	examples_env.AppendUnique(CFLAGS = Split('-Wall -std=c99 -Werror'))
+	examples_env.AppendUnique(CXXFLAGS = Split('-Wall -std=c++0x'))
+
+######################################################################
+# Source files and Targets
+######################################################################
+examples_c = examples_env.Program('examples_c', 'test_logging.c', OBJPREFIX='c_')
+examples_cpp = examples_env.Program('examples_cpp', 'test_logging.cpp')
+
+Alias('liboc_logger_examples', [examples_c, examples_cpp])
+examples_env.AppendTarget('liboc_logger_examples')

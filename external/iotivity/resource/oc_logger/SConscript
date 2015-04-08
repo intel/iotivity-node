@@ -1,0 +1,35 @@
+##
+# liboc_logger (share library) build script
+##
+
+Import('env')
+
+lib_env = env.Clone()
+SConscript(env.get('SRC_DIR') + '/resource/third_party_libs.scons', 'lib_env')
+
+liboc_logger_env = lib_env.Clone()
+######################################################################
+# Build flags
+######################################################################
+liboc_logger_env.PrependUnique(CPPPATH = ['include'])
+
+target_os = env.get('TARGET_OS')
+if target_os == 'android':
+	liboc_logger_env.AppendUnique(CXXFLAGS = ['-frtti', '-fexceptions'])
+	liboc_logger_env.AppendUnique(LIBS = ['gnustl_static', 'log'])
+
+if target_os not in ['arduino', 'windows', 'winrt']:
+	liboc_logger_env.AppendUnique(CFLAGS = ['-Wall', '-std=c99', '-fPIC'])
+	liboc_logger_env.AppendUnique(CXXFLAGS = ['-Wall', '-std=c++0x', '-fPIC'])
+
+######################################################################
+# Source files and Targets
+######################################################################
+shared_liboc_logger_core = liboc_logger_env.SharedLibrary('oc_logger_core', 'c/oc_logger.c',  OBJPREFIX='core_')
+shared_liboc_logger      = liboc_logger_env.SharedLibrary('oc_logger', ['c/oc_logger.c', 'c/oc_console_logger.c', 'cpp/oc_ostream_logger.cpp'])
+static_liboc_logger      = liboc_logger_env.StaticLibrary('oc_logger', ['c/oc_logger.c', 'c/oc_console_logger.c', 'cpp/oc_ostream_logger.cpp'])
+
+liboc_logger_env.InstallTarget([shared_liboc_logger_core, shared_liboc_logger, static_liboc_logger ], 'liboc_logger')
+
+if target_os not in ['ios']:
+	SConscript('examples/SConscript')

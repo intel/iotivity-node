@@ -1,14 +1,19 @@
 {
-  "name": "iotivity",
-  "version": "0.0.0",
-  "description": "IoTivity bindings",
-  "main": "index.js",
-  "scripts": {
-    "test": "node test.js"
-  },
-  "gypfile": true,
-  "dependencies": {
-    "bindings": "~1.2.1",
-    "commitplease": "^2.2.1"
-  }
+	"name": "iotivity",
+	"version": "0.0.0",
+	"description": "IoTivity bindings",
+	"main": "index.js",
+	"scripts": {
+		"test": "node test.js"
+	},
+	"gypfile": true,
+	"dependencies": {
+		"bindings": "~1.2.1"
+	},
+	"devDependencies": {
+		"commitplease": "^2.2.1",
+		"grunt": "^0.4.5",
+		"grunt-bowercopy": "^1.2.0",
+		"load-grunt-tasks": "^3.1.0"
+	}
 }
