@@ -2,13 +2,13 @@
 #include <v8.h>
 
 #include "functions.h"
+#include "enums.h"
 
 using namespace v8;
 
 void Init( Handle<Object> exports ) {
-	Isolate* isolate = Isolate::GetCurrent();
-
-	InitFunctions( exports, isolate );
+	InitFunctions( exports );
+	InitEnums( exports );
 }
 
 NODE_MODULE( iotivity, Init )

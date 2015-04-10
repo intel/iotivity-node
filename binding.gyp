@@ -4,6 +4,7 @@
 			"target_name": "iotivity",
 			"sources": [
 				"main.cc",
+				"enums.cc",
 				"functions.cc"
 			],
 			"libraries": [ "Release/ocbtstack.a" ],

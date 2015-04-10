@@ -37,10 +37,7 @@ void bind_CoAPToOCResponseCode( const FunctionCallbackInfo<Value>& args ) {
 			( double )CoAPToOCResponseCode( ( uint8_t )args[ 0 ]->NumberValue() ) ) );
 }
 
-void InitFunctions( Handle<Object> exports, Isolate *isolate ) {
-	exports->Set( String::NewFromUtf8( isolate, "hello" ),
-		FunctionTemplate::New( isolate, bind_hello )->GetFunction() );
-
-	exports->Set( String::NewFromUtf8( isolate, "CoAPToOCResponseCode" ),
-		FunctionTemplate::New( isolate, bind_CoAPToOCResponseCode )->GetFunction() );
+void InitFunctions( Handle<Object> exports ) {
+	NODE_SET_METHOD( exports, "hello", bind_hello );
+	NODE_SET_METHOD( exports, "CoAPToOCResponseCode", bind_CoAPToOCResponseCode );
 }
