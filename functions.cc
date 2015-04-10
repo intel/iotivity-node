@@ -11,14 +11,12 @@ using namespace v8;
 
 void bind_hello( const FunctionCallbackInfo<Value>& args ) {
 	Isolate* isolate = Isolate::GetCurrent();
-	HandleScope scope( isolate );
 
 	args.GetReturnValue().Set( String::NewFromUtf8( isolate, "world" ) );
 }
 
 void bind_CoAPToOCResponseCode( const FunctionCallbackInfo<Value>& args ) {
 	Isolate* isolate = Isolate::GetCurrent();
-	HandleScope scope( isolate );
 
 	if ( args.Length() < 1 ) {
 		isolate->ThrowException( Exception::TypeError(
@@ -34,7 +32,7 @@ void bind_CoAPToOCResponseCode( const FunctionCallbackInfo<Value>& args ) {
 
 	args.GetReturnValue().Set(
 		Number::New( isolate,
-			( double )CoAPToOCResponseCode( ( uint8_t )args[ 0 ]->NumberValue() ) ) );
+			( double )CoAPToOCResponseCode( ( uint8_t )args[ 0 ]->Uint32Value() ) ) );
 }
 
 void InitFunctions( Handle<Object> exports ) {
