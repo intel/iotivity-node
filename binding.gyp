@@ -2,7 +2,10 @@
 	"targets": [
 		{
 			"target_name": "iotivity",
-			"sources": [ "functions.cc" ],
+			"sources": [
+				"main.cc",
+				"functions.cc"
+			],
 			"libraries": [ "Release/ocbtstack.a" ],
 			"defines": [
 				"WITH_POSIX"
