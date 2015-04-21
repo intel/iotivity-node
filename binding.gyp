@@ -7,7 +7,10 @@
 				"enums.cc",
 				"functions.cc"
 			],
-			"libraries": [ "Release/ocbtstack.a" ],
+			"libraries": [
+				"Release/ocbtstack.a",
+				"Release/libffi.a"
+			],
 			"defines": [
 				"WITH_POSIX"
 			],
@@ -23,7 +26,10 @@
 				"external/iotivity/resource/csdk/stack/include/internal",
 				"external/iotivity/resource/oc_logger/include"
 			],
-			"dependencies": [ "ocbtstack" ]
+			"dependencies": [
+				"ocbtstack",
+				"node_modules/ffi/deps/libffi/libffi.gyp:ffi"
+			]
 		},
 		{
 			"target_name": "ocbtstack",
