@@ -3,10 +3,10 @@
 		{
 			"target_name": "iotivity",
 			"sources": [
-				"main.cc",
-				"enums.cc",
-				"functions.cc",
-				"callback-info.c"
+				"src/main.cc",
+				"src/enums.cc",
+				"src/functions.cc",
+				"src/callback-info.c"
 			],
 			"libraries": [
 				"Release/ocbtstack.a",
