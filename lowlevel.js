@@ -20,3 +20,8 @@ iotivity.OCCreateResource = function(
 		resourceProperties );
 
 };
+
+iotivity.OCDeleteResource = function( handle ) {
+	this._callbacks.remove( handle[ 2 ] );
+	return this._partial_OCCreateResource( handle );
+};

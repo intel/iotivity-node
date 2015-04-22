@@ -174,10 +174,23 @@ void bind__partial_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 	args.GetReturnValue().Set( jsReturnValue );
 }
 
+void bind__partial_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
+	Isolate *isolate = Isolate::GetCurrent();
+
+	VALIDATE_ARGUMENT_COUNT( isolate, args, 1 );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsArray );
+
+	args.GetReturnValue().Set(
+		Number::New( isolate, ( double )OCDeleteResource(
+			( OCResourceHandle )Buffer::Data(
+				Handle<Array>::Cast( args[ 0 ] )->Get( 1 )->ToObject() ) ) ) );
+}
+
 void InitFunctions( Handle<Object> exports ) {
 	module_exports = exports;
 
 	NODE_SET_METHOD( exports, "OCInit", bind_OCInit );
 	NODE_SET_METHOD( exports, "OCStop", bind_OCStop );
 	NODE_SET_METHOD( exports, "_partial_OCCreateResource", bind__partial_OCCreateResource );
+	NODE_SET_METHOD( exports, "_partial_OCDeleteResource", bind__partial_OCDeleteResource );
 }
