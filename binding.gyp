@@ -5,7 +5,8 @@
 			"sources": [
 				"main.cc",
 				"enums.cc",
-				"functions.cc"
+				"functions.cc",
+				"callback-info.c"
 			],
 			"libraries": [
 				"Release/ocbtstack.a",
