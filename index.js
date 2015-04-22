@@ -1,2 +1,2 @@
 // Return the low-level stuff for now
-module.exports = require( "./lowlevel" );
+module.exports = require( "./lib/lowlevel" );
