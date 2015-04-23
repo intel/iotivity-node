@@ -3,7 +3,6 @@
 
 extern "C" {
 
-#include <ocsocket.h>
 #include <ocstack.h>
 
 }

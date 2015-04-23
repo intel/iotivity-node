@@ -16,16 +16,8 @@
 				"WITH_POSIX"
 			],
 			"include_dirs": [
-				"external/iotivity/extlibs/cjson",
-				"external/iotivity/resource/csdk/libcoap-4.1.1",
-				"external/iotivity/resource/csdk/ocsocket/include",
-				"external/iotivity/resource/csdk/logger/include",
-				"external/iotivity/resource/csdk/ocrandom/include",
-				"external/iotivity/resource/csdk/occoap/include",
-				"external/iotivity/resource/csdk/ocmalloc/include",
 				"external/iotivity/resource/csdk/stack/include",
-				"external/iotivity/resource/csdk/stack/include/internal",
-				"external/iotivity/resource/oc_logger/include"
+				"external/iotivity/resource/csdk/ocsocket/include"
 			],
 			"dependencies": [
 				"ocbtstack",
