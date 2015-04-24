@@ -27,6 +27,11 @@
 		{
 			"target_name": "ocbtstack",
 			"type": "static_library",
+			"configurations": {
+				"Debug": {
+					"defines!": [ "DEBUG" ]
+				}
+			},
 			"defines": [
 				"WITH_POSIX"
 			],
