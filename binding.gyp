@@ -9,8 +9,8 @@
 				"src/callback-info.c"
 			],
 			"libraries": [
-				"Release/ocbtstack.a",
-				"Release/libffi.a"
+				"<(PRODUCT_DIR)/ocbtstack.a",
+				"<(PRODUCT_DIR)/libffi.a"
 			],
 			"defines": [
 				"WITH_POSIX"
