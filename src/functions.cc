@@ -80,11 +80,6 @@ void defaultEntityHandler(
 		int uuid ) {
 	Isolate *isolate = Isolate::GetCurrent();
 	Local<Value> jsCallback = get_js_callback( isolate, uuid );
-	Local<Value> jsCallbackArguments[ 2 ] = {
-		Number::New( isolate, ( double )*( OCEntityHandlerFlag * )( arguments[ 0 ] ) ),
-		Buffer::Use( isolate, ( char * )*( OCEntityHandlerRequest ** )( arguments[ 1 ] ),
-			sizeof( OCEntityHandlerRequest ) )
-	};
 
 	// Make sure the JS callback is present
 	if ( !jsCallback->IsFunction() ) {
@@ -99,6 +94,11 @@ void defaultEntityHandler(
 	}
 
 	// Call the JS callback
+	Local<Value> jsCallbackArguments[ 2 ] = {
+		Number::New( isolate, ( double )*( OCEntityHandlerFlag * )( arguments[ 0 ] ) ),
+		Buffer::Use( isolate, ( char * )*( OCEntityHandlerRequest ** )( arguments[ 1 ] ),
+			sizeof( OCEntityHandlerRequest ) )
+	};
 	Local<Value> returnValue = Local<Function>::Cast( jsCallback )->Call(
 		isolate->GetCurrentContext()->Global(),
 		2, jsCallbackArguments );
