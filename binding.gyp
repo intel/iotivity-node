@@ -12,12 +12,13 @@
 				"<(PRODUCT_DIR)/ocbtstack.a",
 				"<(PRODUCT_DIR)/libffi.a"
 			],
-			"defines": [
-				"WITH_POSIX"
-			],
 			"include_dirs": [
 				"external/iotivity/resource/csdk/stack/include",
 				"external/iotivity/resource/csdk/ocsocket/include"
+			],
+			"conditions": [
+				[ "'<!(echo $TESTING)'=='true'",
+						{ "defines": [ "TESTING" ] } ]
 			],
 			"dependencies": [
 				"ocbtstack",
@@ -27,11 +28,6 @@
 		{
 			"target_name": "ocbtstack",
 			"type": "static_library",
-			"configurations": {
-				"Debug": {
-					"defines!": [ "DEBUG" ]
-				}
-			},
 			"defines": [
 				"WITH_POSIX"
 			],

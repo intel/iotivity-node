@@ -20,4 +20,5 @@ module.exports = function( grunt ) {
 
 	// grunt plugins
 	require( "load-grunt-tasks" )( grunt );
+	grunt.loadTasks( "build_tasks" );
 };
