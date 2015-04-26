@@ -1,5 +1,8 @@
+debugger;
+
 var iotivity = require( "../index" ),
-	util = require( "util" );
+	util = require( "util" ),
+	eventLog = [];
 
 function lookupEnumValueName( enumeration, value ) {
 	var index;
@@ -11,6 +14,7 @@ function lookupEnumValueName( enumeration, value ) {
 	}
 }
 
+// Each test requires that we start the stack before we run the test and stop the stack afterwards
 function startStopStack( testBody ) {
 	return function() {
 		QUnit.assert.deepEqual(
@@ -34,8 +38,8 @@ function startStopStack( testBody ) {
 	}
 }
 
-iotivity._assert = function( assertion, actual, expected, message ) {
-	QUnit.assert[ assertion ]( actual, expected, message );
+iotivity._log = function() {
+	eventLog.push( arguments );
 };
 
 test( "Stack start/stop", startStopStack( function() {} ) );

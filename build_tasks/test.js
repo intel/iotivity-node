@@ -1,4 +1,4 @@
-function maybeFail( command, code, callback ) {
+function maybeFail( grunt, command, code, callback ) {
 	if ( code === 0 ) {
 		callback( null );
 	} else {
@@ -26,7 +26,7 @@ module.exports = function( grunt ) {
 						silent: true
 					},
 					function( code, output ) {
-						maybeFail( command, code, callback );
+						maybeFail( grunt, command, code, callback );
 					} );
 			},
 			function( callback ) {
@@ -35,7 +35,7 @@ module.exports = function( grunt ) {
 				grunt.log.subhead( "Running command: " + command );
 
 				shelljs.exec( command, { async: true }, function( code, output ) {
-					maybeFail( command, code, callback );
+					maybeFail( grunt, command, code, callback );
 				} );
 			},
 			function( callback ) {
@@ -50,7 +50,7 @@ module.exports = function( grunt ) {
 						silent: true
 					},
 					function( code, output ) {
-						maybeFail( command, code, callback );
+						maybeFail( grunt, command, code, callback );
 					} );
 			}
 		], function() {

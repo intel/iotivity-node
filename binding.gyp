@@ -39,6 +39,11 @@
 				"-fdata-sections",
 				"-std=gnu99"
 			],
+			"configurations": {
+				"Debug": {
+					"defines!": [ "DEBUG" ]
+				}
+			},
 			"sources": [
 				"external/iotivity/resource/csdk/ocsocket/src/ocsocket.c",
 				"external/iotivity/resource/csdk/libcoap-4.1.1/pdu.c",

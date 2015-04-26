@@ -6,6 +6,6 @@
 
 using namespace v8;
 
-void InitFunctions( Handle<Object> exports );
+void InitFunctions( Handle<Object> exports, Handle<Object> module );
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_H__ */

@@ -6,8 +6,8 @@
 
 using namespace v8;
 
-void Init( Handle<Object> exports ) {
-	InitFunctions( exports );
+void Init( Handle<Object> exports, Handle<Object> module ) {
+	InitFunctions( exports, module );
 	InitEnums( exports );
 }
 

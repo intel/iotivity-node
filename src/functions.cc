@@ -2,9 +2,17 @@
 #include <node_buffer.h>
 #include <v8.h>
 
+using namespace v8;
+using namespace node;
+
 extern "C" {
 #include <ocstack.h>
 #include <ffi.h>
+
+#ifdef TESTING
+#include <stdint.h>
+#endif // TESTING
+
 #include "callback-info.h"
 }
 
@@ -31,10 +39,20 @@ extern "C" {
 		return; \
 	}
 
-using namespace v8;
-using namespace node;
+Persistent<Object> module_exports;
 
-Handle<Object> module_exports;
+#define JS_CALLBACK( isolate, uuid ) \
+	Local<Object>::New( (isolate), module_exports ) \
+		->Get( String::NewFromUtf8( (isolate), "_callbacks" ) )->ToObject() \
+			->Get( String::NewFromUtf8( (isolate), "callbacks" ) )->ToObject() \
+				->Get( (uuid) )
+
+#ifdef TESTING
+#define JS_LOG( isolate ) \
+	Local<Function>::Cast( \
+		Local<Object>::New( (isolate), module_exports ) \
+			->Get( String::NewFromUtf8( (isolate), "_log" ) ) )
+#endif // TESTING
 
 void bind_OCInit( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
@@ -57,15 +75,17 @@ void bind_OCStop( const FunctionCallbackInfo<Value>& args ) {
 	args.GetReturnValue().Set( Number::New( isolate, OCStop() ) );
 }
 
-inline Local<Value> get_js_callback( Isolate *isolate, int uuid ) {
-	return module_exports->
-		Get( String::NewFromUtf8( isolate, "_callbacks" ) )->ToObject()->
-			Get( String::NewFromUtf8( isolate, "callbacks" ) )->ToObject()->
-				Get( uuid );
-}
-
 void dispose_of_callback_info( const v8::WeakCallbackData<v8::Value, _callback_info>& data ) {
 	callback_info_free( ( callback_info * )data.GetParameter() );
+
+#ifdef TESTING
+	Isolate *isolate = Isolate::GetCurrent();
+	Local<Value> logArguments[ 2 ] = {
+		String::NewFromUtf8( isolate, "callback_info_free" ),
+		Number::New( isolate, ( double )( uintptr_t )data.GetParameter() )
+	};
+	JS_LOG( isolate )->Call( isolate->GetCurrentContext()->Global(), 2, logArguments );
+#endif
 }
 
 // Marshaller for OCEntityHandler callback
@@ -79,7 +99,7 @@ void defaultEntityHandler(
 		void**arguments,
 		int uuid ) {
 	Isolate *isolate = Isolate::GetCurrent();
-	Local<Value> jsCallback = get_js_callback( isolate, uuid );
+	Local<Value> jsCallback = JS_CALLBACK( isolate, uuid );
 
 	// Make sure the JS callback is present
 	if ( !jsCallback->IsFunction() ) {
@@ -143,6 +163,14 @@ void bind__partial_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 		// Function signature - arguments
 		&ffi_type_uint32, &ffi_type_pointer );
 
+#ifdef TESTING
+	Local<Value> logArguments[ 2 ] = {
+		String::NewFromUtf8( isolate, "callback_info_new" ),
+		Number::New( isolate, ( double )( uintptr_t )info )
+	};
+	JS_LOG( isolate )->Call( isolate->GetCurrentContext()->Global(), 2, logArguments );
+#endif
+
 	if ( !info ) {
 		(isolate)->ThrowException( Exception::TypeError(
 			String::NewFromUtf8( (isolate),
@@ -186,8 +214,8 @@ void bind__partial_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
 				Handle<Array>::Cast( args[ 0 ] )->Get( 1 )->ToObject() ) ) ) );
 }
 
-void InitFunctions( Handle<Object> exports ) {
-	module_exports = exports;
+void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
+	module_exports.Reset( Isolate::GetCurrent(), exports );
 
 	NODE_SET_METHOD( exports, "OCInit", bind_OCInit );
 	NODE_SET_METHOD( exports, "OCStop", bind_OCStop );
