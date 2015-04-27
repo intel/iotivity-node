@@ -1,2 +1,2 @@
-// Return the low-level stuff for now
-module.exports = require( "./lib/lowlevel" );
+// Return the native stuff for now
+module.exports = require( "bindings" )( "iotivity" );

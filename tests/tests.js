@@ -24,7 +24,7 @@ function startStopStack( testBody ) {
 					10123,
 					iotivity.OCMode.OC_CLIENT_SERVER ) ),
 			"OC_STACK_OK",
-			"OCInit success" );
+			"OCInit succeeded" );
 
 		testBody();
 
@@ -33,41 +33,46 @@ function startStopStack( testBody ) {
 				iotivity.OCStackResult,
 				iotivity.OCStop() ),
 			"OC_STACK_OK",
-			"OCStop success" );
+			"OCStop succeeded" );
 	}
 }
 
 test( "Stack start/stop", startStopStack( function() {} ) );
 
 test( "Create/delete resource", startStopStack( function() {
-	var resource,
+	var result, keyCount,
+		resource = {},
 		callback = function testCallback( flag, request ) {};
 
-	resource = iotivity.OCCreateResource(
+	keyCount = Object.keys( iotivity._test_callbacks ).length;
+	result = iotivity.OCCreateResource(
+		resource,
 		"light",
 		"oc.mi.def",
 		"/light/1",
 		callback,
 		iotivity.OCResourceProperty.OC_DISCOVERABLE );
-	QUnit.assert.deepEqual( util.isArray( resource ), true, "OCCreateResource returns an array" );
-	QUnit.assert.deepEqual( resource.length, 4, "Returned array has length 4" );
 	QUnit.assert.deepEqual(
-		lookupEnumValueName( iotivity.OCStackResult, resource[ 0 ] ),
+		lookupEnumValueName( iotivity.OCStackResult, result ),
 		"OC_STACK_OK",
 		"OCCreateResource succeeded" );
-	QUnit.assert.deepEqual( typeof resource[ 2 ], "number",
-		"uuid is present at return array index 2" );
-	QUnit.assert.deepEqual( iotivity._callbacks.callbacks[ resource[ 2 ] ], callback,
-		"uuid identifies the correct callback" );
-
+	QUnit.assert.deepEqual( typeof resource[ 1 ], "number",
+		"uuid is present at return array index 1" );
 	QUnit.assert.deepEqual(
-		lookupEnumValueName(
-			iotivity.OCStackResult,
-			iotivity.OCDeleteResource( resource ) ),
+		Object.keys( iotivity._test_callbacks ).length,
+		keyCount + 1,
+		"The number of keys in the list of callbacks has increased by one" );
+	QUnit.assert.deepEqual( iotivity._test_callbacks[ resource[ 1 ] ], callback,
+		"The JS callback is present in the list of callbacks at the correct uuid" );
+
+	keyCount = Object.keys( iotivity._test_callbacks ).length;
+	result = iotivity.OCDeleteResource( resource );
+	QUnit.assert.deepEqual(
+		lookupEnumValueName( iotivity.OCStackResult, result ),
 		"OC_STACK_OK",
 		"OCDeleteResource succeeded" );
 	QUnit.assert.deepEqual(
-		( resource[ 2 ] in iotivity._callbacks.callbacks ),
-		false,
-		"callback at uuid is removed from list of callbacks" );
+		Object.keys( iotivity._test_callbacks ).length,
+		keyCount - 1,
+		"The number of keys in the list of callbacks has decreased by one" );
 } ) );

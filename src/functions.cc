@@ -34,13 +34,9 @@ extern "C" {
 		return; \
 	}
 
-Persistent<Object> module_exports;
-
-#define JS_CALLBACK( isolate, uuid ) \
-	Local<Object>::New( (isolate), module_exports ) \
-		->Get( String::NewFromUtf8( (isolate), "_callbacks" ) )->ToObject() \
-			->Get( String::NewFromUtf8( (isolate), "callbacks" ) )->ToObject() \
-				->Get( (uuid) )
+// Hash for storing JS callbacks
+Persistent<Object> callbacks;
+int uuidCounter = 0;
 
 void bind_OCInit( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
@@ -74,19 +70,8 @@ void defaultEntityHandler(
 		void**arguments,
 		int uuid ) {
 	Isolate *isolate = Isolate::GetCurrent();
-	Local<Value> jsCallback = JS_CALLBACK( isolate, uuid );
-
-	// Make sure the JS callback is present
-	if ( !jsCallback->IsFunction() ) {
-		isolate->ThrowException( Exception::TypeError(
-			String::Concat(
-				String::Concat(
-					String::NewFromUtf8( isolate, "JS Callback with UUID " ),
-					String::NewFromUtf8( isolate,
-						*String::Utf8Value( Number::New( isolate, ( double )uuid ) ) ) ),
-				String::NewFromUtf8( isolate, " not found" ) ) ) );
-		return;
-	}
+	Local<Function> jsCallback = Local<Function>::Cast(
+		Local<Object>::New( isolate, callbacks )->Get( uuid ) );
 
 	// Call the JS callback
 	Local<Value> jsCallbackArguments[ 2 ] = {
@@ -94,7 +79,7 @@ void defaultEntityHandler(
 		Buffer::Use( isolate, ( char * )*( OCEntityHandlerRequest ** )( arguments[ 1 ] ),
 			sizeof( OCEntityHandlerRequest ) )
 	};
-	Local<Value> returnValue = Local<Function>::Cast( jsCallback )->Call(
+	Local<Value> returnValue = jsCallback->Call(
 		isolate->GetCurrentContext()->Global(),
 		2, jsCallbackArguments );
 
@@ -103,22 +88,22 @@ void defaultEntityHandler(
 	*returnValueLocation = ( OCEntityHandlerResult )( returnValue->ToNumber()->Value() );
 }
 
-void bind__partial_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
+void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
 	int uuid;
 	OCResourceHandle handle = 0;
 	OCStackResult result;
-	Handle<Array> returnArray;
 	callback_info *info = 0;
 
-	VALIDATE_ARGUMENT_COUNT( isolate, args, 5 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsString );
+	VALIDATE_ARGUMENT_COUNT( isolate, args, 6 );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsObject );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 1, IsString );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 2, IsString );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 3, IsUint32 ); // uuid used as key into callbacks array
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 4, IsUint32 );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 3, IsString );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 4, IsFunction );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 5, IsUint32 );
 
-	uuid = args[ 3 ]->ToUint32()->Value();
+	uuid = uuidCounter++;
 
 	// Create a new callback
 	info = callback_info_new(
@@ -145,42 +130,46 @@ void bind__partial_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 		return;
 	}
 
+	// Store the JS callback in the list of callbacks under the given uuid
+	Local<Object>::New( isolate, callbacks )->Set( uuid, args[ 4 ] );
+
 	result = OCCreateResource(
 		&handle,
-		( const char * )*String::Utf8Value( args[ 0 ] ),
 		( const char * )*String::Utf8Value( args[ 1 ] ),
 		( const char * )*String::Utf8Value( args[ 2 ] ),
+		( const char * )*String::Utf8Value( args[ 3 ] ),
 		( OCEntityHandler )( info->resultingFunction ),
-		( uint8_t )args[ 4 ]->ToUint32()->Value() );
+		( uint8_t )args[ 5 ]->ToUint32()->Value() );
 
-	// We return an array containing the result code and the handle.
-	returnArray = Array::New( isolate, 4 );
-	returnArray->Set( 0, Number::New( isolate, ( double )result ) );
+	Local<Object> jsHandle = args[ 0 ]->ToObject();
 
 	// Store the value of the handle in a buffer
-	returnArray->Set( 1,
+	jsHandle->Set( 0,
 		Buffer::New( isolate, ( const char * )&handle, sizeof( OCResourceHandle ) ) );
-	returnArray->Set( 2, Number::New( isolate, ( double )uuid ) );
+	jsHandle->Set( 1, Number::New( isolate, ( double )uuid ) );
 
 	// Store the pointer to the closure in a buffer
-	returnArray->Set( 3,
-		Buffer::New( isolate, ( const char * )&info, sizeof( callback_info * ) ) );
+	jsHandle->Set( 2, Buffer::New( isolate, ( const char * )&info, sizeof( callback_info * ) ) );
 
-	args.GetReturnValue().Set( returnArray );
+	args.GetReturnValue().Set( Number::New( isolate, ( double )result ) );
 }
 
-void bind__partial_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
+void bind_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
 	OCResourceHandle handle;
 	callback_info *info;
+	int uuid;
 
 	VALIDATE_ARGUMENT_COUNT( isolate, args, 1 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsArray );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsObject );
 
-	Handle<Array> resource = Handle<Array>::Cast( args[ 0 ] );
+	Local<Object> jsHandle = args[ 0 ]->ToObject();
 
-	handle = *( OCResourceHandle * )( Buffer::Data( resource->Get( 1 )->ToObject() ) );
-	info = *( callback_info ** )( Buffer::Data( resource->Get( 3 )->ToObject() ) );
+	handle = *( OCResourceHandle * )( Buffer::Data( jsHandle->Get( 0 )->ToObject() ) );
+	uuid = jsHandle->Get( 1 )->Uint32Value();
+	info = *( callback_info ** )( Buffer::Data( jsHandle->Get( 2 )->ToObject() ) );
+
+	Local<Object>::New( isolate, callbacks )->Delete( uuid );
 
 	args.GetReturnValue().Set( Number::New( isolate, ( double )OCDeleteResource( handle ) ) );
 
@@ -189,10 +178,21 @@ void bind__partial_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
 }
 
 void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
-	module_exports.Reset( Isolate::GetCurrent(), exports );
+	Isolate *isolate = Isolate::GetCurrent();
+
+	// Initialize hash for storing JS callbacks
+	callbacks.Reset( isolate, Object::New( isolate ) );
 
 	NODE_SET_METHOD( exports, "OCInit", bind_OCInit );
 	NODE_SET_METHOD( exports, "OCStop", bind_OCStop );
-	NODE_SET_METHOD( exports, "_partial_OCCreateResource", bind__partial_OCCreateResource );
-	NODE_SET_METHOD( exports, "_partial_OCDeleteResource", bind__partial_OCDeleteResource );
+	NODE_SET_METHOD( exports, "OCCreateResource", bind_OCCreateResource );
+	NODE_SET_METHOD( exports, "OCDeleteResource", bind_OCDeleteResource );
+
+#ifdef TESTING
+
+	// For testing purposes we assign the callbacks object to the module exports so we can inspect
+	// it from the JS test suite
+	exports->Set( String::NewFromUtf8( isolate, "_test_callbacks" ),
+		Local<Object>::New( isolate, callbacks ) );
+#endif /* TESTING */
 }
