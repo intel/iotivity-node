@@ -35,10 +35,10 @@ extern "C" {
 	}
 
 // Hash for storing JS callbacks
-Persistent<Object> callbacks;
-int uuidCounter = 0;
+static Persistent<Object> callbacks;
+static int uuidCounter = 0;
 
-void bind_OCInit( const FunctionCallbackInfo<Value>& args ) {
+static void bind_OCInit( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
 
 	VALIDATE_ARGUMENT_COUNT( isolate, args, 3 );
@@ -53,7 +53,7 @@ void bind_OCInit( const FunctionCallbackInfo<Value>& args ) {
 			( OCMode )args[ 2 ]->ToNumber()->Value() ) ) );
 }
 
-void bind_OCStop( const FunctionCallbackInfo<Value>& args ) {
+static void bind_OCStop( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
 
 	args.GetReturnValue().Set( Number::New( isolate, OCStop() ) );
@@ -64,7 +64,7 @@ void bind_OCStop( const FunctionCallbackInfo<Value>& args ) {
 // differ from one another only by the value of uuid, which is a key into the hash of JS callbacks.
 // When the C API executes one of the closures, we construct a call to the JS callback identified
 // by its UUID, and pass the return value from the callback back to the C API.
-void defaultEntityHandler(
+static void defaultEntityHandler(
 		ffi_cif* cif,
 		OCEntityHandlerResult *returnValueLocation,
 		void**arguments,
@@ -88,7 +88,7 @@ void defaultEntityHandler(
 	*returnValueLocation = ( OCEntityHandlerResult )( returnValue->ToNumber()->Value() );
 }
 
-void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
+static void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
 	int uuid;
 	OCResourceHandle handle = 0;
@@ -154,7 +154,7 @@ void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 	args.GetReturnValue().Set( Number::New( isolate, ( double )result ) );
 }
 
-void bind_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
+static void bind_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
 	OCResourceHandle handle;
 	callback_info *info;

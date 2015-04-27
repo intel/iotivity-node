@@ -9,7 +9,7 @@ extern "C" {
 
 using namespace v8;
 
-Local<Object> bind_OC_SOCKET_OPTION( Isolate* isolate ) {
+static Local<Object> bind_OC_SOCKET_OPTION( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -24,7 +24,7 @@ Local<Object> bind_OC_SOCKET_OPTION( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCEntityHandlerFlag( Isolate* isolate ) {
+static Local<Object> bind_OCEntityHandlerFlag( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -43,7 +43,7 @@ Local<Object> bind_OCEntityHandlerFlag( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCEntityHandlerResult( Isolate* isolate ) {
+static Local<Object> bind_OCEntityHandlerResult( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -74,7 +74,7 @@ Local<Object> bind_OCEntityHandlerResult( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCMethod( Isolate* isolate ) {
+static Local<Object> bind_OCMethod( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -117,7 +117,7 @@ Local<Object> bind_OCMethod( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCMode( Isolate* isolate ) {
+static Local<Object> bind_OCMode( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -136,7 +136,7 @@ Local<Object> bind_OCMode( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCObserveAction( Isolate* isolate ) {
+static Local<Object> bind_OCObserveAction( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -155,7 +155,7 @@ Local<Object> bind_OCObserveAction( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCQualityOfService( Isolate* isolate ) {
+static Local<Object> bind_OCQualityOfService( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -178,7 +178,7 @@ Local<Object> bind_OCQualityOfService( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCResourceProperty( Isolate* isolate ) {
+static Local<Object> bind_OCResourceProperty( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -205,7 +205,7 @@ Local<Object> bind_OCResourceProperty( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCStackApplicationResult( Isolate* isolate ) {
+static Local<Object> bind_OCStackApplicationResult( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -220,7 +220,7 @@ Local<Object> bind_OCStackApplicationResult( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCStackResult( Isolate* isolate ) {
+static Local<Object> bind_OCStackResult( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -347,7 +347,7 @@ Local<Object> bind_OCStackResult( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCTransportProtocolID( Isolate* isolate ) {
+static Local<Object> bind_OCTransportProtocolID( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
@@ -362,7 +362,7 @@ Local<Object> bind_OCTransportProtocolID( Isolate* isolate ) {
 	return obj;
 }
 
-Local<Object> bind_OCVirtualResources( Isolate* isolate ) {
+static Local<Object> bind_OCVirtualResources( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
 	obj->ForceSet(
