@@ -177,6 +177,20 @@ static void bind_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
 	callback_info_free( info );
 }
 
+static void bind_OCStartPresence( const FunctionCallbackInfo<Value>& args ) {
+	Isolate *isolate = Isolate::GetCurrent();
+
+	VALIDATE_ARGUMENT_COUNT( isolate, args, 1 );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsUint32 );
+
+	args.GetReturnValue().Set( Number::New( isolate,
+		( double )OCStartPresence( ( uint32_t )args[ 0 ]->Uint32Value() ) ) );
+}
+
+static void bind_OCStopPresence( const FunctionCallbackInfo<Value>& args ) {
+	args.GetReturnValue().Set( Number::New( Isolate::GetCurrent(), ( double )OCStopPresence() ) );
+}
+
 void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
 	Isolate *isolate = Isolate::GetCurrent();
 
@@ -187,6 +201,8 @@ void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
 	NODE_SET_METHOD( exports, "OCStop", bind_OCStop );
 	NODE_SET_METHOD( exports, "OCCreateResource", bind_OCCreateResource );
 	NODE_SET_METHOD( exports, "OCDeleteResource", bind_OCDeleteResource );
+	NODE_SET_METHOD( exports, "OCStartPresence", bind_OCStartPresence );
+	NODE_SET_METHOD( exports, "OCStopPresence", bind_OCStopPresence );
 
 #ifdef TESTING
 
