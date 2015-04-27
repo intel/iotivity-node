@@ -1,8 +1,7 @@
 debugger;
 
 var iotivity = require( "../index" ),
-	util = require( "util" ),
-	eventLog = [];
+	util = require( "util" );
 
 function lookupEnumValueName( enumeration, value ) {
 	var index;
@@ -38,10 +37,6 @@ function startStopStack( testBody ) {
 	}
 }
 
-iotivity._log = function() {
-	eventLog.push( arguments );
-};
-
 test( "Stack start/stop", startStopStack( function() {} ) );
 
 test( "Create/delete resource", startStopStack( function() {
@@ -55,7 +50,7 @@ test( "Create/delete resource", startStopStack( function() {
 		callback,
 		iotivity.OCResourceProperty.OC_DISCOVERABLE );
 	QUnit.assert.deepEqual( util.isArray( resource ), true, "OCCreateResource returns an array" );
-	QUnit.assert.deepEqual( resource.length, 3, "Returned array has length 3" );
+	QUnit.assert.deepEqual( resource.length, 4, "Returned array has length 4" );
 	QUnit.assert.deepEqual(
 		lookupEnumValueName( iotivity.OCStackResult, resource[ 0 ] ),
 		"OC_STACK_OK",

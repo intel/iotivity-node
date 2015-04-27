@@ -8,11 +8,6 @@ using namespace node;
 extern "C" {
 #include <ocstack.h>
 #include <ffi.h>
-
-#ifdef TESTING
-#include <stdint.h>
-#endif // TESTING
-
 #include "callback-info.h"
 }
 
@@ -47,13 +42,6 @@ Persistent<Object> module_exports;
 			->Get( String::NewFromUtf8( (isolate), "callbacks" ) )->ToObject() \
 				->Get( (uuid) )
 
-#ifdef TESTING
-#define JS_LOG( isolate ) \
-	Local<Function>::Cast( \
-		Local<Object>::New( (isolate), module_exports ) \
-			->Get( String::NewFromUtf8( (isolate), "_log" ) ) )
-#endif // TESTING
-
 void bind_OCInit( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
 
@@ -73,19 +61,6 @@ void bind_OCStop( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
 
 	args.GetReturnValue().Set( Number::New( isolate, OCStop() ) );
-}
-
-void dispose_of_callback_info( const v8::WeakCallbackData<v8::Value, _callback_info>& data ) {
-	callback_info_free( ( callback_info * )data.GetParameter() );
-
-#ifdef TESTING
-	Isolate *isolate = Isolate::GetCurrent();
-	Local<Value> logArguments[ 2 ] = {
-		String::NewFromUtf8( isolate, "callback_info_free" ),
-		Number::New( isolate, ( double )( uintptr_t )data.GetParameter() )
-	};
-	JS_LOG( isolate )->Call( isolate->GetCurrentContext()->Global(), 2, logArguments );
-#endif
 }
 
 // Marshaller for OCEntityHandler callback
@@ -134,7 +109,7 @@ void bind__partial_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 	OCResourceHandle handle = 0;
 	OCStackResult result;
 	Handle<Array> returnArray;
-	callback_info *info;
+	callback_info *info = 0;
 
 	VALIDATE_ARGUMENT_COUNT( isolate, args, 5 );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsString );
@@ -163,14 +138,6 @@ void bind__partial_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 		// Function signature - arguments
 		&ffi_type_uint32, &ffi_type_pointer );
 
-#ifdef TESTING
-	Local<Value> logArguments[ 2 ] = {
-		String::NewFromUtf8( isolate, "callback_info_new" ),
-		Number::New( isolate, ( double )( uintptr_t )info )
-	};
-	JS_LOG( isolate )->Call( isolate->GetCurrentContext()->Global(), 2, logArguments );
-#endif
-
 	if ( !info ) {
 		(isolate)->ThrowException( Exception::TypeError(
 			String::NewFromUtf8( (isolate),
@@ -186,32 +153,39 @@ void bind__partial_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 		( OCEntityHandler )( info->resultingFunction ),
 		( uint8_t )args[ 4 ]->ToUint32()->Value() );
 
-	// We return an array containing the result code and the handle. It is made weakly
-	// persistent so as to allow us to dispose of the callback_info structure when it's no
-	// longer in use.
-	returnArray = Array::New( isolate, 3 );
+	// We return an array containing the result code and the handle.
+	returnArray = Array::New( isolate, 4 );
 	returnArray->Set( 0, Number::New( isolate, ( double )result ) );
+
+	// Store the value of the handle in a buffer
 	returnArray->Set( 1,
 		Buffer::New( isolate, ( const char * )&handle, sizeof( OCResourceHandle ) ) );
 	returnArray->Set( 2, Number::New( isolate, ( double )uuid ) );
 
-	Persistent<Value> jsReturnValue( isolate, returnArray );
+	// Store the pointer to the closure in a buffer
+	returnArray->Set( 3,
+		Buffer::New( isolate, ( const char * )&info, sizeof( callback_info * ) ) );
 
-	jsReturnValue.SetWeak( info, dispose_of_callback_info );
-
-	args.GetReturnValue().Set( jsReturnValue );
+	args.GetReturnValue().Set( returnArray );
 }
 
 void bind__partial_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
+	OCResourceHandle handle;
+	callback_info *info;
 
 	VALIDATE_ARGUMENT_COUNT( isolate, args, 1 );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsArray );
 
-	args.GetReturnValue().Set(
-		Number::New( isolate, ( double )OCDeleteResource(
-			( OCResourceHandle )Buffer::Data(
-				Handle<Array>::Cast( args[ 0 ] )->Get( 1 )->ToObject() ) ) ) );
+	Handle<Array> resource = Handle<Array>::Cast( args[ 0 ] );
+
+	handle = *( OCResourceHandle * )( Buffer::Data( resource->Get( 1 )->ToObject() ) );
+	info = *( callback_info ** )( Buffer::Data( resource->Get( 3 )->ToObject() ) );
+
+	args.GetReturnValue().Set( Number::New( isolate, ( double )OCDeleteResource( handle ) ) );
+
+	// OCDeleteResource will presumably remove the C callback, so we no longer need the closure.
+	callback_info_free( info );
 }
 
 void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
