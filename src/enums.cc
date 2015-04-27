@@ -405,7 +405,7 @@ void InitEnums( Handle<Object> exports ) {
 	exports->Set( String::NewFromUtf8( isolate, "OCObserveAction" ),
 		bind_OCObserveAction( isolate ) );
 	exports->Set( String::NewFromUtf8( isolate, "OCQualityOfService" ),
-		bind_OCObserveAction( isolate ) );
+		bind_OCQualityOfService( isolate ) );
 	exports->Set( String::NewFromUtf8( isolate, "OCResourceProperty" ),
 		bind_OCResourceProperty( isolate ) );
 	exports->Set( String::NewFromUtf8( isolate, "OCStackApplicationResult" ),
