@@ -5,6 +5,9 @@
 			"sources": [
 				"src/main.cc",
 				"src/enums.cc",
+				"src/functions/oc-create-delete-resource.cc",
+				"src/functions/oc-do-resource.cc",
+				"src/functions/simple.cc",
 				"src/functions.cc",
 				"src/callback-info.c"
 			],
