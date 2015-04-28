@@ -1,3 +1,4 @@
+#include <node_buffer.h>
 #include "oc-do-resource.h"
 #include "../functions-internal.h"
 
@@ -7,12 +8,27 @@ extern "C" {
 }
 
 using namespace v8;
+using namespace node;
 
 static OCStackApplicationResult defaultOCClientResponseHandler(
 		void *context, OCDoHandle handle, OCClientResponse *clientResponse ) {
 	Isolate *isolate = Isolate::GetCurrent();
-	Local<Function> jsCallback = Local<Function>::New( isolate, *( Persistent<Function> * )context );
-	
+	Local<Function> jsCallback = Local<Function>::New(
+		isolate,
+		*( Persistent<Function> * )context );
+
+	Local<Value> jsCallbackArguments[ 2 ] = {
+		Buffer::New( isolate, ( char * )&handle, sizeof( OCDoHandle ) ),
+		Buffer::Use( isolate, ( char * )clientResponse, sizeof( OCClientResponse ) )
+	};
+
+	Local<Value> returnValue = jsCallback->Call(
+		isolate->GetCurrentContext()->Global(),
+		2, jsCallbackArguments );
+
+	VALIDATE_CALLBACK_RETURN_VALUE_TYPE( isolate, returnValue, IsUint32 );
+
+	return ( OCStackApplicationResult )returnValue->Uint32Value();
 }
 
 static void defaultOCClientContextDeleter( void *context ) {
@@ -56,7 +72,6 @@ static OCHeaderOption *oc_header_options_new( Isolate *isolate, Handle<Array> ar
 // Always returns NULL
 static OCHeaderOption *oc_header_options_free( OCHeaderOption *options ) {
 	free( ( void * )options );
-
 	return 0;
 }
 
@@ -98,4 +113,7 @@ void bind_OCDoResource( const FunctionCallbackInfo<Value>& args ) {
 			( uint8_t )args[ 8 ]->Uint32Value() ) ) );
 
 	options = oc_header_options_free( options );
+
+	args[ 0 ]->ToObject()->Set( String::NewFromUtf8( isolate, "handle" ),
+		Buffer::New( isolate, ( const char * )&handle, sizeof( OCDoHandle ) ) );
 }
