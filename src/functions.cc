@@ -31,6 +31,6 @@ void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
 	// For testing purposes we assign the callbacks object to the module exports so we can inspect
 	// it from the JS test suite
 	exports->Set( String::NewFromUtf8( isolate, "_test_callbacks" ),
-		Local<Object>::New( isolate, callbacks ) );
+		Local<Object>::New( isolate, *_callbacks ) );
 #endif /* TESTING */
 }
