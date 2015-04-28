@@ -11,7 +11,7 @@ using namespace v8;
 static OCStackApplicationResult defaultOCClientResponseHandler(
 		void *context, OCDoHandle handle, OCClientResponse *clientResponse ) {
 	Isolate *isolate = Isolate::GetCurrent();
-	Local<Object> jsContext = Local<Object>::New( isolate, *( Persistent<Object> * )context );
+	Local<Function> jsCallback = Local<Function>::New( isolate, *( Persistent<Function> * )context );
 	
 }
 
@@ -77,11 +77,11 @@ void bind_OCDoResource( const FunctionCallbackInfo<Value>& args ) {
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 3, IsString );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 4, IsString );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 5, IsUint32 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 6, IsObject );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 6, IsFunction );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 7, IsArray );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 8, IsUint32 );
 
-	data.context = ( void * )new Persistent<Object>( isolate, args[ 7 ]->ToObject() );
+	data.context = ( void * )new Persistent<Function>( isolate, Local<Function>::Cast( args[ 7 ] ) );
 
 	options = oc_header_options_new( isolate, Handle<Array>::Cast( args[ 0 ] ) );
 
