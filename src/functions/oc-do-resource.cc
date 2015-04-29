@@ -92,13 +92,14 @@ void bind_OCDoResource( const FunctionCallbackInfo<Value>& args ) {
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 3, IsString );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 4, IsString );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 5, IsUint32 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 6, IsFunction );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 7, IsArray );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 8, IsUint32 );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 6, IsUint32 );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 7, IsFunction );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 8, IsArray );
+	VALIDATE_ARGUMENT_TYPE( isolate, args, 9, IsUint32 );
 
 	data.context = ( void * )new Persistent<Function>( isolate, Local<Function>::Cast( args[ 7 ] ) );
 
-	options = oc_header_options_new( isolate, Handle<Array>::Cast( args[ 0 ] ) );
+	options = oc_header_options_new( isolate, Handle<Array>::Cast( args[ 8 ] ) );
 
 	args.GetReturnValue().Set( Number::New( isolate,
 		( double )OCDoResource(
@@ -107,10 +108,11 @@ void bind_OCDoResource( const FunctionCallbackInfo<Value>& args ) {
 			( const char * )*String::Utf8Value( args[ 2 ] ),
 			( const char * )*String::Utf8Value( args[ 3 ] ),
 			( const char * )*String::Utf8Value( args[ 4 ] ),
-			( OCQualityOfService )args[ 5 ]->Uint32Value(),
+			( OCConnectivityType )args[ 5 ]->Uint32Value(),
+			( OCQualityOfService )args[ 6 ]->Uint32Value(),
 			&data,
 			options,
-			( uint8_t )args[ 8 ]->Uint32Value() ) ) );
+			( uint8_t )args[ 9 ]->Uint32Value() ) ) );
 
 	options = oc_header_options_free( options );
 

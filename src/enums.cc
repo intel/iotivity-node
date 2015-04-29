@@ -9,21 +9,6 @@ extern "C" {
 
 using namespace v8;
 
-static Local<Object> bind_OC_SOCKET_OPTION( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
-
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_SOCKET_NOOPTION" ),
-		Number::New( isolate, OC_SOCKET_NOOPTION ),
-		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_SOCKET_REUSEADDR" ),
-		Number::New( isolate, OC_SOCKET_REUSEADDR ),
-		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-
-	return obj;
-}
-
 static Local<Object> bind_OCEntityHandlerFlag( Isolate* isolate ) {
 	Local<Object> obj = Object::New( isolate );
 
@@ -389,11 +374,36 @@ static Local<Object> bind_OCVirtualResources( Isolate* isolate ) {
 	return obj;
 }
 
+static Local<Object> bind_OCConnectivityType( Isolate* isolate ) {
+	Local<Object> obj = Object::New( isolate );
+
+	obj->ForceSet(
+		String::NewFromUtf8( isolate, "OC_ETHERNET" ),
+		Number::New( isolate, OC_ETHERNET ),
+		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
+	obj->ForceSet(
+		String::NewFromUtf8( isolate, "OC_WIFI" ),
+		Number::New( isolate, OC_WIFI ),
+		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
+	obj->ForceSet(
+		String::NewFromUtf8( isolate, "OC_EDR" ),
+		Number::New( isolate, OC_EDR ),
+		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
+	obj->ForceSet(
+		String::NewFromUtf8( isolate, "OC_LE" ),
+		Number::New( isolate, OC_LE ),
+		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
+	obj->ForceSet(
+		String::NewFromUtf8( isolate, "OC_ALL" ),
+		Number::New( isolate, OC_ALL ),
+		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
+
+	return obj;
+}
+
 void InitEnums( Handle<Object> exports ) {
 	v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
-	exports->Set( String::NewFromUtf8( isolate, "OC_SOCKET_OPTION" ),
-		bind_OC_SOCKET_OPTION( isolate ) );
 	exports->Set( String::NewFromUtf8( isolate, "OCEntityHandlerFlag" ),
 		bind_OCEntityHandlerFlag( isolate ) );
 	exports->Set( String::NewFromUtf8( isolate, "OCEntityHandlerResult" ),
@@ -416,5 +426,6 @@ void InitEnums( Handle<Object> exports ) {
 		bind_OCTransportProtocolID( isolate ) );
 	exports->Set( String::NewFromUtf8( isolate, "OCVirtualResources" ),
 		bind_OCVirtualResources( isolate ) );
-	
+	exports->Set( String::NewFromUtf8( isolate, "OCConnectivityType" ),
+		bind_OCConnectivityType( isolate ) );
 }
