@@ -23,9 +23,11 @@ void bind_OCInit( const FunctionCallbackInfo<Value>& args ) {
 }
 
 void bind_OCStop( const FunctionCallbackInfo<Value>& args ) {
-	Isolate *isolate = Isolate::GetCurrent();
+	args.GetReturnValue().Set( Number::New( Isolate::GetCurrent(), OCStop() ) );
+}
 
-	args.GetReturnValue().Set( Number::New( isolate, OCStop() ) );
+void bind_OCProcess( const FunctionCallbackInfo<Value>& args ) {
+	args.GetReturnValue().Set( Number::New( Isolate::GetCurrent(), OCProcess() ) );
 }
 
 void bind_OCStartPresence( const FunctionCallbackInfo<Value>& args ) {
@@ -35,9 +37,9 @@ void bind_OCStartPresence( const FunctionCallbackInfo<Value>& args ) {
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsUint32 );
 
 	args.GetReturnValue().Set( Number::New( isolate,
-		( double )OCStartPresence( ( uint32_t )args[ 0 ]->Uint32Value() ) ) );
+		OCStartPresence( ( uint32_t )args[ 0 ]->Uint32Value() ) ) );
 }
 
 void bind_OCStopPresence( const FunctionCallbackInfo<Value>& args ) {
-	args.GetReturnValue().Set( Number::New( Isolate::GetCurrent(), ( double )OCStopPresence() ) );
+	args.GetReturnValue().Set( Number::New( Isolate::GetCurrent(), OCStopPresence() ) );
 }

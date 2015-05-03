@@ -5,6 +5,7 @@
 
 void bind_OCInit( const v8::FunctionCallbackInfo<v8::Value>& args );
 void bind_OCStop( const v8::FunctionCallbackInfo<v8::Value>& args );
+void bind_OCProcess( const v8::FunctionCallbackInfo<v8::Value>& args );
 void bind_OCStartPresence( const v8::FunctionCallbackInfo<v8::Value>& args );
 void bind_OCStopPresence( const v8::FunctionCallbackInfo<v8::Value>& args );
 

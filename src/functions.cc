@@ -20,6 +20,7 @@ void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
 
 	NODE_SET_METHOD( exports, "OCInit", bind_OCInit );
 	NODE_SET_METHOD( exports, "OCStop", bind_OCStop );
+	NODE_SET_METHOD( exports, "OCProcess", bind_OCProcess );
 	NODE_SET_METHOD( exports, "OCCreateResource", bind_OCCreateResource );
 	NODE_SET_METHOD( exports, "OCDeleteResource", bind_OCDeleteResource );
 	NODE_SET_METHOD( exports, "OCStartPresence", bind_OCStartPresence );
