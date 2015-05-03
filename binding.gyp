@@ -33,6 +33,24 @@
 			"dependencies": [
 				"node_modules/ffi/deps/libffi/libffi.gyp:ffi"
 			]
+		},
+		{
+			"target_name": "client",
+			"type": "executable",
+			"sources": [ "c/client.c" ],
+			"libraries": [
+				'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
+				'<(LIBCOAP)',
+				'-Wl,-rpath,<(LIBOCTBSTACK_PATH)',
+				'<!(pkg-config --libs glib-2.0)',
+			],
+			"include_dirs": [
+				"<( IOTIVITY_PATH )/resource/csdk/stack/include",
+				"<( IOTIVITY_PATH )/resource/csdk/ocsocket/include"
+			],
+			"cflags": [
+				'<!(pkg-config --cflags glib-2.0)'
+			]
 		}
 	]
 }
