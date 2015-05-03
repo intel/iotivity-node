@@ -1,6 +1,7 @@
 {
 	"variables": {
 		"IOTIVITY_PATH": '<!(echo "$IOTIVITY_PATH")',
+		"LIBCOAP": '<!(find "$IOTIVITY_PATH/out" -name libcoap.a -print -quit)',
 		"LIBOCTBSTACK_PATH": '<!(dirname $( find "$IOTIVITY_PATH/out" -name liboctbstack.so -print -quit ))'
 	},
 	"targets": [
@@ -17,6 +18,7 @@
 			],
 			"libraries": [
 				"<(PRODUCT_DIR)/libffi.a",
+				'<(LIBCOAP)',
 				'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
 				'-Wl,-rpath,<(LIBOCTBSTACK_PATH)'
 			],
