@@ -8,10 +8,10 @@ runOCProcess( gpointer user_data ) {
 	GMainLoop *mainLoop = ( GMainLoop * )user_data;
 
 	if ( result == OC_STACK_OK ) {
-		g_message( "OCProcess() succeeded" );
+		g_message( "server: OCProcess() succeeded" );
 		return G_SOURCE_CONTINUE;
 	} else {
-		g_warning( "OCProcess() did not return OC_STACK_OK - quitting main loop" );
+		g_warning( "server: OCProcess() did not return OC_STACK_OK - quitting main loop" );
 		g_main_loop_quit( mainLoop );
 		return G_SOURCE_REMOVE;
 	}
@@ -19,7 +19,7 @@ runOCProcess( gpointer user_data ) {
 
 static OCEntityHandlerResult
 handleLight1( OCEntityHandlerFlag flag, OCEntityHandlerRequest *request ) {
-	g_message( "handleLight1: Entering" );
+	g_message( "server: handleLight1: Entering" );
 	return OC_EH_OK;
 }
 
@@ -29,7 +29,7 @@ main( int argc, char **argv ) {
 	OCResourceHandle handle;
 
 	if ( OC_STACK_OK == OCInit( NULL, 0, OC_SERVER ) ) {
-		g_message( "OCInit() succeeded" );
+		g_message( "server: OCInit() succeeded" );
 
 		if ( OC_STACK_OK == OCCreateResource(
 			&handle,
@@ -39,9 +39,9 @@ main( int argc, char **argv ) {
 			handleLight1,
 			OC_DISCOVERABLE ) ) {
 
-			g_message( "OCCreateResource() succeeded" );
+			g_message( "server: OCCreateResource() succeeded" );
 
-			g_timeout_add_seconds( 2, runOCProcess, mainLoop );
+			g_timeout_add( 100, runOCProcess, mainLoop );
 			OCStartPresence( 0 );
 			g_main_loop_run( mainLoop );
 			OCStop();
@@ -49,6 +49,6 @@ main( int argc, char **argv ) {
 		}
 	}
 
-	g_warning( "Startup failed" );
+	g_warning( "server: Startup failed" );
 	return 1;
 }
