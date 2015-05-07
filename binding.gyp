@@ -3,6 +3,16 @@
 		"IOTIVITY_PATH": '<!(echo "$IOTIVITY_PATH")',
 		"LIBOCTBSTACK_PATH": '<!(dirname $( find "$IOTIVITY_PATH/out" -name liboctbstack.so -print -quit ))'
 	},
+	"target_defaults": {
+		"include_dirs": [
+			"<( IOTIVITY_PATH )/resource/csdk/stack/include",
+			"<( IOTIVITY_PATH )/resource/csdk/ocsocket/include"
+		],
+		"libraries": [
+			'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
+			'-Wl,-rpath,<(LIBOCTBSTACK_PATH)',
+		],
+	},
 	"targets": [
 		{
 			"target_name": "iotivity",
@@ -15,15 +25,7 @@
 				"src/functions.cc",
 				"src/callback-info.c"
 			],
-			"libraries": [
-				"<(PRODUCT_DIR)/libffi.a",
-				'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
-				'-Wl,-rpath,<(LIBOCTBSTACK_PATH)'
-			],
-			"include_dirs": [
-				"<( IOTIVITY_PATH )/resource/csdk/stack/include",
-				"<( IOTIVITY_PATH )/resource/csdk/ocsocket/include"
-			],
+			"libraries": [ "<(PRODUCT_DIR)/libffi.a" ],
 			"conditions": [
 				[ "'<!(echo $TESTING)'=='true'",
 						{ "defines": [ "TESTING" ] } ]
@@ -36,35 +38,15 @@
 			"target_name": "client",
 			"type": "executable",
 			"sources": [ "c/client.c" ],
-			"libraries": [
-				'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
-				'-Wl,-rpath,<(LIBOCTBSTACK_PATH)',
-				'<!(pkg-config --libs glib-2.0)',
-			],
-			"include_dirs": [
-				"<( IOTIVITY_PATH )/resource/csdk/stack/include",
-				"<( IOTIVITY_PATH )/resource/csdk/ocsocket/include"
-			],
-			"cflags": [
-				'<!(pkg-config --cflags glib-2.0)'
-			]
+			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
+			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
 		},
 		{
 			"target_name": "server",
 			"type": "executable",
 			"sources": [ "c/server.c" ],
-			"libraries": [
-				'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
-				'-Wl,-rpath,<(LIBOCTBSTACK_PATH)',
-				'<!(pkg-config --libs glib-2.0)',
-			],
-			"include_dirs": [
-				"<( IOTIVITY_PATH )/resource/csdk/stack/include",
-				"<( IOTIVITY_PATH )/resource/csdk/ocsocket/include"
-			],
-			"cflags": [
-				'<!(pkg-config --cflags glib-2.0)'
-			]
+			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
+			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
 		}
 	]
 }
