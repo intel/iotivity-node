@@ -71,7 +71,9 @@ static OCHeaderOption *oc_header_options_new( Isolate *isolate, Handle<Array> ar
 
 // Always returns NULL
 static OCHeaderOption *oc_header_options_free( OCHeaderOption *options ) {
-	free( ( void * )options );
+	if ( options ) {
+		free( ( void * )options );
+	}
 	return 0;
 }
 
@@ -89,25 +91,28 @@ void bind_OCDoResource( const FunctionCallbackInfo<Value>& args ) {
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsObject );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 1, IsUint32 );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 2, IsString );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 3, IsString );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 4, IsString );
+	VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, 3, IsString );
+	VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, 4, IsString );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 5, IsUint32 );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 6, IsUint32 );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 7, IsFunction );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 8, IsArray );
+	VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, 8, IsArray );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 9, IsUint32 );
 
-	data.context = ( void * )new Persistent<Function>( isolate, Local<Function>::Cast( args[ 7 ] ) );
+	data.context = ( void * )new Persistent<Function>( isolate,
+		Local<Function>::Cast( args[ 7 ] ) );
 
-	options = oc_header_options_new( isolate, Handle<Array>::Cast( args[ 8 ] ) );
+	if ( args[ 8 ]->IsArray() ) {
+		options = oc_header_options_new( isolate, Handle<Array>::Cast( args[ 8 ] ) );
+	}
 
 	args.GetReturnValue().Set( Number::New( isolate,
 		( double )OCDoResource(
 			&handle,
 			( OCMethod )args[ 1 ]->Uint32Value(),
 			( const char * )*String::Utf8Value( args[ 2 ] ),
-			( const char * )*String::Utf8Value( args[ 3 ] ),
-			( const char * )*String::Utf8Value( args[ 4 ] ),
+			( const char * )( args[ 3 ]->IsString() ? ( *String::Utf8Value( args[ 3 ] ) ) : 0 ),
+			( const char * )( args[ 4 ]->IsString() ? ( *String::Utf8Value( args[ 4 ] ) ) : 0 ),
 			( OCConnectivityType )args[ 5 ]->Uint32Value(),
 			( OCQualityOfService )args[ 6 ]->Uint32Value(),
 			&data,

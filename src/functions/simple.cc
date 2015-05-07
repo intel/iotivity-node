@@ -11,13 +11,13 @@ void bind_OCInit( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
 
 	VALIDATE_ARGUMENT_COUNT( isolate, args, 3 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsString );
+	VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, 0, IsString );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 1, IsUint32 );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 2, IsNumber );
 
 	args.GetReturnValue().Set( Number::New( isolate,
 		OCInit(
-			( const char * )*String::Utf8Value( args[ 0 ] ),
+			( const char * )( args[ 0 ]->IsString() ? ( *String::Utf8Value( args[ 0 ] ) ) : 0 ),
 			( uint16_t )args[ 1 ]->ToUint32()->Value(),
 			( OCMode )args[ 2 ]->ToNumber()->Value() ) ) );
 }

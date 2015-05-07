@@ -3,26 +3,34 @@
 
 #include <v8.h>
 
-#define THROW_TYPECHECK_EXCEPTION( isolate, typecheck, message ) \
+#define THROW_TYPECHECK_EXCEPTION( isolate, message ) \
 		(isolate)->ThrowException( Exception::TypeError( \
-			String::NewFromUtf8( (isolate), \
-				message " must satisfy " #typecheck "()" ) ) )
+			String::NewFromUtf8( (isolate), message ) ) )
 
 #define VALIDATE_CALLBACK_RETURN_VALUE_TYPE( isolate, value, typecheck ) \
 	if ( !value->typecheck() ) { \
-		THROW_TYPECHECK_EXCEPTION( isolate, typecheck, "Callback return value type" ); \
+		THROW_TYPECHECK_EXCEPTION( isolate, \
+			"Callback return value type must satisfy " #typecheck "()" ); \
 	}
 
 #define VALIDATE_ARGUMENT_COUNT( isolate, args, length ) \
 	if ( (args).Length() < (length) ) { \
-		(isolate)->ThrowException( Exception::TypeError( \
+		(isolate)->ThrowException( Exception::RangeError( \
 			String::NewFromUtf8( (isolate), "Need " #length " arguments" ) ) ); \
 		return; \
 	}
 
 #define VALIDATE_ARGUMENT_TYPE( isolate, args, index, typecheck  ) \
 	if ( !(args)[ (index) ]->typecheck() ) { \
-		THROW_TYPECHECK_EXCEPTION( isolate, typecheck, "Argument " #index " " ); \
+		THROW_TYPECHECK_EXCEPTION( isolate, \
+			"Argument " #index " must satisfy " #typecheck "()" ); \
+		return; \
+	}
+
+#define VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, index, typecheck  ) \
+	if ( !( (args)[ (index) ]->typecheck() || (args)[ (index) ]->IsNull() ) ) { \
+		THROW_TYPECHECK_EXCEPTION( isolate, \
+			"Argument " #index " must satisfy " #typecheck "() or IsNull()" ); \
 		return; \
 	}
 
