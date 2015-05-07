@@ -1,7 +1,6 @@
 {
 	"variables": {
 		"IOTIVITY_PATH": '<!(echo "$IOTIVITY_PATH")',
-		"LIBCOAP": '<!(find "$IOTIVITY_PATH/out" -name libcoap.a -print -quit)',
 		"LIBOCTBSTACK_PATH": '<!(dirname $( find "$IOTIVITY_PATH/out" -name liboctbstack.so -print -quit ))'
 	},
 	"targets": [
@@ -18,7 +17,6 @@
 			],
 			"libraries": [
 				"<(PRODUCT_DIR)/libffi.a",
-				'<(LIBCOAP)',
 				'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
 				'-Wl,-rpath,<(LIBOCTBSTACK_PATH)'
 			],
@@ -40,7 +38,6 @@
 			"sources": [ "c/client.c" ],
 			"libraries": [
 				'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
-				'<(LIBCOAP)',
 				'-Wl,-rpath,<(LIBOCTBSTACK_PATH)',
 				'<!(pkg-config --libs glib-2.0)',
 			],
@@ -58,7 +55,6 @@
 			"sources": [ "c/server.c" ],
 			"libraries": [
 				'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
-				'<(LIBCOAP)',
 				'-Wl,-rpath,<(LIBOCTBSTACK_PATH)',
 				'<!(pkg-config --libs glib-2.0)',
 			],
