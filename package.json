@@ -19,6 +19,7 @@
 		"grunt-bowercopy": "^1.2.0",
 		"load-grunt-tasks": "^3.1.0",
 		"qunitjs": "^1.18.0",
-		"shelljs": "^0.4.0"
+		"shelljs": "^0.4.0",
+	    "underscore": "^1.8.3"
 	}
 }
