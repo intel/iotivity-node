@@ -1,4 +1,6 @@
 var _ = require( "underscore" ),
+	path = require( "path" ),
+	spawn = require( "child_process" ).spawn,
 	testUtils = function( iotivity, assert ) {
 	if ( !this._isTestUtils ) {
 		return new testUtils( iotivity, assert );
@@ -41,6 +43,32 @@ _.extend( testUtils.prototype, {
 				"OC_STACK_OK",
 				"OCProcess has not failed once in " + callCount + " calls" );
 		}, this );
+	},
+
+	startTestServer: function( whenReady, teardown ) {
+		var testServer = spawn( "node", [ path.join( __dirname, "test-server.js" ) ] );
+
+		testServer.stdout.on( "data", _.bind( function testServerStdoutData( data ) {
+			_.each( data.toString().split( "\n" ), _.bind( function( value ) {
+				var jsonObject;
+
+				if ( value ) {
+					jsonObject = JSON.parse( value );
+
+					if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
+						teardown();
+					}
+
+					if ( jsonObject.call == "OCCreateResource" ) {
+						whenReady();
+					}
+				}
+			}, this ) );
+		}, this ) );
+
+		return function stopTestServer() {
+			testServer.kill( "SIGTERM" );
+		};
 	},
 
 	testShutdown: function() {
