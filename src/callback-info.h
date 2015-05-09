@@ -11,9 +11,10 @@ typedef void ( *Callback )();
 typedef void ( *Marshaller )( ffi_cif*, void*, void**, void* );
 
 typedef struct _callback_info {
+	ffi_cif cif;
 	Marshaller resultingFunction;
 	ffi_closure *closure;
-	ffi_type **argTypes;
+	ffi_type *argTypes[];
 } callback_info;
 
 // Free a callback_info structure. Always returns NULL
