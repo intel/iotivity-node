@@ -47,6 +47,13 @@
 			"sources": [ "c/server.c" ],
 			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
 			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
+		},
+		{
+			"target_name": "server.observable",
+			"type": "executable",
+			"sources": [ "c/server.observable.c" ],
+			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
+			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
 		}
 	]
 }
