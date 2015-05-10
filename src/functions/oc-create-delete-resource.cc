@@ -13,27 +13,26 @@ using namespace node;
 
 // Marshaller for OCEntityHandler callback
 // defaultEntityHandler is placed in a closure each time someone calls OCCreateResource. Closures
-// differ from one another only by the value of uuid, which is a key into the hash of JS callbacks.
-// When the C API executes one of the closures, we construct a call to the JS callback identified
-// by its UUID, and pass the return value from the callback back to the C API.
+// differ from one another only by the value of jsCallbackInPersistent, which is a persistent
+// reference to the JS callback. When the C API executes one of the closures, we construct a call
+// to the JS callback we find at jsCallbackInPersistent, and pass the return value from the
+// callback back to the C API.
 static void defaultEntityHandler(
 		ffi_cif* cif,
 		OCEntityHandlerResult *returnValueLocation,
 		void**arguments,
-		int uuid ) {
+		void *jsCallbackInPersistent ) {
 	Isolate *isolate = Isolate::GetCurrent();
-	Local<Function> jsCallback = Local<Function>::Cast(
-		Local<Object>::New( isolate, *_callbacks )->Get( uuid ) );
 
-	// Call the JS callback
+	// Construct arguments to the JS callback and then call it, recording its return value
 	Local<Value> jsCallbackArguments[ 2 ] = {
 		Number::New( isolate, ( double )*( OCEntityHandlerFlag * )( arguments[ 0 ] ) ),
 		Buffer::Use( isolate, ( char * )*( OCEntityHandlerRequest ** )( arguments[ 1 ] ),
 			sizeof( OCEntityHandlerRequest ) )
 	};
-	Local<Value> returnValue = jsCallback->Call(
-		isolate->GetCurrentContext()->Global(),
-		2, jsCallbackArguments );
+	Local<Value> returnValue =
+		Local<Function>::New( isolate, *( Persistent<Function> * )jsCallbackInPersistent )
+			->Call( isolate->GetCurrentContext()->Global(), 2, jsCallbackArguments );
 
 	VALIDATE_CALLBACK_RETURN_VALUE_TYPE( isolate, returnValue, IsNumber );
 
@@ -42,7 +41,6 @@ static void defaultEntityHandler(
 
 void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
-	int uuid;
 	OCResourceHandle handle = 0;
 	callback_info *info = 0;
 
@@ -54,13 +52,15 @@ void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 4, IsFunction );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 5, IsUint32 );
 
-	uuid = _uuidCounter++;
+	Persistent<Function> *jsCallback = new Persistent<Function>(
+		isolate,
+		Local<Function>::Cast( args[ 4 ] ) );
 
 	// Create a new callback
 	info = callback_info_new(
 
 		// Location of JS callback
-		uuid,
+		( void * )jsCallback,
 
 		// Function signature - return value
 		&ffi_type_uint32,
@@ -81,9 +81,6 @@ void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 		return;
 	}
 
-	// Store the JS callback in the list of callbacks under the given uuid
-	Local<Object>::New( isolate, *_callbacks )->Set( uuid, args[ 4 ] );
-
 	args.GetReturnValue().Set(
 		Number::New(
 			isolate,
@@ -99,34 +96,32 @@ void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 
 	jsHandle->Set( String::NewFromUtf8( isolate, "handle" ),
 		Buffer::New( isolate, ( const char * )&handle, sizeof( OCResourceHandle ) ) );
-	jsHandle->Set( String::NewFromUtf8( isolate, "uuid" ),
-		Number::New( isolate, ( double )uuid ) );
+	jsHandle->Set( String::NewFromUtf8( isolate, "jsCallback" ),
+		Buffer::New( isolate, ( const char * )&jsCallback, sizeof( Persistent<Function> * ) ) );
 	jsHandle->Set( String::NewFromUtf8( isolate, "callbackInfo" ),
 		Buffer::New( isolate, ( const char * )&info, sizeof( callback_info * ) ) );
 }
 
 void bind_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
 	Isolate *isolate = Isolate::GetCurrent();
-	OCResourceHandle handle;
-	callback_info *info;
-	int uuid;
 
 	VALIDATE_ARGUMENT_COUNT( isolate, args, 1 );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsObject );
 
 	Local<Object> jsHandle = args[ 0 ]->ToObject();
 
-	handle = *( OCResourceHandle * )( Buffer::Data(
-		jsHandle->Get( String::NewFromUtf8( isolate, "handle" ) )->ToObject() ) );
-
-	uuid = jsHandle->Get( String::NewFromUtf8( isolate, "uuid" ) )->Uint32Value();
-	info = *( callback_info ** )( Buffer::Data(
-		jsHandle->Get( String::NewFromUtf8( isolate, "callbackInfo" ) )->ToObject() ) );
-
-	Local<Object>::New( isolate, *_callbacks )->Delete( uuid );
-
-	args.GetReturnValue().Set( Number::New( isolate, ( double )OCDeleteResource( handle ) ) );
+	args.GetReturnValue().Set(
+		Number::New( isolate, OCDeleteResource(
+			*( OCResourceHandle * )( Buffer::Data(
+				jsHandle->Get( String::NewFromUtf8( isolate, "handle" ) )
+					->ToObject() ) ) ) ) );
 
 	// OCDeleteResource will presumably remove the C callback, so we no longer need the closure.
-	callback_info_free( info );
+	callback_info_free( *( callback_info ** )( Buffer::Data(
+		jsHandle->Get( String::NewFromUtf8( isolate, "callbackInfo" ) )->ToObject() ) ) );
+
+	// Remove our reference to the JS callback
+	delete *( Persistent<Function> ** )( Buffer::Data(
+		jsHandle->Get( String::NewFromUtf8( isolate, "jsCallback" ) )->ToObject() ) );
+
 }

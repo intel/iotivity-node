@@ -4,7 +4,7 @@ var iotivity = require( "../../index" ),
 	testUtils = require( "../test-utils" )( iotivity, QUnit.assert );
 
 test( "Simple server", function( assert ) {
-	var result, stopProcessing, stopTestClient, keyCount,
+	var result, stopProcessing, stopTestClient,
 		done = assert.async(),
 		handlerWasCalled = false,
 		failsafeTimeoutId = null,
@@ -32,18 +32,12 @@ test( "Simple server", function( assert ) {
 			// Make sure the entity handler was called
 			assert.deepEqual( handlerWasCalled, true, "Entity handler was called" );
 
-			// Make sure OCDeleteResource works correctly, including the callback removal on the
-			// C++ side
-			keyCount = Object.keys( iotivity._test_callbacks ).length;
+			// Make sure OCDeleteResource works correctly
 			result = iotivity.OCDeleteResource( handle );
 			assert.deepEqual(
 				testUtils.lookupEnumValueName( "OCStackResult", result ),
 				"OC_STACK_OK",
 				"OCDeleteResource succeeded" );
-			assert.deepEqual(
-				Object.keys( iotivity._test_callbacks ).length,
-				keyCount - 1,
-				"The number of keys in the list of callbacks has decreased by one" );
 
 			// Make sure stack shutdown works
 			testUtils.testShutdown();
@@ -63,9 +57,7 @@ test( "Simple server", function( assert ) {
 	if ( testUtils.testStartup( iotivity.OCMode.OC_SERVER ) ===
 			iotivity.OCStackResult.OC_STACK_OK ) {
 
-		// Make sure OCCreateResource works correctly, including the callback manipulation on the
-		// C++ side
-		keyCount = Object.keys( iotivity._test_callbacks ).length;
+		// Make sure OCCreateResource works correctly
 		result = iotivity.OCCreateResource(
 			handle,
 			"core.light",
@@ -78,13 +70,6 @@ test( "Simple server", function( assert ) {
 			testUtils.lookupEnumValueName( "OCStackResult", result ),
 			"OC_STACK_OK",
 			"OCCreateResource succeeded" );
-		assert.deepEqual( typeof handle.uuid, "number", "uuid is present" );
-		assert.deepEqual(
-			Object.keys( iotivity._test_callbacks ).length,
-			keyCount + 1,
-			"The number of keys in the list of callbacks has increased by one" );
-		assert.deepEqual( iotivity._test_callbacks[ handle.uuid ], callback,
-			"The JS callback is present in the list of callbacks at the correct uuid" );
 
 		// If OCCreateResource was successful, we can make sure the entity handler gets called
 		if ( result === iotivity.OCStackResult.OC_STACK_OK ) {

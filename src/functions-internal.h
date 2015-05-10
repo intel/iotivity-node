@@ -34,8 +34,4 @@
 		return; \
 	}
 
-// Hash for storing JS callbacks indexed by UUID
-extern v8::Persistent<v8::Object> *_callbacks;
-extern int _uuidCounter;
-
 #endif /* __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__ */

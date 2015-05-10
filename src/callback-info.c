@@ -6,7 +6,6 @@ extern "C" {
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <stdint.h>
 
 #include "callback-info.h"
 
@@ -20,7 +19,7 @@ callback_info *callback_info_free( callback_info *info ) {
 }
 
 callback_info *callback_info_new(
-		int uuid,
+		void *user_data,
 		ffi_type *return_type,
 		Marshaller default_handler,
 		int argumentCount, ... ) {
@@ -62,7 +61,7 @@ callback_info *callback_info_new(
 						info->closure,
 						&( info->cif ),
 						default_handler,
-						(void *)( uintptr_t )uuid,
+						user_data,
 						(void *)( info->resultingFunction ) ) != FFI_OK ) {
 
 					info = callback_info_free( info );

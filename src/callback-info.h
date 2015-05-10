@@ -22,7 +22,7 @@ callback_info *callback_info_free( callback_info *info );
 
 // Create a new callback_info.
 callback_info *callback_info_new(
-	int uuid,
+	void *user_data,
 	ffi_type *return_type,
 	Marshaller default_handler,
 	int argumentCount, ... );
