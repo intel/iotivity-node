@@ -4,9 +4,9 @@ var iotivity = require( "../../index" ),
 	testUtils = require( "../test-utils" )( iotivity, QUnit.assert );
 
 test( "Simple discovery", function( assert ) {
-	var result, stopProcessing,
-		stopTestServer,
+	var result, stopProcessing, stopTestServer,
 		done = assert.async(),
+		handlerWasCalled = false,
 		failsafeTimeoutId = null,
 		handle = {},
 		teardown = function() {
