@@ -8,7 +8,6 @@ runOCProcess( gpointer user_data ) {
 	GMainLoop *mainLoop = ( GMainLoop * )user_data;
 
 	if ( result == OC_STACK_OK ) {
-		g_message( "server: OCProcess() succeeded" );
 		return G_SOURCE_CONTINUE;
 	} else {
 		g_warning( "server: OCProcess() did not return OC_STACK_OK - quitting main loop" );
@@ -35,7 +34,7 @@ main( int argc, char **argv ) {
 			&handle,
 			"light",
 			"oc.mi.def",
-			"/light/1",
+			"/a/light",
 			handleLight1,
 			OC_DISCOVERABLE ) ) {
 
