@@ -71,6 +71,28 @@ _.extend( testUtils.prototype, {
 		};
 	},
 
+	startTestClient: function( teardown ) {
+		var testClient = spawn( "node", [ path.join( __dirname, "test-client.js" ) ] );
+
+		testClient.stdout.on( "data", _.bind( function testServerStdoutData( data ) {
+			_.each( data.toString().split( "\n" ), _.bind( function( value ) {
+				var jsonObject;
+
+				if ( value ) {
+					jsonObject = JSON.parse( value );
+
+					if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
+						teardown();
+					}
+				}
+			}, this ) );
+		}, this ) );
+
+		return function stopTestClient() {
+			testClient.kill( "SIGTERM" );
+		};
+	},
+
 	testShutdown: function() {
 		var result = this._iotivity.OCStop();
 
