@@ -1,3 +1,6 @@
+// Server that illustrates the action of the entity handler. client.observable.js contains a client
+// that issues a request that causes the entity handler to fire.
+
 var intervalId,
 	iotivity = require( "../index" ),
 	handle = {};
