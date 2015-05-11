@@ -29,6 +29,22 @@ defaultCb( void *context, OCDoHandle handle, OCClientResponse *response ) {
 	g_message( "client: ->resJSONPayload: %s", response->resJSONPayload );
 	g_message( "client: ->numRcvdVendorSpecificHeaderOptions: %d",
 		response->numRcvdVendorSpecificHeaderOptions );
+	for ( index = 0 ; index < response->numRcvdVendorSpecificHeaderOptions ; index++ ) {
+		g_message( "client: ->rcvdVendorSpecificHeaderOptions[ %d ]", index );
+		g_message( "client:   ->rcvdVendorSpecificHeaderOptions[ %d ].protocolID: %d\n",
+			index, ( int )( response->rcvdVendorSpecificHeaderOptions[ index ].protocolID ) );
+		g_message( "client:   ->rcvdVendorSpecificHeaderOptions[ %d ].optionID: %d\n",
+		index, ( int )response->rcvdVendorSpecificHeaderOptions[ index ].optionID );
+		g_message( "client:   ->rcvdVendorSpecificHeaderOptions[ %d ].optionLength: %d\n",
+			index, response->rcvdVendorSpecificHeaderOptions[ index ].optionLength );
+		for ( index1 = 0 ;
+				index1 < response->rcvdVendorSpecificHeaderOptions[ index ].optionLength;
+				index1++ ) {
+			g_message( "response->rcvdVendorSpecificHeaderOptions[ %d ].optionData[ %d ]: %d\n",
+				index, index1,
+				response->rcvdVendorSpecificHeaderOptions[ index ].optionData[ index1 ] );
+		}
+	}
 
 	return OC_STACK_DELETE_TRANSACTION;
 }
