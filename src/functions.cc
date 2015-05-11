@@ -3,8 +3,8 @@
 
 #include "functions/oc-create-delete-resource.h"
 #include "functions/oc-do-resource.h"
+#include "functions/oc-do-response.h"
 #include "functions/simple.h"
-#include "functions-internal.h"
 
 using namespace v8;
 
@@ -17,4 +17,5 @@ void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
 	NODE_SET_METHOD( exports, "OCStartPresence", bind_OCStartPresence );
 	NODE_SET_METHOD( exports, "OCStopPresence", bind_OCStopPresence );
 	NODE_SET_METHOD( exports, "OCDoResource", bind_OCDoResource );
+	NODE_SET_METHOD( exports, "OCDoResponse", bind_OCDoResponse );
 }

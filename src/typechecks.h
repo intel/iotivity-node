@@ -13,10 +13,13 @@
 			"Callback return value type must satisfy " #typecheck "()" ); \
 	}
 
+#define THROW_RANGE_EXCEPTION( isolate, message ) \
+	(isolate)->ThrowException( Exception::RangeError( \
+		String::NewFromUtf8( (isolate), message ) ) )
+
 #define VALIDATE_ARGUMENT_COUNT( isolate, args, length ) \
 	if ( (args).Length() < (length) ) { \
-		(isolate)->ThrowException( Exception::RangeError( \
-			String::NewFromUtf8( (isolate), "Need " #length " arguments" ) ) ); \
+		THROW_RANGE_EXCEPTION( (isolate), "Need " #length " arguments" ); \
 		return; \
 	}
 
@@ -25,6 +28,13 @@
 		THROW_TYPECHECK_EXCEPTION( isolate, \
 			"Argument " #index " must satisfy " #typecheck "()" ); \
 		return; \
+	}
+
+#define VALIDATE_VALUE_TYPE( isolate, value, typecheck, message, failReturn ) \
+	if ( !(value)->typecheck() ) { \
+		THROW_TYPECHECK_EXCEPTION( isolate, \
+			message " must satisfy " #typecheck "()" ); \
+		return failReturn; \
 	}
 
 #define VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, index, typecheck  ) \

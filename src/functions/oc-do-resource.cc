@@ -1,6 +1,6 @@
 #include <node_buffer.h>
 #include "oc-do-resource.h"
-#include "../functions-internal.h"
+#include "../typechecks.h"
 #include "../structures.h"
 
 extern "C" {
@@ -22,7 +22,7 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
 	// Call the JS Callback
 	Local<Value> jsCallbackArguments[ 2 ] = {
 		Buffer::New( isolate, ( char * )&handle, sizeof( OCDoHandle ) ),
-		jsOCClientResponse( isolate, clientResponse )
+		js_OCClientResponse( isolate, clientResponse )
 	};
 	Local<Value> returnValue = jsCallback->Call(
 		isolate->GetCurrentContext()->Global(),

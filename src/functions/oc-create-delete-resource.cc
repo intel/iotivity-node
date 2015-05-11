@@ -1,7 +1,7 @@
 #include <v8.h>
 #include <node_buffer.h>
 
-#include "../functions-internal.h"
+#include "../typechecks.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -117,11 +117,18 @@ void bind_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
 					->ToObject() ) ) ) ) );
 
 	// OCDeleteResource will presumably remove the C callback, so we no longer need the closure.
-	callback_info_free( *( callback_info ** )( Buffer::Data(
-		jsHandle->Get( String::NewFromUtf8( isolate, "callbackInfo" ) )->ToObject() ) ) );
+	Local<Value> callbackInfo = jsHandle->Get( String::NewFromUtf8( isolate, "callbackInfo" ) );
+	if ( !Buffer::HasInstance( callbackInfo ) ) {
+		THROW_TYPECHECK_EXCEPTION( isolate, "callbackInfo is not a Node::Buffer" );
+		return;
+	}
+	callback_info_free( *( callback_info ** )( Buffer::Data( callbackInfo->ToObject() ) ) );
 
 	// Remove our reference to the JS callback
-	delete *( Persistent<Function> ** )( Buffer::Data(
-		jsHandle->Get( String::NewFromUtf8( isolate, "jsCallback" ) )->ToObject() ) );
-
+	Local<Value> jsCallback = jsHandle->Get( String::NewFromUtf8( isolate, "jsCallback" ) );
+	if ( !Buffer::HasInstance( jsCallback ) ) {
+		THROW_TYPECHECK_EXCEPTION( isolate, "jsCallback is not a Node::Buffer" );
+		return;
+	}
+	delete *( Persistent<Function> ** )( Buffer::Data( jsCallback->ToObject() ) );
 }
