@@ -12,6 +12,7 @@ v8::Local<v8::Object> js_OCClientResponse( v8::Isolate *isolate, OCClientRespons
 // Fills in @destination. @destination->payload is assumed to be allocated of size
 // MAX_RESPONSE_LENGTH
 bool c_OCEntityHandlerResponse(
+	v8::Isolate *isolate,
 	OCEntityHandlerResponse *destination,
 	v8::Local<v8::Object> jsOCEntityHandlerResponse );
 

@@ -21,7 +21,7 @@ void bind_OCDoResponse( const FunctionCallbackInfo<Value>& args ) {
 	VALIDATE_ARGUMENT_COUNT( isolate, args, 1 );
 	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsObject );
 
-	if ( c_OCEntityHandlerResponse( &response, args[ 0 ]->ToObject() ) ) {
+	if ( c_OCEntityHandlerResponse( isolate, &response, args[ 0 ]->ToObject() ) ) {
 		args.GetReturnValue().Set( Number::New( isolate, OCDoResponse( &response ) ) );
 	}
 }
