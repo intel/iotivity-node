@@ -1,5 +1,5 @@
 #include <node.h>
-#include <v8.h>
+#include <nan.h>
 
 extern "C" {
 
@@ -9,423 +9,409 @@ extern "C" {
 
 using namespace v8;
 
-static Local<Object> bind_OCEntityHandlerFlag( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCEntityHandlerFlag() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_INIT_FLAG" ),
-		Number::New( isolate, OC_INIT_FLAG ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_INIT_FLAG" ),
+		NanNew<Number>( OC_INIT_FLAG ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REQUEST_FLAG" ),
-		Number::New( isolate, OC_REQUEST_FLAG ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REQUEST_FLAG" ),
+		NanNew<Number>( OC_REQUEST_FLAG ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_OBSERVE_FLAG" ),
-		Number::New( isolate, OC_OBSERVE_FLAG ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_OBSERVE_FLAG" ),
+		NanNew<Number>( OC_OBSERVE_FLAG ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCEntityHandlerResult( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCEntityHandlerResult() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_EH_OK" ),
-		Number::New( isolate, OC_EH_OK ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_EH_OK" ),
+		NanNew<Number>( OC_EH_OK ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_EH_ERROR" ),
-		Number::New( isolate, OC_EH_ERROR ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_EH_ERROR" ),
+		NanNew<Number>( OC_EH_ERROR ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_EH_RESOURCE_CREATED" ),
-		Number::New( isolate, OC_EH_RESOURCE_CREATED ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_EH_RESOURCE_CREATED" ),
+		NanNew<Number>( OC_EH_RESOURCE_CREATED ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_EH_RESOURCE_DELETED" ),
-		Number::New( isolate, OC_EH_RESOURCE_DELETED ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_EH_RESOURCE_DELETED" ),
+		NanNew<Number>( OC_EH_RESOURCE_DELETED ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_EH_SLOW" ),
-		Number::New( isolate, OC_EH_SLOW ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_EH_SLOW" ),
+		NanNew<Number>( OC_EH_SLOW ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_EH_FORBIDDEN" ),
-		Number::New( isolate, OC_EH_FORBIDDEN ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_EH_FORBIDDEN" ),
+		NanNew<Number>( OC_EH_FORBIDDEN ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCMethod( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCMethod() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REST_NOMETHOD" ),
-		Number::New( isolate, OC_REST_NOMETHOD ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REST_NOMETHOD" ),
+		NanNew<Number>( OC_REST_NOMETHOD ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REST_GET" ),
-		Number::New( isolate, OC_REST_GET ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REST_GET" ),
+		NanNew<Number>( OC_REST_GET ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REST_PUT" ),
-		Number::New( isolate, OC_REST_PUT ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REST_PUT" ),
+		NanNew<Number>( OC_REST_PUT ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REST_POST" ),
-		Number::New( isolate, OC_REST_POST ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REST_POST" ),
+		NanNew<Number>( OC_REST_POST ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REST_DELETE" ),
-		Number::New( isolate, OC_REST_DELETE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REST_DELETE" ),
+		NanNew<Number>( OC_REST_DELETE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REST_OBSERVE" ),
-		Number::New( isolate, OC_REST_OBSERVE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REST_OBSERVE" ),
+		NanNew<Number>( OC_REST_OBSERVE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REST_OBSERVE_ALL" ),
-		Number::New( isolate, OC_REST_OBSERVE_ALL ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REST_OBSERVE_ALL" ),
+		NanNew<Number>( OC_REST_OBSERVE_ALL ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REST_CANCEL_OBSERVE" ),
-		Number::New( isolate, OC_REST_CANCEL_OBSERVE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REST_CANCEL_OBSERVE" ),
+		NanNew<Number>( OC_REST_CANCEL_OBSERVE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_REST_PRESENCE" ),
-		Number::New( isolate, OC_REST_PRESENCE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_REST_PRESENCE" ),
+		NanNew<Number>( OC_REST_PRESENCE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCMode( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCMode() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_CLIENT" ),
-		Number::New( isolate, OC_CLIENT ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_CLIENT" ),
+		NanNew<Number>( OC_CLIENT ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_SERVER" ),
-		Number::New( isolate, OC_SERVER ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_SERVER" ),
+		NanNew<Number>( OC_SERVER ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_CLIENT_SERVER" ),
-		Number::New( isolate, OC_CLIENT_SERVER ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_CLIENT_SERVER" ),
+		NanNew<Number>( OC_CLIENT_SERVER ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCObserveAction( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCObserveAction() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_OBSERVE_REGISTER" ),
-		Number::New( isolate, OC_OBSERVE_REGISTER ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_OBSERVE_REGISTER" ),
+		NanNew<Number>( OC_OBSERVE_REGISTER ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_OBSERVE_DEREGISTER" ),
-		Number::New( isolate, OC_OBSERVE_DEREGISTER ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_OBSERVE_DEREGISTER" ),
+		NanNew<Number>( OC_OBSERVE_DEREGISTER ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_OBSERVE_NO_OPTION" ),
-		Number::New( isolate, OC_OBSERVE_NO_OPTION ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_OBSERVE_NO_OPTION" ),
+		NanNew<Number>( OC_OBSERVE_NO_OPTION ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCQualityOfService( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCQualityOfService() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_LOW_QOS" ),
-		Number::New( isolate, OC_LOW_QOS ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_LOW_QOS" ),
+		NanNew<Number>( OC_LOW_QOS ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_MEDIUM_QOS" ),
-		Number::New( isolate, OC_MEDIUM_QOS ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_MEDIUM_QOS" ),
+		NanNew<Number>( OC_MEDIUM_QOS ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_HIGH_QOS" ),
-		Number::New( isolate, OC_HIGH_QOS ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_HIGH_QOS" ),
+		NanNew<Number>( OC_HIGH_QOS ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_NA_QOS" ),
-		Number::New( isolate, OC_NA_QOS ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_NA_QOS" ),
+		NanNew<Number>( OC_NA_QOS ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCResourceProperty( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCResourceProperty() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_ACTIVE" ),
-		Number::New( isolate, OC_ACTIVE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_ACTIVE" ),
+		NanNew<Number>( OC_ACTIVE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_DISCOVERABLE" ),
-		Number::New( isolate, OC_DISCOVERABLE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_DISCOVERABLE" ),
+		NanNew<Number>( OC_DISCOVERABLE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_OBSERVABLE" ),
-		Number::New( isolate, OC_OBSERVABLE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_OBSERVABLE" ),
+		NanNew<Number>( OC_OBSERVABLE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_SLOW" ),
-		Number::New( isolate, OC_SLOW ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_SLOW" ),
+		NanNew<Number>( OC_SLOW ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_SECURE" ),
-		Number::New( isolate, OC_SECURE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_SECURE" ),
+		NanNew<Number>( OC_SECURE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCStackApplicationResult( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCStackApplicationResult() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_DELETE_TRANSACTION" ),
-		Number::New( isolate, OC_STACK_DELETE_TRANSACTION ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_DELETE_TRANSACTION" ),
+		NanNew<Number>( OC_STACK_DELETE_TRANSACTION ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_KEEP_TRANSACTION" ),
-		Number::New( isolate, OC_STACK_KEEP_TRANSACTION ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_KEEP_TRANSACTION" ),
+		NanNew<Number>( OC_STACK_KEEP_TRANSACTION ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCStackResult( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCStackResult() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_OK" ),
-		Number::New( isolate, OC_STACK_OK ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_OK" ),
+		NanNew<Number>( OC_STACK_OK ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_RESOURCE_CREATED" ),
-		Number::New( isolate, OC_STACK_RESOURCE_CREATED ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_RESOURCE_CREATED" ),
+		NanNew<Number>( OC_STACK_RESOURCE_CREATED ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_RESOURCE_DELETED" ),
-		Number::New( isolate, OC_STACK_RESOURCE_DELETED ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_RESOURCE_DELETED" ),
+		NanNew<Number>( OC_STACK_RESOURCE_DELETED ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_CONTINUE" ),
-		Number::New( isolate, OC_STACK_CONTINUE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_CONTINUE" ),
+		NanNew<Number>( OC_STACK_CONTINUE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_URI" ),
-		Number::New( isolate, OC_STACK_INVALID_URI ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_URI" ),
+		NanNew<Number>( OC_STACK_INVALID_URI ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_QUERY" ),
-		Number::New( isolate, OC_STACK_INVALID_QUERY ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_QUERY" ),
+		NanNew<Number>( OC_STACK_INVALID_QUERY ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_IP" ),
-		Number::New( isolate, OC_STACK_INVALID_IP ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_IP" ),
+		NanNew<Number>( OC_STACK_INVALID_IP ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_PORT" ),
-		Number::New( isolate, OC_STACK_INVALID_PORT ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_PORT" ),
+		NanNew<Number>( OC_STACK_INVALID_PORT ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_CALLBACK" ),
-		Number::New( isolate, OC_STACK_INVALID_CALLBACK ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_CALLBACK" ),
+		NanNew<Number>( OC_STACK_INVALID_CALLBACK ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_METHOD" ),
-		Number::New( isolate, OC_STACK_INVALID_METHOD ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_METHOD" ),
+		NanNew<Number>( OC_STACK_INVALID_METHOD ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_PARAM" ),
-		Number::New( isolate, OC_STACK_INVALID_PARAM ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_PARAM" ),
+		NanNew<Number>( OC_STACK_INVALID_PARAM ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_OBSERVE_PARAM" ),
-		Number::New( isolate, OC_STACK_INVALID_OBSERVE_PARAM ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_OBSERVE_PARAM" ),
+		NanNew<Number>( OC_STACK_INVALID_OBSERVE_PARAM ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_NO_MEMORY" ),
-		Number::New( isolate, OC_STACK_NO_MEMORY ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_NO_MEMORY" ),
+		NanNew<Number>( OC_STACK_NO_MEMORY ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_COMM_ERROR" ),
-		Number::New( isolate, OC_STACK_COMM_ERROR ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_COMM_ERROR" ),
+		NanNew<Number>( OC_STACK_COMM_ERROR ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_NOTIMPL" ),
-		Number::New( isolate, OC_STACK_NOTIMPL ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_NOTIMPL" ),
+		NanNew<Number>( OC_STACK_NOTIMPL ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_NO_RESOURCE" ),
-		Number::New( isolate, OC_STACK_NO_RESOURCE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_NO_RESOURCE" ),
+		NanNew<Number>( OC_STACK_NO_RESOURCE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_RESOURCE_ERROR" ),
-		Number::New( isolate, OC_STACK_RESOURCE_ERROR ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_RESOURCE_ERROR" ),
+		NanNew<Number>( OC_STACK_RESOURCE_ERROR ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_SLOW_RESOURCE" ),
-		Number::New( isolate, OC_STACK_SLOW_RESOURCE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_SLOW_RESOURCE" ),
+		NanNew<Number>( OC_STACK_SLOW_RESOURCE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_NO_OBSERVERS" ),
-		Number::New( isolate, OC_STACK_NO_OBSERVERS ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_NO_OBSERVERS" ),
+		NanNew<Number>( OC_STACK_NO_OBSERVERS ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_OBSERVER_NOT_FOUND" ),
-		Number::New( isolate, OC_STACK_OBSERVER_NOT_FOUND ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_OBSERVER_NOT_FOUND" ),
+		NanNew<Number>( OC_STACK_OBSERVER_NOT_FOUND ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_VIRTUAL_DO_NOT_HANDLE" ),
-		Number::New( isolate, OC_STACK_VIRTUAL_DO_NOT_HANDLE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_VIRTUAL_DO_NOT_HANDLE" ),
+		NanNew<Number>( OC_STACK_VIRTUAL_DO_NOT_HANDLE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_OPTION" ),
-		Number::New( isolate, OC_STACK_INVALID_OPTION ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_OPTION" ),
+		NanNew<Number>( OC_STACK_INVALID_OPTION ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_MALFORMED_RESPONSE" ),
-		Number::New( isolate, OC_STACK_MALFORMED_RESPONSE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_MALFORMED_RESPONSE" ),
+		NanNew<Number>( OC_STACK_MALFORMED_RESPONSE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_PERSISTENT_BUFFER_REQUIRED" ),
-		Number::New( isolate, OC_STACK_PERSISTENT_BUFFER_REQUIRED ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_PERSISTENT_BUFFER_REQUIRED" ),
+		NanNew<Number>( OC_STACK_PERSISTENT_BUFFER_REQUIRED ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_REQUEST_HANDLE" ),
-		Number::New( isolate, OC_STACK_INVALID_REQUEST_HANDLE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_REQUEST_HANDLE" ),
+		NanNew<Number>( OC_STACK_INVALID_REQUEST_HANDLE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_INVALID_DEVICE_INFO" ),
-		Number::New( isolate, OC_STACK_INVALID_DEVICE_INFO ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_INVALID_DEVICE_INFO" ),
+		NanNew<Number>( OC_STACK_INVALID_DEVICE_INFO ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_PRESENCE_STOPPED" ),
-		Number::New( isolate, OC_STACK_PRESENCE_STOPPED ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_PRESENCE_STOPPED" ),
+		NanNew<Number>( OC_STACK_PRESENCE_STOPPED ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_PRESENCE_TIMEOUT" ),
-		Number::New( isolate, OC_STACK_PRESENCE_TIMEOUT ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_PRESENCE_TIMEOUT" ),
+		NanNew<Number>( OC_STACK_PRESENCE_TIMEOUT ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_PRESENCE_DO_NOT_HANDLE" ),
-		Number::New( isolate, OC_STACK_PRESENCE_DO_NOT_HANDLE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_PRESENCE_DO_NOT_HANDLE" ),
+		NanNew<Number>( OC_STACK_PRESENCE_DO_NOT_HANDLE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_STACK_ERROR" ),
-		Number::New( isolate, OC_STACK_ERROR ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_STACK_ERROR" ),
+		NanNew<Number>( OC_STACK_ERROR ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCTransportProtocolID( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCTransportProtocolID() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_INVALID_ID" ),
-		Number::New( isolate, OC_INVALID_ID ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_INVALID_ID" ),
+		NanNew<Number>( OC_INVALID_ID ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_COAP_ID" ),
-		Number::New( isolate, OC_COAP_ID ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_COAP_ID" ),
+		NanNew<Number>( OC_COAP_ID ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCVirtualResources( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCVirtualResources() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_WELL_KNOWN_URI" ),
-		Number::New( isolate, OC_WELL_KNOWN_URI ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_WELL_KNOWN_URI" ),
+		NanNew<Number>( OC_WELL_KNOWN_URI ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_DEVICE_URI" ),
-		Number::New( isolate, OC_DEVICE_URI ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_DEVICE_URI" ),
+		NanNew<Number>( OC_DEVICE_URI ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_RESOURCE_TYPES_URI" ),
-		Number::New( isolate, OC_RESOURCE_TYPES_URI ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_RESOURCE_TYPES_URI" ),
+		NanNew<Number>( OC_RESOURCE_TYPES_URI ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_PRESENCE" ),
-		Number::New( isolate, OC_PRESENCE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_PRESENCE" ),
+		NanNew<Number>( OC_PRESENCE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_MAX_VIRTUAL_RESOURCES" ),
-		Number::New( isolate, OC_MAX_VIRTUAL_RESOURCES ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_MAX_VIRTUAL_RESOURCES" ),
+		NanNew<Number>( OC_MAX_VIRTUAL_RESOURCES ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
-static Local<Object> bind_OCConnectivityType( Isolate* isolate ) {
-	Local<Object> obj = Object::New( isolate );
+static Local<Object> bind_OCConnectivityType() {
+	Local<Object> returnValue = NanNew<Object>();
 
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_ETHERNET" ),
-		Number::New( isolate, OC_ETHERNET ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_ETHERNET" ),
+		NanNew<Number>( OC_ETHERNET ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_WIFI" ),
-		Number::New( isolate, OC_WIFI ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_WIFI" ),
+		NanNew<Number>( OC_WIFI ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_EDR" ),
-		Number::New( isolate, OC_EDR ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_EDR" ),
+		NanNew<Number>( OC_EDR ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_LE" ),
-		Number::New( isolate, OC_LE ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_LE" ),
+		NanNew<Number>( OC_LE ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
-	obj->ForceSet(
-		String::NewFromUtf8( isolate, "OC_ALL" ),
-		Number::New( isolate, OC_ALL ),
+	returnValue->ForceSet(
+		NanNew<String>( "OC_ALL" ),
+		NanNew<Number>( OC_ALL ),
 		static_cast<PropertyAttribute>( ReadOnly || DontDelete ) );
 
-	return obj;
+	return returnValue;
 }
 
 void InitEnums( Handle<Object> exports ) {
-	v8::Isolate* isolate = v8::Isolate::GetCurrent();
-
-	exports->Set( String::NewFromUtf8( isolate, "OCEntityHandlerFlag" ),
-		bind_OCEntityHandlerFlag( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCEntityHandlerResult" ),
-		bind_OCEntityHandlerResult( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCMethod" ),
-		bind_OCMethod( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCMode" ),
-		bind_OCMode( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCObserveAction" ),
-		bind_OCObserveAction( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCQualityOfService" ),
-		bind_OCQualityOfService( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCResourceProperty" ),
-		bind_OCResourceProperty( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCStackApplicationResult" ),
-		bind_OCStackApplicationResult( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCStackResult" ),
-		bind_OCStackResult( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCTransportProtocolID" ),
-		bind_OCTransportProtocolID( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCVirtualResources" ),
-		bind_OCVirtualResources( isolate ) );
-	exports->Set( String::NewFromUtf8( isolate, "OCConnectivityType" ),
-		bind_OCConnectivityType( isolate ) );
+	exports->Set( NanNew<String>( "OCEntityHandlerFlag" ), bind_OCEntityHandlerFlag() );
+	exports->Set( NanNew<String>( "OCEntityHandlerResult" ), bind_OCEntityHandlerResult() );
+	exports->Set( NanNew<String>( "OCMethod" ), bind_OCMethod() );
+	exports->Set( NanNew<String>( "OCMode" ), bind_OCMode() );
+	exports->Set( NanNew<String>( "OCObserveAction" ), bind_OCObserveAction() );
+	exports->Set( NanNew<String>( "OCQualityOfService" ), bind_OCQualityOfService() );
+	exports->Set( NanNew<String>( "OCResourceProperty" ), bind_OCResourceProperty() );
+	exports->Set( NanNew<String>( "OCStackApplicationResult" ), bind_OCStackApplicationResult() );
+	exports->Set( NanNew<String>( "OCStackResult" ), bind_OCStackResult() );
+	exports->Set( NanNew<String>( "OCTransportProtocolID" ), bind_OCTransportProtocolID() );
+	exports->Set( NanNew<String>( "OCVirtualResources" ), bind_OCVirtualResources() );
+	exports->Set( NanNew<String>( "OCConnectivityType" ), bind_OCConnectivityType() );
 }

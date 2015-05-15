@@ -14,32 +14,25 @@ using namespace node;
 // Create an object containing the information from an OCCLientResponse structure
 static OCStackApplicationResult defaultOCClientResponseHandler(
 		void *context, OCDoHandle handle, OCClientResponse *clientResponse ) {
-	Isolate *isolate = Isolate::GetCurrent();
-	Local<Function> jsCallback = Local<Function>::New(
-		isolate,
-		*( Persistent<Function> * )context );
 
 	// Call the JS Callback
 	Local<Value> jsCallbackArguments[ 2 ] = {
-		Buffer::New( isolate, ( char * )&handle, sizeof( OCDoHandle ) ),
-		js_OCClientResponse( isolate, clientResponse )
+		NanNewBufferHandle( ( char * )&handle, sizeof( OCDoHandle ) ),
+		js_OCClientResponse( clientResponse )
 	};
-	Local<Value> returnValue = jsCallback->Call(
-		isolate->GetCurrentContext()->Global(),
+	Local<Value> returnValue = NanMakeCallback(
+		NanGetCurrentContext()->Global(),
+		NanNew( *( Persistent<Function> * )context ),
 		2, jsCallbackArguments );
 
 	// Validate value we got back from it
-	VALIDATE_CALLBACK_RETURN_VALUE_TYPE( isolate, returnValue, IsUint32 );
+	VALIDATE_CALLBACK_RETURN_VALUE_TYPE( returnValue, IsUint32 );
 
 	// Pass on the value to the C API
 	return ( OCStackApplicationResult )returnValue->Uint32Value();
 }
 
-static void defaultOCClientContextDeleter( void *context ) {
-	delete ( Persistent<Object> * )context;
-}
-
-static OCHeaderOption *oc_header_options_new( Isolate *isolate, Handle<Array> array ) {
+static OCHeaderOption *oc_header_options_new( Handle<Array> array ) {
 	int index, optionIndex, optionLength;
 	int count = array->Length();
 	OCHeaderOption *options = ( OCHeaderOption * )malloc( sizeof( OCHeaderOption ) * count );
@@ -48,17 +41,17 @@ static OCHeaderOption *oc_header_options_new( Isolate *isolate, Handle<Array> ar
 		for ( index = 0 ; index < count ; index++ ) {
 			options[ index ].protocolID =
 				( OCTransportProtocolID )array->Get( index )->ToObject()
-					->Get( String::NewFromUtf8( isolate, "protocolID" ) )->Uint32Value();
+					->Get( NanNew<String>( "protocolID" ) )->Uint32Value();
 			options[ index ].optionID =
 				( uint16_t )array->Get( index )->ToObject()
-					->Get( String::NewFromUtf8( isolate, "optionID" ) )->Uint32Value();
+					->Get( NanNew<String>( "optionID" ) )->Uint32Value();
 			options[ index ].optionLength =
 				( uint16_t )array->Get( index )->ToObject()
-					->Get( String::NewFromUtf8( isolate, "optionLength" ) )->Uint32Value();
+					->Get( NanNew<String>( "optionLength" ) )->Uint32Value();
 
 			Handle<Array> jsOption = Handle<Array>::Cast(
 				array->Get( index )->ToObject()
-					->Get( String::NewFromUtf8( isolate, "optionData" ) ) ) ;
+					->Get( NanNew<String>( "optionData" ) ) ) ;
 			optionLength = jsOption->Length();
 			optionLength = ( optionLength > MAX_HEADER_OPTION_DATA_LENGTH ) ?
 				MAX_HEADER_OPTION_DATA_LENGTH : optionLength;
@@ -81,36 +74,36 @@ static OCHeaderOption *oc_header_options_free( OCHeaderOption *options ) {
 	return 0;
 }
 
-void bind_OCDoResource( const FunctionCallbackInfo<Value>& args ) {
-	Isolate *isolate = Isolate::GetCurrent();
+NAN_METHOD( bind_OCDoResource ) {
+	NanScope();
+
 	OCHeaderOption *options = 0;
 	OCDoHandle handle;
 	OCCallbackData data = {
 		0,
 		defaultOCClientResponseHandler,
-		defaultOCClientContextDeleter
+		( OCClientContextDeleter )persistentJSCallback_free
 	};
 
-	VALIDATE_ARGUMENT_COUNT( isolate, args, 9 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsObject );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 1, IsUint32 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 2, IsString );
-	VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, 3, IsString );
-	VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, 4, IsString );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 5, IsUint32 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 6, IsUint32 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 7, IsFunction );
-	VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, 8, IsArray );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 9, IsUint32 );
+	VALIDATE_ARGUMENT_COUNT( args, 9 );
+	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
+	VALIDATE_ARGUMENT_TYPE( args, 1, IsUint32 );
+	VALIDATE_ARGUMENT_TYPE( args, 2, IsString );
+	VALIDATE_ARGUMENT_TYPE_OR_NULL( args, 3, IsString );
+	VALIDATE_ARGUMENT_TYPE_OR_NULL( args, 4, IsString );
+	VALIDATE_ARGUMENT_TYPE( args, 5, IsUint32 );
+	VALIDATE_ARGUMENT_TYPE( args, 6, IsUint32 );
+	VALIDATE_ARGUMENT_TYPE( args, 7, IsFunction );
+	VALIDATE_ARGUMENT_TYPE_OR_NULL( args, 8, IsArray );
+	VALIDATE_ARGUMENT_TYPE( args, 9, IsUint32 );
 
-	data.context = ( void * )new Persistent<Function>( isolate,
-		Local<Function>::Cast( args[ 7 ] ) );
+	data.context = ( void * )persistentJSCallback_new( Local<Function>::Cast( args[ 7 ] ) );
 
 	if ( args[ 8 ]->IsArray() ) {
-		options = oc_header_options_new( isolate, Handle<Array>::Cast( args[ 8 ] ) );
+		options = oc_header_options_new( Handle<Array>::Cast( args[ 8 ] ) );
 	}
 
-	args.GetReturnValue().Set( Number::New( isolate,
+	Local<Number> returnValue = NanNew<Number>(
 		( double )OCDoResource(
 			&handle,
 			( OCMethod )args[ 1 ]->Uint32Value(),
@@ -121,10 +114,12 @@ void bind_OCDoResource( const FunctionCallbackInfo<Value>& args ) {
 			( OCQualityOfService )args[ 6 ]->Uint32Value(),
 			&data,
 			options,
-			( uint8_t )args[ 9 ]->Uint32Value() ) ) );
+			( uint8_t )args[ 9 ]->Uint32Value() ) );
 
 	options = oc_header_options_free( options );
 
-	args[ 0 ]->ToObject()->Set( String::NewFromUtf8( isolate, "handle" ),
-		Buffer::New( isolate, ( const char * )&handle, sizeof( OCDoHandle ) ) );
+	args[ 0 ]->ToObject()->Set( NanNew<String>( "handle" ),
+		NanNewBufferHandle( ( const char * )&handle, sizeof( OCDoHandle ) ) );
+
+	NanReturnValue( returnValue );
 }

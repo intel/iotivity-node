@@ -19,6 +19,7 @@
 			"target_name": "iotivity",
 			"sources": [
 				"src/main.cc",
+				"src/common.cc",
 				"src/enums.cc",
 				"src/structures.cc",
 				"src/functions/oc-create-delete-resource.cc",

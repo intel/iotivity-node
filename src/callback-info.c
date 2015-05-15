@@ -13,6 +13,9 @@ callback_info *callback_info_free( callback_info *info ) {
 	if ( info->closure ) {
 		ffi_closure_free( info->closure );
 	}
+	if ( info->remover ) {
+		info->remover( info->user_data );
+	}
 	free( info );
 
 	return 0;
@@ -20,6 +23,7 @@ callback_info *callback_info_free( callback_info *info ) {
 
 callback_info *callback_info_new(
 		void *user_data,
+		UserDataRemover remover,
 		ffi_type *return_type,
 		Marshaller default_handler,
 		int argumentCount, ... ) {
@@ -34,6 +38,10 @@ callback_info *callback_info_new(
 	// Allocate info structure
 	if ( info ) {
 		memset( info, 0, sizeof( callback_info ) );
+
+		// Save user data info
+		info->remover = remover;
+		info->user_data = user_data;
 
 		// Allocate closure
 		info->closure = ( ffi_closure * )ffi_closure_alloc(

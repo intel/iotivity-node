@@ -1,5 +1,6 @@
 #include <v8.h>
 #include <node_buffer.h>
+#include <nan.h>
 
 #include "../common.h"
 
@@ -22,45 +23,47 @@ static void defaultEntityHandler(
 		OCEntityHandlerResult *returnValueLocation,
 		void**arguments,
 		void *jsCallbackInPersistent ) {
-	Isolate *isolate = Isolate::GetCurrent();
 
 	// Construct arguments to the JS callback and then call it, recording its return value
 	Local<Value> jsCallbackArguments[ 2 ] = {
-		Number::New( isolate, ( double )*( OCEntityHandlerFlag * )( arguments[ 0 ] ) ),
-		Buffer::Use( isolate, ( char * )*( OCEntityHandlerRequest ** )( arguments[ 1 ] ),
+		NanNew<Number>( ( double )*( OCEntityHandlerFlag * )( arguments[ 0 ] ) ),
+		NanBufferUse( ( char * )*( OCEntityHandlerRequest ** )( arguments[ 1 ] ),
 			sizeof( OCEntityHandlerRequest ) )
 	};
 	Local<Value> returnValue =
-		Local<Function>::New( isolate, *( Persistent<Function> * )jsCallbackInPersistent )
-			->Call( isolate->GetCurrentContext()->Global(), 2, jsCallbackArguments );
+		NanMakeCallback(
+			NanGetCurrentContext()->Global(),
+			NanNew( *( Persistent<Function> * )jsCallbackInPersistent ),
+			2,
+			jsCallbackArguments );
 
-	VALIDATE_CALLBACK_RETURN_VALUE_TYPE( isolate, returnValue, IsNumber );
+	VALIDATE_CALLBACK_RETURN_VALUE_TYPE( returnValue, IsNumber );
 
 	*returnValueLocation = ( OCEntityHandlerResult )( returnValue->ToNumber()->Value() );
 }
 
-void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
-	Isolate *isolate = Isolate::GetCurrent();
+NAN_METHOD( bind_OCCreateResource ) {
+	NanScope();
+
 	OCResourceHandle handle = 0;
 	callback_info *info = 0;
 
-	VALIDATE_ARGUMENT_COUNT( isolate, args, 6 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsObject );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 1, IsString );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 2, IsString );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 3, IsString );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 4, IsFunction );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 5, IsUint32 );
-
-	Persistent<Function> *jsCallback = new Persistent<Function>(
-		isolate,
-		Local<Function>::Cast( args[ 4 ] ) );
+	VALIDATE_ARGUMENT_COUNT( args, 6 );
+	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
+	VALIDATE_ARGUMENT_TYPE( args, 1, IsString );
+	VALIDATE_ARGUMENT_TYPE( args, 2, IsString );
+	VALIDATE_ARGUMENT_TYPE( args, 3, IsString );
+	VALIDATE_ARGUMENT_TYPE( args, 4, IsFunction );
+	VALIDATE_ARGUMENT_TYPE( args, 5, IsUint32 );
 
 	// Create a new callback
 	info = callback_info_new(
 
 		// Location of JS callback
-		( void * )jsCallback,
+		( void * )persistentJSCallback_new( Local<Function>::Cast( args[ 4 ] ) ),
+
+		// Function that will delete the callback
+		( UserDataRemover )persistentJSCallback_free,
 
 		// Function signature - return value
 		&ffi_type_uint32,
@@ -75,60 +78,48 @@ void bind_OCCreateResource( const FunctionCallbackInfo<Value>& args ) {
 		&ffi_type_uint32, &ffi_type_pointer );
 
 	if ( !info ) {
-		(isolate)->ThrowException( Exception::TypeError(
-			String::NewFromUtf8( (isolate),
-				"OCCreateResource: Unable to allocate C callback" ) ) );
-		return;
+		NanThrowError( "OCCreateResource: Unable to allocate C callback" );
+		NanReturnUndefined();
 	}
 
-	args.GetReturnValue().Set(
-		Number::New(
-			isolate,
-			( double )OCCreateResource(
-				&handle,
-				( const char * )*String::Utf8Value( args[ 1 ] ),
-				( const char * )*String::Utf8Value( args[ 2 ] ),
-				( const char * )*String::Utf8Value( args[ 3 ] ),
-				( OCEntityHandler )( info->resultingFunction ),
-				( uint8_t )args[ 5 ]->ToUint32()->Value() ) ) );
+	Local<Number> returnValue = NanNew<Number>( OCCreateResource(
+		&handle,
+		( const char * )*String::Utf8Value( args[ 1 ] ),
+		( const char * )*String::Utf8Value( args[ 2 ] ),
+		( const char * )*String::Utf8Value( args[ 3 ] ),
+		( OCEntityHandler )( info->resultingFunction ),
+		( uint8_t )args[ 5 ]->Uint32Value() ) );
 
+	// Save info to the handle
 	Local<Object> jsHandle = args[ 0 ]->ToObject();
+	jsHandle->Set( NanNew<String>( "handle" ),
+		NanNewBufferHandle( ( const char * )&handle, sizeof( OCResourceHandle ) ) );
+	jsHandle->Set( NanNew<String>( "callbackInfo" ),
+		NanNewBufferHandle( ( const char * )&info, sizeof( callback_info * ) ) );
 
-	jsHandle->Set( String::NewFromUtf8( isolate, "handle" ),
-		Buffer::New( isolate, ( const char * )&handle, sizeof( OCResourceHandle ) ) );
-	jsHandle->Set( String::NewFromUtf8( isolate, "jsCallback" ),
-		Buffer::New( isolate, ( const char * )&jsCallback, sizeof( Persistent<Function> * ) ) );
-	jsHandle->Set( String::NewFromUtf8( isolate, "callbackInfo" ),
-		Buffer::New( isolate, ( const char * )&info, sizeof( callback_info * ) ) );
+	NanReturnValue( returnValue );
 }
 
-void bind_OCDeleteResource( const FunctionCallbackInfo<Value>& args ) {
-	Isolate *isolate = Isolate::GetCurrent();
+NAN_METHOD( bind_OCDeleteResource ) {
+	NanScope();
 
-	VALIDATE_ARGUMENT_COUNT( isolate, args, 1 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsObject );
+	VALIDATE_ARGUMENT_COUNT( args, 1 );
+	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
 
 	Local<Object> jsHandle = args[ 0 ]->ToObject();
 
-	args.GetReturnValue().Set(
-		Number::New( isolate, OCDeleteResource(
-			*( OCResourceHandle * )( Buffer::Data(
-				jsHandle->Get( String::NewFromUtf8( isolate, "handle" ) )
-					->ToObject() ) ) ) ) );
+	Local<Number> returnValue = NanNew<Number>( OCDeleteResource(
+		*( OCResourceHandle * )( Buffer::Data(
+			jsHandle->Get( NanNew<String>( "handle" ) )
+				->ToObject() ) ) ) );
 
 	// OCDeleteResource will presumably remove the C callback, so we no longer need the closure.
-	Local<Value> callbackInfo = jsHandle->Get( String::NewFromUtf8( isolate, "callbackInfo" ) );
+	Local<Value> callbackInfo = jsHandle->Get( NanNew<String>( "callbackInfo" ) );
 	if ( !Buffer::HasInstance( callbackInfo ) ) {
-		THROW_TYPECHECK_EXCEPTION( isolate, "callbackInfo is not a Node::Buffer" );
-		return;
+		NanThrowTypeError( "callbackInfo is not a Node::Buffer" );
+		NanReturnUndefined();
 	}
 	callback_info_free( *( callback_info ** )( Buffer::Data( callbackInfo->ToObject() ) ) );
 
-	// Remove our reference to the JS callback
-	Local<Value> jsCallback = jsHandle->Get( String::NewFromUtf8( isolate, "jsCallback" ) );
-	if ( !Buffer::HasInstance( jsCallback ) ) {
-		THROW_TYPECHECK_EXCEPTION( isolate, "jsCallback is not a Node::Buffer" );
-		return;
-	}
-	delete *( Persistent<Function> ** )( Buffer::Data( jsCallback->ToObject() ) );
+	NanReturnValue( returnValue );
 }

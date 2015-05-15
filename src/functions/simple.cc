@@ -7,39 +7,43 @@ extern "C" {
 
 using namespace v8;
 
-void bind_OCInit( const FunctionCallbackInfo<Value>& args ) {
-	Isolate *isolate = Isolate::GetCurrent();
+NAN_METHOD( bind_OCInit ) {
+	NanScope();
 
-	VALIDATE_ARGUMENT_COUNT( isolate, args, 3 );
-	VALIDATE_ARGUMENT_TYPE_OR_NULL( isolate, args, 0, IsString );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 1, IsUint32 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 2, IsNumber );
+	VALIDATE_ARGUMENT_COUNT( args, 3 );
+	VALIDATE_ARGUMENT_TYPE_OR_NULL( args, 0, IsString );
+	VALIDATE_ARGUMENT_TYPE( args, 1, IsUint32 );
+	VALIDATE_ARGUMENT_TYPE( args, 2, IsNumber );
 
-	args.GetReturnValue().Set( Number::New( isolate,
-		OCInit(
-			( const char * )( args[ 0 ]->IsString() ? ( *String::Utf8Value( args[ 0 ] ) ) : 0 ),
-			( uint16_t )args[ 1 ]->ToUint32()->Value(),
-			( OCMode )args[ 2 ]->ToNumber()->Value() ) ) );
+	NanReturnValue( NanNew<Number>( OCInit(
+		( const char * )( args[ 0 ]->IsString() ? ( *String::Utf8Value( args[ 0 ] ) ) : 0 ),
+		( uint16_t )args[ 1 ]->ToUint32()->Value(),
+		( OCMode )args[ 2 ]->ToNumber()->Value() ) ) );
 }
 
-void bind_OCStop( const FunctionCallbackInfo<Value>& args ) {
-	args.GetReturnValue().Set( Number::New( Isolate::GetCurrent(), OCStop() ) );
+NAN_METHOD( bind_OCStop ) {
+	NanScope();
+
+	NanReturnValue( NanNew<Number>( OCStop() ) );
 }
 
-void bind_OCProcess( const FunctionCallbackInfo<Value>& args ) {
-	args.GetReturnValue().Set( Number::New( Isolate::GetCurrent(), OCProcess() ) );
+NAN_METHOD( bind_OCProcess ) {
+	NanScope();
+
+	NanReturnValue( NanNew<Number>( OCProcess() ) );
 }
 
-void bind_OCStartPresence( const FunctionCallbackInfo<Value>& args ) {
-	Isolate *isolate = Isolate::GetCurrent();
+NAN_METHOD( bind_OCStartPresence ) {
+	NanScope();
 
-	VALIDATE_ARGUMENT_COUNT( isolate, args, 1 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsUint32 );
+	VALIDATE_ARGUMENT_COUNT( args, 1 );
+	VALIDATE_ARGUMENT_TYPE( args, 0, IsUint32 );
 
-	args.GetReturnValue().Set( Number::New( isolate,
-		OCStartPresence( ( uint32_t )args[ 0 ]->Uint32Value() ) ) );
+	NanReturnValue( NanNew<Number>( OCStartPresence( ( uint32_t )args[ 0 ]->Uint32Value() ) ) );
 }
 
-void bind_OCStopPresence( const FunctionCallbackInfo<Value>& args ) {
-	args.GetReturnValue().Set( Number::New( Isolate::GetCurrent(), OCStopPresence() ) );
+NAN_METHOD( bind_OCStopPresence ) {
+	NanScope();
+
+	NanReturnValue( NanNew<Number>( OCStopPresence() ) );
 }

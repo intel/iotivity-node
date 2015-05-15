@@ -11,17 +11,20 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-void bind_OCDoResponse( const FunctionCallbackInfo<Value>& args ) {
-	Isolate *isolate = Isolate::GetCurrent();
+NAN_METHOD( bind_OCDoResponse ) {
+	NanScope();
+
 	OCEntityHandlerResponse response;
 	char payload[ MAX_RESPONSE_LENGTH ];
 
+	VALIDATE_ARGUMENT_COUNT( args, 1 );
+	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
+
 	response.payload = payload;
 
-	VALIDATE_ARGUMENT_COUNT( isolate, args, 1 );
-	VALIDATE_ARGUMENT_TYPE( isolate, args, 0, IsObject );
-
-	if ( c_OCEntityHandlerResponse( isolate, &response, args[ 0 ]->ToObject() ) ) {
-		args.GetReturnValue().Set( Number::New( isolate, OCDoResponse( &response ) ) );
+	if ( c_OCEntityHandlerResponse( &response, args[ 0 ]->ToObject() ) ) {
+		NanReturnValue( NanNew<Number>( OCDoResponse( &response ) ) );
+	} else {
+		NanReturnUndefined();
 	}
 }

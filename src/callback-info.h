@@ -9,11 +9,14 @@ extern "C" {
 
 typedef void ( *Callback )();
 typedef void ( *Marshaller )( ffi_cif*, void*, void**, void* );
+typedef void ( *UserDataRemover )( void* );
 
 typedef struct _callback_info {
 	ffi_cif cif;
 	Marshaller resultingFunction;
 	ffi_closure *closure;
+	void *user_data;
+	UserDataRemover remover;
 	ffi_type *argTypes[];
 } callback_info;
 
@@ -23,6 +26,7 @@ callback_info *callback_info_free( callback_info *info );
 // Create a new callback_info.
 callback_info *callback_info_new(
 	void *user_data,
+	UserDataRemover remover,
 	ffi_type *return_type,
 	Marshaller default_handler,
 	int argumentCount, ... );

@@ -1,9 +1,10 @@
 #ifndef __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 #define __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 
+#include <v8.h>
 #include <nan.h>
 
-#define VALIDATE_CALLBACK_RETURN_VALUE_TYPE( isolate, value, typecheck ) \
+#define VALIDATE_CALLBACK_RETURN_VALUE_TYPE( value, typecheck ) \
 	if ( !value->typecheck() ) { \
 		NanThrowTypeError( "Callback return value type must satisfy " #typecheck "()" ); \
 	}
@@ -28,5 +29,8 @@
 	if ( !( (args)[ (index) ]->typecheck() || (args)[ (index) ]->IsNull() ) ) { \
 		return NanThrowTypeError( "Argument " #index " must satisfy " #typecheck "() or IsNull()" ); \
 	}
+
+v8::Persistent<v8::Function> *persistentJSCallback_new( v8::Local<v8::Function> callback );
+void persistentJSCallback_free( v8::Persistent<v8::Function> *callback );
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__ */
