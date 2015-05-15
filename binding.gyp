@@ -5,6 +5,7 @@
 	},
 	"target_defaults": {
 		"include_dirs": [
+			"<!(node -e \"require('nan')\")",
 			"<( IOTIVITY_PATH )/resource/csdk/stack/include",
 			"<( IOTIVITY_PATH )/resource/csdk/ocsocket/include"
 		],
