@@ -1,5 +1,5 @@
-#include <v8.h>
-#include "../typechecks.h"
+#include <nan.h>
+#include "../common.h"
 
 extern "C" {
 #include <ocstack.h>

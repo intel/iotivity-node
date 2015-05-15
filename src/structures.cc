@@ -5,7 +5,7 @@ extern "C" {
 }
 
 #include "structures.h"
-#include "typechecks.h"
+#include "common.h"
 
 using namespace v8;
 using namespace node;

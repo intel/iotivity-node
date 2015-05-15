@@ -1,6 +1,6 @@
 #include <node_buffer.h>
 #include "oc-do-resource.h"
-#include "../typechecks.h"
+#include "../common.h"
 #include "../structures.h"
 
 extern "C" {

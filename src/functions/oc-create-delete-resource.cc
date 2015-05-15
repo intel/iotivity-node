@@ -1,7 +1,7 @@
 #include <v8.h>
 #include <node_buffer.h>
 
-#include "../typechecks.h"
+#include "../common.h"
 
 extern "C" {
 #include <ocstack.h>
