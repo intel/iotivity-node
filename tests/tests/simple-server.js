@@ -51,6 +51,7 @@ test( "Simple server", function( assert ) {
 		callback = function( flag, request ) {
 			handlerWasCalled = true;
 			teardown();
+			return iotivity.OCEntityHandlerResult.OC_EH_OK;
 		};
 
 	// Make sure the stack starts up correctly

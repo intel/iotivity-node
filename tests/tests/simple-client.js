@@ -72,6 +72,7 @@ test( "Simple client", function( assert ) {
 					function( handle, response ) {
 						handlerWasCalled = true;
 						teardown();
+						return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 					},
 					null,
 					0 );

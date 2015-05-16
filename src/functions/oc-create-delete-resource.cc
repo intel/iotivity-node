@@ -37,7 +37,7 @@ static void defaultEntityHandler(
 			2,
 			jsCallbackArguments );
 
-	VALIDATE_CALLBACK_RETURN_VALUE_TYPE( returnValue, IsNumber );
+	VALIDATE_CALLBACK_RETURN_VALUE_TYPE( returnValue, IsNumber, "OCEntityHandler" );
 
 	*returnValueLocation = ( OCEntityHandlerResult )( returnValue->ToNumber()->Value() );
 }

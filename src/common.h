@@ -4,9 +4,9 @@
 #include <v8.h>
 #include <nan.h>
 
-#define VALIDATE_CALLBACK_RETURN_VALUE_TYPE( value, typecheck ) \
+#define VALIDATE_CALLBACK_RETURN_VALUE_TYPE( value, typecheck, message ) \
 	if ( !value->typecheck() ) { \
-		NanThrowTypeError( "Callback return value type must satisfy " #typecheck "()" ); \
+		NanThrowTypeError( message " callback return value type must satisfy " #typecheck "()" ); \
 	}
 
 #define VALIDATE_ARGUMENT_COUNT( args, length ) \
