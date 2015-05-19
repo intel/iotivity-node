@@ -1,18 +1,10 @@
 {
-	"variables": {
-		"IOTIVITY_PATH": '<!(echo "$IOTIVITY_PATH")',
-		"LIBOCTBSTACK_PATH": '<!(dirname $( find "$IOTIVITY_PATH/out" -name liboctbstack.so -print -quit ))'
-	},
 	"target_defaults": {
 		"include_dirs": [
-			"<!(node -e \"require('nan')\")",
-			"<( IOTIVITY_PATH )/resource/csdk/stack/include",
-			"<( IOTIVITY_PATH )/resource/csdk/ocsocket/include"
+			"<!(node -e \"require('nan')\")"
 		],
-		"libraries": [
-			'<(LIBOCTBSTACK_PATH)/liboctbstack.so',
-			'-Wl,-rpath,<(LIBOCTBSTACK_PATH)',
-		],
+		"libraries": [ '<!(pkg-config --libs octbstack)' ],
+		"cflags": [ '<!(pkg-config --cflags octbstack)' ]
 	},
 	"targets": [
 		{
