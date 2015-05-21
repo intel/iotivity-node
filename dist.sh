@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir -p dist/iotivity
+rm -rf dist && mkdir -p dist/iotivity
 
 npm install && npm test || ( echo "Repair build first."; exit 1; )
 
@@ -13,7 +13,5 @@ cp build/Release/iotivity.node dist/iotivity/build/Release
 cd dist
 tar cvjf iotivity.tar.bz2 iotivity
 cd ..
-
-rm -rf dist/iotivity
 
 npm install
