@@ -4,6 +4,7 @@
 #include "functions/oc-create-delete-resource.h"
 #include "functions/oc-do-resource.h"
 #include "functions/oc-do-response.h"
+#include "functions/oc-notify.h"
 #include "functions/simple.h"
 
 using namespace v8;
@@ -27,4 +28,6 @@ void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
 		NanNew<FunctionTemplate>( bind_OCDoResource )->GetFunction() );
 	exports->Set( NanNew<String>( "OCDoResponse" ),
 		NanNew<FunctionTemplate>( bind_OCDoResponse )->GetFunction() );
+	exports->Set( NanNew<String>( "OCNotifyAllObservers" ),
+		NanNew<FunctionTemplate>( bind_OCNotifyAllObservers )->GetFunction() );
 }

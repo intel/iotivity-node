@@ -17,6 +17,7 @@
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
 				"src/functions/oc-do-response.cc",
+				"src/functions/oc-notify.cc",
 				"src/functions/simple.cc",
 				"src/functions.cc",
 				"src/callback-info.c"
