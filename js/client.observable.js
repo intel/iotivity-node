@@ -2,7 +2,7 @@
 // causing it to specifically target the server.observable entity handler.
 
 var intervalId,
-	iotivity = require( "../index" ),
+	iotivity = require( "iotivity" ),
 	handle = {};
 
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );

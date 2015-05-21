@@ -1,5 +1,5 @@
 var intervalId,
-	iotivity = require( "../index" ),
+	iotivity = require( "iotivity" ),
 	handle = {};
 
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );

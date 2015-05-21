@@ -2,7 +2,7 @@
 // that issues a request that causes the entity handler to fire.
 
 var intervalId,
-	iotivity = require( "../index" ),
+	iotivity = require( "iotivity" ),
 	handle = {};
 
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
