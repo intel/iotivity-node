@@ -211,3 +211,25 @@ bool c_OCEntityHandlerResponse(
 
 	return true;
 }
+
+Local<Object> js_OCResourceHandle(
+		Local<Object> jsHandle,
+		OCResourceHandle handle ) {
+
+	jsHandle->Set( NanNew<String>( "handle" ),
+		NanNewBufferHandle( ( const char * )&handle, sizeof( OCResourceHandle ) ) );
+
+	return jsHandle;
+}
+
+OCResourceHandle c_OCResourceHandle( Local<Object> jsHandle ) {
+
+	Local<Value> handle = jsHandle->Get( NanNew<String>( "handle" ) );
+
+	if ( !Buffer::HasInstance( handle ) ) {
+		NanThrowTypeError( "OCResourceHandle.handle is not a Node::Buffer" );
+		return 0;
+	}
+
+	return *( OCResourceHandle * )Buffer::Data( handle->ToObject() );
+}

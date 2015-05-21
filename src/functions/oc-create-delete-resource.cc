@@ -1,8 +1,10 @@
 #include <v8.h>
 #include <node_buffer.h>
 #include <nan.h>
+#include <map>
 
 #include "../common.h"
+#include "../structures.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -11,6 +13,9 @@ extern "C" {
 
 using namespace v8;
 using namespace node;
+
+// Associate the callback info with a resource handle
+static std::map<OCResourceHandle, callback_info *> annotation;
 
 // Marshaller for OCEntityHandler callback
 // defaultEntityHandler is placed in a closure each time someone calls OCCreateResource. Closures
@@ -91,11 +96,8 @@ NAN_METHOD( bind_OCCreateResource ) {
 		( uint8_t )args[ 5 ]->Uint32Value() ) );
 
 	// Save info to the handle
-	Local<Object> jsHandle = args[ 0 ]->ToObject();
-	jsHandle->Set( NanNew<String>( "handle" ),
-		NanNewBufferHandle( ( const char * )&handle, sizeof( OCResourceHandle ) ) );
-	jsHandle->Set( NanNew<String>( "callbackInfo" ),
-		NanNewBufferHandle( ( const char * )&info, sizeof( callback_info * ) ) );
+	annotation[ handle ] = info;
+	js_OCResourceHandle( args[ 0 ]->ToObject(), handle );
 
 	NanReturnValue( returnValue );
 }
@@ -103,23 +105,22 @@ NAN_METHOD( bind_OCCreateResource ) {
 NAN_METHOD( bind_OCDeleteResource ) {
 	NanScope();
 
+	OCStackResult returnValue;
+
 	VALIDATE_ARGUMENT_COUNT( args, 1 );
 	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
 
-	Local<Object> jsHandle = args[ 0 ]->ToObject();
+	OCResourceHandle handle = c_OCResourceHandle( args[ 0 ]->ToObject() );
 
-	Local<Number> returnValue = NanNew<Number>( OCDeleteResource(
-		*( OCResourceHandle * )( Buffer::Data(
-			jsHandle->Get( NanNew<String>( "handle" ) )
-				->ToObject() ) ) ) );
-
-	// OCDeleteResource will presumably remove the C callback, so we no longer need the closure.
-	Local<Value> callbackInfo = jsHandle->Get( NanNew<String>( "callbackInfo" ) );
-	if ( !Buffer::HasInstance( callbackInfo ) ) {
-		NanThrowTypeError( "callbackInfo is not a Node::Buffer" );
+	if ( handle ) {
+		callback_info *info = annotation[ handle ];
+		annotation.erase( handle );
+		returnValue = OCDeleteResource( handle );
+		if ( info ) {
+			callback_info_free( info );
+		}
+		NanReturnValue( NanNew<Number>( returnValue ) );
+	} else {
 		NanReturnUndefined();
 	}
-	callback_info_free( *( callback_info ** )( Buffer::Data( callbackInfo->ToObject() ) ) );
-
-	NanReturnValue( returnValue );
 }
