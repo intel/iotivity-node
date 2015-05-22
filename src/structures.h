@@ -25,4 +25,6 @@ v8::Local<v8::Object> js_OCResourceHandle(
 // right keys
 OCResourceHandle c_OCResourceHandle( v8::Local<v8::Object> jsHandle );
 
+v8::Local<v8::Object> js_OCEntityHandlerRequest( OCEntityHandlerRequest *request );
+
 #endif /* __IOTIVITY_NODE_STRUCTURES_H__ */

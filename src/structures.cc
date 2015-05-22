@@ -11,8 +11,54 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-Local<Object> js_OCClientResponse( OCClientResponse *response ) {
+static void addHeaderOptions(
+		Local<Object> jsObject,
+		uint8_t optionCount,
+		OCHeaderOption *options ) {
 	uint32_t optionIndex, optionDataIndex;
+
+	// numRcvdVendorSpecificHeaderOptions
+	jsObject->Set(
+		NanNew<String>( "numRcvdVendorSpecificHeaderOptions" ),
+		NanNew<Number>( optionCount ) );
+
+	// rcvdVendorSpecificHeaderOptions
+	Local<Array> headerOptions = NanNew<Array>( optionCount );
+
+		// rcvdVendorSpecificHeaderOptions[ index ]
+		for ( optionIndex = 0 ; optionIndex < optionCount ; optionIndex++ ) {
+			Local<Object> headerOption = NanNew<Object>();
+
+				// response.rcvdVendorSpecificHeaderOptions[ index ].protocolID
+				headerOption->Set( NanNew<String>( "protocolID" ),
+					NanNew<Number>( options[ optionIndex ].protocolID ) );
+
+				// response.rcvdVendorSpecificHeaderOptions[ index ].optionID
+				headerOption->Set( NanNew<String>( "optionID" ),
+					NanNew<Number>( options[ optionIndex ].optionID ) );
+
+				// response.rcvdVendorSpecificHeaderOptions[ index ].optionLength
+				headerOption->Set( NanNew<String>( "optionLength" ),
+					NanNew<Number>( options[ optionIndex ].optionLength ) );
+
+				// response.rcvdVendorSpecificHeaderOptions[ index ].optionData
+				Local<Array> headerOptionData = NanNew<Array>(
+					options[ optionIndex ].optionLength );
+				for ( optionDataIndex = 0 ;
+						optionDataIndex < options[ optionIndex ].optionLength ;
+						optionDataIndex++ ) {
+					headerOptionData->Set(
+						optionDataIndex,
+						NanNew<Number>( options[ optionIndex ].optionData[ optionDataIndex ] ) );
+				}
+				headerOption->Set( NanNew<String>( "optionData" ), headerOptionData );
+			headerOptions->Set( optionIndex, headerOption );
+		}
+	jsObject->Set( NanNew<String>( "rcvdVendorSpecificHeaderOptions" ), headerOptions );
+}
+
+Local<Object> js_OCClientResponse( OCClientResponse *response ) {
+	uint32_t addressIndex;
 	Local<Object> jsResponse = NanNew<Object>();
 
 		// jsResponse.addr
@@ -23,9 +69,9 @@ Local<Object> js_OCClientResponse( OCClientResponse *response ) {
 
 			// jsResponse.addr.addr
 			Local<Array> addrAddr = NanNew<Array>( response->addr->size );
-			for ( optionIndex = 0 ; optionIndex < response->addr->size ; optionIndex++ ) {
-				addrAddr->Set( optionIndex, NanNew<Number>(
-					response->addr->addr[ optionIndex ] ) );
+			for ( addressIndex = 0 ; addressIndex < response->addr->size ; addressIndex++ ) {
+				addrAddr->Set( addressIndex, NanNew<Number>(
+					response->addr->addr[ addressIndex ] ) );
 			}
 			addr->Set( NanNew<String>( "addr" ), addrAddr );
 
@@ -47,49 +93,10 @@ Local<Object> js_OCClientResponse( OCClientResponse *response ) {
 				NanNew<String>( response->resJSONPayload ) );
 		}
 
-		// jsResponse.numRcvdVendorSpecificHeaderOptions
-		jsResponse->Set(
-			NanNew<String>( "numRcvdVendorSpecificHeaderOptions" ),
-			NanNew<Number>( response->numRcvdVendorSpecificHeaderOptions ) );
-
-		// jsResponse.rcvdVendorSpecificHeaderOptions
-		Local<Array> headerOptions = NanNew<Array>( response->numRcvdVendorSpecificHeaderOptions );
-
-			// jsResponse.rcvdVendorSpecificHeaderOptions[ index ]
-			OCHeaderOption *cHeaderOptions = response->rcvdVendorSpecificHeaderOptions;
-			uint8_t headerOptionCount = response->numRcvdVendorSpecificHeaderOptions;
-			for ( optionIndex = 0 ;
-					optionIndex < headerOptionCount ;
-					optionIndex++ ) {
-				Local<Object> headerOption = NanNew<Object>();
-
-					// response.rcvdVendorSpecificHeaderOptions[ index ].protocolID
-					headerOption->Set( NanNew<String>( "protocolID" ),
-						NanNew<Number>( cHeaderOptions[ optionIndex ].protocolID ) );
-
-					// response.rcvdVendorSpecificHeaderOptions[ index ].optionID
-					headerOption->Set( NanNew<String>( "optionID" ),
-						NanNew<Number>( cHeaderOptions[ optionIndex ].optionID ) );
-
-					// response.rcvdVendorSpecificHeaderOptions[ index ].optionLength
-					headerOption->Set( NanNew<String>( "optionLength" ),
-						NanNew<Number>( cHeaderOptions[ optionIndex ].optionLength ) );
-
-					// response.rcvdVendorSpecificHeaderOptions[ index ].optionData
-					Local<Array> headerOptionData = NanNew<Array>(
-						cHeaderOptions[ optionIndex ].optionLength );
-					for ( optionDataIndex = 0 ;
-							optionDataIndex < cHeaderOptions[ optionIndex ].optionLength ;
-							optionDataIndex++ ) {
-						headerOptionData->Set(
-							optionDataIndex,
-							NanNew<Number>(
-								cHeaderOptions[ optionIndex ].optionData[ optionDataIndex ] ) );
-					}
-					headerOption->Set( NanNew<String>( "optionData" ), headerOptionData );
-				headerOptions->Set( optionIndex, headerOption );
-			}
-		jsResponse->Set( NanNew<String>( "rcvdVendorSpecificHeaderOptions" ), headerOptions );
+		addHeaderOptions(
+			jsResponse,
+			response->numRcvdVendorSpecificHeaderOptions,
+			response->rcvdVendorSpecificHeaderOptions );
 
 	return jsResponse;
 }
@@ -232,4 +239,41 @@ OCResourceHandle c_OCResourceHandle( Local<Object> jsHandle ) {
 	}
 
 	return *( OCResourceHandle * )Buffer::Data( handle->ToObject() );
+}
+
+// Returns the Local<Object> which was passed in
+static Local<Object> js_OCRequestHandle( Local<Object> jsHandle, OCRequestHandle handle ) {
+	jsHandle->Set( NanNew<String>( "handle" ),
+		NanNewBufferHandle( ( const char * )&handle, sizeof( OCRequestHandle ) ) );
+
+	return jsHandle;
+}
+
+Local<Object> js_OCEntityHandlerRequest( OCEntityHandlerRequest *request ) {
+	Local<Object> jsRequest = NanNew<Object>();
+
+	jsRequest->Set( NanNew<String>( "resource" ),
+		js_OCResourceHandle( NanNew<Object>(), request->resource ) );
+
+	jsRequest->Set( NanNew<String>( "requestHandle" ),
+		js_OCRequestHandle( NanNew<Object>(), request->requestHandle ) );
+
+	jsRequest->Set( NanNew<String>( "method" ), NanNew<Number>( request->method ) );
+	jsRequest->Set( NanNew<String>( "query" ), NanNew<String>( request->query ) );
+
+	Local<Object> obsInfo = NanNew<Object>();
+		obsInfo->Set( NanNew<String>( "action" ), NanNew<Number>( request->obsInfo.action ) );
+		obsInfo->Set( NanNew<String>( "obsId" ), NanNew<Number>( request->obsInfo.obsId ) );
+	jsRequest->Set( NanNew<String>( "obsInfo" ), obsInfo );
+
+	jsRequest->Set(
+		NanNew<String>( "reqJSONPayload" ),
+		NanNew<String>( request->reqJSONPayload ) );
+
+	addHeaderOptions(
+		jsRequest,
+		request->numRcvdVendorSpecificHeaderOptions,
+		request->rcvdVendorSpecificHeaderOptions );
+
+	return jsRequest;
 }

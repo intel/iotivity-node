@@ -32,8 +32,7 @@ static void defaultEntityHandler(
 	// Construct arguments to the JS callback and then call it, recording its return value
 	Local<Value> jsCallbackArguments[ 2 ] = {
 		NanNew<Number>( ( double )*( OCEntityHandlerFlag * )( arguments[ 0 ] ) ),
-		NanBufferUse( ( char * )*( OCEntityHandlerRequest ** )( arguments[ 1 ] ),
-			sizeof( OCEntityHandlerRequest ) )
+		js_OCEntityHandlerRequest( *( OCEntityHandlerRequest ** )( arguments[ 1 ] ) )
 	};
 	Local<Value> returnValue =
 		NanMakeCallback(
