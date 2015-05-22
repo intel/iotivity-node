@@ -25,10 +25,21 @@ callback_info *callback_info_free( callback_info *info );
 
 // Create a new callback_info.
 callback_info *callback_info_new(
+
+	// Extra parameter
 	void *user_data,
+
+	// Function that frees the memory for the extra parameter
 	UserDataRemover remover,
+
+	// The signature of the original function:
+	// Return type
 	ffi_type *return_type,
+
+	// Location
 	Marshaller default_handler,
+
+	// Argument count followed by list of argument types
 	int argumentCount, ... );
 
 #ifdef __cplusplus

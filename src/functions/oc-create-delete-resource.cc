@@ -46,6 +46,16 @@ static void defaultEntityHandler(
 	*returnValueLocation = ( OCEntityHandlerResult )( returnValue->ToNumber()->Value() );
 }
 
+// Create a callback_info structure for a given JS callback
+#define newInfoForJSCallback( callback ) \
+	callback_info_new( \
+		( void * )persistentJSCallback_new( (callback) ), \
+		( UserDataRemover )persistentJSCallback_free, \
+		&ffi_type_uint32, \
+		( Marshaller )defaultEntityHandler, \
+		2, \
+		&ffi_type_uint32, &ffi_type_pointer )
+
 NAN_METHOD( bind_OCCreateResource ) {
 	NanScope();
 
@@ -61,26 +71,7 @@ NAN_METHOD( bind_OCCreateResource ) {
 	VALIDATE_ARGUMENT_TYPE( args, 5, IsUint32 );
 
 	// Create a new callback
-	info = callback_info_new(
-
-		// Location of JS callback
-		( void * )persistentJSCallback_new( Local<Function>::Cast( args[ 4 ] ) ),
-
-		// Function that will delete the callback
-		( UserDataRemover )persistentJSCallback_free,
-
-		// Function signature - return value
-		&ffi_type_uint32,
-
-		// Function signature - location of function
-		( Marshaller )defaultEntityHandler,
-
-		// Function signature - number of arguments
-		2,
-
-		// Function signature - arguments
-		&ffi_type_uint32, &ffi_type_pointer );
-
+	info = newInfoForJSCallback( Local<Function>::Cast( args[ 4 ] ) );
 	if ( !info ) {
 		NanThrowError( "OCCreateResource: Unable to allocate C callback" );
 		NanReturnUndefined();
@@ -109,17 +100,71 @@ NAN_METHOD( bind_OCDeleteResource ) {
 	VALIDATE_ARGUMENT_COUNT( args, 1 );
 	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
 
+	// Retrieve OCResourceHandle from JS object
 	OCResourceHandle handle = c_OCResourceHandle( args[ 0 ]->ToObject() );
+	if ( !handle ) {
+		NanReturnUndefined();
+	}
 
-	if ( handle ) {
+	// Delete the resource identified by the handle
+	returnValue = OCDeleteResource( handle );
+
+	if ( returnValue == OC_STACK_OK ) {
+
+		// If deleting the resource worked, get rid of the entity handler
 		callback_info *info = annotation[ handle ];
 		annotation.erase( handle );
-		returnValue = OCDeleteResource( handle );
 		if ( info ) {
 			callback_info_free( info );
 		}
-		NanReturnValue( NanNew<Number>( returnValue ) );
-	} else {
+	}
+
+	NanReturnValue( NanNew<Number>( returnValue ) );
+}
+
+NAN_METHOD( bind_OCBindResourceHandler ) {
+	NanScope();
+
+	OCResourceHandle handle = 0;
+	callback_info *info = 0;
+
+	VALIDATE_ARGUMENT_COUNT( args, 2 );
+	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
+	VALIDATE_ARGUMENT_TYPE( args, 1, IsFunction );
+
+	// Retrieve OCResourceHandle from JS object
+	handle = c_OCResourceHandle( args[ 0 ]->ToObject() );
+	if ( !handle ) {
 		NanReturnUndefined();
 	}
+
+	// Create a new callback
+	info = newInfoForJSCallback( Local<Function>::Cast( args[ 1 ] ) );
+	if ( !info ) {
+		NanThrowError( "OCBindResourceHandler: Unable to allocate C callback" );
+		NanReturnUndefined();
+	}
+
+	// Replace the existing entity handler with the new callback
+	OCStackResult returnValue = OCBindResourceHandler(
+		handle,
+		( OCEntityHandler )( info->resultingFunction ) );
+
+	if ( returnValue == OC_STACK_OK ) {
+
+		// If setting the new entity handler worked, get rid of the original entity handler and
+		// associate the new one with the handle.
+		callback_info *old_info = annotation[ handle ];
+		if ( old_info ) {
+			callback_info_free( old_info );
+		}
+		annotation[ handle ] = info;
+	} else {
+
+		// If the stack was not able to make use of the new entity handler, get rid of the
+		// callback we created above.
+		callback_info_free( info );
+	}
+
+	NanReturnValue( NanNew<Number>( returnValue ) );
 }
