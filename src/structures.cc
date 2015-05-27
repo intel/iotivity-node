@@ -130,18 +130,24 @@ bool c_OCEntityHandlerResponse(
 	VALIDATE_VALUE_TYPE( ehResult, IsUint32, "ehResult", false );
 	destination->ehResult = ( OCEntityHandlerResult )ehResult->Uint32Value();
 
-	// payload
+	// payload and payloadSize
 	Local<Value> payload = jsOCEntityHandlerResponse->Get( NanNew<String>( "payload" ) );
 	VALIDATE_VALUE_TYPE( payload, IsString, "payload", false );
-	const char *payloadString = ( const char * )*String::Utf8Value( payload );
-	size_t payloadLength = strlen( payloadString );
+
+	// Make sure the size in bytes of the UTF-8 representation, including the terminating NULL
+	// character, does not exceed MAX_RESPONSE_LENGTH
+	size_t payloadLength = ( size_t )payload->ToString()->Utf8Length();
 	if ( payloadLength >= MAX_RESPONSE_LENGTH ) {
 		NanThrowRangeError( "payload is longer than MAX_RESPONSE_LENGTH" );
 		return false;
 	}
-	strncpy( destination->payload, payloadString, payloadLength );
 
-	// payloadSize
+	// Zero out the destination and copy the string into it, and indicate the payload size
+	memset( destination->payload, 0, MAX_RESPONSE_LENGTH );
+	strncpy(
+		destination->payload,
+		( const char * )*String::Utf8Value( payload ),
+		MAX_RESPONSE_LENGTH );
 	destination->payloadSize = payloadLength;
 
 	// numSendVendorSpecificHeaderOptions
