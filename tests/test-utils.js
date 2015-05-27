@@ -45,14 +45,18 @@ _.extend( testUtils.prototype, {
 		}, this );
 	},
 
-	startTestServer: function( whenReady, teardown ) {
-		var testServer = spawn( "node", [ path.join( __dirname, "test-server.js" ) ] );
+	startTestServer: function( whenReady, teardown, responseObject ) {
+		var testServer = spawn( "node",
+			[ path.join( __dirname, "test-server.js" ) ]
+				.concat( responseObject ?
+					[ "response=" + JSON.stringify( responseObject ) ] : [] ) );
 
 		testServer.stdout.on( "data", _.bind( function testServerStdoutData( data ) {
 			_.each( data.toString().split( "\n" ), _.bind( function( value ) {
 				var jsonObject;
 
 				if ( value ) {
+
 					jsonObject = JSON.parse( value );
 
 					if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
