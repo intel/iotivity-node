@@ -1,12 +1,15 @@
 require( "../setup" );
 
 var iotivity = require( "../../index" ),
-	testUtils = require( "../test-utils" )( iotivity, QUnit.assert );
+	testUtils = require( "../test-utils" )( iotivity, QUnit.assert ),
+
+	// Token that will make the trip from the server to the client. The test will assert that it is
+	// successfully received by the OCDoResource() handler
+	magicToken = { href: { rep: { "0": "magicValue", "1": "int", "2": 42 } } };
 
 test( "Simple client", function( assert ) {
-	var result, stopProcessing, stopTestServer,
+	var result, stopProcessing, stopTestServer, responseFromServer,
 		done = assert.async(),
-		handlerWasCalled = false,
 		failsafeTimeoutId = null,
 		handle = {},
 
@@ -29,8 +32,11 @@ test( "Simple client", function( assert ) {
 				failsafeTimeoutId = null;
 			}
 
-			// Make sure the callback was called
-			assert.deepEqual( handlerWasCalled, true, "OCDoResource handler was called" );
+			// Make sure the callback was called with the right response
+			assert.deepEqual(
+				responseFromServer,
+				magicToken,
+				"OCDoResource handler received the expected response" );
 
 			// Make sure stack shutdown works
 			testUtils.testShutdown();
@@ -64,13 +70,13 @@ test( "Simple client", function( assert ) {
 				result = iotivity.OCDoResource(
 					handle,
 					iotivity.OCMethod.OC_REST_GET,
-					"light",
+					"/light/1",
 					null,
 					null,
 					iotivity.OCConnectivityType.OC_ALL,
 					iotivity.OCQualityOfService.OC_HIGH_QOS,
 					function( handle, response ) {
-						handlerWasCalled = true;
+						responseFromServer = JSON.parse( response.resJSONPayload ).oc[ 0 ];
 						teardown();
 						return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 					},
@@ -91,6 +97,7 @@ test( "Simple client", function( assert ) {
 			// If the test server fails to work correctly we cannot perform the test so we give up
 			function() {
 				teardown();
-			} );
+			},
+			magicToken );
 	}
 } );
