@@ -32,4 +32,6 @@ void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
 		NanNew<FunctionTemplate>( bind_OCDoResponse )->GetFunction() );
 	exports->Set( NanNew<String>( "OCNotifyAllObservers" ),
 		NanNew<FunctionTemplate>( bind_OCNotifyAllObservers )->GetFunction() );
+	exports->Set( NanNew<String>( "OCNotifyListOfObservers" ),
+		NanNew<FunctionTemplate>( bind_OCNotifyListOfObservers )->GetFunction() );
 }
