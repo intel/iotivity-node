@@ -250,16 +250,20 @@ Local<Object> js_OCEntityHandlerRequest( OCEntityHandlerRequest *request ) {
 		js_OCRequestHandle( NanNew<Object>(), request->requestHandle ) );
 
 	jsRequest->Set( NanNew<String>( "method" ), NanNew<Number>( request->method ) );
-	jsRequest->Set( NanNew<String>( "query" ), NanNew<String>( request->query ) );
+	if ( request->query ) {
+		jsRequest->Set( NanNew<String>( "query" ), NanNew<String>( request->query ) );
+	}
 
 	Local<Object> obsInfo = NanNew<Object>();
 		obsInfo->Set( NanNew<String>( "action" ), NanNew<Number>( request->obsInfo.action ) );
 		obsInfo->Set( NanNew<String>( "obsId" ), NanNew<Number>( request->obsInfo.obsId ) );
 	jsRequest->Set( NanNew<String>( "obsInfo" ), obsInfo );
 
-	jsRequest->Set(
-		NanNew<String>( "reqJSONPayload" ),
-		NanNew<String>( request->reqJSONPayload ) );
+	if ( request->reqJSONPayload ) {
+		jsRequest->Set(
+			NanNew<String>( "reqJSONPayload" ),
+			NanNew<String>( request->reqJSONPayload ) );
+	}
 
 	addHeaderOptions(
 		jsRequest,
