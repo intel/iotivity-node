@@ -5,7 +5,8 @@ var iotivity = require( "../../index" ),
 
 	// Token that will make the trip from the server to the client. The test will assert that it is
 	// successfully received by the OCDoResource() handler
-	magicToken = { href: { rep: { "0": "magicValue", "1": "int", "2": 42 } } };
+	magicToken = { href: { rep: { "0": "magicValue", "1": "int", "2": 42 } } },
+	resourcePath = "/simple-client-" + Math.round( Math.random() * 1048576 );
 
 test( "Simple client", function( assert ) {
 	var result, stopProcessing, stopTestServer, responseFromServer,
@@ -70,7 +71,7 @@ test( "Simple client", function( assert ) {
 				result = iotivity.OCDoResource(
 					handle,
 					iotivity.OCMethod.OC_REST_GET,
-					"/light/1",
+					resourcePath,
 					null,
 					null,
 					iotivity.OCConnectivityType.OC_ALL,
@@ -98,6 +99,9 @@ test( "Simple client", function( assert ) {
 			function() {
 				teardown();
 			},
-			magicToken );
+			{
+				payload: magicToken,
+				path: resourcePath
+			} );
 	}
 } );

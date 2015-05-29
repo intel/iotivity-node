@@ -1,11 +1,24 @@
-var result, payload, argumentIndex,
+var result, argumentIndex,
+	options = {
+		path: "/light/1",
+		payload: {
+			href: {
+				rep: {
+					"0": "random",
+					"1": "int",
+					"2": Math.round( Math.random() * 100 )
+				}
+			}
+		},
+	},
 	resourceHandle = {},
 	processLoop = null,
-	iotivity = require( "../index" );
+	iotivity = require( "../index" ),
+	_ = require( "underscore" );
 
 for ( argumentIndex in process.argv ) {
-	if ( process.argv[ argumentIndex ].substr( 0, 9 ) === "response=" ) {
-		payload = process.argv[ argumentIndex ].substr( 9 );
+	if ( process.argv[ argumentIndex ].substr( 0, 8 ) === "options=" ) {
+		options = _.extend( {}, options, JSON.parse( process.argv[ argumentIndex ].substr( 8 ) ) );
 	}
 }
 
@@ -32,8 +45,10 @@ if ( result === iotivity.OCStackResult.OC_STACK_OK ) {
 		resourceHandle,
 		"light",
 		"oc.mi.def",
-		"/light/1",
+		options.path,
 		function( flag, request ) {
+			var payload = JSON.stringify( options.payload );
+
 			if ( payload ) {
 				console.log( JSON.stringify( {
 					call: "OCDoResponse",

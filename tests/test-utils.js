@@ -45,11 +45,11 @@ _.extend( testUtils.prototype, {
 		}, this );
 	},
 
-	startTestServer: function( whenReady, teardown, responseObject ) {
+	startTestServer: function( whenReady, teardown, options ) {
 		var testServer = spawn( "node",
 			[ path.join( __dirname, "test-server.js" ) ]
-				.concat( responseObject ?
-					[ "response=" + JSON.stringify( responseObject ) ] : [] ) );
+				.concat( options ?
+					[ "options=" + JSON.stringify( options ) ] : [] ) );
 
 		testServer.stdout.on( "data", _.bind( function testServerStdoutData( data ) {
 			_.each( data.toString().split( "\n" ), _.bind( function( value ) {
