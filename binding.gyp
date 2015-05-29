@@ -39,6 +39,13 @@
 			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
 		},
 		{
+			"target_name": "client.observe",
+			"type": "executable",
+			"sources": [ "c/client.observe.c" ],
+			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
+			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
+		},
+		{
 			"target_name": "server",
 			"type": "executable",
 			"sources": [ "c/server.c" ],
