@@ -16,6 +16,10 @@ void InitFunctions( Handle<Object> exports, Handle<Object> module ) {
 		NanNew<FunctionTemplate>( bind_OCStop )->GetFunction() );
 	exports->Set( NanNew<String>( "OCProcess" ),
 		NanNew<FunctionTemplate>( bind_OCProcess )->GetFunction() );
+	exports->Set( NanNew<String>( "OCDevAddrToIPv4Addr" ),
+		NanNew<FunctionTemplate>( bind_OCDevAddrToIPv4Addr )->GetFunction() );
+	exports->Set( NanNew<String>( "OCDevAddrToPort" ),
+		NanNew<FunctionTemplate>( bind_OCDevAddrToPort )->GetFunction() );
 	exports->Set( NanNew<String>( "OCCreateResource" ),
 		NanNew<FunctionTemplate>( bind_OCCreateResource )->GetFunction() );
 	exports->Set( NanNew<String>( "OCBindResourceHandler" ),

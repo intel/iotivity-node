@@ -27,4 +27,9 @@ OCResourceHandle c_OCResourceHandle( v8::Local<v8::Object> jsHandle );
 
 v8::Local<v8::Object> js_OCEntityHandlerRequest( OCEntityHandlerRequest *request );
 
+v8::Local<v8::Object> js_OCDevAddr( OCDevAddr *address );
+
+// Fills in @address
+bool c_OCDevAddr( v8::Local<v8::Object> jsDevAddr, OCDevAddr *address );
+
 #endif /* __IOTIVITY_NODE_STRUCTURES_H__ */

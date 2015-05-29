@@ -58,24 +58,9 @@ static void addHeaderOptions(
 }
 
 Local<Object> js_OCClientResponse( OCClientResponse *response ) {
-	uint32_t addressIndex;
 	Local<Object> jsResponse = NanNew<Object>();
 
-		// jsResponse.addr
-		Local<Object> addr = NanNew<Object>();
-
-			// jsResponse.addr.size
-			addr->Set( NanNew<String>( "size" ), NanNew<Number>( response->addr->size ) );
-
-			// jsResponse.addr.addr
-			Local<Array> addrAddr = NanNew<Array>( response->addr->size );
-			for ( addressIndex = 0 ; addressIndex < response->addr->size ; addressIndex++ ) {
-				addrAddr->Set( addressIndex, NanNew<Number>(
-					response->addr->addr[ addressIndex ] ) );
-			}
-			addr->Set( NanNew<String>( "addr" ), addrAddr );
-
-		jsResponse->Set( NanNew<String>( "addr" ), addr );
+		jsResponse->Set( NanNew<String>( "addr" ), js_OCDevAddr( response->addr ) );
 
 		// jsResponse.connType
 		jsResponse->Set( NanNew<String>( "connType" ), NanNew<Number>( response->connType ) );
@@ -282,4 +267,53 @@ Local<Object> js_OCEntityHandlerRequest( OCEntityHandlerRequest *request ) {
 		request->rcvdVendorSpecificHeaderOptions );
 
 	return jsRequest;
+}
+
+Local<Object> js_OCDevAddr( OCDevAddr *address ) {
+	uint32_t addressIndex;
+	Local<Object> returnValue = NanNew<Object>();
+
+	// addr.size
+	returnValue->Set( NanNew<String>( "size" ), NanNew<Number>( address->size ) );
+
+	// addr.addr
+	Local<Array> addrAddr = NanNew<Array>( DEV_ADDR_SIZE_MAX );
+	for ( addressIndex = 0 ; addressIndex < DEV_ADDR_SIZE_MAX ; addressIndex++ ) {
+		addrAddr->Set( addressIndex, NanNew<Number>(
+			address->addr[ addressIndex ] ) );
+	}
+	returnValue->Set( NanNew<String>( "addr" ), addrAddr );
+
+	return returnValue;
+}
+
+bool c_OCDevAddr( Local<Object> jsDevAddr, OCDevAddr *address ) {
+	uint32_t addressIndex;
+	uint8_t addr[ DEV_ADDR_SIZE_MAX ] = { 0 };
+
+	Local<Value> size = jsDevAddr->Get( NanNew<String>( "size" ) );
+	VALIDATE_VALUE_TYPE( size, IsNumber, "addr.size", false );
+
+	Local<Value> addrValue = jsDevAddr->Get( NanNew<String>( "addr" ) );
+	VALIDATE_VALUE_TYPE( addrValue, IsArray, "addr.addr", false );
+	Local<Array> addrArray = Local<Array>::Cast( addrValue );
+	uint32_t addrLength = addrArray->Length();
+	if ( addrLength > DEV_ADDR_SIZE_MAX ) {
+		NanThrowRangeError(
+			"OCDevAddr: Number of JS structure address bytes exceeds DEV_ADDR_SIZE_MAX" );
+		return false;
+	}
+
+	// Grab each address byte, making sure it's a number
+	for ( addressIndex = 0 ; addressIndex < DEV_ADDR_SIZE_MAX ; addressIndex++ ) {
+		Local<Value> addressItem = addrArray->Get( addressIndex );
+		VALIDATE_VALUE_TYPE( addressItem, IsNumber, "addr.addr item", false );
+		addr[ addressIndex ] = addressItem->Uint32Value();
+	}
+
+	// Fill in the destination structure
+	address->size = size->Uint32Value();
+	memcpy( address->addr, addr, DEV_ADDR_SIZE_MAX * sizeof( uint8_t ) );
+
+	return true;
 }
