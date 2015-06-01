@@ -18,6 +18,21 @@ iotivity-node depends on [iotivity](http://iotivity.org/) proper. It has been te
     Now clone this repository and change directory into it.
 0. ```npm install```
 
+## Placing the binaries onto a device
+The distribution scripts (```dist.sh``` in iotivity-node, and ```install.sh``` in iotivity) make it easy to create a binary tarball which can be unpacked into the root directory of a device:
+
+0. Change directory to the root of the ```iotivity``` repository and run ```DESTDIR=/tmp/iotivity-installation ./install.sh```
+0. ```mkdir -p /tmp/iotivity-installation/usr/lib/node_modules```
+0. Change directory to the root of the ```iotivity-node``` repository.
+0. ```./dist.sh```
+0. ```cd dist```
+0. ```cp -a iotivity /tmp/iotivity-installation/usr/lib/node_modules```
+0. ```cd /tmp/iotivity-installation```
+0. ```rm -rf usr/include```
+0. ```tar cvjf iotivity.bin.tar.bz2 *```
+
+You can now transfer iotivity.bin.tar.bz2 to the device and then unpack it into the root directory.
+
 ## Examples
 
 The JavaScript examples are located in ```js/``` and come in pairs of one client and one server, each illustrating a basic aspect of iotivity. To run them, open two terminals and change directory to the root of the iotivity-node repository in both. Always launch the server before the client. For example, in one terminal you can run ```node js/server.observe.js``` and in the other terminal you can run ```node js/client.observe.js```.
