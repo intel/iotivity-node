@@ -9,10 +9,41 @@ var iotivity = require( "../../index" ),
 	resourcePath = "/simple-client-" + Math.round( Math.random() * 1048576 );
 
 test( "Simple client", function( assert ) {
-	var result, stopProcessing, stopTestServer, responseFromServer,
+	var result, stopProcessing, stopTestServer,
 		done = assert.async(),
 		failsafeTimeoutId = null,
 		handle = {},
+
+		// Construct the absolute URL from the device address and the resource path, while testing
+		// OCDevAddrToIPv4Addr and OCDevAddrToPort in the process
+		getAbsoluteUrl = function( address ) {
+			var result,
+				ipv4Bytes = [],
+				portHolder = {};
+
+			result = iotivity.OCDevAddrToIPv4Addr( address, ipv4Bytes );
+			assert.deepEqual(
+				testUtils.lookupEnumValueName( "OCStackResult", result ),
+				"OC_STACK_OK",
+				"OCDevAddrToIPv4Addr has succeeded" );
+			if ( iotivity.OCStackResult.OC_STACK_OK !== result ) {
+				return;
+			}
+
+			result = iotivity.OCDevAddrToPort( address, portHolder );
+			assert.deepEqual(
+				testUtils.lookupEnumValueName( "OCStackResult", result ),
+				"OC_STACK_OK",
+				"OCDevAddrToPort has succeeded" );
+			if ( iotivity.OCStackResult.OC_STACK_OK !== result ) {
+				return;
+			}
+
+			return "coap://" +
+				ipv4Bytes[ 0 ] + "." + ipv4Bytes[ 1 ] + "." +
+				ipv4Bytes[ 2 ] + "." + ipv4Bytes[ 3 ] + ":" +
+				portHolder.port + resourcePath;
+		},
 
 		// Clean up before we exit
 		teardown = function() {
@@ -33,18 +64,14 @@ test( "Simple client", function( assert ) {
 				failsafeTimeoutId = null;
 			}
 
-			// Make sure the callback was called with the right response
-			assert.deepEqual(
-				responseFromServer,
-				magicToken,
-				"OCDoResource handler received the expected response" );
-
 			// Make sure stack shutdown works
 			testUtils.testShutdown();
 
 			// Inform QUnit that this async test has concluded
 			done();
 		};
+
+	assert.expect( 9 );
 
 	// Make sure the stack starts up correctly
 	if ( testUtils.testStartup( iotivity.OCMode.OC_CLIENT ) ===
@@ -77,8 +104,38 @@ test( "Simple client", function( assert ) {
 					iotivity.OCConnectivityType.OC_ALL,
 					iotivity.OCQualityOfService.OC_HIGH_QOS,
 					function( handle, response ) {
-						responseFromServer = JSON.parse( response.resJSONPayload ).oc[ 0 ];
-						teardown();
+						var url = getAbsoluteUrl( response.addr ),
+							observeHandle = {};
+
+						ok( true, "OCDoResource discovery handler was called" );
+
+						if ( !url ) {
+							teardown();
+						} else {
+							result = iotivity.OCDoResource(
+								observeHandle,
+								iotivity.OCMethod.OC_REST_OBSERVE,
+								url,
+								null,
+								null,
+								response.connType,
+								iotivity.OCQualityOfService.OC_HIGH_QOS,
+								function( handle, response ) {
+
+									// Make sure the callback was called with the right response
+									assert.deepEqual(
+										JSON.parse( response.resJSONPayload ).oc[ 0 ],
+										magicToken,
+										"OCDoResource observation handler has received the " +
+											"expected response" );
+
+									teardown();
+									return iotivity.OCStackApplicationResult
+										.OC_STACK_DELETE_TRANSACTION;
+								},
+								null,
+								0 );
+						}
 						return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 					},
 					null,
@@ -86,7 +143,7 @@ test( "Simple client", function( assert ) {
 				assert.deepEqual(
 					testUtils.lookupEnumValueName( "OCStackResult", result ),
 					"OC_STACK_OK",
-					"OCDoResource has succeeded" );
+					"OCDoResource for discovery has succeeded" );
 				assert.ok(
 					handle.handle,
 					"The resulting handle contains a non-null property named \"handle\"" );
