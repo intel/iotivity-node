@@ -3,6 +3,6 @@
 
 #include <nan.h>
 
-NAN_METHOD( bind_OCDoResponse );
+NAN_METHOD(bind_OCDoResponse);
 
 #endif /* __IOTIVITY_NODE_OCDORESPONSE_H__ */

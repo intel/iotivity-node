@@ -6,6 +6,6 @@
 
 using namespace v8;
 
-void InitEnums( Handle<Object> exports );
+void InitEnums(Handle<Object> exports);
 
 #endif /* __IOTIVITY_NODE_ENUMS_H__ */
