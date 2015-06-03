@@ -82,8 +82,7 @@ NAN_METHOD(bind_OCDoResource) {
 
   OCHeaderOption *options = 0;
   OCDoHandle handle;
-  OCCallbackData data = {0, defaultOCClientResponseHandler,
-                         (OCClientContextDeleter)persistentJSCallback_free};
+  OCCallbackData data;
 
   VALIDATE_ARGUMENT_COUNT(args, 9);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
@@ -99,6 +98,8 @@ NAN_METHOD(bind_OCDoResource) {
 
   data.context =
       (void *)persistentJSCallback_new(Local<Function>::Cast(args[7]));
+  data.cb = defaultOCClientResponseHandler;
+  data.cd = (OCClientContextDeleter)persistentJSCallback_free;
 
   if (args[8]->IsArray()) {
     options = oc_header_options_new(Handle<Array>::Cast(args[8]));
