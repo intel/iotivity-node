@@ -4,7 +4,10 @@
 			"<!(node -e \"require('nan')\")"
 		],
 		"libraries": [ '<!(pkg-config --libs octbstack)' ],
-		"cflags": [ '<!(pkg-config --cflags octbstack)' ]
+		"cflags": [
+			'<!(pkg-config --cflags octbstack)',
+			'-std=c++11'
+		]
 	},
 	"targets": [
 		{

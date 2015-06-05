@@ -19,7 +19,7 @@ function getAbsoluteUrl( response ) {
 
 	return "coap://" +
 		ipv4Bytes[ 0 ] + "." + ipv4Bytes[ 1 ] + "." + ipv4Bytes[ 2 ] + "." + ipv4Bytes[ 3 ] + ":" +
-		portHolder.port + JSON.parse( response.resJSONPayload ).oc[ 0 ].href;
+		portHolder.port + JSON.parse( response.resJSONPayload ).oic[ 0 ].href;
 }
 
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
