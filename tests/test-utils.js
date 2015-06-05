@@ -48,8 +48,7 @@ _.extend( testUtils.prototype, {
 	startTestServer: function( whenReady, teardown, options ) {
 		var testServer = spawn( "node",
 			[ path.join( __dirname, "test-server.js" ) ]
-				.concat( options ?
-					[ "options=" + JSON.stringify( options ) ] : [] ) );
+				.concat( options ? [ "options=" + JSON.stringify( options ) ] : [] ) );
 
 		testServer.stdout.on( "data", _.bind( function testServerStdoutData( data ) {
 			_.each( data.toString().split( "\n" ), _.bind( function( value ) {
@@ -75,8 +74,9 @@ _.extend( testUtils.prototype, {
 		};
 	},
 
-	startTestClient: function( teardown ) {
-		var testClient = spawn( "node", [ path.join( __dirname, "test-client.js" ) ] );
+	startTestClient: function( teardown, options ) {
+		var testClient = spawn( "node", [ path.join( __dirname, "test-client.js" ) ]
+				.concat( options ? [ "options=" + JSON.stringify( options ) ] : [] ) );
 
 		testClient.stdout.on( "data", _.bind( function testServerStdoutData( data ) {
 			_.each( data.toString().split( "\n" ), _.bind( function( value ) {

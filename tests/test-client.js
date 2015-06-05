@@ -1,7 +1,19 @@
 var result,
+	options = {
+		path: "/a/light",
+		request: null
+	},
 	doHandle = {},
 	processLoop = null,
+	_ = require( "underscore" ),
 	iotivity = require( "../index" );
+
+// Merge options from the command line
+for ( argumentIndex in process.argv ) {
+	if ( process.argv[ argumentIndex ].substr( 0, 8 ) === "options=" ) {
+		options = _.extend( {}, options, JSON.parse( process.argv[ argumentIndex ].substr( 8 ) ) );
+	}
+}
 
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
 
@@ -25,9 +37,9 @@ if ( result === iotivity.OCStackResult.OC_STACK_OK ) {
 	result = iotivity.OCDoResource(
 		doHandle,
 		iotivity.OCMethod.OC_REST_GET,
-		"/a/light",
+		options.path,
 		null,
-		null,
+		JSON.stringify( options.request ),
 		iotivity.OCConnectivityType.OC_ALL,
 		iotivity.OCQualityOfService.OC_LOW_QOS,
 		function( handle, response ) {

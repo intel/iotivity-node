@@ -16,6 +16,7 @@ var result, argumentIndex,
 	iotivity = require( "../index" ),
 	_ = require( "underscore" );
 
+// Merge options from the command line
 for ( argumentIndex in process.argv ) {
 	if ( process.argv[ argumentIndex ].substr( 0, 8 ) === "options=" ) {
 		options = _.extend( {}, options, JSON.parse( process.argv[ argumentIndex ].substr( 8 ) ) );

@@ -5,8 +5,9 @@ var iotivity = require( "../../index" ),
 
 test( "Simple server", function( assert ) {
 	var result, stopProcessing, stopTestClient,
+		resourcePath = "/a/simple-server-" + Math.round( Math.random() * 10000 ),
+		magicRequest = { "setAnswer": 42 },
 		done = assert.async(),
-		handlerWasCalled = false,
 		failsafeTimeoutId = null,
 		handle = {},
 
@@ -29,9 +30,6 @@ test( "Simple server", function( assert ) {
 				failsafeTimeoutId = null;
 			}
 
-			// Make sure the entity handler was called
-			assert.deepEqual( handlerWasCalled, true, "Entity handler was called" );
-
 			// Make sure OCDeleteResource works correctly
 			result = iotivity.OCDeleteResource( handle );
 			assert.deepEqual(
@@ -44,15 +42,11 @@ test( "Simple server", function( assert ) {
 
 			// Inform QUnit that this async test has concluded
 			done();
-		},
-
-		// We store the location of the entity handler, because we want to make sure that it is
-		// getting stored in the correct place on the C++ side
-		callback = function( flag, request ) {
-			handlerWasCalled = true;
-			teardown();
-			return iotivity.OCEntityHandlerResult.OC_EH_OK;
 		};
+
+	// Since some of our assertions are inside asynchronously called functions, this asserts that
+	// all the assertions are reached, but it does not assert the order in which they are reached.
+	assert.expect( 6 );
 
 	// Make sure the stack starts up correctly
 	if ( testUtils.testStartup( iotivity.OCMode.OC_SERVER ) ===
@@ -63,8 +57,17 @@ test( "Simple server", function( assert ) {
 			handle,
 			"core.light",
 			"oc.mi.def",
-			"/a/light",
-			callback,
+			resourcePath,
+			function( flag, request ) {
+				var receivedRequest = request.reqJSONPayload ?
+					JSON.parse( request.reqJSONPayload ) : undefined;
+
+				assert.deepEqual( receivedRequest, magicRequest,
+					"Entity handler has received the correct request" );
+				teardown();
+
+				return iotivity.OCEntityHandlerResult.OC_EH_OK;
+			},
 			iotivity.OCResourceProperty.OC_DISCOVERABLE |
 			iotivity.OCResourceProperty.OC_OBSERVABLE );
 		assert.deepEqual(
@@ -85,7 +88,10 @@ test( "Simple server", function( assert ) {
 			}, 5000 );
 
 			// Start a test client which will send a request to the server under test
-			stopTestClient = testUtils.startTestClient( teardown );
+			stopTestClient = testUtils.startTestClient( teardown, {
+				path: resourcePath,
+				request: magicRequest
+			} );
 		}
 	}
 } );
