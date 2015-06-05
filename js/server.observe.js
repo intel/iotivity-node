@@ -32,7 +32,7 @@ iotivity.OCCreateResource(
 				}
 			} );
 
-		console.log( "OCCreateResource() handler: Entering" );
+		console.log( "OCCreateResource() handler: Responding with " + payload );
 		iotivity.OCDoResponse( {
 			requestHandle: request.requestHandle.handle,
 			resourceHandle: request.resource.handle,

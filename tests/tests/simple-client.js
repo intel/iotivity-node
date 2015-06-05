@@ -124,7 +124,7 @@ test( "Simple client", function( assert ) {
 
 									// Make sure the callback was called with the right response
 									assert.deepEqual(
-										JSON.parse( response.resJSONPayload ).oc[ 0 ],
+										JSON.parse( response.resJSONPayload ).oic[ 0 ],
 										magicToken,
 										"OCDoResource observation handler has received the " +
 											"expected response" );

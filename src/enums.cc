@@ -10,9 +10,6 @@ using namespace v8;
 static Local<Object> bind_OCEntityHandlerFlag() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_INIT_FLAG"),
-                        NanNew<Number>(OC_INIT_FLAG),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
   returnValue->ForceSet(NanNew<String>("OC_REQUEST_FLAG"),
                         NanNew<Number>(OC_REQUEST_FLAG),
                         static_cast<PropertyAttribute>(ReadOnly || DontDelete));
@@ -42,6 +39,9 @@ static Local<Object> bind_OCEntityHandlerResult() {
                         static_cast<PropertyAttribute>(ReadOnly || DontDelete));
   returnValue->ForceSet(NanNew<String>("OC_EH_FORBIDDEN"),
                         NanNew<Number>(OC_EH_FORBIDDEN),
+                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  returnValue->ForceSet(NanNew<String>("OC_EH_RESOURCE_NOT_FOUND"),
+                        NanNew<Number>(OC_EH_RESOURCE_NOT_FOUND),
                         static_cast<PropertyAttribute>(ReadOnly || DontDelete));
 
   return returnValue;
@@ -296,10 +296,9 @@ static Local<Object> bind_OCVirtualResources() {
 static Local<Object> bind_OCConnectivityType() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_ETHERNET"),
-                        NanNew<Number>(OC_ETHERNET),
+  returnValue->ForceSet(NanNew<String>("OC_IPV4"), NanNew<Number>(OC_IPV4),
                         static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_WIFI"), NanNew<Number>(OC_WIFI),
+  returnValue->ForceSet(NanNew<String>("OC_IPV6"), NanNew<Number>(OC_IPV6),
                         static_cast<PropertyAttribute>(ReadOnly || DontDelete));
   returnValue->ForceSet(NanNew<String>("OC_EDR"), NanNew<Number>(OC_EDR),
                         static_cast<PropertyAttribute>(ReadOnly || DontDelete));
