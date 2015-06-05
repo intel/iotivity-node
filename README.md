@@ -14,7 +14,7 @@ iotivity-node depends on [iotivity](http://iotivity.org/) proper. It has been te
 0. As root, change directory to the iotivity repository and run ```./install.sh```. The script recognizes two environment variables: ```PREFIX``` is set to ```/usr``` by default, and ```DESTDIR``` is unset. Use ```PREFIX``` to install to a location other than ```/usr``` and use ```DESTDIR``` to set an additional prefix where to put the files. This latter option is especially useful for packaging. Examples:
 
     ```PREFIX=/usr/local ./install.sh``` will install the files into ```/usr/local``` instead.
-    ```PREFIX=/usr/local DESTDIR=/home/username/iotivity-installation ./install.sh``` will install the files into ```/home/usr/iotivity-installation/usr/local```, but it will configure liboctbstack to work when loaded from ```/usr/local```.
+    ```PREFIX=/usr/local DESTDIR=/home/username/iotivity-installation ./install.sh``` will install the files into ```/home/username/iotivity-installation/usr/local```, but it will configure liboctbstack to work when loaded from ```/usr/local```.
 0. Now that iotivity is built and installed, clone this repository, change directory into it, and run ```npm install```.
 
 ## Placing the binaries onto a device
