@@ -36,7 +36,7 @@ You can now transfer iotivity.bin.tar.bz2 to the device and then unpack it into 
 
 The JavaScript examples are located in [js/](./js/) and come in pairs of one client and one server, each illustrating a basic aspect of iotivity. To run them, open two terminals and change directory to the root of the iotivity-node repository in both. Always launch the server before the client. For example, in one terminal you can run ```node js/server.observe.js``` and in the other terminal you can run ```node js/client.observe.js```.
 
-If you wish to run the client one one machine and the server on another, make sure no firewall is running on either machine.
+If you wish to run the client on one machine and the server on another, make sure no firewall is running on either machine.
 
 ## Tests
 
