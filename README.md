@@ -27,7 +27,7 @@ The distribution scripts (```dist.sh``` in iotivity-node, and ```install.sh``` i
 0. ```cd dist```
 0. ```cp -a iotivity /tmp/iotivity-installation/usr/lib/node_modules```
 0. ```cd /tmp/iotivity-installation```
-0. ```rm -rf usr/include```
+0. ```rm -rf usr/include usr/lib/pkgconfig```
 0. ```tar cvjf iotivity.bin.tar.bz2 *```
 
 You can now transfer iotivity.bin.tar.bz2 to the device and then unpack it into the root directory.
