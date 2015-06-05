@@ -7,15 +7,16 @@ extern "C" {
 
 using namespace v8;
 
+#define SET_ENUM_MEMBER(destination, name)                      \
+  (destination)                                                 \
+      ->ForceSet(NanNew<String>(#name), NanNew<Number>((name)), \
+                 static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+
 static Local<Object> bind_OCEntityHandlerFlag() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_REQUEST_FLAG"),
-                        NanNew<Number>(OC_REQUEST_FLAG),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_OBSERVE_FLAG"),
-                        NanNew<Number>(OC_OBSERVE_FLAG),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_REQUEST_FLAG);
+  SET_ENUM_MEMBER(returnValue, OC_OBSERVE_FLAG);
 
   return returnValue;
 }
@@ -23,26 +24,13 @@ static Local<Object> bind_OCEntityHandlerFlag() {
 static Local<Object> bind_OCEntityHandlerResult() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_EH_OK"), NanNew<Number>(OC_EH_OK),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_EH_ERROR"),
-                        NanNew<Number>(OC_EH_ERROR),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_EH_RESOURCE_CREATED"),
-                        NanNew<Number>(OC_EH_RESOURCE_CREATED),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_EH_RESOURCE_DELETED"),
-                        NanNew<Number>(OC_EH_RESOURCE_DELETED),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_EH_SLOW"),
-                        NanNew<Number>(OC_EH_SLOW),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_EH_FORBIDDEN"),
-                        NanNew<Number>(OC_EH_FORBIDDEN),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_EH_RESOURCE_NOT_FOUND"),
-                        NanNew<Number>(OC_EH_RESOURCE_NOT_FOUND),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_EH_OK);
+  SET_ENUM_MEMBER(returnValue, OC_EH_ERROR);
+  SET_ENUM_MEMBER(returnValue, OC_EH_RESOURCE_CREATED);
+  SET_ENUM_MEMBER(returnValue, OC_EH_RESOURCE_DELETED);
+  SET_ENUM_MEMBER(returnValue, OC_EH_SLOW);
+  SET_ENUM_MEMBER(returnValue, OC_EH_FORBIDDEN);
+  SET_ENUM_MEMBER(returnValue, OC_EH_RESOURCE_NOT_FOUND);
 
   return returnValue;
 }
@@ -50,33 +38,15 @@ static Local<Object> bind_OCEntityHandlerResult() {
 static Local<Object> bind_OCMethod() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_REST_NOMETHOD"),
-                        NanNew<Number>(OC_REST_NOMETHOD),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_REST_GET"),
-                        NanNew<Number>(OC_REST_GET),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_REST_PUT"),
-                        NanNew<Number>(OC_REST_PUT),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_REST_POST"),
-                        NanNew<Number>(OC_REST_POST),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_REST_DELETE"),
-                        NanNew<Number>(OC_REST_DELETE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_REST_OBSERVE"),
-                        NanNew<Number>(OC_REST_OBSERVE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_REST_OBSERVE_ALL"),
-                        NanNew<Number>(OC_REST_OBSERVE_ALL),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_REST_CANCEL_OBSERVE"),
-                        NanNew<Number>(OC_REST_CANCEL_OBSERVE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_REST_PRESENCE"),
-                        NanNew<Number>(OC_REST_PRESENCE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_REST_NOMETHOD);
+  SET_ENUM_MEMBER(returnValue, OC_REST_GET);
+  SET_ENUM_MEMBER(returnValue, OC_REST_PUT);
+  SET_ENUM_MEMBER(returnValue, OC_REST_POST);
+  SET_ENUM_MEMBER(returnValue, OC_REST_DELETE);
+  SET_ENUM_MEMBER(returnValue, OC_REST_OBSERVE);
+  SET_ENUM_MEMBER(returnValue, OC_REST_OBSERVE_ALL);
+  SET_ENUM_MEMBER(returnValue, OC_REST_CANCEL_OBSERVE);
+  SET_ENUM_MEMBER(returnValue, OC_REST_PRESENCE);
 
   return returnValue;
 }
@@ -84,13 +54,9 @@ static Local<Object> bind_OCMethod() {
 static Local<Object> bind_OCMode() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_CLIENT"), NanNew<Number>(OC_CLIENT),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_SERVER"), NanNew<Number>(OC_SERVER),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_CLIENT_SERVER"),
-                        NanNew<Number>(OC_CLIENT_SERVER),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_CLIENT);
+  SET_ENUM_MEMBER(returnValue, OC_SERVER);
+  SET_ENUM_MEMBER(returnValue, OC_CLIENT_SERVER);
 
   return returnValue;
 }
@@ -98,15 +64,9 @@ static Local<Object> bind_OCMode() {
 static Local<Object> bind_OCObserveAction() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_OBSERVE_REGISTER"),
-                        NanNew<Number>(OC_OBSERVE_REGISTER),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_OBSERVE_DEREGISTER"),
-                        NanNew<Number>(OC_OBSERVE_DEREGISTER),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_OBSERVE_NO_OPTION"),
-                        NanNew<Number>(OC_OBSERVE_NO_OPTION),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_OBSERVE_REGISTER);
+  SET_ENUM_MEMBER(returnValue, OC_OBSERVE_DEREGISTER);
+  SET_ENUM_MEMBER(returnValue, OC_OBSERVE_NO_OPTION);
 
   return returnValue;
 }
@@ -114,17 +74,10 @@ static Local<Object> bind_OCObserveAction() {
 static Local<Object> bind_OCQualityOfService() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_LOW_QOS"),
-                        NanNew<Number>(OC_LOW_QOS),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_MEDIUM_QOS"),
-                        NanNew<Number>(OC_MEDIUM_QOS),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_HIGH_QOS"),
-                        NanNew<Number>(OC_HIGH_QOS),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_NA_QOS"), NanNew<Number>(OC_NA_QOS),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_LOW_QOS);
+  SET_ENUM_MEMBER(returnValue, OC_MEDIUM_QOS);
+  SET_ENUM_MEMBER(returnValue, OC_HIGH_QOS);
+  SET_ENUM_MEMBER(returnValue, OC_NA_QOS);
 
   return returnValue;
 }
@@ -132,18 +85,12 @@ static Local<Object> bind_OCQualityOfService() {
 static Local<Object> bind_OCResourceProperty() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_ACTIVE"), NanNew<Number>(OC_ACTIVE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_DISCOVERABLE"),
-                        NanNew<Number>(OC_DISCOVERABLE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_OBSERVABLE"),
-                        NanNew<Number>(OC_OBSERVABLE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_SLOW"), NanNew<Number>(OC_SLOW),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_SECURE"), NanNew<Number>(OC_SECURE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_RES_PROP_NONE);
+  SET_ENUM_MEMBER(returnValue, OC_ACTIVE);
+  SET_ENUM_MEMBER(returnValue, OC_DISCOVERABLE);
+  SET_ENUM_MEMBER(returnValue, OC_OBSERVABLE);
+  SET_ENUM_MEMBER(returnValue, OC_SLOW);
+  SET_ENUM_MEMBER(returnValue, OC_SECURE);
 
   return returnValue;
 }
@@ -151,12 +98,8 @@ static Local<Object> bind_OCResourceProperty() {
 static Local<Object> bind_OCStackApplicationResult() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_STACK_DELETE_TRANSACTION"),
-                        NanNew<Number>(OC_STACK_DELETE_TRANSACTION),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_KEEP_TRANSACTION"),
-                        NanNew<Number>(OC_STACK_KEEP_TRANSACTION),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_STACK_DELETE_TRANSACTION);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_KEEP_TRANSACTION);
 
   return returnValue;
 }
@@ -164,96 +107,40 @@ static Local<Object> bind_OCStackApplicationResult() {
 static Local<Object> bind_OCStackResult() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_STACK_OK"),
-                        NanNew<Number>(OC_STACK_OK),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_RESOURCE_CREATED"),
-                        NanNew<Number>(OC_STACK_RESOURCE_CREATED),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_RESOURCE_DELETED"),
-                        NanNew<Number>(OC_STACK_RESOURCE_DELETED),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_CONTINUE"),
-                        NanNew<Number>(OC_STACK_CONTINUE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_URI"),
-                        NanNew<Number>(OC_STACK_INVALID_URI),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_QUERY"),
-                        NanNew<Number>(OC_STACK_INVALID_QUERY),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_IP"),
-                        NanNew<Number>(OC_STACK_INVALID_IP),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_PORT"),
-                        NanNew<Number>(OC_STACK_INVALID_PORT),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_CALLBACK"),
-                        NanNew<Number>(OC_STACK_INVALID_CALLBACK),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_METHOD"),
-                        NanNew<Number>(OC_STACK_INVALID_METHOD),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_PARAM"),
-                        NanNew<Number>(OC_STACK_INVALID_PARAM),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_OBSERVE_PARAM"),
-                        NanNew<Number>(OC_STACK_INVALID_OBSERVE_PARAM),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_NO_MEMORY"),
-                        NanNew<Number>(OC_STACK_NO_MEMORY),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_COMM_ERROR"),
-                        NanNew<Number>(OC_STACK_COMM_ERROR),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_NOTIMPL"),
-                        NanNew<Number>(OC_STACK_NOTIMPL),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_NO_RESOURCE"),
-                        NanNew<Number>(OC_STACK_NO_RESOURCE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_RESOURCE_ERROR"),
-                        NanNew<Number>(OC_STACK_RESOURCE_ERROR),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_SLOW_RESOURCE"),
-                        NanNew<Number>(OC_STACK_SLOW_RESOURCE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_NO_OBSERVERS"),
-                        NanNew<Number>(OC_STACK_NO_OBSERVERS),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_OBSERVER_NOT_FOUND"),
-                        NanNew<Number>(OC_STACK_OBSERVER_NOT_FOUND),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_VIRTUAL_DO_NOT_HANDLE"),
-                        NanNew<Number>(OC_STACK_VIRTUAL_DO_NOT_HANDLE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_OPTION"),
-                        NanNew<Number>(OC_STACK_INVALID_OPTION),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_MALFORMED_RESPONSE"),
-                        NanNew<Number>(OC_STACK_MALFORMED_RESPONSE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_PERSISTENT_BUFFER_REQUIRED"),
-                        NanNew<Number>(OC_STACK_PERSISTENT_BUFFER_REQUIRED),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_REQUEST_HANDLE"),
-                        NanNew<Number>(OC_STACK_INVALID_REQUEST_HANDLE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_INVALID_DEVICE_INFO"),
-                        NanNew<Number>(OC_STACK_INVALID_DEVICE_INFO),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_PRESENCE_STOPPED"),
-                        NanNew<Number>(OC_STACK_PRESENCE_STOPPED),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_PRESENCE_TIMEOUT"),
-                        NanNew<Number>(OC_STACK_PRESENCE_TIMEOUT),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_PRESENCE_DO_NOT_HANDLE"),
-                        NanNew<Number>(OC_STACK_PRESENCE_DO_NOT_HANDLE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_STACK_ERROR"),
-                        NanNew<Number>(OC_STACK_ERROR),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_STACK_OK);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_RESOURCE_CREATED);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_RESOURCE_DELETED);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_CONTINUE);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_URI);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_QUERY);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_IP);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_PORT);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_CALLBACK);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_METHOD);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_PARAM);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_OBSERVE_PARAM);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_NO_MEMORY);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_COMM_ERROR);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_TIMEOUT);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_ADAPTER_NOT_ENABLED);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_NOTIMPL);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_NO_RESOURCE);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_RESOURCE_ERROR);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_SLOW_RESOURCE);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_DUPLICATE_REQUEST);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_NO_OBSERVERS);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_OBSERVER_NOT_FOUND);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_VIRTUAL_DO_NOT_HANDLE);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_OPTION);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_MALFORMED_RESPONSE);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_PERSISTENT_BUFFER_REQUIRED);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_REQUEST_HANDLE);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_DEVICE_INFO);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_INVALID_JSON);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_PRESENCE_STOPPED);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_PRESENCE_TIMEOUT);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_PRESENCE_DO_NOT_HANDLE);
+  SET_ENUM_MEMBER(returnValue, OC_STACK_ERROR);
 
   return returnValue;
 }
@@ -261,12 +148,8 @@ static Local<Object> bind_OCStackResult() {
 static Local<Object> bind_OCTransportProtocolID() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_INVALID_ID"),
-                        NanNew<Number>(OC_INVALID_ID),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_COAP_ID"),
-                        NanNew<Number>(OC_COAP_ID),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_INVALID_ID);
+  SET_ENUM_MEMBER(returnValue, OC_COAP_ID);
 
   return returnValue;
 }
@@ -274,21 +157,12 @@ static Local<Object> bind_OCTransportProtocolID() {
 static Local<Object> bind_OCVirtualResources() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_WELL_KNOWN_URI"),
-                        NanNew<Number>(OC_WELL_KNOWN_URI),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_DEVICE_URI"),
-                        NanNew<Number>(OC_DEVICE_URI),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_RESOURCE_TYPES_URI"),
-                        NanNew<Number>(OC_RESOURCE_TYPES_URI),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_PRESENCE"),
-                        NanNew<Number>(OC_PRESENCE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_MAX_VIRTUAL_RESOURCES"),
-                        NanNew<Number>(OC_MAX_VIRTUAL_RESOURCES),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_WELL_KNOWN_URI);
+  SET_ENUM_MEMBER(returnValue, OC_DEVICE_URI);
+  SET_ENUM_MEMBER(returnValue, OC_PLATFORM_URI);
+  SET_ENUM_MEMBER(returnValue, OC_RESOURCE_TYPES_URI);
+  SET_ENUM_MEMBER(returnValue, OC_PRESENCE);
+  SET_ENUM_MEMBER(returnValue, OC_MAX_VIRTUAL_RESOURCES);
 
   return returnValue;
 }
@@ -296,16 +170,11 @@ static Local<Object> bind_OCVirtualResources() {
 static Local<Object> bind_OCConnectivityType() {
   Local<Object> returnValue = NanNew<Object>();
 
-  returnValue->ForceSet(NanNew<String>("OC_IPV4"), NanNew<Number>(OC_IPV4),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_IPV6"), NanNew<Number>(OC_IPV6),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_EDR"), NanNew<Number>(OC_EDR),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_LE"), NanNew<Number>(OC_LE),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
-  returnValue->ForceSet(NanNew<String>("OC_ALL"), NanNew<Number>(OC_ALL),
-                        static_cast<PropertyAttribute>(ReadOnly || DontDelete));
+  SET_ENUM_MEMBER(returnValue, OC_IPV4);
+  SET_ENUM_MEMBER(returnValue, OC_IPV6);
+  SET_ENUM_MEMBER(returnValue, OC_EDR);
+  SET_ENUM_MEMBER(returnValue, OC_LE);
+  SET_ENUM_MEMBER(returnValue, OC_ALL);
 
   return returnValue;
 }
