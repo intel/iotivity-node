@@ -76,9 +76,7 @@ test( "Simple server", function( assert ) {
 		if ( result === iotivity.OCStackResult.OC_STACK_OK ) {
 
 			// Start the processing loop
-			stopProcessing = testUtils.testProcessing( 100, function() {
-				teardown();
-			} );
+			stopProcessing = testUtils.testProcessing( 100, teardown );
 
 			// If the entity handler does not get called within five seconds, give up
 			failsafeTimeoutId = setTimeout( function() {
@@ -87,9 +85,7 @@ test( "Simple server", function( assert ) {
 			}, 5000 );
 
 			// Start a test client which will send a request to the server under test
-			stopTestClient = testUtils.startTestClient( function() {
-				teardown();
-			} );
+			stopTestClient = testUtils.startTestClient( teardown );
 		}
 	}
 } );

@@ -84,9 +84,7 @@ test( "Simple client", function( assert ) {
 			function() {
 
 				// Start the processing loop
-				stopProcessing = testUtils.testProcessing( 100, function() {
-					teardown();
-				} );
+				stopProcessing = testUtils.testProcessing( 100, teardown );
 
 				// If the callback does not get called within five seconds, give up
 				failsafeTimeoutId = setTimeout( function() {
@@ -153,9 +151,7 @@ test( "Simple client", function( assert ) {
 			},
 
 			// If the test server fails to work correctly we cannot perform the test so we give up
-			function() {
-				teardown();
-			},
+			teardown,
 			{
 				payload: magicToken,
 				path: resourcePath
