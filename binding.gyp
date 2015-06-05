@@ -5,9 +5,9 @@
 		],
 		"libraries": [ '<!@(pkg-config --libs octbstack)' ],
 		"cflags": [
-			'<!(pkg-config --cflags octbstack)',
-			'-std=c++11'
+			'<!(pkg-config --cflags octbstack)'
 		],
+		"cflags_cc": [ '-std=c++11' ],
 		"xcode_settings": {
 			"OTHER_CFLAGS": ['<!(pkg-config --cflags octbstack)']
 		}
