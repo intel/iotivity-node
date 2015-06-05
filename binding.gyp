@@ -3,11 +3,14 @@
 		"include_dirs": [
 			"<!(node -e \"require('nan')\")"
 		],
-		"libraries": [ '<!(pkg-config --libs octbstack)' ],
+		"libraries": [ '<!@(pkg-config --libs octbstack)' ],
 		"cflags": [
 			'<!(pkg-config --cflags octbstack)',
 			'-std=c++11'
-		]
+		],
+		"xcode_settings": {
+			"OTHER_CFLAGS": ['<!(pkg-config --cflags octbstack)']
+		}
 	},
 	"targets": [
 		{
@@ -39,28 +42,52 @@
 			"type": "executable",
 			"sources": [ "c/client.c" ],
 			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
-			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
+			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ],
+			"xcode_settings": {
+				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
+				"OTHER_LDFLAGS": [
+					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+				]
+			}
 		},
 		{
 			"target_name": "client.observe",
 			"type": "executable",
 			"sources": [ "c/client.observe.c" ],
 			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
-			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
+			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ],
+			"xcode_settings": {
+				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
+				"OTHER_LDFLAGS": [
+					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+				]
+			}
 		},
 		{
 			"target_name": "server",
 			"type": "executable",
 			"sources": [ "c/server.c" ],
 			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
-			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
+			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ],
+			"xcode_settings": {
+				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
+				"OTHER_LDFLAGS": [
+					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+				]
+			}
 		},
 		{
 			"target_name": "server.observable",
 			"type": "executable",
 			"sources": [ "c/server.observable.c" ],
 			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
-			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ]
+			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ],
+			"xcode_settings": {
+				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
+				"OTHER_LDFLAGS": [
+					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+				]
+			}
 		}
 	]
 }
