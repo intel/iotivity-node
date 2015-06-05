@@ -6,7 +6,7 @@ This project provides [iotivity](http://iotivity.org/) node.js bindings.
 
 iotivity-node depends on [iotivity](http://iotivity.org/) proper. It has been tested against [809b1b1](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=809b1b1e9be15724a6d756b403328a95894e639f) on Linux. During compilation, it uses pkgconfig to retrieve the iotivity compiler and linker flags. This means that you have to first build and install iotivity. The following procedure is known to work on Linux:
 
-0. Grab a [snapshot](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=40514d0b79627ff4372d36fea1d12b346e284c86;sf=tgz) of iotivity from its git repository and unpack it locally.
+0. Grab a [snapshot](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=809b1b1e9be15724a6d756b403328a95894e639f;sf=tgz) of iotivity from its git repository and unpack it locally.
 0. Make sure a compiler, make, and [scons](http://www.scons.org/) (a build tool) are installed. Your distribution should provide all these tools.
 0. ```cd iotivity```
 0. scons has the concept of targets just like make. You can get a list of targets contained in the iotivity repository, as well as a listing of recognized build flags via ```scons --help```. The only target you need for the node.js bindings is ```liboctbstack```. Thus, run ```scons liboctbstack``` to build this target.
