@@ -47,9 +47,9 @@ QUnit.config.callbacks.log.push( function( status ) {
 		status.message );
 	if ( !status.result ) {
 		console.log( "Actual: " );
-		console.log( status.actual );
+		console.log( QUnit.dump.parse( status.actual ) );
 		console.log( "Expected: " );
-		console.log( status.expected );
+		console.log( QUnit.dump.parse( status.expected ) );
 	}
 } );
 

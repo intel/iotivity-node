@@ -10,6 +10,28 @@ var _ = require( "underscore" ),
 	this._assert = assert;
 };
 
+function testApp( filename, teardown, options, outputHandler ) {
+		var testAppProcess = spawn( "node",
+			[ path.join( __dirname, filename ) ]
+				.concat( options ? [ "options=" + JSON.stringify( options ) ] : [] ) ),
+			stopTestAppProcess = function() {
+				testAppProcess.kill( "SIGTERM" );
+				process.removeListener( "exit", stopTestAppProcess );
+			}
+
+		process.on( "exit", stopTestAppProcess );
+
+		testAppProcess.stdout.on( "data", function testAppProcessStdoutData( data ) {
+			_.each( data.toString().split( "\n" ), function( value ) {
+				if ( value ) {
+					outputHandler( JSON.parse( value ) );
+				}
+			} );
+		} );
+
+		return stopTestAppProcess;
+}
+
 _.extend( testUtils.prototype, {
 	_isTestUtils: true,
 
@@ -46,55 +68,25 @@ _.extend( testUtils.prototype, {
 	},
 
 	startTestServer: function( whenReady, teardown, options ) {
-		var testServer = spawn( "node",
-			[ path.join( __dirname, "test-server.js" ) ]
-				.concat( options ? [ "options=" + JSON.stringify( options ) ] : [] ) );
+		return testApp( "test-server.js", teardown, options,
+			_.bind( function testServerOutputHandler( jsonObject ) {
+				if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
+					teardown();
+				}
 
-		testServer.stdout.on( "data", _.bind( function testServerStdoutData( data ) {
-			_.each( data.toString().split( "\n" ), _.bind( function( value ) {
-				var jsonObject;
-
-				if ( value ) {
-
-					jsonObject = JSON.parse( value );
-
-					if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
-						teardown();
-					}
-
-					if ( jsonObject.call == "OCCreateResource" ) {
-						whenReady();
-					}
+				if ( jsonObject.call == "OCCreateResource" ) {
+					whenReady();
 				}
 			}, this ) );
-		}, this ) );
-
-		return function stopTestServer() {
-			testServer.kill( "SIGTERM" );
-		};
 	},
 
 	startTestClient: function( teardown, options ) {
-		var testClient = spawn( "node", [ path.join( __dirname, "test-client.js" ) ]
-				.concat( options ? [ "options=" + JSON.stringify( options ) ] : [] ) );
-
-		testClient.stdout.on( "data", _.bind( function testServerStdoutData( data ) {
-			_.each( data.toString().split( "\n" ), _.bind( function( value ) {
-				var jsonObject;
-
-				if ( value ) {
-					jsonObject = JSON.parse( value );
-
-					if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
-						teardown();
-					}
+		return testApp( "test-client.js", teardown, options,
+			_.bind( function testClientOutputHandler( jsonObject ) {
+				if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
+					teardown();
 				}
 			}, this ) );
-		}, this ) );
-
-		return function stopTestClient() {
-			testClient.kill( "SIGTERM" );
-		};
 	},
 
 	testShutdown: function() {
