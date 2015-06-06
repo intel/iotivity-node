@@ -52,3 +52,13 @@ QUnit.config.callbacks.log.push( function( status ) {
 		console.log( status.expected );
 	}
 } );
+
+QUnit.config.callbacks.done.push( function( status ) {
+	var passed = "\033[42;30m " + status.passed + " \033[0m",
+		failed = "\033[41;30m " + status.failed + " \033[0m";
+
+	console.log( "Total assertions: " +
+		"(" + passed + ( status.failed > 0 ? "+" + failed : "" ) + ") / " + status.total );
+
+	process.exit( status.failed > 0 ? 1 : 0 );
+} );

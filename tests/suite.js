@@ -6,6 +6,8 @@ var path = require( "path" ),
 
 // Spawn all tests in ./tests/ in separate node instances sequentially
 fs.readdir( testsPath, function( error, files ) {
+	var failures = [];
+
 	if ( error ) {
 		throw error;
 	} else {
@@ -18,19 +20,26 @@ fs.readdir( testsPath, function( error, files ) {
 						[ singleTest ],
 						{ stdio: "inherit" } )
 					.on( "exit", function( code, signal ) {
-						callback( ( ( code === 0 || code === null ) && signal !== "SIGSEGV" ) ?
-							null :
-							{
+						if ( !( ( code === 0 || code === null ) && signal !== "SIGSEGV" ) ) {
+							failures.push( {
 								test: singleTest,
 								code: code,
 								signal: signal
 							} );
+						}
+						callback( null );
 					} );
 			},
 			function( error ) {
-				if ( error ) {
-					throw new Error( error.test + " exited with code " +
-						error.code + " and signal " + error.signal + "." );
+				var index, message, failure;
+
+				if ( failures.length > 0 ) {
+					for ( index = 0, message = "\n" ; index < failures.length ; index++ ) {
+						failure = failures[ index ];
+						message += failure.test + " exited with " + failure.code +
+							( failure.signal ? " and signal " + failure.signal : "" ) + "\n";
+					}
+					throw new Error( message );
 				}
 			} );
 	}
