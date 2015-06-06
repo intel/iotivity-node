@@ -9,39 +9,25 @@
 
 using namespace v8;
 
+#define SET_FUNCTION(destination, functionName) \
+  (destination)                                 \
+      ->Set(NanNew<String>(#functionName),      \
+            NanNew<FunctionTemplate>(bind_##functionName)->GetFunction())
+
 void InitFunctions(Handle<Object> exports, Handle<Object> module) {
-  exports->Set(NanNew<String>("OCInit"),
-               NanNew<FunctionTemplate>(bind_OCInit)->GetFunction());
-  exports->Set(NanNew<String>("OCStop"),
-               NanNew<FunctionTemplate>(bind_OCStop)->GetFunction());
-  exports->Set(NanNew<String>("OCProcess"),
-               NanNew<FunctionTemplate>(bind_OCProcess)->GetFunction());
-  exports->Set(
-      NanNew<String>("OCDevAddrToIPv4Addr"),
-      NanNew<FunctionTemplate>(bind_OCDevAddrToIPv4Addr)->GetFunction());
-  exports->Set(NanNew<String>("OCDevAddrToPort"),
-               NanNew<FunctionTemplate>(bind_OCDevAddrToPort)->GetFunction());
-  exports->Set(NanNew<String>("OCCreateResource"),
-               NanNew<FunctionTemplate>(bind_OCCreateResource)->GetFunction());
-  exports->Set(
-      NanNew<String>("OCBindResourceHandler"),
-      NanNew<FunctionTemplate>(bind_OCBindResourceHandler)->GetFunction());
-  exports->Set(NanNew<String>("OCBindResource"),
-               NanNew<FunctionTemplate>(bind_OCBindResource)->GetFunction());
-  exports->Set(NanNew<String>("OCDeleteResource"),
-               NanNew<FunctionTemplate>(bind_OCDeleteResource)->GetFunction());
-  exports->Set(NanNew<String>("OCStartPresence"),
-               NanNew<FunctionTemplate>(bind_OCStartPresence)->GetFunction());
-  exports->Set(NanNew<String>("OCStopPresence"),
-               NanNew<FunctionTemplate>(bind_OCStopPresence)->GetFunction());
-  exports->Set(NanNew<String>("OCDoResource"),
-               NanNew<FunctionTemplate>(bind_OCDoResource)->GetFunction());
-  exports->Set(NanNew<String>("OCDoResponse"),
-               NanNew<FunctionTemplate>(bind_OCDoResponse)->GetFunction());
-  exports->Set(
-      NanNew<String>("OCNotifyAllObservers"),
-      NanNew<FunctionTemplate>(bind_OCNotifyAllObservers)->GetFunction());
-  exports->Set(
-      NanNew<String>("OCNotifyListOfObservers"),
-      NanNew<FunctionTemplate>(bind_OCNotifyListOfObservers)->GetFunction());
+  SET_FUNCTION(exports, OCInit);
+  SET_FUNCTION(exports, OCStop);
+  SET_FUNCTION(exports, OCProcess);
+  SET_FUNCTION(exports, OCDevAddrToIPv4Addr);
+  SET_FUNCTION(exports, OCDevAddrToPort);
+  SET_FUNCTION(exports, OCCreateResource);
+  SET_FUNCTION(exports, OCBindResourceHandler);
+  SET_FUNCTION(exports, OCBindResource);
+  SET_FUNCTION(exports, OCDeleteResource);
+  SET_FUNCTION(exports, OCStartPresence);
+  SET_FUNCTION(exports, OCStopPresence);
+  SET_FUNCTION(exports, OCDoResource);
+  SET_FUNCTION(exports, OCDoResponse);
+  SET_FUNCTION(exports, OCNotifyAllObservers);
+  SET_FUNCTION(exports, OCNotifyListOfObservers);
 }
