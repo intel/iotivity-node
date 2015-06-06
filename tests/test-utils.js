@@ -10,17 +10,29 @@ var _ = require( "underscore" ),
 	this._assert = assert;
 };
 
-function testApp( filename, teardown, options, outputHandler ) {
+// Launch a JS file in a child process with certain provisions:
+// 1. Pass a single command line argument: options=<JSON string>
+// 2. Make sure that when this process exits the child process is TERMinated
+// 3. Read stdout from the child process, parse it as JSON, and call @outputHandler with the result
+// 4. Return a function that will terminate the child process
+function testApp( filename, options, outputHandler ) {
+
+		// Launch the child process and store the resulting process object (1)
 		var testAppProcess = spawn( "node",
 			[ path.join( __dirname, filename ) ]
 				.concat( options ? [ "options=" + JSON.stringify( options ) ] : [] ) ),
+
+			// Function that stops the child process
 			stopTestAppProcess = function() {
 				testAppProcess.kill( "SIGTERM" );
 				process.removeListener( "exit", stopTestAppProcess );
 			}
 
+		// If this process should exit for any reason, kill the child process (2)
 		process.on( "exit", stopTestAppProcess );
 
+		// Read stdout from the child process, turn each line into a JSON object, and call the
+		// callback with it (3)
 		testAppProcess.stdout.on( "data", function testAppProcessStdoutData( data ) {
 			_.each( data.toString().split( "\n" ), function( value ) {
 				if ( value ) {
@@ -29,6 +41,7 @@ function testApp( filename, teardown, options, outputHandler ) {
 			} );
 		} );
 
+		// Return to the caller the function that will kill the child process (4)
 		return stopTestAppProcess;
 }
 
@@ -68,7 +81,7 @@ _.extend( testUtils.prototype, {
 	},
 
 	startTestServer: function( whenReady, teardown, options ) {
-		return testApp( "test-server.js", teardown, options,
+		return testApp( "test-server.js", options,
 			_.bind( function testServerOutputHandler( jsonObject ) {
 				if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
 					teardown();
@@ -81,7 +94,7 @@ _.extend( testUtils.prototype, {
 	},
 
 	startTestClient: function( teardown, options ) {
-		return testApp( "test-client.js", teardown, options,
+		return testApp( "test-client.js", options,
 			_.bind( function testClientOutputHandler( jsonObject ) {
 				if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
 					teardown();
