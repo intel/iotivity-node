@@ -54,9 +54,6 @@ static void defaultEntityHandler(ffi_cif *cif,
 NAN_METHOD(bind_OCCreateResource) {
   NanScope();
 
-  OCResourceHandle handle = 0;
-  callback_info *info = 0;
-
   VALIDATE_ARGUMENT_COUNT(args, 6);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
@@ -64,6 +61,9 @@ NAN_METHOD(bind_OCCreateResource) {
   VALIDATE_ARGUMENT_TYPE(args, 3, IsString);
   VALIDATE_ARGUMENT_TYPE(args, 4, IsFunction);
   VALIDATE_ARGUMENT_TYPE(args, 5, IsUint32);
+
+  OCResourceHandle handle = 0;
+  callback_info *info = 0;
 
   // Create a new callback
   info = newInfoForJSCallback(Local<Function>::Cast(args[4]));
@@ -89,14 +89,14 @@ NAN_METHOD(bind_OCCreateResource) {
 NAN_METHOD(bind_OCDeleteResource) {
   NanScope();
 
-  OCStackResult returnValue;
-
   VALIDATE_ARGUMENT_COUNT(args, 1);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
 
+  OCStackResult returnValue;
+  OCResourceHandle handle = 0;
+
   // Retrieve OCResourceHandle from JS object
-  OCResourceHandle handle = c_OCResourceHandle(args[0]->ToObject());
-  if (!handle) {
+  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
     NanReturnUndefined();
   }
 
@@ -118,16 +118,15 @@ NAN_METHOD(bind_OCDeleteResource) {
 NAN_METHOD(bind_OCBindResourceHandler) {
   NanScope();
 
-  OCResourceHandle handle = 0;
-  callback_info *info = 0;
-
   VALIDATE_ARGUMENT_COUNT(args, 2);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsFunction);
 
+  OCResourceHandle handle = 0;
+  callback_info *info = 0;
+
   // Retrieve OCResourceHandle from JS object
-  handle = c_OCResourceHandle(args[0]->ToObject());
-  if (!handle) {
+  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
     NanReturnUndefined();
   }
 
@@ -157,4 +156,24 @@ NAN_METHOD(bind_OCBindResourceHandler) {
   }
 
   NanReturnValue(NanNew<Number>(returnValue));
+}
+
+NAN_METHOD(bind_OCBindResource) {
+  NanScope();
+
+  OCResourceHandle collectionHandle = 0, resourceHandle = 0;
+
+  VALIDATE_ARGUMENT_COUNT(args, 2);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsObject);
+
+  if (!c_OCResourceHandle(&collectionHandle, args[0]->ToObject())) {
+    NanReturnUndefined();
+  }
+  if (!c_OCResourceHandle(&resourceHandle, args[1]->ToObject())) {
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(
+      NanNew<Number>(OCBindResource(collectionHandle, resourceHandle)));
 }

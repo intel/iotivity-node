@@ -20,14 +20,13 @@ NAN_METHOD(bind_OCNotifyAllObservers) {
   VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsNumber);
 
-  OCResourceHandle handle = c_OCResourceHandle(args[0]->ToObject());
-
-  if (handle) {
-    NanReturnValue(NanNew<Number>(OCNotifyAllObservers(
-        handle, (OCQualityOfService)args[1]->Uint32Value())));
-  } else {
+  OCResourceHandle handle;
+  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
     NanReturnUndefined();
   }
+
+  NanReturnValue(NanNew<Number>(OCNotifyAllObservers(
+      handle, (OCQualityOfService)args[1]->Uint32Value())));
 }
 
 NAN_METHOD(bind_OCNotifyListOfObservers) {
@@ -40,8 +39,8 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   VALIDATE_ARGUMENT_TYPE(args, 3, IsString);
   VALIDATE_ARGUMENT_TYPE(args, 4, IsNumber);
 
-  OCResourceHandle handle = c_OCResourceHandle(args[0]->ToObject());
-  if (!handle) {
+  OCResourceHandle handle;
+  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
     NanReturnUndefined();
   }
 

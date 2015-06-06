@@ -26,6 +26,8 @@ void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   exports->Set(
       NanNew<String>("OCBindResourceHandler"),
       NanNew<FunctionTemplate>(bind_OCBindResourceHandler)->GetFunction());
+  exports->Set(NanNew<String>("OCBindResource"),
+               NanNew<FunctionTemplate>(bind_OCBindResource)->GetFunction());
   exports->Set(NanNew<String>("OCDeleteResource"),
                NanNew<FunctionTemplate>(bind_OCDeleteResource)->GetFunction());
   exports->Set(NanNew<String>("OCStartPresence"),

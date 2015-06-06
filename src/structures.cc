@@ -217,15 +217,17 @@ Local<Object> js_OCResourceHandle(Local<Object> jsHandle,
   return jsHandle;
 }
 
-OCResourceHandle c_OCResourceHandle(Local<Object> jsHandle) {
+bool c_OCResourceHandle(OCResourceHandle *destination, Local<Object> jsHandle) {
   Local<Value> handle = jsHandle->Get(NanNew<String>("handle"));
 
   if (!Buffer::HasInstance(handle)) {
     NanThrowTypeError("OCResourceHandle.handle is not a Node::Buffer");
-    return 0;
+    return false;
   }
 
-  return *(OCResourceHandle *)Buffer::Data(handle->ToObject());
+  *destination = *(OCResourceHandle *)Buffer::Data(handle->ToObject());
+
+  return true;
 }
 
 // Returns the Local<Object> which was passed in
