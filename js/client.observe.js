@@ -32,7 +32,7 @@ intervalId = setInterval( function() {
 iotivity.OCDoResource(
 	handle,
 	iotivity.OCMethod.OC_REST_GET,
-	"/oic/res",
+	iotivity.OC_MULTICAST_DISCOVERY_URI,
 	null,
 	null,
 	iotivity.OCConnectivityType.OC_ALL,

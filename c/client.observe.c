@@ -153,7 +153,7 @@ addDiscoverCallback() {
 	if ( OC_STACK_OK != OCDoResource(
 			&handle,
 			OC_REST_GET,
-			"/oic/res",
+			OC_MULTICAST_DISCOVERY_URI,
 			NULL,
 			NULL,
 			OC_ALL,
