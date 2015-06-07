@@ -153,7 +153,7 @@ addDiscoverCallback() {
 	if ( OC_STACK_OK != OCDoResource(
 			&handle,
 			OC_REST_GET,
-			"/oc/core",
+			"/oic/res",
 			NULL,
 			NULL,
 			OC_ALL,
