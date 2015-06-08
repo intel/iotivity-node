@@ -176,20 +176,20 @@ static Local<Object> bind_OCConnectivityType() {
   return returnValue;
 }
 
-#define SET_ENUM( destination, enumName ) \
-	(destination)->Set( NanNew<String>( #enumName ), bind_##enumName() )
+#define SET_ENUM(destination, enumName) \
+  (destination)->Set(NanNew<String>(#enumName), bind_##enumName())
 
 void InitEnums(Handle<Object> exports) {
-  SET_ENUM( exports, OCEntityHandlerFlag );
-  SET_ENUM( exports, OCEntityHandlerResult );
-  SET_ENUM( exports, OCMethod );
-  SET_ENUM( exports, OCMode );
-  SET_ENUM( exports, OCObserveAction );
-  SET_ENUM( exports, OCQualityOfService );
-  SET_ENUM( exports, OCResourceProperty );
-  SET_ENUM( exports, OCStackApplicationResult );
-  SET_ENUM( exports, OCStackResult );
-  SET_ENUM( exports, OCTransportProtocolID );
-  SET_ENUM( exports, OCVirtualResources );
-  SET_ENUM( exports, OCConnectivityType );
+  SET_ENUM(exports, OCEntityHandlerFlag);
+  SET_ENUM(exports, OCEntityHandlerResult);
+  SET_ENUM(exports, OCMethod);
+  SET_ENUM(exports, OCMode);
+  SET_ENUM(exports, OCObserveAction);
+  SET_ENUM(exports, OCQualityOfService);
+  SET_ENUM(exports, OCResourceProperty);
+  SET_ENUM(exports, OCStackApplicationResult);
+  SET_ENUM(exports, OCStackResult);
+  SET_ENUM(exports, OCTransportProtocolID);
+  SET_ENUM(exports, OCVirtualResources);
+  SET_ENUM(exports, OCConnectivityType);
 }

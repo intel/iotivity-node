@@ -8,8 +8,8 @@ using namespace v8;
 
 void InitEnums(Handle<Object> exports);
 
-#define SET_CONSTANT_MEMBER(destination, v8Type, name)            \
-  (destination)                                                   \
+#define SET_CONSTANT_MEMBER(destination, v8Type, name)          \
+  (destination)                                                 \
       ->ForceSet(NanNew<String>(#name), NanNew<v8Type>((name)), \
                  static_cast<PropertyAttribute>(ReadOnly || DontDelete));
 
