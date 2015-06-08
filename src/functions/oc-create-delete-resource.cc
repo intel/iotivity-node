@@ -177,3 +177,37 @@ NAN_METHOD(bind_OCBindResource) {
   NanReturnValue(
       NanNew<Number>(OCBindResource(collectionHandle, resourceHandle)));
 }
+
+NAN_METHOD(bind_OCBindResourceInterfaceToResource) {
+  NanScope();
+
+  OCResourceHandle handle = 0;
+
+  VALIDATE_ARGUMENT_COUNT(args, 2);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
+
+  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(NanNew<Number>(OCBindResourceInterfaceToResource(
+      handle, (const char *)*String::Utf8Value(args[1]))));
+}
+
+NAN_METHOD(bind_OCBindResourceTypeToResource) {
+  NanScope();
+
+  OCResourceHandle handle = 0;
+
+  VALIDATE_ARGUMENT_COUNT(args, 2);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
+
+  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(NanNew<Number>(OCBindResourceTypeToResource(
+      handle, (const char *)*String::Utf8Value(args[1]))));
+}
