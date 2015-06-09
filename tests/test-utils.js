@@ -93,8 +93,8 @@ _.extend( testUtils.prototype, {
 			}, this ) );
 	},
 
-	startTestClient: function( teardown, options ) {
-		return testApp( "test-client.js", options,
+	startTestClient: function( teardown, options, dataHandler ) {
+		return testApp( "test-client.js", options, dataHandler ? dataHandler :
 			_.bind( function testClientOutputHandler( jsonObject ) {
 				if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
 					teardown();

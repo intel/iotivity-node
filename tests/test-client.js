@@ -1,6 +1,7 @@
 var result,
 	options = {
 		path: "/a/light",
+		logResponse: false,
 		request: null
 	},
 	doHandle = {},
@@ -43,6 +44,11 @@ if ( result === iotivity.OCStackResult.OC_STACK_OK ) {
 		iotivity.OCConnectivityType.OC_ALL,
 		iotivity.OCQualityOfService.OC_LOW_QOS,
 		function( handle, response ) {
+			if ( options.logResponse ) {
+				console.log( JSON.stringify( {
+					"OCDoResource response": response
+				} ) );
+			}
 			return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 		},
 		null,
