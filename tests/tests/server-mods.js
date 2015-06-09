@@ -81,7 +81,6 @@ function constructActualResponse( prefix, resourcePath, response ) {
 test( "Adding resource type and interface to resource", function( assert ) {
 	var result, stopProcessing, stopDiscoverSequence,
 		resourcePath = "/a/simple-server-" + Math.round( Math.random() * 10000 ),
-		magicRequest = { "setAnswer": 42 },
 		done = assert.async(),
 		failsafeTimeoutId = null,
 		handle = {},
@@ -136,13 +135,6 @@ test( "Adding resource type and interface to resource", function( assert ) {
 			"oc.mi.def",
 			resourcePath,
 			function( flag, request ) {
-				var receivedRequest = request.reqJSONPayload ?
-					JSON.parse( request.reqJSONPayload ) : undefined;
-
-				assert.deepEqual( receivedRequest, magicRequest,
-					"Entity handler has received the correct request" );
-				teardown();
-
 				return iotivity.OCEntityHandlerResult.OC_EH_OK;
 			},
 			iotivity.OCResourceProperty.OC_DISCOVERABLE |
