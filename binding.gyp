@@ -19,6 +19,7 @@
 				"src/main.cc",
 				"src/common.cc",
 				"src/enums.cc",
+				"src/constants.cc",
 				"src/structures.cc",
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",

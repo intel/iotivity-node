@@ -9,25 +9,20 @@ extern "C" {
 
 using namespace v8;
 
-static Local<Object> bind_OCEntityHandlerFlag() {
+#define SET_ENUM(destination, enumName) \
+  (destination)->Set(NanNew<String>(#enumName), bind_##enumName())
+
+// The rest of this file is generated
+
+static Local<Object> bind_OCVirtualResources() {
   Local<Object> returnValue = NanNew<Object>();
 
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_REQUEST_FLAG);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_OBSERVE_FLAG);
-
-  return returnValue;
-}
-
-static Local<Object> bind_OCEntityHandlerResult() {
-  Local<Object> returnValue = NanNew<Object>();
-
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_OK);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_ERROR);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_RESOURCE_CREATED);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_RESOURCE_DELETED);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_SLOW);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_FORBIDDEN);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_RESOURCE_NOT_FOUND);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_WELL_KNOWN_URI);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_DEVICE_URI);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_PLATFORM_URI);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_RESOURCE_TYPES_URI);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_PRESENCE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_MAX_VIRTUAL_RESOURCES);
 
   return returnValue;
 }
@@ -58,16 +53,6 @@ static Local<Object> bind_OCMode() {
   return returnValue;
 }
 
-static Local<Object> bind_OCObserveAction() {
-  Local<Object> returnValue = NanNew<Object>();
-
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_OBSERVE_REGISTER);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_OBSERVE_DEREGISTER);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_OBSERVE_NO_OPTION);
-
-  return returnValue;
-}
-
 static Local<Object> bind_OCQualityOfService() {
   Local<Object> returnValue = NanNew<Object>();
 
@@ -92,11 +77,23 @@ static Local<Object> bind_OCResourceProperty() {
   return returnValue;
 }
 
-static Local<Object> bind_OCStackApplicationResult() {
+static Local<Object> bind_OCTransportProtocolID() {
   Local<Object> returnValue = NanNew<Object>();
 
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_DELETE_TRANSACTION);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_KEEP_TRANSACTION);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_INVALID_ID);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_COAP_ID);
+
+  return returnValue;
+}
+
+static Local<Object> bind_OCConnectivityType() {
+  Local<Object> returnValue = NanNew<Object>();
+
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_IPV4);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_IPV6);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_EDR);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_LE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_ALL);
 
   return returnValue;
 }
@@ -142,54 +139,59 @@ static Local<Object> bind_OCStackResult() {
   return returnValue;
 }
 
-static Local<Object> bind_OCTransportProtocolID() {
+static Local<Object> bind_OCObserveAction() {
   Local<Object> returnValue = NanNew<Object>();
 
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_INVALID_ID);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_COAP_ID);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_OBSERVE_REGISTER);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_OBSERVE_DEREGISTER);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_OBSERVE_NO_OPTION);
 
   return returnValue;
 }
 
-static Local<Object> bind_OCVirtualResources() {
+static Local<Object> bind_OCEntityHandlerResult() {
   Local<Object> returnValue = NanNew<Object>();
 
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_WELL_KNOWN_URI);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_DEVICE_URI);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_PLATFORM_URI);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_RESOURCE_TYPES_URI);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_PRESENCE);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_MAX_VIRTUAL_RESOURCES);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_OK);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_ERROR);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_RESOURCE_CREATED);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_RESOURCE_DELETED);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_SLOW);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_FORBIDDEN);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_EH_RESOURCE_NOT_FOUND);
 
   return returnValue;
 }
 
-static Local<Object> bind_OCConnectivityType() {
+static Local<Object> bind_OCEntityHandlerFlag() {
   Local<Object> returnValue = NanNew<Object>();
 
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_IPV4);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_IPV6);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_EDR);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_LE);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_ALL);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_REQUEST_FLAG);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_OBSERVE_FLAG);
 
   return returnValue;
 }
 
-#define SET_ENUM(destination, enumName) \
-  (destination)->Set(NanNew<String>(#enumName), bind_##enumName())
+static Local<Object> bind_OCStackApplicationResult() {
+  Local<Object> returnValue = NanNew<Object>();
+
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_DELETE_TRANSACTION);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_KEEP_TRANSACTION);
+
+  return returnValue;
+}
 
 void InitEnums(Handle<Object> exports) {
-  SET_ENUM(exports, OCEntityHandlerFlag);
-  SET_ENUM(exports, OCEntityHandlerResult);
+  SET_ENUM(exports, OCVirtualResources);
   SET_ENUM(exports, OCMethod);
   SET_ENUM(exports, OCMode);
-  SET_ENUM(exports, OCObserveAction);
   SET_ENUM(exports, OCQualityOfService);
   SET_ENUM(exports, OCResourceProperty);
-  SET_ENUM(exports, OCStackApplicationResult);
-  SET_ENUM(exports, OCStackResult);
   SET_ENUM(exports, OCTransportProtocolID);
-  SET_ENUM(exports, OCVirtualResources);
   SET_ENUM(exports, OCConnectivityType);
+  SET_ENUM(exports, OCStackResult);
+  SET_ENUM(exports, OCObserveAction);
+  SET_ENUM(exports, OCEntityHandlerResult);
+  SET_ENUM(exports, OCEntityHandlerFlag);
+  SET_ENUM(exports, OCStackApplicationResult);
 }

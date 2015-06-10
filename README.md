@@ -43,6 +43,10 @@ If you wish to run the client on one machine and the server on another, make sur
 
 To run the tests, simply run ```npm test```. A script called ```dist.sh``` is also provided. It runs ```npm install```, runs the tests, then runs ```npm prune --production``` to remove all sources, headers, and build dependencies. After that, it copies relevant files to ```dist/``` and creates a tarball from them. This is followed by running ```npm install``` again to restore the development environment.
 
+## Maintaining
+
+The script ```./update-enums-and-constants.sh``` reads the header files ocstackconfig.h and octypes.h and generates the contents of src/constants.cc and src/enums.cc. Read the comments in the script before you modify either src/constants.cc or src/enums.cc.
+
 ## Coding Style
 Please follow the [jQuery](http://contribute.jquery.org/style-guide/js/) coding style for the JavaScript files.
 
