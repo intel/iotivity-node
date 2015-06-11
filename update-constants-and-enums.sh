@@ -11,7 +11,11 @@
 # The script also generates the function InitEnums() and InitConstants() which the files are
 # expected to export.
 
-INCLUDE_PATH=`pkg-config --cflags octbstack | sed 's/-I//g' | awk '{ print $1;}'`
+if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
+	export OCTBSTACK_CFLAGS=`pkg-config --cflags octbstack`
+fi
+
+INCLUDE_PATH=`echo "${OCTBSTACK_CFLAGS}" | sed 's/-I//g' | awk '{ print $1;}'`
 
 # enums.cc
 
