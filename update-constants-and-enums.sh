@@ -3,15 +3,13 @@
 # Update constants in src/main.cc and enums in src/enums.cc. This file uses pkgconfig to determine
 # the location of octypes.h and ocstackconfig.h.
 #
-# src/main.cc is edited as follows:
-# 1. The section following the comment "// ocstackconfig.h: Stack configuration" is replaced
-# 2. The section following the comment "// octypes.h: Definitions" is replaced
+# Both src/main.cc and src/enums.cc contain the comment "// The rest of this file is generated".
+# This script preserves the file up to and including the comment, and discards the rest of the
+# file. It then appends to src/main.cc the constant definitions from octypes.h and ocstackconfig.h
+# and to src/enums.cc the enum definitions from octypes.h
 #
-# src/enums.cc is edited as follows:
-# 1. The file is truncated up to and including the comment "// The rest of this file is generated"
-# 2. The enum definitions and the init function are appended.
-
-set -x
+# The script also generates the function InitEnums() and InitConstants() which the files are
+# expected to export.
 
 INCLUDE_PATH=`pkg-config --cflags octbstack | sed 's/-I//g' | awk '{ print $1;}'`
 
