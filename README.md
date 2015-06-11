@@ -6,7 +6,7 @@ This project provides [iotivity](http://iotivity.org/) node.js bindings.
 
 iotivity-node depends on [iotivity](http://iotivity.org/) proper. It has been tested against [0.9.1](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=0.9.1) on Linux.
 
-During compilation, it uses pkgconfig to retrieve the iotivity compiler and linker flags. This means that you have to first build and install iotivity. The following procedure is known to work on Linux:
+During compilation, it needs environment variables to retrieve the iotivity compiler and linker flags. This means that you have to first build and install iotivity. The following procedure is known to work on Linux:
 
 0. Grab a [snapshot](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=0.9.1;sf=tgz) of iotivity from its git repository and unpack it locally.
 0. Make sure a compiler, make, and [scons](http://www.scons.org/) (a build tool) are installed. Your distribution should provide all these tools.
@@ -15,7 +15,7 @@ During compilation, it uses pkgconfig to retrieve the iotivity compiler and link
 0. Now that iotivity is built, clone this repository, and change directory into it.
 0. Set the following environment variables:
 	* ```OCTBSTACK_CFLAGS``` - this should contain the compiler flags for locating the iotivity include files. For example, the value of this variables can be ```-I/home/nix/iot/iotivity/resource/csdk/stack/include```.
-	* ```OCTBSTACK_LIBS``` - this should contain the linker flags necessary for locating ```liboctbstack.so``` both at compile time and at runtime. It's value can be as simple as ```-loctbstack``` if liboctbstack is in /usr/lib, but may need to be as complex as ```-L/home/nix/iot/iotivity/out/linux/x86/release -loctbstack -Wl,-rpath=/home/nix/iot/iotivity/out/linux/x86/release```
+	* ```OCTBSTACK_LIBS``` - this should contain the linker flags necessary for locating ```liboctbstack.so``` both at compile time and at runtime. It's value can be as simple as ```-loctbstack``` if liboctbstack is in /usr/lib, but may need to be as complex as ```-L/home/nix/iot/iotivity/out/linux/x86/release -loctbstack -Wl,-rpath=/home/nix/iot/iotivity/out/linux/x86/release``` if liboctbstack is located on an unusual path.
 0. Run ```npm install``` with these environment variables set.
 
 Alternatively, you can use some rudimentary install scripts for both iotivity and this repository. Using them will help you avoid having to set environment variables.
