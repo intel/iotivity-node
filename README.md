@@ -4,9 +4,7 @@ This project provides [iotivity](http://iotivity.org/) node.js bindings.
 
 ## Installation
 
-iotivity-node depends on [iotivity](http://iotivity.org/) proper. It has been tested against the following versions on Linux:
-
-* [0.9.1](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=0.9.1)
+iotivity-node depends on [iotivity](http://iotivity.org/) proper. It has been tested against [0.9.1](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=0.9.1) on Linux.
 
 During compilation, it uses pkgconfig to retrieve the iotivity compiler and linker flags. This means that you have to first build and install iotivity. The following procedure is known to work on Linux:
 
