@@ -46,7 +46,7 @@ function discoverSequence( teardown, sequence ) {
 
 // Collect the parts of the response that interest us
 function constructActualResponse( prefix, resourcePath, response ) {
-	var payload, index, item;
+	var payload, index, item, oic;
 
 	ok( response.resJSONPayload, prefix + ": resJSONPayload present" );
 	if ( !response.resJSONPayload ) {
@@ -54,15 +54,16 @@ function constructActualResponse( prefix, resourcePath, response ) {
 	}
 
 	payload = JSON.parse( response.resJSONPayload );
+	oic = payload.oic || payload.oc;
 
-	ok( payload.oic, prefix + ": oic present in payload" );
-	if ( !payload.oic ) {
+	ok( oic, prefix + ": oic present in payload" );
+	if ( !oic ) {
 		return {};
 	}
 
-	for ( index in payload.oic ) {
-		if ( payload.oic[ index ].href === resourcePath ) {
-			item = payload.oic[ index ];
+	for ( index in oic ) {
+		if ( oic[ index ].href === resourcePath ) {
+			item = oic[ index ];
 		}
 	}
 	ok( item, prefix + ": " + resourcePath + " discovered" );

@@ -119,10 +119,14 @@ test( "Simple client", function( assert ) {
 								response.connType,
 								iotivity.OCQualityOfService.OC_HIGH_QOS,
 								function( handle, response ) {
+									var payload, oic;
+
+									payload = JSON.parse( response.resJSONPayload );
+									oic = payload.oic || payload.oc;
 
 									// Make sure the callback was called with the right response
 									assert.deepEqual(
-										JSON.parse( response.resJSONPayload ).oic[ 0 ],
+										oic[ 0 ],
 										magicToken,
 										"OCDoResource observation handler has received the " +
 											"expected response" );

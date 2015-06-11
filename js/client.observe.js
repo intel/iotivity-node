@@ -4,7 +4,8 @@ var intervalId,
 
 // Construct the absolute URL for the resource from the OCDoResource() response
 function getAbsoluteUrl( response ) {
-	var ipv4Bytes = [],
+	var payload, oic,
+		ipv4Bytes = [],
 		portHolder = {};
 
 	if ( iotivity.OCStackResult.OC_STACK_OK !==
@@ -17,9 +18,12 @@ function getAbsoluteUrl( response ) {
 		return;
 	}
 
+	payload = JSON.parse( response.resJSONPayload );
+	oic = payload.oic || payload.oc;
+
 	return "coap://" +
 		ipv4Bytes[ 0 ] + "." + ipv4Bytes[ 1 ] + "." + ipv4Bytes[ 2 ] + "." + ipv4Bytes[ 3 ] + ":" +
-		portHolder.port + JSON.parse( response.resJSONPayload ).oic[ 0 ].href;
+		portHolder.port + oic[ 0 ].href;
 }
 
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
