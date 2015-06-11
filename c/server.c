@@ -17,7 +17,7 @@ runOCProcess( gpointer user_data ) {
 }
 
 static OCEntityHandlerResult
-handleLight1( OCEntityHandlerFlag flag, OCEntityHandlerRequest *request ) {
+handleLight1( OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *context ) {
 	g_message( "server: handleLight1: Entering" );
 	return OC_EH_OK;
 }
@@ -36,6 +36,7 @@ main( int argc, char **argv ) {
 			"oc.mi.def",
 			"/a/light",
 			handleLight1,
+			NULL,
 			OC_DISCOVERABLE ) ) {
 
 			g_message( "server: OCCreateResource() succeeded" );

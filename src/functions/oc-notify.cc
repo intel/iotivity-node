@@ -7,7 +7,6 @@
 
 extern "C" {
 #include <ocstack.h>
-#include "../callback-info.h"
 }
 
 using namespace v8;

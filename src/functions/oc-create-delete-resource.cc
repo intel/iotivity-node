@@ -8,48 +8,28 @@
 
 extern "C" {
 #include <ocstack.h>
-#include "../callback-info.h"
 }
 
 using namespace v8;
 using namespace node;
 
 // Associate the callback info with a resource handle
-static std::map<OCResourceHandle, callback_info *> annotation;
+static std::map<OCResourceHandle, Persistent<Function> *> annotation;
 
-// Marshaller for OCEntityHandler callback
-// defaultEntityHandler is placed in a closure each time someone calls
-// OCCreateResource. Closures differ from one another only by the value of
-// jsCallbackInPersistent, which is a persistent reference to the JS callback.
-// When the C API executes one of the closures, we construct a call to the JS
-// callback we find at jsCallbackInPersistent, and pass the return value from
-// the callback back to the C API.
-static void defaultEntityHandler(ffi_cif *cif,
-                                 OCEntityHandlerResult *returnValueLocation,
-                                 void **arguments,
-                                 void *jsCallbackInPersistent) {
+static OCEntityHandlerResult defaultEntityHandler(
+    OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *context) {
   // Construct arguments to the JS callback and then call it, recording its
   // return value
-  Local<Value> jsCallbackArguments[2] = {
-      NanNew<Number>((double)*(OCEntityHandlerFlag *)(arguments[0])),
-      js_OCEntityHandlerRequest(*(OCEntityHandlerRequest **)(arguments[1]))};
-  Local<Value> returnValue =
-      NanMakeCallback(NanGetCurrentContext()->Global(),
-                      NanNew(*(Persistent<Function> *)jsCallbackInPersistent),
-                      2, jsCallbackArguments);
+  Local<Value> jsCallbackArguments[2] = {NanNew<Number>(flag),
+                                         js_OCEntityHandlerRequest(request)};
+  Local<Value> returnValue = NanMakeCallback(
+      NanGetCurrentContext()->Global(),
+      NanNew(*(Persistent<Function> *)context), 2, jsCallbackArguments);
 
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsNumber, "OCEntityHandler");
 
-  *returnValueLocation =
-      (OCEntityHandlerResult)(returnValue->ToNumber()->Value());
+  return (OCEntityHandlerResult)(returnValue->Uint32Value());
 }
-
-// Create a callback_info structure for a given JS callback
-#define newInfoForJSCallback(callback)                                     \
-  callback_info_new((void *)persistentJSCallback_new((callback)),          \
-                    (UserDataRemover)persistentJSCallback_free,            \
-                    &ffi_type_uint32, (Marshaller)defaultEntityHandler, 2, \
-                    &ffi_type_uint32, &ffi_type_pointer)
 
 NAN_METHOD(bind_OCCreateResource) {
   NanScope();
@@ -63,24 +43,17 @@ NAN_METHOD(bind_OCCreateResource) {
   VALIDATE_ARGUMENT_TYPE(args, 5, IsUint32);
 
   OCResourceHandle handle = 0;
-  callback_info *info = 0;
+  Persistent<Function> *callback =
+      persistentJSCallback_new(Local<Function>::Cast(args[4]));
 
-  // Create a new callback
-  info = newInfoForJSCallback(Local<Function>::Cast(args[4]));
-  if (!info) {
-    NanThrowError("OCCreateResource: Unable to allocate C callback");
-    NanReturnUndefined();
-  }
-
-  Local<Number> returnValue = NanNew<Number>(
-      OCCreateResource(&handle, (const char *)*String::Utf8Value(args[1]),
-                       (const char *)*String::Utf8Value(args[2]),
-                       (const char *)*String::Utf8Value(args[3]),
-                       (OCEntityHandler)(info->resultingFunction),
-                       (uint8_t)args[5]->Uint32Value()));
+  Local<Number> returnValue = NanNew<Number>(OCCreateResource(
+      &handle, (const char *)*String::Utf8Value(args[1]),
+      (const char *)*String::Utf8Value(args[2]),
+      (const char *)*String::Utf8Value(args[3]), defaultEntityHandler,
+      (void *)callback, (uint8_t)args[5]->Uint32Value()));
 
   // Save info to the handle
-  annotation[handle] = info;
+  annotation[handle] = callback;
   js_OCResourceHandle(args[0]->ToObject(), handle);
 
   NanReturnValue(returnValue);
@@ -105,10 +78,10 @@ NAN_METHOD(bind_OCDeleteResource) {
 
   if (returnValue == OC_STACK_OK) {
     // If deleting the resource worked, get rid of the entity handler
-    callback_info *info = annotation[handle];
+    Persistent<Function> *callback = annotation[handle];
     annotation.erase(handle);
-    if (info) {
-      callback_info_free(info);
+    if (callback) {
+      persistentJSCallback_free(callback);
     }
   }
 
@@ -123,36 +96,31 @@ NAN_METHOD(bind_OCBindResourceHandler) {
   VALIDATE_ARGUMENT_TYPE(args, 1, IsFunction);
 
   OCResourceHandle handle = 0;
-  callback_info *info = 0;
 
   // Retrieve OCResourceHandle from JS object
   if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
     NanReturnUndefined();
   }
 
-  // Create a new callback
-  info = newInfoForJSCallback(Local<Function>::Cast(args[1]));
-  if (!info) {
-    NanThrowError("OCBindResourceHandler: Unable to allocate C callback");
-    NanReturnUndefined();
-  }
+  Persistent<Function> *callback =
+      persistentJSCallback_new(Local<Function>::Cast(args[1]));
 
   // Replace the existing entity handler with the new callback
   OCStackResult returnValue =
-      OCBindResourceHandler(handle, (OCEntityHandler)(info->resultingFunction));
+      OCBindResourceHandler(handle, defaultEntityHandler, (void *)callback);
 
   if (returnValue == OC_STACK_OK) {
     // If setting the new entity handler worked, get rid of the original entity
     // handler and associate the new one with the handle.
-    callback_info *old_info = annotation[handle];
-    if (old_info) {
-      callback_info_free(old_info);
+    Persistent<Function> *oldCallback = annotation[handle];
+    if (oldCallback) {
+      persistentJSCallback_free(oldCallback);
     }
-    annotation[handle] = info;
+    annotation[handle] = callback;
   } else {
     // If the stack was not able to make use of the new entity handler, get rid
-    // of the callback we created above.
-    callback_info_free(info);
+    // of the reference we created above.
+    persistentJSCallback_free(callback);
   }
 
   NanReturnValue(NanNew<Number>(returnValue));

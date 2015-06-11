@@ -67,9 +67,10 @@ static Local<Object> bind_OCQualityOfService() {
 static Local<Object> bind_OCResourceProperty() {
   Local<Object> returnValue = NanNew<Object>();
 
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_ACTIVE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_RES_PROP_NONE);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_DISCOVERABLE);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_OBSERVABLE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_ACTIVE);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_SLOW);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_SECURE);
 

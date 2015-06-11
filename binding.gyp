@@ -65,18 +65,13 @@
 				"src/functions/oc-do-response.cc",
 				"src/functions/oc-notify.cc",
 				"src/functions/simple.cc",
-				"src/functions.cc",
-				"src/callback-info.c"
+				"src/functions.cc"
 			],
-			"libraries": [ "<(PRODUCT_DIR)/libffi.a" ],
 			"conditions": [
 				[ "'<!(echo $TESTING)'=='true'",
 						{ "defines": [ "TESTING" ] } ]
 			],
-			"dependencies": [
-				"csdk",
-				"node_modules/ffi/deps/libffi/libffi.gyp:ffi"
-			]
+			"dependencies": [ "csdk" ]
 		},
 		{
 			"target_name": "client",
