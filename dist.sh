@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# npm install needs these variables to be in place. If they're not, let's try to establish them
+# using pkg-config.
+if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
+	export OCTBSTACK_CFLAGS=`pkg-config --cflags octbstack`
+fi
+
+if test "x${OCTBSTACK_LIBS}x" = "xx"; then
+	export OCTBSTACK_LIBS=`pkg-config --libs octbstack`
+fi
+
 rm -rf dist && \
 mkdir -p dist/iotivity &&
 npm install

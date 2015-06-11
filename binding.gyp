@@ -3,13 +3,13 @@
 		"include_dirs": [
 			"<!(node -e \"require('nan')\")"
 		],
-		"libraries": [ '<!@(pkg-config --libs octbstack)' ],
+		"libraries": [ '<!@(echo "$OCTBSTACK_LIBS")' ],
 		"cflags": [
-			'<!(pkg-config --cflags octbstack)'
+			'<!@(echo "$OCTBSTACK_CFLAGS")'
 		],
 		"cflags_cc": [ '-std=c++11' ],
 		"xcode_settings": {
-			"OTHER_CFLAGS": ['<!(pkg-config --cflags octbstack)']
+			"OTHER_CFLAGS": ['<!@(echo "$OCTBSTACK_CFLAGS")']
 		}
 	},
 	"targets": [
