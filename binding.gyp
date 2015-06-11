@@ -30,6 +30,11 @@
 				"src/callback-info.c"
 			],
 			"libraries": [ "<(PRODUCT_DIR)/libffi.a" ],
+			"xcode_settings": {
+				"OTHER_LDFLAGS": [
+					'-loctbstack', '-locsrm', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+				]
+			},
 			"conditions": [
 				[ "'<!(echo $TESTING)'=='true'",
 						{ "defines": [ "TESTING" ] } ]
