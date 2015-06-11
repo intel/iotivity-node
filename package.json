@@ -12,7 +12,8 @@
   "gypfile": true,
   "dependencies": {
     "bindings": "~1.2.1",
-    "nan": "^1.8.4"
+    "nan": "^1.8.4",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "async": "^0.9.0",
@@ -26,7 +27,6 @@
     "load-grunt-config": "^0.17.2",
     "load-grunt-tasks": "^3.2.0",
     "qunitjs": "^1.18.0",
-    "underscore": "^1.8.3",
     "uuid": "^2.0.1"
   }
 }
