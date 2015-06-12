@@ -6,7 +6,7 @@
 	"main": "index.js",
 	"scripts": {
 		"ci": "./ci.sh",
-		"test": "node tests/suite.js 'options={ \"testsPath\": \"tests\" }'"
+		"test": "node tests/suite.js 'options={ \"testsPath\": \"api-tests\" }'"
 	},
 	"gypfile": true,
 	"dependencies": {
