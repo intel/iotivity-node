@@ -13,7 +13,7 @@ var result, argumentIndex,
 	},
 	resourceHandle = {},
 	processLoop = null,
-	iotivity = require( "../index" ),
+	iotivity = require( "../lowlevel" ),
 	_ = require( "underscore" );
 
 // Merge options from the command line

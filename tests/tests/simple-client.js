@@ -1,6 +1,6 @@
 require( "../setup" );
 
-var iotivity = require( "../../index" ),
+var iotivity = require( "../../lowlevel" ),
 	testUtils = require( "../test-utils" )( iotivity, QUnit.assert ),
 
 	// Token that will make the trip from the server to the client. The test will assert that it is

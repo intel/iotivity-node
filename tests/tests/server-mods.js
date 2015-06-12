@@ -1,6 +1,6 @@
 require( "../setup" );
 
-var iotivity = require( "../../index" ),
+var iotivity = require( "../../lowlevel" ),
 	testUtils = require( "../test-utils" )( iotivity, QUnit.assert );
 
 function discoverSequence( teardown, sequence ) {

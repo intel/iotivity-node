@@ -1,6 +1,6 @@
 require( "../setup" );
 
-var iotivity = require( "../../index" ),
+var iotivity = require( "../../lowlevel" ),
 	testUtils = require( "../test-utils" )( iotivity, QUnit.assert );
 
 test( "Simple server", function( assert ) {

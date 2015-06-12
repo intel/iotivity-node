@@ -7,7 +7,7 @@ var result,
 	doHandle = {},
 	processLoop = null,
 	_ = require( "underscore" ),
-	iotivity = require( "../index" );
+	iotivity = require( "../lowlevel" );
 
 // Merge options from the command line
 for ( argumentIndex in process.argv ) {
