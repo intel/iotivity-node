@@ -5,7 +5,7 @@
 	"engine": "node 0.12.2",
 	"main": "index.js",
 	"scripts": {
-		"test": "node tests/suite.js"
+		"test": "node tests/suite.js options={ 'testsPath': 'tests' }"
 	},
 	"gypfile": true,
 	"dependencies": {

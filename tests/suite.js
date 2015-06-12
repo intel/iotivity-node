@@ -1,8 +1,27 @@
+function parseCommandLineOptions() {
+	var index,
+		returnValue = {};
+
+	for ( index in process.argv ) {
+		if ( process.argv[ index ].substr( 0, 8 ) === "options=" ) {
+			returnValue = JSON.parse( process.argv[ index ].substr( 8 ) );
+			break;
+		}
+	}
+
+	return returnValue;
+}
+
 var path = require( "path" ),
 	async = require( "async" ),
 	fs = require( "fs" ),
 	child_process = require( "child_process" ),
-	testsPath = path.join( __dirname, "tests" );
+	_ = require( "underscore" ),
+	options = _.extend( {
+			testsPath: "tests"
+		},
+		parseCommandLineOptions() ),
+	testsPath = path.join( __dirname, options.testsPath );
 
 // Spawn all tests in ./tests/ in separate node instances sequentially
 fs.readdir( testsPath, function( error, files ) {
