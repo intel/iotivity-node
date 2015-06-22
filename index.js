@@ -108,7 +108,44 @@ _.extend( OicDevice.prototype, {
 
 			fulfill();
 		}, this ) );
-	}
+	},
+
+  _server: _.extend( {
+    enablePresence: function ( ttl ) {
+      return new Promise( _.bind( function( fulfill, reject ) {
+        var result;
+
+        result = iotivity.OCStartPresence ( ttl );
+
+			  if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
+				  reject( _.extend( new Error( "enablePresence: OCStartPresence() failed" ), {
+					  result: result
+				  } ) );
+				  return;
+			  }
+
+			  fulfill();
+      }, this ) );
+    },
+
+    disablePresence: function () {
+      return new Promise( _.bind( function( fulfill, reject ) {
+        var result;
+
+        result = iotivity.OCStopPresence ();
+
+			  if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
+				  reject( _.extend( new Error( "enablePresence: OCStopPresence() failed" ), {
+					  result: result
+				  } ) );
+				  return;
+			  }
+
+			  fulfill();
+      }, this ) );
+    },
+
+  })
 } );
 
 module.exports = OicDevice;
