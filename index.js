@@ -36,7 +36,20 @@ var iotivity = require( "bindings" )( "iotivity" ),
 		if ( settings ) {
 			this._settings = settings;
 		}
-	};
+	},
+  OicResource = function ( init ) {
+    if ( !this._isOicResource ) {
+      return new OicResource( init );
+    }
+
+    if ( init )
+      _.extend( this, init );
+
+  };
+
+_.extend( OicResource.prototype, {
+  _isOicResource: true,
+} );
 
 _.extend( OicDevice.prototype, {
 	_isOicDevice: true,
@@ -111,11 +124,78 @@ _.extend( OicDevice.prototype, {
 	},
 
   _server: _.extend( {
+    onrequest: null,
+    listeners: {},
+
+    addEventListener: function ( event, callback ) {
+      if ( !( event in listeners ) ) {
+        listeners[ event ] = [];
+      }
+      // Currently allows duplicate callbacks. Should it?
+      listeners[ event ].push( callback );
+    },
+
+    removeEventListener: function ( event, callback ) {
+      if ( event in listeners ) {
+        listeners [ event ] = listeners [ event ].filter ( function ( ev ) {
+          return ev !== callback;
+        });
+      }
+    },
+
+    dispatchEvent: function ( event, request ) {
+      if ( typeof self [ "on" + event ] === "function" ) {
+        self [ "on" + event ] ( request );
+      }
+      if ( event in listeners ) {
+        for ( var i = 0, len = listeners [ event ].length; i < len; i++ ) {
+          listeners [ event ] [ i ].call( self, request );
+        }
+      }
+    },
+
+    registerResource: function ( init ) {
+      return new Promise( _.bind( function( fulfill, reject ) {
+        var result = 0;
+        var flag = 0;
+        var handle = {};
+        var resource = new OicResource ( init );
+
+        if ( init.discoverable )
+          flag |= iotivity.OCResourceProperty.OC_DISCOVERABLE;
+
+        if ( init.observable )
+          flag |= iotivity.OCResourceProperty.OC_OBSERVABLE;
+
+        result = iotivity.OCCreateResource (
+            handle,
+            init.resourceTypes [ 0 ], //FIXME: API SPEC mentions an array.Vagule remember that the first type is default from the Oic Spec. Check it up.
+            init.interfaces [ 0 ], //FIXME: API SPEC mentions an array.Vagule remember that the first type is default from the Oic Spec. Check it up.
+            init.url,
+            function ( flag, request ) {
+              /* Handle the request and raise events accordingly */
+            },
+            flag );
+
+			  if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
+				  reject( _.extend( new Error( "enablePresence: OCStartPresence() failed" ), {
+					  result: result
+				  } ) );
+				  return;
+			  }
+
+        resource.id = handle; //FIXME: What whould be the id? Something unique or the handle?
+
+			  fulfill( resource );
+      }, this ) );
+
+    },
+
     enablePresence: function ( ttl ) {
       return new Promise( _.bind( function( fulfill, reject ) {
         var result;
 
-        result = iotivity.OCStartPresence ( ttl );
+        result = iotivity.OCStartPresence ( ttl ? ttl : 0 );
 
 			  if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
 				  reject( _.extend( new Error( "enablePresence: OCStartPresence() failed" ), {
@@ -148,4 +228,4 @@ _.extend( OicDevice.prototype, {
   })
 } );
 
-module.exports = OicDevice;
+module.exports = OicDevice, OicResource;
