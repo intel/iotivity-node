@@ -1,6 +1,6 @@
 require( "../setup" );
 
-var OicDevice = require( "../../index" );
+var OicDevice = require( "../../index" ).OicDevice;
 
 test( "Start the stack", function( assert ) {
 	var done = assert.async();
