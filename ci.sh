@@ -44,7 +44,7 @@ mkdir -p ./depbuild || exit 1
 # Download and build iotivity from tarball
 cd ./depbuild || exit 1
 	wget -O iotivity.tar.gz 'https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=0.9.1;sf=tgz' || exit 1
-	tar xzf iotivity.tar.gz || exit 1
+	tar xvzf iotivity.tar.gz || exit 1
 
 	cd iotivity || exit 1
 		IOTIVITY_PATH="$( pwd )"
