@@ -5,6 +5,7 @@
 	"engine": "node 0.12.2",
 	"main": "index.js",
 	"scripts": {
+		"ci": "./ci.sh",
 		"test": "node tests/suite.js 'options={ \"testsPath\": \"tests\" }'"
 	},
 	"gypfile": true,

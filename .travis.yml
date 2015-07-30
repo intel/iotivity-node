@@ -1,0 +1,17 @@
+sudo: false
+
+language: cpp
+
+install:
+- if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - libboost-all-dev
+    - uuid-dev
+    - g++-4.8
+
+script: npm run-script ci
