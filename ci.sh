@@ -59,4 +59,4 @@ cd ../../ || exit 1
 # Run ./dist.sh
 OCTBSTACK_CFLAGS="-I${IOTIVITY_PATH}/resource/csdk/stack/include" \
 OCTBSTACK_LIBS="-loctbstack -L${OUTPUT_PATH} -Wl,-rpath ${OUTPUT_PATH}" \
-./dist.sh || exit 1
+./dist.sh --testonly || exit 1

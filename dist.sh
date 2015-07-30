@@ -19,6 +19,10 @@ if ! npm test; then
 	exit 1
 fi
 
+if test "x$1x" = "x--testonlyx"; then
+	exit 0
+fi
+
 npm prune --production &&
 cp -a AUTHORS.txt index.js MIT-LICENSE.txt node_modules README.md dist/iotivity &&
 mkdir -p dist/iotivity/build/Release &&
