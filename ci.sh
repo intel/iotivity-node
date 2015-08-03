@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CSDK_REVISION="0.9.1"
+
 set -x
 
 get_output_path() {
@@ -43,7 +45,7 @@ mkdir -p ./depbuild || exit 1
 
 # Download and build iotivity from tarball
 cd ./depbuild || exit 1
-	wget -O iotivity.tar.gz 'https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=0.9.1;sf=tgz' || exit 1
+	wget -O iotivity.tar.gz 'https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h='"${CSDK_REVISION}"';sf=tgz' || exit 1
 	tar xvzf iotivity.tar.gz || exit 1
 
 	# There should only be one directory inside this directory, so using the wildcard evaluates
