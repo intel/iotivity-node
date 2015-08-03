@@ -34,6 +34,7 @@ cat src/enums.cc | \
 # Parse header for enums
 cat ${INCLUDE_PATH}/octypes.h | \
   grep -vE '#(ifdef|define|endif)|^\s*/' | \
+  grep -v '^$' | \
   awk -v PRINT=0 -v OUTPUT="" -v ENUM_LIST="" '{
     if ( $0 == "typedef enum" ) PRINT=1;
     if ( PRINT == 1 ) {
