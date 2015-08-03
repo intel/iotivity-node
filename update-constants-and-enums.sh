@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Update constants in src/main.cc and enums in src/enums.cc. This file uses pkgconfig to determine
-# the location of octypes.h and ocstackconfig.h.
+# the location of octypes.h and ocstackconfig.h, but only if the environment variable
+# OCTBSTACK_CFLAGS is unset.
 #
 # Both src/main.cc and src/enums.cc contain the comment "// The rest of this file is generated".
 # This script preserves the file up to and including the comment, and discards the rest of the
