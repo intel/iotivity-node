@@ -86,6 +86,9 @@ cd ./depbuild || exit 1
 	# There should only be one directory inside this directory, so using the wildcard evaluates
 	# exactly to it
 	cd iotivity* || exit 1
+
+		# iotivity wants us to clone this before it'll do anything
+		git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor
 		IOTIVITY_PATH="$( pwd )"
 		OUTPUT_PATH="${IOTIVITY_PATH}/$( get_output_path )"
 		test "x${OUTPUT_PATH}x" = "xx" && exit 1

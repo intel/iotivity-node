@@ -14,6 +14,7 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - libboost-all-dev
+    - libcurl4-openssl-dev
     - uuid-dev
     - g++-4.8
 
