@@ -1,6 +1,23 @@
 # iotivity-node
+
 ## Description
 This project provides [iotivity](http://iotivity.org/) node.js bindings.
+
+## Build status
+<dl>
+	<dt>master:</dt>
+	<dd>
+		<a href="https://travis-ci.org/otcshare/iotivity-node">
+			<img alt="Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=master"></img>
+		</a>
+	</dd>
+	<dt>special-api:</dt>
+	<dd>
+		<a href="https://travis-ci.org/otcshare/iotivity-node">
+			<img alt="Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=special-api"></img>
+		</a>
+	</dd>
+</dl>
 
 ## Installation
 
