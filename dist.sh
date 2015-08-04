@@ -1,5 +1,17 @@
 #!/bin/bash
 
+TESTONLY=""
+DEBUG=""
+
+while [[ $# > 0 ]]; do
+	if test "x$1x" = "x--testonlyx"; then
+		TESTONLY="TRUE"
+	elif test "x$1x" = "x--debugx"; then
+		DEBUG="--debug"
+	fi
+	shift
+done
+
 # npm install needs these variables to be in place. If they're not, let's try to establish them
 # using pkg-config.
 if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
@@ -12,14 +24,14 @@ fi
 
 rm -rf dist && \
 mkdir -p dist/iotivity &&
-npm install
+npm install ${DEBUG}
 
 if ! npm test; then
 	echo "Repair build first."
 	exit 1
 fi
 
-if test "x$1x" = "x--testonlyx"; then
+if test "x${TESTONLY}x" = "xTRUEx"; then
 	exit 0
 fi
 
