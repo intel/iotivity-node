@@ -14,15 +14,53 @@ using namespace v8;
 
 // The rest of this file is generated
 
-static Local<Object> bind_OCVirtualResources() {
+static Local<Object> bind_OCTransportAdapter() {
   Local<Object> returnValue = NanNew<Object>();
 
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_WELL_KNOWN_URI);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_DEVICE_URI);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_PLATFORM_URI);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_RESOURCE_TYPES_URI);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_PRESENCE);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_MAX_VIRTUAL_RESOURCES);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_DEFAULT_ADAPTER);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_ADAPTER_IP);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_ADAPTER_GATT_BTLE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_ADAPTER_RFCOMM_BTEDR);
+
+  return returnValue;
+}
+
+static Local<Object> bind_OCTransportFlags() {
+  Local<Object> returnValue = NanNew<Object>();
+
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_DEFAULT_FLAGS);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_FLAG_SECURE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_IP_USE_V6);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_IP_USE_V4);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_RESERVED1);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_SCOPE_INTERFACE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_SCOPE_LINK);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_SCOPE_REALM);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_SCOPE_ADMIN);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_SCOPE_SITE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_SCOPE_ORG);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_SCOPE_GLOBAL);
+
+  return returnValue;
+}
+
+static Local<Object> bind_OCConnectivityType() {
+  Local<Object> returnValue = NanNew<Object>();
+
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_DEFAULT);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_ADAPTER_IP);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_ADAPTER_GATT_BTLE);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_ADAPTER_RFCOMM_BTEDR);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_FLAG_SECURE);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_IP_USE_V6);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_IP_USE_V4);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_SCOPE_INTERFACE);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_SCOPE_LINK);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_SCOPE_REALM);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_SCOPE_ADMIN);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_SCOPE_SITE);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_SCOPE_ORG);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_SCOPE_GLOBAL);
 
   return returnValue;
 }
@@ -39,6 +77,7 @@ static Local<Object> bind_OCMethod() {
   SET_CONSTANT_MEMBER(returnValue, Number, OC_REST_OBSERVE_ALL);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_REST_CANCEL_OBSERVE);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_REST_PRESENCE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_REST_DISCOVER);
 
   return returnValue;
 }
@@ -73,6 +112,7 @@ static Local<Object> bind_OCResourceProperty() {
   SET_CONSTANT_MEMBER(returnValue, Number, OC_ACTIVE);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_SLOW);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_SECURE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_EXPLICIT_DISCOVERABLE);
 
   return returnValue;
 }
@@ -82,18 +122,6 @@ static Local<Object> bind_OCTransportProtocolID() {
 
   SET_CONSTANT_MEMBER(returnValue, Number, OC_INVALID_ID);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_COAP_ID);
-
-  return returnValue;
-}
-
-static Local<Object> bind_OCConnectivityType() {
-  Local<Object> returnValue = NanNew<Object>();
-
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_IPV4);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_IPV6);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_EDR);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_LE);
-  SET_CONSTANT_MEMBER(returnValue, Number, OC_ALL);
 
   return returnValue;
 }
@@ -131,6 +159,7 @@ static Local<Object> bind_OCStackResult() {
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_INVALID_REQUEST_HANDLE);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_INVALID_DEVICE_INFO);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_INVALID_JSON);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_UNAUTHORIZED_REQ);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_PRESENCE_STOPPED);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_PRESENCE_TIMEOUT);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_PRESENCE_DO_NOT_HANDLE);
@@ -163,6 +192,34 @@ static Local<Object> bind_OCEntityHandlerResult() {
   return returnValue;
 }
 
+static Local<Object> bind_OCPayloadType() {
+  Local<Object> returnValue = NanNew<Object>();
+
+  SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_INVALID);
+  SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_DISCOVERY);
+  SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_DEVICE);
+  SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_PLATFORM);
+  SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_REPRESENTATION);
+  SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_SECURITY);
+  SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_PRESENCE);
+
+  return returnValue;
+}
+
+static Local<Object> bind_OCRepPayloadPropType() {
+  Local<Object> returnValue = NanNew<Object>();
+
+  SET_CONSTANT_MEMBER(returnValue, Number, OCREP_PROP_NULL);
+  SET_CONSTANT_MEMBER(returnValue, Number, OCREP_PROP_INT);
+  SET_CONSTANT_MEMBER(returnValue, Number, OCREP_PROP_DOUBLE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OCREP_PROP_BOOL);
+  SET_CONSTANT_MEMBER(returnValue, Number, OCREP_PROP_STRING);
+  SET_CONSTANT_MEMBER(returnValue, Number, OCREP_PROP_OBJECT);
+  SET_CONSTANT_MEMBER(returnValue, Number, OCREP_PROP_ARRAY);
+
+  return returnValue;
+}
+
 static Local<Object> bind_OCEntityHandlerFlag() {
   Local<Object> returnValue = NanNew<Object>();
 
@@ -182,16 +239,19 @@ static Local<Object> bind_OCStackApplicationResult() {
 }
 
 void InitEnums(Handle<Object> exports) {
-  SET_ENUM(exports, OCVirtualResources);
+  SET_ENUM(exports, OCTransportAdapter);
+  SET_ENUM(exports, OCTransportFlags);
+  SET_ENUM(exports, OCConnectivityType);
   SET_ENUM(exports, OCMethod);
   SET_ENUM(exports, OCMode);
   SET_ENUM(exports, OCQualityOfService);
   SET_ENUM(exports, OCResourceProperty);
   SET_ENUM(exports, OCTransportProtocolID);
-  SET_ENUM(exports, OCConnectivityType);
   SET_ENUM(exports, OCStackResult);
   SET_ENUM(exports, OCObserveAction);
   SET_ENUM(exports, OCEntityHandlerResult);
+  SET_ENUM(exports, OCPayloadType);
+  SET_ENUM(exports, OCRepPayloadPropType);
   SET_ENUM(exports, OCEntityHandlerFlag);
   SET_ENUM(exports, OCStackApplicationResult);
 }

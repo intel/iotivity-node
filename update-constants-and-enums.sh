@@ -40,8 +40,10 @@ cat ${INCLUDE_PATH}/octypes.h | \
     if ( PRINT == 1 ) {
       if ( !( $1 ~ /^[{}]/ ) && $1 != "typedef" )
         OUTPUT = OUTPUT "  SET_CONSTANT_MEMBER(returnValue, Number, " $1 ");\n";
-      else if ( $1 == "}" ) {
-        ENUM_NAME = substr( $2, 1, length( $2 ) - 1 );
+      else if ( $1 ~ /^}/ ) {
+	    ENUM_NAME = $0;
+	    gsub( /^} */, "", ENUM_NAME );
+	    gsub( / *;.*$/, "", ENUM_NAME );
         ENUM_LIST = ENUM_LIST "  SET_ENUM(exports, " ENUM_NAME ");\n";
         print("static Local<Object> bind_" ENUM_NAME "() {\n  Local<Object> returnValue = NanNew<Object>();\n" );
       }
