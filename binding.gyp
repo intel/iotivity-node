@@ -68,66 +68,11 @@
 				"src/functions.cc"
 			],
 			"conditions": [
-				[ "'<!(echo $TESTING)'=='true'",
-						{ "defines": [ "TESTING" ] } ]
+				[ "'<!(echo $TESTING)'=='true'", {
+					"defines": [ "TESTING" ]
+				} ]
 			],
 			"dependencies": [ "csdk" ]
-		},
-		{
-			"target_name": "client",
-			"dependencies": [ "csdk" ],
-			"type": "executable",
-			"sources": [ "c/client.c" ],
-			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
-			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ],
-			"xcode_settings": {
-				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
-				"OTHER_LDFLAGS": [
-					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
-				]
-			}
-		},
-		{
-			"target_name": "client.observe",
-			"dependencies": [ "csdk" ],
-			"type": "executable",
-			"sources": [ "c/client.observe.c" ],
-			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
-			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ],
-			"xcode_settings": {
-				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
-				"OTHER_LDFLAGS": [
-					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
-				]
-			}
-		},
-		{
-			"target_name": "server",
-			"dependencies": [ "csdk" ],
-			"type": "executable",
-			"sources": [ "c/server.c" ],
-			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
-			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ],
-			"xcode_settings": {
-				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
-				"OTHER_LDFLAGS": [
-					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
-				]
-			}
-		},
-		{
-			"target_name": "server.observable",
-			"dependencies": [ "csdk" ],
-			"type": "executable",
-			"sources": [ "c/server.observable.c" ],
-			"libraries": [ '<!(pkg-config --libs glib-2.0)' ],
-			"cflags": [ '<!(pkg-config --cflags glib-2.0)' ],
-			"xcode_settings": {
-				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
-				"OTHER_LDFLAGS": [
-					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
-				]
-			}
 		}
 	]
 }
