@@ -72,8 +72,7 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   }
 
   Local<Number> returnValue = NanNew<Number>(
-      OCNotifyListOfObservers(handle, c_observations, numberOfIds,
-                              (const char *)*String::Utf8Value(args[3]),
+      OCNotifyListOfObservers(handle, c_observations, numberOfIds, 0,
                               (OCQualityOfService)args[4]->Uint32Value()));
 
   free(c_observations);

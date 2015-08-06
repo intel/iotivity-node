@@ -71,12 +71,6 @@ Local<Object> js_OCClientResponse(OCClientResponse *response) {
   jsResponse->Set(NanNew<String>("sequenceNumber"),
                   NanNew<Number>(response->sequenceNumber));
 
-  // jsResponse.resJSONPayload
-  if (response->resJSONPayload) {
-    jsResponse->Set(NanNew<String>("resJSONPayload"),
-                    NanNew<String>(response->resJSONPayload));
-  }
-
   addHeaderOptions(jsResponse, response->numRcvdVendorSpecificHeaderOptions,
                    response->rcvdVendorSpecificHeaderOptions);
 
@@ -126,13 +120,6 @@ bool c_OCEntityHandlerResponse(OCEntityHandlerResponse *destination,
     NanThrowRangeError("payload is longer than MAX_RESPONSE_LENGTH");
     return false;
   }
-
-  // Zero out the destination and copy the string into it, and indicate the
-  // payload size
-  memset(destination->payload, 0, MAX_RESPONSE_LENGTH);
-  strncpy(destination->payload, (const char *)*String::Utf8Value(payload),
-          MAX_RESPONSE_LENGTH);
-  destination->payloadSize = payloadLength;
 
   // numSendVendorSpecificHeaderOptions
   Local<Value> numSendVendorSpecificHeaderOptions =
@@ -260,11 +247,6 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
   obsInfo->Set(NanNew<String>("obsId"), NanNew<Number>(request->obsInfo.obsId));
   jsRequest->Set(NanNew<String>("obsInfo"), obsInfo);
 
-  if (request->reqJSONPayload) {
-    jsRequest->Set(NanNew<String>("reqJSONPayload"),
-                   NanNew<String>(request->reqJSONPayload));
-  }
-
   addHeaderOptions(jsRequest, request->numRcvdVendorSpecificHeaderOptions,
                    request->rcvdVendorSpecificHeaderOptions);
 
@@ -274,9 +256,6 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
 Local<Object> js_OCDevAddr(OCDevAddr *address) {
   uint32_t addressIndex;
   Local<Object> returnValue = NanNew<Object>();
-
-  // addr.size
-  returnValue->Set(NanNew<String>("size"), NanNew<Number>(address->size));
 
   // addr.addr
   Local<Array> addrAddr = NanNew<Array>(DEV_ADDR_SIZE_MAX);
@@ -314,7 +293,6 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
   }
 
   // Fill in the destination structure
-  address->size = size->Uint32Value();
   memcpy(address->addr, addr, DEV_ADDR_SIZE_MAX * sizeof(uint8_t));
 
   return true;

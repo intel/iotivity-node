@@ -20,7 +20,7 @@ NAN_METHOD(bind_OCDoResponse) {
   VALIDATE_ARGUMENT_COUNT(args, 1);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
 
-  response.payload = payload;
+  response.payload = 0;
 
   if (c_OCEntityHandlerResponse(&response, args[0]->ToObject())) {
     NanReturnValue(NanNew<Number>(OCDoResponse(&response)));

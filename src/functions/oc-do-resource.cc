@@ -11,7 +11,7 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-// Create an object containing the information from an OCCLientResponse
+// Create an object containing the information from an OCClientResponse
 // structure
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
@@ -105,14 +105,12 @@ NAN_METHOD(bind_OCDoResource) {
     options = oc_header_options_new(Handle<Array>::Cast(args[8]));
   }
 
-  Local<Number> returnValue = NanNew<Number>((double)OCDoResource(
-      &handle, (OCMethod)args[1]->Uint32Value(),
-      (const char *)*String::Utf8Value(args[2]),
-      (const char *)(args[3]->IsString() ? (*String::Utf8Value(args[3])) : 0),
-      (const char *)(args[4]->IsString() ? (*String::Utf8Value(args[4])) : 0),
-      (OCConnectivityType)args[5]->Uint32Value(),
-      (OCQualityOfService)args[6]->Uint32Value(), &data, options,
-      (uint8_t)args[9]->Uint32Value()));
+  Local<Number> returnValue = NanNew<Number>(
+      (double)OCDoResource(&handle, (OCMethod)args[1]->Uint32Value(),
+                           (const char *)*String::Utf8Value(args[2]), 0, 0,
+                           (OCConnectivityType)args[5]->Uint32Value(),
+                           (OCQualityOfService)args[6]->Uint32Value(), &data,
+                           options, (uint8_t)args[9]->Uint32Value()));
 
   options = oc_header_options_free(options);
 

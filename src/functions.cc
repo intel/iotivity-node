@@ -18,8 +18,6 @@ void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   SET_FUNCTION(exports, OCInit);
   SET_FUNCTION(exports, OCStop);
   SET_FUNCTION(exports, OCProcess);
-  SET_FUNCTION(exports, OCDevAddrToIPv4Addr);
-  SET_FUNCTION(exports, OCDevAddrToPort);
   SET_FUNCTION(exports, OCCreateResource);
   SET_FUNCTION(exports, OCBindResourceHandler);
   SET_FUNCTION(exports, OCBindResource);
