@@ -60,6 +60,7 @@
 				"src/enums.cc",
 				"src/constants.cc",
 				"src/structures.cc",
+				"src/structures/oc-dev-addr.cc",
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
 				"src/functions/oc-do-response.cc",

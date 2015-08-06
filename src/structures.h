@@ -2,6 +2,7 @@
 #define __IOTIVITY_NODE_STRUCTURES_H__
 
 #include <v8.h>
+#include "structures/oc-dev-addr.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -26,10 +27,5 @@ bool c_OCResourceHandle(OCResourceHandle *destination,
 
 v8::Local<v8::Object> js_OCEntityHandlerRequest(
     OCEntityHandlerRequest *request);
-
-v8::Local<v8::Object> js_OCDevAddr(OCDevAddr *address);
-
-// Fills in @address
-bool c_OCDevAddr(v8::Local<v8::Object> jsDevAddr, OCDevAddr *address);
 
 #endif /* __IOTIVITY_NODE_STRUCTURES_H__ */
