@@ -1,7 +1,8 @@
 #include <node_buffer.h>
 #include "oc-do-resource.h"
 #include "../common.h"
-#include "../structures.h"
+#include "../structures/oc-header-option-array.h"
+#include "../structures/oc-client-response.h"
 
 extern "C" {
 #include <stdlib.h>
@@ -31,60 +32,15 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
   return (OCStackApplicationResult)returnValue->Uint32Value();
 }
 
-static OCHeaderOption *oc_header_options_new(Handle<Array> array) {
-  int index, optionIndex, optionLength;
-  int count = array->Length();
-  OCHeaderOption *options =
-      (OCHeaderOption *)malloc(sizeof(OCHeaderOption) * count);
-
-  if (options) {
-    for (index = 0; index < count; index++) {
-      options[index].protocolID = (OCTransportProtocolID)array->Get(index)
-                                      ->ToObject()
-                                      ->Get(NanNew<String>("protocolID"))
-                                      ->Uint32Value();
-      options[index].optionID = (uint16_t)array->Get(index)
-                                    ->ToObject()
-                                    ->Get(NanNew<String>("optionID"))
-                                    ->Uint32Value();
-      options[index].optionLength = (uint16_t)array->Get(index)
-                                        ->ToObject()
-                                        ->Get(NanNew<String>("optionLength"))
-                                        ->Uint32Value();
-
-      Handle<Array> jsOption = Handle<Array>::Cast(
-          array->Get(index)->ToObject()->Get(NanNew<String>("optionData")));
-      optionLength = jsOption->Length();
-      optionLength = (optionLength > MAX_HEADER_OPTION_DATA_LENGTH)
-                         ? MAX_HEADER_OPTION_DATA_LENGTH
-                         : optionLength;
-
-      for (optionIndex = 0; optionIndex < optionLength; optionIndex++) {
-        options[index].optionData[optionIndex] =
-            (uint8_t)jsOption->Get(optionIndex)->Uint32Value();
-      }
-    }
-  }
-
-  return options;
-}
-
-// Always returns NULL
-static OCHeaderOption *oc_header_options_free(OCHeaderOption *options) {
-  if (options) {
-    free((void *)options);
-  }
-  return 0;
-}
-
 NAN_METHOD(bind_OCDoResource) {
   NanScope();
 
   OCHeaderOption *options = 0;
+  uint8_t optionCount = 0;
   OCDoHandle handle;
   OCCallbackData data;
 
-  VALIDATE_ARGUMENT_COUNT(args, 9);
+  VALIDATE_ARGUMENT_COUNT(args, 8);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);
   VALIDATE_ARGUMENT_TYPE(args, 2, IsString);
@@ -94,7 +50,6 @@ NAN_METHOD(bind_OCDoResource) {
   VALIDATE_ARGUMENT_TYPE(args, 6, IsUint32);
   VALIDATE_ARGUMENT_TYPE(args, 7, IsFunction);
   VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 8, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 9, IsUint32);
 
   data.context =
       (void *)persistentJSCallback_new(Local<Function>::Cast(args[7]));
@@ -102,7 +57,9 @@ NAN_METHOD(bind_OCDoResource) {
   data.cd = (OCClientContextDeleter)persistentJSCallback_free;
 
   if (args[8]->IsArray()) {
-    options = oc_header_options_new(Handle<Array>::Cast(args[8]));
+  	if ( !c_OCHeaderOption( Local<Array>::Cast( args[ 8 ] ), &options, &optionCount ) ) {
+		NanReturnUndefined();
+	}
   }
 
   Local<Number> returnValue = NanNew<Number>(
@@ -112,7 +69,9 @@ NAN_METHOD(bind_OCDoResource) {
                            (OCQualityOfService)args[6]->Uint32Value(), &data,
                            options, (uint8_t)args[9]->Uint32Value()));
 
-  options = oc_header_options_free(options);
+	if ( optionCount > 0 ) {
+		free( options );
+	}
 
   args[0]->ToObject()->Set(
       NanNew<String>("handle"),

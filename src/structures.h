@@ -3,12 +3,13 @@
 
 #include <v8.h>
 #include "structures/oc-dev-addr.h"
+#include "structures/oc-header-option-array.h"
+#include "structures/oc-client-response.h"
+#include "structures/oc-payload.h"
 
 extern "C" {
 #include <ocstack.h>
 }
-
-v8::Local<v8::Object> js_OCClientResponse(OCClientResponse *response);
 
 // Fills in @destination. @destination->payload is assumed to be allocated of
 // size

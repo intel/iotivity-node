@@ -11,72 +11,6 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-static void addHeaderOptions(Local<Object> jsObject, uint8_t optionCount,
-                             OCHeaderOption *options) {
-  uint32_t optionIndex, optionDataIndex;
-
-  // numRcvdVendorSpecificHeaderOptions
-  jsObject->Set(NanNew<String>("numRcvdVendorSpecificHeaderOptions"),
-                NanNew<Number>(optionCount));
-
-  // rcvdVendorSpecificHeaderOptions
-  Local<Array> headerOptions = NanNew<Array>(optionCount);
-
-  // rcvdVendorSpecificHeaderOptions[ index ]
-  for (optionIndex = 0; optionIndex < optionCount; optionIndex++) {
-    Local<Object> headerOption = NanNew<Object>();
-
-    // response.rcvdVendorSpecificHeaderOptions[ index ].protocolID
-    headerOption->Set(NanNew<String>("protocolID"),
-                      NanNew<Number>(options[optionIndex].protocolID));
-
-    // response.rcvdVendorSpecificHeaderOptions[ index ].optionID
-    headerOption->Set(NanNew<String>("optionID"),
-                      NanNew<Number>(options[optionIndex].optionID));
-
-    // response.rcvdVendorSpecificHeaderOptions[ index ].optionLength
-    headerOption->Set(NanNew<String>("optionLength"),
-                      NanNew<Number>(options[optionIndex].optionLength));
-
-    // response.rcvdVendorSpecificHeaderOptions[ index ].optionData
-    Local<Array> headerOptionData =
-        NanNew<Array>(options[optionIndex].optionLength);
-    for (optionDataIndex = 0;
-         optionDataIndex < options[optionIndex].optionLength;
-         optionDataIndex++) {
-      headerOptionData->Set(
-          optionDataIndex,
-          NanNew<Number>(options[optionIndex].optionData[optionDataIndex]));
-    }
-    headerOption->Set(NanNew<String>("optionData"), headerOptionData);
-    headerOptions->Set(optionIndex, headerOption);
-  }
-  jsObject->Set(NanNew<String>("rcvdVendorSpecificHeaderOptions"),
-                headerOptions);
-}
-
-Local<Object> js_OCClientResponse(OCClientResponse *response) {
-  Local<Object> jsResponse = NanNew<Object>();
-
-  jsResponse->Set(NanNew<String>("addr"), js_OCDevAddr(response->addr));
-
-  // jsResponse.connType
-  jsResponse->Set(NanNew<String>("connType"),
-                  NanNew<Number>(response->connType));
-
-  // jsResponse.result
-  jsResponse->Set(NanNew<String>("result"), NanNew<Number>(response->result));
-
-  // jsResponse.sequenceNumber
-  jsResponse->Set(NanNew<String>("sequenceNumber"),
-                  NanNew<Number>(response->sequenceNumber));
-
-  addHeaderOptions(jsResponse, response->numRcvdVendorSpecificHeaderOptions,
-                   response->rcvdVendorSpecificHeaderOptions);
-
-  return jsResponse;
-}
-
 bool c_OCEntityHandlerResponse(OCEntityHandlerResponse *destination,
                                v8::Local<Object> jsOCEntityHandlerResponse) {
   // requestHandle
@@ -247,8 +181,8 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
   obsInfo->Set(NanNew<String>("obsId"), NanNew<Number>(request->obsInfo.obsId));
   jsRequest->Set(NanNew<String>("obsInfo"), obsInfo);
 
-  addHeaderOptions(jsRequest, request->numRcvdVendorSpecificHeaderOptions,
-                   request->rcvdVendorSpecificHeaderOptions);
+	jsRequest->Set( NanNew<String>( "rcvdVendorSpecificHeaderOptions" ),
+		js_OCHeaderOption( request->rcvdVendorSpecificHeaderOptions, request->numRcvdVendorSpecificHeaderOptions ) );
 
   return jsRequest;
 }
