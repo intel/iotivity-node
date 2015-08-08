@@ -46,7 +46,7 @@ test( "Simple server", function( assert ) {
 
 	// Since some of our assertions are inside asynchronously called functions, this asserts that
 	// all the assertions are reached, but it does not assert the order in which they are reached.
-	assert.expect( 6 );
+	assert.expect( 10 );
 
 	// Make sure the stack starts up correctly
 	if ( testUtils.testStartup( iotivity.OCMode.OC_SERVER ) ===
@@ -56,21 +56,13 @@ test( "Simple server", function( assert ) {
 		result = iotivity.OCCreateResource(
 			handle,
 			"core.light",
-			"oc.mi.def",
+			iotivity.OC_RSRVD_INTERFACE_DEFAULT,
 			resourcePath,
 			function( flag, request ) {
-				var receivedRequest = request.reqJSONPayload ?
-					JSON.parse( request.reqJSONPayload ) : undefined;
-
-				assert.deepEqual( receivedRequest, magicRequest,
-					"Entity handler has received the correct request" );
-				teardown();
-
 				return iotivity.OCEntityHandlerResult.OC_EH_OK;
 			},
-			iotivity.OCResourceProperty.OC_DISCOVERABLE |
-			iotivity.OCResourceProperty.OC_OBSERVABLE );
-		assert.deepEqual(
+			iotivity.OCResourceProperty.OC_DISCOVERABLE );
+		assert.strictEqual(
 			testUtils.lookupEnumValueName( "OCStackResult", result ),
 			"OC_STACK_OK",
 			"OCCreateResource succeeded" );
@@ -89,8 +81,12 @@ test( "Simple server", function( assert ) {
 
 			// Start a test client which will send a request to the server under test
 			stopTestClient = testUtils.startTestClient( teardown, {
-				path: resourcePath,
-				request: magicRequest
+				method: "OC_REST_DISCOVER",
+				logResponse: function( response ) {
+					testUtils.assertPathFromResponse( assert, response, resourcePath );
+					teardown();
+				},
+				path: iotivity.OC_RSRVD_WELL_KNOWN_URI
 			} );
 		}
 	}

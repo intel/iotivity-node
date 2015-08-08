@@ -10,6 +10,18 @@ var _ = require( "underscore" ),
 	this._assert = assert;
 };
 
+function findResourceByUri( resources, uri ) {
+	var index;
+
+	for ( index in resources ) {
+		if ( resources[ index ].uri === uri ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 // Launch a JS file in a child process with certain provisions:
 // 1. Pass a single command line argument: options=<JSON string>
 // 2. Make sure that when this process exits the child process is TERMinated
@@ -80,6 +92,18 @@ _.extend( testUtils.prototype, {
 		}, this );
 	},
 
+	assertPathFromResponse: function( assert, response, resourcePath ) {
+		assert.ok( response, "Response received" );
+		assert.ok( response.payload, "Response has payload" );
+		assert.ok( response.payload.resources, "Payload has resources" );
+		assert.ok(
+			response.payload.resources.length,
+			"At least one resource is present" );
+		assert.ok(
+			findResourceByUri( response.payload.resources, resourcePath ),
+			"Test resource found" );
+	},
+
 	startTestServer: function( whenReady, teardown, options ) {
 		return testApp( "test-server.js", options,
 			_.bind( function testServerOutputHandler( jsonObject ) {
@@ -94,9 +118,14 @@ _.extend( testUtils.prototype, {
 	},
 
 	startTestClient: function( teardown, options, dataHandler ) {
+		var responseCallback = options.logResponse;
+
+		_.extend( options, { logResponse : !!options.logResponse } );
 		return testApp( "test-client.js", options, dataHandler ? dataHandler :
 			_.bind( function testClientOutputHandler( jsonObject ) {
-				if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
+				if ( jsonObject[ "OCDoResource response" ] !== undefined ) {
+					responseCallback( jsonObject[ "OCDoResource response" ] );
+				} else if ( jsonObject.result !== this._iotivity.OCStackResult.OC_STACK_OK ) {
 					teardown();
 				}
 			}, this ) );

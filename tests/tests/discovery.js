@@ -1,17 +1,5 @@
 require( "../setup" );
 
-function findResourceByUri( resources, uri ) {
-	var index;
-
-	for ( index in resources ) {
-		if ( resources[ index ].uri === uri ) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 var iotivity = require( "../../index" ),
 	testUtils = require( "../test-utils" )( iotivity, QUnit.assert ),
 	resourcePath = "/simple-client-" + Math.round( Math.random() * 1048576 );
@@ -77,15 +65,7 @@ test( "Resource discovery", function( assert ) {
 					iotivity.OCConnectivityType.CT_DEFAULT,
 					iotivity.OCQualityOfService.OC_HIGH_QOS,
 					function( handle, response ) {
-						assert.ok( response, "Response received" );
-						assert.ok( response.payload, "Response has payload" );
-						assert.ok( response.payload.resources, "Payload has resources" );
-						assert.ok(
-							response.payload.resources.length,
-							"At least one resource is present" );
-						assert.ok(
-							findResourceByUri( response.payload.resources, resourcePath ),
-							"Test resource found" );
+						testUtils.assertPathFromResponse( assert, response, resourcePath );
 						teardown();
 					},
 					null );

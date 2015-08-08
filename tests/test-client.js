@@ -1,5 +1,6 @@
 var result,
 	options = {
+		method: "OC_REST_GET",
 		path: "/a/light",
 		logResponse: false,
 		request: null
@@ -20,6 +21,7 @@ result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
 
 console.log( JSON.stringify( {
 	call: "OCInit",
+	options: options,
 	result: result
 } ) );
 
@@ -35,24 +37,29 @@ if ( result === iotivity.OCStackResult.OC_STACK_OK ) {
 		}
 	}, 100 );
 
-	result = iotivity.OCDoResource(
-		doHandle,
-		iotivity.OCMethod.OC_REST_GET,
-		options.path,
-		null,
-		JSON.stringify( options.request ),
-		iotivity.OCConnectivityType.OC_ALL,
-		iotivity.OCQualityOfService.OC_LOW_QOS,
-		function( handle, response ) {
-			if ( options.logResponse ) {
-				console.log( JSON.stringify( {
-					"OCDoResource response": response
-				} ) );
-			}
-			return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
-		},
-		null,
-		0 );
+	try {
+		result = iotivity.OCDoResource(
+			doHandle,
+			iotivity.OCMethod[ options.method ],
+			options.path,
+			null,
+			options.request ? options.request : null,
+			iotivity.OCConnectivityType.CT_DEFAULT,
+			iotivity.OCQualityOfService.OC_HIGH_QOS,
+			function( handle, response ) {
+
+				if ( options.logResponse ) {
+					console.log( JSON.stringify( {
+						"OCDoResource response": response
+					} ) );
+				}
+				return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
+			},
+			null,
+			0 );
+	} catch( e ) {
+		result = e.message;
+	}
 
 	console.log( JSON.stringify( {
 		call: "OCDoResource",
