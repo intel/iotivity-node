@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CSDK_REVISION="0.9.2-RC2"
+CSDK_REVISION="0.9.2-RC3"
 
 if test "x$1x" = "x--debugx"; then
 	SCONS_FLAGS="RELEASE=False"
