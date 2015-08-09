@@ -3,29 +3,47 @@
 		"include_dirs": [
 			"<!(node -e \"require('nan')\")"
 		],
-		"libraries":
-			[ '<!@(if test "x${EXTERNAL_OCTBSTACK}x" = "xx"; then echo "-L$(pwd)/deps/iotivity/lib -loctbstack -Wl,-rpath $(pwd)/deps/iotivity/lib"; else echo "$OCTBSTACK_LIBS"; fi)' ],
-		"cflags":
-			[ '<!@(if test "x${EXTERNAL_OCTBSTACK}x" = "xx"; then echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include"; else echo "$OCTBSTACK_CFLAGS"; fi)' ],
-		"cflags_cc": [ '-std=c++11' ],
-		"xcode_settings": {
-			"OTHER_CFLAGS":
-				[ '<!@(if test "x${EXTERNAL_OCTBSTACK}x" = "xx"; then echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include"; else echo "$OCTBSTACK_CFLAGS"; fi)' ]
-		}
+		"conditions": [
+			[ "'<!(echo $EXTERNAL_OCTBSTACK)'==''", {
+				"libraries": [
+					'<!@(echo "-L$(pwd)/deps/iotivity/lib -loctbstack -Wl,-rpath $(pwd)/deps/iotivity/lib")'
+				],
+				"cflags": [
+					'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")'
+				],
+				"xcode_settings": {
+					"OTHER_CFLAGS": [
+						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")'
+					]
+				}
+			} ],
+			[ "'<!(echo $EXTERNAL_OCTBSTACK)'!=''", {
+				"libraries": [ '<!@(echo "$OCTBSTACK_LIBS")' ],
+				"cflags": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ],
+				"xcode_settings": {
+					"OTHER_CFLAGS": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ]
+				}
+			} ]
+		],
+		"cflags_cc": [ '-std=c++11' ]
 	},
 	"targets": [
 		{
 			"target_name": "csdk",
-			"actions": [ {
-				"action_name": "build",
-				"inputs": [],
-				"outputs": [
-					"deps/iotivity/lib/liboctbstack.so",
-					"deps/iotivity/include"
-				],
-				"action": [ "sh",  "./build-csdk.sh" ],
-				"message": "Building CSDK"
-			} ]
+			"conditions": [
+				[ "'<!(echo $EXTERNAL_OCTBSTACK)'==''", {
+					"actions": [ {
+						"action_name": "build",
+						"inputs": [],
+						"outputs": [
+							"deps/iotivity/lib/liboctbstack.so",
+							"deps/iotivity/include"
+						],
+						"action": [ "sh",  "./build-csdk.sh" ],
+						"message": "Building CSDK"
+					} ]
+				} ]
+			]
 		},
 		{
 			"target_name": "iotivity",
