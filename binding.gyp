@@ -42,7 +42,11 @@
 							"deps/iotivity/lib/liboctbstack.so",
 							"deps/iotivity/include"
 						],
-						"action": [ "sh",  "./build-csdk.sh" ],
+						"action": [
+							"sh",
+							"./build-csdk.sh",
+							'<!@(if test "x${npm_config_debug}x" == "xtruex"; then echo "--debug"; else echo ""; fi)'
+						],
 						"message": "Building CSDK"
 					} ]
 				} ]

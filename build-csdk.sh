@@ -2,10 +2,14 @@
 
 CSDK_REVISION="0.9.1"
 
+if test "x$1x" = "x--debugx"; then
+	SCONS_FLAGS="RELEASE=False"
+fi
+
 set -x
 
 get_output_path() {
-	scons -h | \
+	scons $SCONS_FLAGS -h | \
 	awk \
 		-v 'release=""' \
 		-v 'os=""' \
@@ -85,7 +89,7 @@ cd ./depbuild || exit 1
 		IOTIVITY_PATH="$( pwd )"
 		OUTPUT_PATH="${IOTIVITY_PATH}/$( get_output_path )"
 		test "x${OUTPUT_PATH}x" = "xx" && exit 1
-		scons liboctbstack || { cat config.log; exit 1; }
+		scons $SCONS_FLAGS liboctbstack || { cat config.log; exit 1; }
 		install || exit 1
 
 cd ../../ || exit 1
