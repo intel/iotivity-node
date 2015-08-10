@@ -94,4 +94,6 @@ cd ./depbuild || exit 1
 
 cd ../../ || exit 1
 
-rm -rf depbuild || exit 1
+if test "x$1x" != "x--debugx"; then
+	rm -rf depbuild || exit 1
+fi
