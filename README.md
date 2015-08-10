@@ -23,6 +23,8 @@ This project provides [iotivity](http://iotivity.org/) node.js bindings.
 
 ### For the impatient:
 0. Install development headers for boost, libuuid, and glib 2.0
+
+    boost headers and the boost library are needed during the build process, but iotivity-node does not ultimately depend on the boost library.
 0. Install scons
 0. Run ```npm install```
 
@@ -77,6 +79,8 @@ If you wish to run the client on one machine and the server on another, make sur
 ## Tests
 
 To run the tests, simply run ```npm test```. A script called ```dist.sh``` is also provided. It runs ```npm install```, runs the tests, then runs ```npm prune --production``` to remove all sources, headers, and build dependencies. After that, it copies relevant files to ```dist/``` and creates a tarball from them. This is followed by running ```npm install``` again to restore the development environment.
+
+The ```dist.sh``` script accepts the optional command line argument ```--testonly```. This will cause the script to exit after having run the tests.
 
 ## Maintenance
 
