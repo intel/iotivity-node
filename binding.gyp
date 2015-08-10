@@ -1,6 +1,6 @@
 {
 	"variables": {
-		"externalOCTBStack": '<!(if test "x${OCTBSTACK_CFLAGS}x" == "xx" -o "x${OCTBSTACK_CFLAGS}x" == "xx"; then echo false; else echo true; fi)',
+		"externalOCTBStack": '<!(if test "x${OCTBSTACK_CFLAGS}x" != "xx" -a "x${OCTBSTACK_CFLAGS}x" != "xx"; then echo true; else echo false; fi)',
 	},
 	"target_defaults": {
 		"include_dirs": [
@@ -45,7 +45,7 @@
 						"action": [
 							"sh",
 							"./build-csdk.sh",
-							'<!@(if test "x${npm_config_debug}x" == "xtruex"; then echo "--debug"; else echo ""; fi)'
+							'<!@(if test "x${npm_config_debug}x" != "xtruex"; then echo ""; else echo "--debug"; fi)'
 						],
 						"message": "Building CSDK"
 					} ]
