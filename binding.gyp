@@ -1,10 +1,13 @@
 {
+	"variables": {
+		"externalOCTBStack": '<!(if test "x${OCTBSTACK_CFLAGS}x" == "xx" -o "x${OCTBSTACK_CFLAGS}x" == "xx"; then echo false; else echo true; fi)',
+	},
 	"target_defaults": {
 		"include_dirs": [
 			"<!(node -e \"require('nan')\")"
 		],
 		"conditions": [
-			[ "'<!(echo $EXTERNAL_OCTBSTACK)'==''", {
+			[ "'<(externalOCTBStack)'=='false'", {
 				"libraries": [
 					'<!@(echo "-L$(pwd)/deps/iotivity/lib -loctbstack -Wl,-rpath $(pwd)/deps/iotivity/lib")'
 				],
@@ -17,7 +20,7 @@
 					]
 				}
 			} ],
-			[ "'<!(echo $EXTERNAL_OCTBSTACK)'!=''", {
+			[ "'<(externalOCTBStack)'=='true'", {
 				"libraries": [ '<!@(echo "$OCTBSTACK_LIBS")' ],
 				"cflags": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ],
 				"xcode_settings": {
@@ -31,7 +34,7 @@
 		{
 			"target_name": "csdk",
 			"conditions": [
-				[ "'<!(echo $EXTERNAL_OCTBSTACK)'==''", {
+				[ "'<(externalOCTBStack)'=='false'", {
 					"actions": [ {
 						"action_name": "build",
 						"inputs": [],
