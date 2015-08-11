@@ -121,9 +121,9 @@ dictionary OicDeviceInfo {
 };
 
 interface OicClient: EventTarget {
-  // client API: discovery
-  Promise<sequence<OicResource>> findResources(OicDiscoveryOptions options);  // GET oic/res
-  Promise<sequence<OicDeviceInfo>> findDevices(OicDiscoveryOptions options);  // GET /oic/d
+  // client API: discovery; Promise succeeds when request is successfully sent
+  Promise<void> findResources(OicDiscoveryOptions options);  // GET oic/res
+  Promise<void> findDevices(OicDiscoveryOptions options);  // GET /oic/d
 
   // client API: CRUDN
   Promise<OicResource> createResource(OicResourceInit resource);  // create remote res
@@ -134,6 +134,8 @@ interface OicClient: EventTarget {
   Promise<void> cancelObserving(USVString id);
 
   attribute EventHandler<OicResourceChangeEvent> onresourcechange;  // observe
+  attribute EventHandler<OicResourceFoundEvent> onresourcefound;  // discovery
+  attribute EventHandler<OicDeviceFoundEvent> ondevicefound;  // discovery
 };
 
 interface OicServer: EventTarget {
@@ -172,6 +174,14 @@ interface OicResourceChangedEvent : Event {
   enum { “add”, “update”, “remove” } type;
   OicResource resource;
   DOMString[] updatedPropertyNames; // only for updates, for the rest empty
+};
+
+interface OicResourceFoundEvent : Event {
+  OicResource resource;
+};
+
+interface OicDeviceFoundEvent : Event {
+  OicDeviceInfo device;
 };
 
 dictionary OicDiscoveryOptions {  // all properties are null by default, meaning “find all”
@@ -285,14 +295,15 @@ function requestHandler(request) {
 // update dimming the local blue light, then request dimming the remote light
 function startClient() {
   // discover resources
+  device.client.onresourcefound = function(event) {
+    if(event.resource && event.resource.url == "/light/ambience/red")
+      observe(device, res);
+  }
   device.client.findResources({ resourceType: “Light” })
-    .then((list) => {
-      foreach(res in list) {
-         if(res.url == "/light/ambience/red")
-           observe(device, res);
-      }
+    .then( () => {
+      console.log("Resource discovery started.");
     }).catch((e) => {
-          console.log("Error finding resources: " + e.message);
+      console.log("Error finding resources: " + e.message);
     });
 };
 
