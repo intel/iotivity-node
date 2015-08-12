@@ -2,6 +2,7 @@
 	"name": "iotivity",
 	"version": "0.9.2",
 	"description": "IoTivity bindings",
+	"repository": "https://github.com/otcshare/iotivity-node/",
 	"engine": "node 0.12.2",
 	"main": "index.js",
 	"scripts": {
