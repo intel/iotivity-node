@@ -55,23 +55,23 @@
 		{
 			"target_name": "iotivity",
 			"sources": [
-				"src/enums.cc",
-				"src/structures.cc",
-				"src/main.cc",
-				"src/structures/handles.cc",
-				"src/structures/oc-payload.cc",
-				"src/structures/oc-client-response.cc",
-				"src/structures/oc-header-option-array.cc",
-				"src/structures/oc-entity-handler-response.cc",
-				"src/structures/oc-dev-addr.cc",
-				"src/functions.cc",
-				"src/constants.cc",
 				"src/common.cc",
+				"src/constants.cc",
+				"src/enums.cc",
+				"src/functions.cc",
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
-				"src/functions/oc-notify.cc",
 				"src/functions/oc-do-response.cc",
-				"src/functions/simple.cc"
+				"src/functions/oc-notify.cc",
+				"src/functions/simple.cc",
+				"src/main.cc",
+				"src/structures.cc",
+				"src/structures/handles.cc",
+				"src/structures/oc-client-response.cc",
+				"src/structures/oc-dev-addr.cc",
+				"src/structures/oc-entity-handler-response.cc",
+				"src/structures/oc-header-option-array.cc",
+				"src/structures/oc-payload.cc"
 			],
 			"conditions": [
 				[ "'<!(echo $TESTING)'=='true'", {

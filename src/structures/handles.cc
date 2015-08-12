@@ -4,20 +4,20 @@
 
 using namespace v8;
 
-static Local<Array> jsArrayFromBytes( char *bytes, size_t length ) {
+static Local<Array> jsArrayFromBytes( unsigned char *bytes, size_t length ) {
 	size_t index;
 	Local<Array> returnValue = NanNew<Array>( length );
 
 	for ( index = 0 ; index < length ; index++ ) {
 		returnValue->ForceSet(
-			NanNew<Uint32>( index ),
-			NanNew<Uint32>( bytes[ index ] ),
+			NanNew<Number>( index ),
+			NanNew<Number>( bytes[ index ] ),
 			( PropertyAttribute )( ReadOnly | DontEnum | DontDelete ) );
 	}
 	return returnValue;
 }
 
-static bool fillCArrayFromJSArray( char *bytes, size_t length, Local<Array> array ) {
+static bool fillCArrayFromJSArray( unsigned char *bytes, size_t length, Local<Array> array ) {
 	size_t index, arrayLength;
 
 	arrayLength = array->Length();
@@ -29,7 +29,7 @@ static bool fillCArrayFromJSArray( char *bytes, size_t length, Local<Array> arra
 	for ( index = 0 ; index < length ; index++ ) {
 		Local<Value> byte = array->Get( index );
 		VALIDATE_VALUE_TYPE( byte, IsUint32, "byte array item", false );
-		PropertyAttribute attributes = array->GetPropertyAttributes( NanNew<Uint32>( index ) );
+		PropertyAttribute attributes = array->GetPropertyAttributes( NanNew<Number>( index ) );
 		if ( !( attributes & ( ReadOnly | DontEnum | DontDelete ) ) ) {
 			NanThrowError( "byte array item has been tampered with" );
 			return false;
@@ -41,13 +41,13 @@ static bool fillCArrayFromJSArray( char *bytes, size_t length, Local<Array> arra
 }
 
 Local<Array> js_OCResourceHandle( OCResourceHandle handle ) {
-	return jsArrayFromBytes( ( ( char * )( &handle ) ), sizeof( OCResourceHandle ) );
+	return jsArrayFromBytes( ( ( unsigned char * )( &handle ) ), sizeof( OCResourceHandle ) );
 }
 
 bool c_OCResourceHandle( Local<Array> handle, OCResourceHandle *p_cHandle ) {
 	OCResourceHandle local;
 
-	if ( !fillCArrayFromJSArray( ( ( char * )&local ), sizeof( OCResourceHandle ), handle ) ) {
+	if ( !fillCArrayFromJSArray( ( ( unsigned char * )&local ), sizeof( OCResourceHandle ), handle ) ) {
 		return false;
 	}
 
@@ -56,13 +56,13 @@ bool c_OCResourceHandle( Local<Array> handle, OCResourceHandle *p_cHandle ) {
 }
 
 Local<Array> js_OCRequestHandle( OCRequestHandle handle ) {
-	return jsArrayFromBytes( ( ( char * )( &handle ) ), sizeof( OCRequestHandle ) );
+	return jsArrayFromBytes( ( ( unsigned char * )( &handle ) ), sizeof( OCRequestHandle ) );
 }
 
 bool c_OCRequestHandle( Local<Array> handle, OCRequestHandle *p_cHandle ) {
 	OCRequestHandle local;
 
-	if ( !fillCArrayFromJSArray( ( ( char * )&local ), sizeof( OCRequestHandle ), handle ) ) {
+	if ( !fillCArrayFromJSArray( ( ( unsigned char * )&local ), sizeof( OCRequestHandle ), handle ) ) {
 		return false;
 	}
 
@@ -71,13 +71,13 @@ bool c_OCRequestHandle( Local<Array> handle, OCRequestHandle *p_cHandle ) {
 }
 
 Local<Array> js_OCDoHandle( OCDoHandle handle ) {
-	return jsArrayFromBytes( ( ( char * )( &handle ) ), sizeof( OCDoHandle ) );
+	return jsArrayFromBytes( ( ( unsigned char * )( &handle ) ), sizeof( OCDoHandle ) );
 }
 
 bool c_OCDoHandle( Local<Array> handle, OCDoHandle *p_cHandle ) {
 	OCDoHandle local;
 
-	if ( !fillCArrayFromJSArray( ( ( char * )&local ), sizeof( OCDoHandle ), handle ) ) {
+	if ( !fillCArrayFromJSArray( ( ( unsigned char * )&local ), sizeof( OCDoHandle ), handle ) ) {
 		return false;
 	}
 
