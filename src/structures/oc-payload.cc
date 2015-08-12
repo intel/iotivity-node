@@ -12,7 +12,7 @@ extern "C" {
 
 using namespace v8;
 
-static bool c_OCRepPayload( OCRepPayload **p_payload, Local<Object> jsPayload );
+static bool c_OCRepPayload( Local<Object> jsPayload, OCRepPayload **p_payload );
 static Local<Object> js_OCRepPayload( OCRepPayload *payload );
 
 static Local<Value> stringOrUndefined( char *str ) {
@@ -373,7 +373,7 @@ static bool fillArray( void *flatArray, int *p_index, Local<Array> array, OCRepP
 					case OCREP_PROP_OBJECT:
 						{
 							OCRepPayload *theObject = 0;
-							if ( c_OCRepPayload( &theObject, member->ToObject() ) ) {
+							if ( c_OCRepPayload( member->ToObject(), &theObject ) ) {
 								( ( OCRepPayload ** )flatArray )[ (*p_index)++ ] = theObject;
 							} else {
 
@@ -432,7 +432,7 @@ static bool flattenArray( Local<Array> array, void **flatArray, size_t dimension
 	return true;
 }
 
-static bool c_OCRepPayload( OCRepPayload **p_payload, Local<Object> jsPayload ) {
+static bool c_OCRepPayload( Local<Object> jsPayload, OCRepPayload **p_payload ) {
 	uint32_t index, length;
 	OCRepPayload *payload = OCRepPayloadCreate();
 
@@ -515,7 +515,7 @@ static bool c_OCRepPayload( OCRepPayload **p_payload, Local<Object> jsPayload ) 
 			} else if ( value->IsObject() ) {
 				OCRepPayload *child_payload = 0;
 
-				if ( c_OCRepPayload( &child_payload, value->ToObject() ) ) {
+				if ( c_OCRepPayload( value->ToObject(), &child_payload ) ) {
 					if ( !OCRepPayloadSetPropObjectAsOwner( payload, (const char *)*String::Utf8Value( keys->Get( index ) ),
 							child_payload ) ) {
 						NanThrowError( "reppayload: Failed to set object property" );
@@ -552,7 +552,7 @@ static bool c_OCRepPayload( OCRepPayload **p_payload, Local<Object> jsPayload ) 
 		Local<Value> next = jsPayload->Get( NanNew<String>( "next" ) );
 		VALIDATE_VALUE_TYPE_OR_FREE( next, IsObject, "reppayload.next", false, payload, OCRepPayloadDestroy );
 		OCRepPayload *next_payload = 0;
-		if ( !c_OCRepPayload( &next_payload, next->ToObject() ) ) {
+		if ( !c_OCRepPayload( next->ToObject(), &next_payload ) ) {
 			OCRepPayloadDestroy( payload );
 			return false;
 		}
@@ -563,14 +563,14 @@ static bool c_OCRepPayload( OCRepPayload **p_payload, Local<Object> jsPayload ) 
 	return true;
 }
 
-bool c_OCPayload( OCPayload **p_payload, Local<Object> jsPayload ) {
+bool c_OCPayload( Local<Object> jsPayload, OCPayload **p_payload ) {
 	if ( !jsPayload->IsNull() ) {
 		Local<Value> type = jsPayload->Get( NanNew<String>( "type" ) );
 		VALIDATE_VALUE_TYPE( type, IsNumber, "payload.type", false );
 
 		switch( type->Uint32Value() ) {
 			case PAYLOAD_TYPE_REPRESENTATION:
-				return c_OCRepPayload( ( OCRepPayload ** )p_payload, jsPayload );
+				return c_OCRepPayload( jsPayload, ( OCRepPayload ** )p_payload );
 
 			default:
 				NanThrowError( "Support for this payload type not implemented" );

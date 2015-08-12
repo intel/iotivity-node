@@ -87,7 +87,7 @@ NAN_METHOD(bind_OCDoResource) {
 
 	// If a payload is given, we only use it if it can be converted to a OCPayload *
 	if ( args[ 4 ]->IsObject() ) {
-		if ( !c_OCPayload( &payload, args[ 4 ]->ToObject() ) ) {
+		if ( !c_OCPayload( args[ 4 ]->ToObject(), &payload ) ) {
 			if ( options ) {
 				free( options );
 			}
