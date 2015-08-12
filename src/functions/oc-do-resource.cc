@@ -1,6 +1,6 @@
-#include <node_buffer.h>
 #include "oc-do-resource.h"
 #include "../common.h"
+#include "../structures/handles.h"
 #include "../structures/oc-header-option-array.h"
 #include "../structures/oc-client-response.h"
 #include "../structures/oc-dev-addr.h"
@@ -21,7 +21,7 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
   // Call the JS Callback
   Local<Value> jsCallbackArguments[2] = {
-      NanNewBufferHandle((char *)&handle, sizeof(OCDoHandle)),
+      js_OCDoHandle( handle ),
       js_OCClientResponse(clientResponse)};
   Local<Value> returnValue = NanMakeCallback(
       NanGetCurrentContext()->Global(),
@@ -62,8 +62,14 @@ NAN_METHOD(bind_OCDoResource) {
   data.cd = (OCClientContextDeleter)persistentJSCallback_free;
 
   if (args[8]->IsArray()) {
-  	if ( !c_OCHeaderOption( Local<Array>::Cast( args[ 8 ] ), &options, &optionCount ) ) {
+  	options = (OCHeaderOption *)malloc( Local<Array>::Cast( args[ 8 ] )->Length() * sizeof( OCHeaderOption ) );
+	if ( !options ) {
+		return NanThrowError( "Ran out of memory attempting to allocate header options" );
 		NanReturnUndefined();
+	}
+  	if ( !c_OCHeaderOption( Local<Array>::Cast( args[ 8 ] ), options, &optionCount ) ) {
+		NanReturnUndefined();
+		free( options );
 	}
   }
 
@@ -72,6 +78,9 @@ NAN_METHOD(bind_OCDoResource) {
 		if ( c_OCDevAddr( args[ 3 ]->ToObject(), &destinationToFillIn ) ) {
 			destination = &destinationToFillIn;
 		} else {
+			if ( options ) {
+				free( options );
+			}
 			NanReturnUndefined();
 		}
 	}
@@ -79,6 +88,9 @@ NAN_METHOD(bind_OCDoResource) {
 	// If a payload is given, we only use it if it can be converted to a OCPayload *
 	if ( args[ 4 ]->IsObject() ) {
 		if ( !c_OCPayload( &payload, args[ 4 ]->ToObject() ) ) {
+			if ( options ) {
+				free( options );
+			}
 			NanReturnUndefined();
 		}
 	}
@@ -91,13 +103,11 @@ NAN_METHOD(bind_OCDoResource) {
                            (OCQualityOfService)args[6]->Uint32Value(), &data,
                            options, (uint8_t)args[9]->Uint32Value()));
 
-	if ( optionCount > 0 ) {
+	if ( options ) {
 		free( options );
 	}
 
-  args[0]->ToObject()->Set(
-      NanNew<String>("handle"),
-      NanNewBufferHandle((const char *)&handle, sizeof(OCDoHandle)));
+  args[0]->ToObject()->Set( NanNew<String>("handle"), js_OCDoHandle( handle ) );
 
   NanReturnValue(returnValue);
 }

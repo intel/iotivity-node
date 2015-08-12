@@ -4,6 +4,7 @@
 #include <map>
 
 #include "../common.h"
+#include "../structures/handles.h"
 #include "../structures.h"
 
 extern "C" {
@@ -54,8 +55,7 @@ NAN_METHOD(bind_OCCreateResource) {
 
   // Save info to the handle
   annotation[handle] = callback;
-  js_OCResourceHandle(args[0]->ToObject(), handle);
-
+  args[ 0 ]->ToObject()->Set( NanNew<String>( "handle" ), js_OCResourceHandle( handle ) );
   NanReturnValue(returnValue);
 }
 
@@ -63,13 +63,13 @@ NAN_METHOD(bind_OCDeleteResource) {
   NanScope();
 
   VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
 
   OCStackResult returnValue;
   OCResourceHandle handle = 0;
 
   // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
+  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
     NanReturnUndefined();
   }
 
@@ -92,13 +92,13 @@ NAN_METHOD(bind_OCBindResourceHandler) {
   NanScope();
 
   VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsFunction);
 
   OCResourceHandle handle = 0;
 
   // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
+  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
     NanReturnUndefined();
   }
 
@@ -132,13 +132,13 @@ NAN_METHOD(bind_OCBindResource) {
   OCResourceHandle collectionHandle = 0, resourceHandle = 0;
 
   VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
 
-  if (!c_OCResourceHandle(&collectionHandle, args[0]->ToObject())) {
+  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &collectionHandle)) {
     NanReturnUndefined();
   }
-  if (!c_OCResourceHandle(&resourceHandle, args[1]->ToObject())) {
+  if (!c_OCResourceHandle(Local<Array>::Cast( args[1] ), &resourceHandle)) {
     NanReturnUndefined();
   }
 
@@ -152,10 +152,10 @@ NAN_METHOD(bind_OCBindResourceInterfaceToResource) {
   OCResourceHandle handle = 0;
 
   VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
 
-  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
+  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
     NanReturnUndefined();
   }
 
@@ -169,10 +169,10 @@ NAN_METHOD(bind_OCBindResourceTypeToResource) {
   OCResourceHandle handle = 0;
 
   VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
 
-  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
+  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
     NanReturnUndefined();
   }
 

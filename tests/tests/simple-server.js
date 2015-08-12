@@ -31,7 +31,7 @@ test( "Simple server", function( assert ) {
 			}
 
 			// Make sure OCDeleteResource works correctly
-			result = iotivity.OCDeleteResource( handle );
+			result = iotivity.OCDeleteResource( handle.handle );
 			assert.deepEqual(
 				testUtils.lookupEnumValueName( "OCStackResult", result ),
 				"OC_STACK_OK",

@@ -32,6 +32,7 @@ process.on( "SIGINT", function() {
 
 	// Tear down the processing loop and stop iotivity
 	clearInterval( intervalId );
+	iotivity.OCDeleteResource( handle.handle );
 	iotivity.OCStop();
 
 	// Exit

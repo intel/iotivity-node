@@ -24,7 +24,31 @@ iotivity.OCCreateResource(
 	function( flag, request ) {
 		console.log( "Entity handler called with flag = " + flag + " and the following request:" );
 		console.log( JSON.stringify( request, null, 4 ) );
-		return iotivity.OCEntityHandlerResult.OC_EH_OK;
+
+		// If we find the magic question in the request, we return the magic answer
+		if ( request && request.payload && request.payload.values &&
+				request.payload.values.question ===
+					"How many angels can dance on the head of a pin?" ) {
+
+			iotivity.OCDoResponse( {
+				requestHandle: request.requestHandle,
+				resourceHandle: request.resource,
+				ehResult: iotivity.OCEntityHandlerResult.OC_EH_OK,
+				payload: {
+					type: 4,
+					values: {
+						"answer": "As many as wanting."
+					}
+				},
+				resourceUri: sampleUri,
+				sendVendorSpecificHeaderOptions: []
+			} );
+
+			return iotivity.OCEntityHandlerResult.OC_EH_OK;
+		}
+
+		// By default we error out
+		return iotivity.OCEntityHandlerResult.OC_EH_ERROR;
 	},
 	iotivity.OCResourceProperty.OC_DISCOVERABLE );
 
@@ -35,6 +59,7 @@ process.on( "SIGINT", function() {
 
 	// Tear down the processing loop and stop iotivity
 	clearInterval( intervalId );
+	iotivity.OCDeleteResource( handle.handle );
 	iotivity.OCStop();
 
 	// Exit

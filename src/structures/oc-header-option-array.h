@@ -7,8 +7,6 @@ extern "C" {
 }
 
 v8::Local<v8::Array> js_OCHeaderOption( OCHeaderOption *options, uint8_t optionCount );
-
-// The pointer stored in p_options needs to be freed with free()
-bool c_OCHeaderOption( v8::Local<v8::Array> options, OCHeaderOption **p_options, uint8_t *p_optionCount );
+bool c_OCHeaderOption( v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options, uint8_t *p_optionCount );
 
 #endif /* __IOTIVITY_NODE_OCHEADEROPTION_ARRAY__ */

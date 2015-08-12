@@ -3,7 +3,7 @@
 #include <nan.h>
 
 #include "../common.h"
-#include "../structures.h"
+#include "../structures/handles.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -16,11 +16,11 @@ NAN_METHOD(bind_OCNotifyAllObservers) {
   NanScope();
 
   VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsNumber);
 
   OCResourceHandle handle;
-  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
+  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
     NanReturnUndefined();
   }
 
@@ -32,14 +32,14 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   NanScope();
 
   VALIDATE_ARGUMENT_COUNT(args, 5);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 2, IsNumber);
   VALIDATE_ARGUMENT_TYPE(args, 3, IsString);
   VALIDATE_ARGUMENT_TYPE(args, 4, IsNumber);
 
   OCResourceHandle handle;
-  if (!c_OCResourceHandle(&handle, args[0]->ToObject())) {
+  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
     NanReturnUndefined();
   }
 
