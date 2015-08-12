@@ -9,14 +9,6 @@ extern "C" {
 
 using namespace v8;
 
-#define VALIDATE_VALUE_TYPE_OR_FREE(value, typecheck, message, failReturn, pointer_to_free, free_function) \
-  if (!(value)->typecheck()) {                                     \
-    NanThrowTypeError(message " must satisfy " #typecheck "()");   \
-	free_function((pointer_to_free));                                      \
-    return failReturn;                                             \
-  }
-
-
 v8::Local<v8::Array> js_OCHeaderOption( OCHeaderOption *options, uint8_t optionCount ) {
 	uint8_t index;
 	uint16_t dataIndex;

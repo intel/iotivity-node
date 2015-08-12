@@ -18,7 +18,9 @@ Local<Object> js_OCClientResponse( OCClientResponse *response ) {
 	returnValue->Set( NanNew<String>( "devAddr" ), js_OCDevAddr( &( response->devAddr ) ) );
 
 	// response.addr
-	returnValue->Set( NanNew<String>( "addr" ), js_OCDevAddr( response->addr ) );
+	if ( response->addr ) {
+		returnValue->Set( NanNew<String>( "addr" ), js_OCDevAddr( response->addr ) );
+	}
 
 	// response.connType
 	returnValue->Set( NanNew<String>( "connType" ), NanNew<Number>( response->connType ) );
@@ -30,10 +32,14 @@ Local<Object> js_OCClientResponse( OCClientResponse *response ) {
 	returnValue->Set( NanNew<String>( "sequenceNumber" ), NanNew<Number>( response->sequenceNumber ) );
 
 	// response.resourceUri
-	returnValue->Set( NanNew<String>( "resourceUri" ), NanNew<String>( response->resourceUri ) );
+	if ( response->resourceUri ) {
+		returnValue->Set( NanNew<String>( "resourceUri" ), NanNew<String>( response->resourceUri ) );
+	}
 
 	// response.payload
-	returnValue->Set( NanNew<String>( "payload" ), js_OCPayload( response->payload ) );
+	if ( response->payload ) {
+		returnValue->Set( NanNew<String>( "payload" ), js_OCPayload( response->payload ) );
+	}
 
 	// response.rcvdVendorSpecificHeaderOptions
 	returnValue->Set( NanNew<String>( "rcvdVendorSpecificHeaderOptions" ),

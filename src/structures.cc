@@ -184,5 +184,10 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
 	jsRequest->Set( NanNew<String>( "rcvdVendorSpecificHeaderOptions" ),
 		js_OCHeaderOption( request->rcvdVendorSpecificHeaderOptions, request->numRcvdVendorSpecificHeaderOptions ) );
 
+	jsRequest->Set( NanNew<String>( "devAddr" ), js_OCDevAddr( &( request->devAddr ) ) );
+	if ( request->payload ) {
+		jsRequest->Set( NanNew<String>( "payload" ), js_OCPayload( request->payload ) );
+	}
+
   return jsRequest;
 }

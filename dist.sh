@@ -12,6 +12,12 @@ while [[ $# > 0 ]]; do
 	shift
 done
 
+if test "x${DEBUG}x" = "xx"; then
+	MODULE_LOCATION="Release"
+else
+	MODULE_LOCATION="Debug"
+fi
+
 # npm install needs these variables to be in place. If they're not, let's try to establish them
 # using pkg-config.
 if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
@@ -37,8 +43,8 @@ fi
 
 npm prune --production &&
 cp -a AUTHORS.txt index.js MIT-LICENSE.txt node_modules README.md dist/iotivity &&
-mkdir -p dist/iotivity/build/Release &&
-cp build/Release/iotivity.node dist/iotivity/build/Release &&
+mkdir -p dist/iotivity/build/${MODULE_LOCATION} &&
+cp build/${MODULE_LOCATION}/iotivity.node dist/iotivity/build/${MODULE_LOCATION} &&
 if test -d deps; then
 	mkdir -p dist/iotivity/deps/iotivity/lib
 	cp deps/iotivity/lib/liboctbstack.so dist/iotivity/deps/iotivity/lib
@@ -46,4 +52,4 @@ fi
 cd dist &&
 tar cvjf iotivity.tar.bz2 iotivity &&
 cd .. &&
-npm install
+npm install ${DEBUG}
