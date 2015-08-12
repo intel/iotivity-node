@@ -74,6 +74,9 @@ install() {
 
 	mkdir -p "${INCLUDEDIR}/iotivity/resource/csdk/stack" || return 1
 	cp -a resource/csdk/stack/include "${INCLUDEDIR}/${OCTBSTACK_INCLUDEDIR}" || return 1
+
+	# FIXME: Necessary for 0.9.2
+	touch "${INCLUDEDIR}/${OCTBSTACK_INCLUDEDIR}"/logger.h || return 1
 }
 
 mkdir -p ./depbuild || exit 1
