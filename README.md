@@ -29,20 +29,20 @@ This project provides [iotivity](http://iotivity.org/) node.js bindings.
 0. Run ```npm install```
 
 ### In more detail:
-iotivity-node depends on [iotivity](http://iotivity.org/) proper. It has been tested against [0.9.1](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=0.9.1) on Linux. iotivity depends on development headers for libuuid and boost.
+iotivity-node depends on [iotivity](http://iotivity.org/) proper. It has been tested against [0.9.2](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=0.9.2) on Linux. iotivity depends on development headers for libuuid and boost.
 
 iotivity-node requires a compiler that implements the C++11 standard.
 
 During compilation, iotivity-node downloads iotivity from its git repository, builds it, and links against it. If you wish to build iotivity separately, set the environment variable OCTBSTACK_CFLAGS to contain the compiler arguments necessary for building against iotivity, and also set the environment variable OCTBSTACK_LIBS to contain the linker arguments necessary for linking against iotivity. If both variables are set to non-empty values, iotivity-node will skip the step of downloading and building iotivity from sources. If you choose to build iotivity separately, you can use the following procedure, which is known to work on Linux:
 
-0. Grab a [snapshot](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=0.9.1;sf=tgz) of iotivity from its git repository and unpack it locally.
-0. Make sure a compiler, make, and [scons](http://www.scons.org/) (a build tool) are installed. Your distribution should provide all these tools.
+0. Grab a [snapshot](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=0.9.2;sf=tgz) of iotivity from its git repository and unpack it locally.
+0. Make sure a compiler, make, [scons](http://www.scons.org/) (a build tool), and the headers for the above-mentioned library dependencies (boost and libuuid) are installed. Your distribution should provide all these tools and libraries.
 0. ```cd iotivity```
 0. scons has the concept of targets just like make. You can get a list of targets contained in the iotivity repository, as well as a listing of recognized build flags via ```scons --help```. The only target you need for the node.js bindings is ```liboctbstack```. Thus, run ```scons liboctbstack``` to build this target.
 0. Now that iotivity is built, clone this repository, and change directory into it.
 0. Set the following environment variables:
 	* ```OCTBSTACK_CFLAGS``` - this should contain the compiler flags for locating the iotivity include files. For example, the value of this variables can be ```-I/home/nix/iot/iotivity/resource/csdk/stack/include```.
-	* ```OCTBSTACK_LIBS``` - this should contain the linker flags necessary for locating ```liboctbstack.so``` both at compile time and at runtime. It's value can be as simple as ```-loctbstack``` if liboctbstack is in /usr/lib, but may need to be as complex as ```-L/home/nix/iot/iotivity/out/linux/x86/release -loctbstack -Wl,-rpath=/home/nix/iot/iotivity/out/linux/x86/release``` if liboctbstack.so is located on an unusual path.
+	* ```OCTBSTACK_LIBS``` - this should contain the linker flags necessary for locating ```liboctbstack.so``` both at compile time and at runtime. Its value can be as simple as ```-loctbstack``` if liboctbstack is in /usr/lib, but may need to be as complex as ```-L/home/nix/iot/iotivity/out/linux/x86/release -loctbstack -Wl,-rpath=/home/nix/iot/iotivity/out/linux/x86/release``` if liboctbstack.so is located on an unusual path.
 0. Run ```npm install``` with these environment variables set.
 
 Alternatively, you can use some rudimentary install scripts for both iotivity and this repository. Using them will help you avoid having to set the environment variables ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the scripts will supply them to the build process.
@@ -72,9 +72,9 @@ You can now transfer iotivity.bin.tar.bz2 to the device and then unpack it into 
 
 ## Examples
 
-The JavaScript examples are located in [js/](./js/) and come in pairs of one client and one server, each illustrating a basic aspect of iotivity. To run them, open two terminals and change directory to the root of the iotivity-node repository in both. Always launch the server before the client. For example, in one terminal you can run ```node js/server.observe.js``` and in the other terminal you can run ```node js/client.observe.js```.
+The JavaScript examples are located in [js/](./js/) and come in pairs of one client and one server, each illustrating a basic aspect of iotivity. To run them, open two terminals and change directory to the root of the iotivity-node repository in both. Always launch the server before the client. For example, in one terminal you can run ```node js/server.discoverable.js``` and in the other terminal you can run ```node js/client.discovery.js```.
 
-If you wish to run the client on one machine and the server on another, make sure no firewall is running on either machine.
+Make sure no firewall is running (or one is properly configured to allow iotivity-related traffic) on the machine(s) where these applications are running.
 
 ## Tests
 
@@ -102,16 +102,16 @@ find src -type f | while read; do
 done
 ```
 
-When writing the bindings, data arriving from Javascript is considered unreliable and must be validated. If it does not validate correctly, and exception must be thrown immediately after the failed check, and the process must be aborted. Data arriving from C is considered reliable and can be assigned to Javascript immediately.
+When writing the bindings, data arriving from Javascript is considered unreliable and must be validated. If it does not validate correctly, an exception must be thrown immediately after the failed check, and the process must be aborted. Data arriving from C is considered reliable and can be assigned to Javascript immediately.
 
 Functions converting Javascript structures to C structures are named ```c_CStructureName``` and have the following signature:
 
 ```C++
-bool c_CStructureName( CStructureName **p_putStructurePointerHere, Local<Object> jsStructureName );
+bool c_CStructureName( Local<Object> jsStructureName, CStructureName **p_putStructurePointerHere );
 ```
 
-This allows us to throw an exception and return false if the ```jsStructureName``` fails validation. The caller can then also return false immediately, and the binding can ultimately return undefined immediately.
+This signature allows us to throw an exception and return false if any part of ```jsStructureName``` fails validation. The caller can then also return false immediately, and the binding can ultimately return undefined immediately.
 
 As a general principle, if a Javascript value fails validation, throw an exception immediately. Do not return false and expect the caller to throw the exception. Call it exception-at-the-point-of-failure.
 
-Pointers to structures received from the C API may always be null. The functions converting those pointers to Javascript objects assume that they are not null. So, wrap the call to such a function in a null-check.
+Pointers to structures received from the C API may always be null. The functions converting those pointers to Javascript objects (js_CStructureName()) assume that they are not null. So, wrap the call to such a function in a null-check.
