@@ -1,15 +1,13 @@
 #include <nan.h>
 #include "../common.h"
 #include "oc-payload.h"
+#include "oc-sid.h"
 #include "string-primitive.h"
 
 extern "C" {
 #include <string.h>
 #include <ocpayload.h>
 }
-
-// FIXME: Remove the definition below when the stack starts providing it
-#define UUID_SIZE (16)
 
 using namespace v8;
 
@@ -136,11 +134,7 @@ Local<Object> js_OCResourcePayload( OCResourcePayload *payload ) {
 	returnValue->Set( NanNew<String>( "uri" ), NanNew<String>( payload->uri ) );
 
 	// payload.sid
-	Local<Array> sid = NanNew<Array>( UUID_SIZE );
-	for ( index = 0 ; index < UUID_SIZE ; index++ ) {
-		sid->Set( index, NanNew<Number>( payload->sid[ index ] ) );
-	}
-	returnValue->Set( NanNew<String>( "sid" ), sid );
+	returnValue->Set( NanNew<String>( "sid" ), js_SID( payload->sid ) );
 
 	// payload.types
 	for ( item = payload->types, length = 0; item; item = item->next, length++ );
@@ -194,6 +188,34 @@ Local<Object> js_OCDiscoveryPayload( OCDiscoveryPayload *payload ) {
 	return returnValue;
 }
 
+Local<Object> js_OCDevicePayload( OCDevicePayload *payload ) {
+	Local<Object> returnValue = NanNew<Object>();
+
+	returnValue->Set( NanNew<String>( "type" ), NanNew<Number>( payload->base.type ) );
+
+	if ( payload->uri ) {
+		returnValue->Set( NanNew<String>( "uri" ), NanNew<String>( payload->uri ) );
+	}
+
+	if ( payload->sid ) {
+		returnValue->Set( NanNew<String>( "sid" ), js_SID( payload->sid ) );
+	}
+
+	if ( payload->deviceName ) {
+		returnValue->Set( NanNew<String>( "deviceName" ), NanNew<String>( payload->deviceName ) );
+	}
+
+	if ( payload->specVersion ) {
+		returnValue->Set( NanNew<String>( "specVersion" ), NanNew<String>( payload->specVersion ) );
+	}
+
+	if ( payload->dataModelVersion ) {
+		returnValue->Set( NanNew<String>( "dataModelVersion" ), NanNew<String>( payload->dataModelVersion ) );
+	}
+
+	return returnValue;
+}
+
 Local<Value> js_OCPayload( OCPayload *payload ) {
 	switch( payload->type ) {
 		case PAYLOAD_TYPE_DISCOVERY:
@@ -202,9 +224,15 @@ Local<Value> js_OCPayload( OCPayload *payload ) {
 		case PAYLOAD_TYPE_REPRESENTATION:
 			return js_OCRepPayload( ( OCRepPayload * )payload );
 
+		case PAYLOAD_TYPE_DEVICE:
+			return js_OCDevicePayload( ( OCDevicePayload * )payload );
+
 		case PAYLOAD_TYPE_INVALID:
 		default:
-			printf( "js_OCPayload: payload->type: %d\n", payload->type );
+			NanThrowTypeError(
+				PAYLOAD_TYPE_INVALID == payload->type ?
+					"Constructing payload for Javascript: Invalid payload type" :
+					"Constructing payload for Javascript: payload type not implemented" );
 			break;
 	}
 	return NanNull();
