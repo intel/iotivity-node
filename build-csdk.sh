@@ -63,7 +63,8 @@ install() {
 	LIBDIR="$( echo "${PREFIX}/lib" | sed 's@//*@/@g' )"
 	INCLUDEDIR="$( echo "${PREFIX}/include" | sed 's@//*@/@g' )"
 
-	OCTBSTACK_INCLUDEDIR=iotivity/resource/csdk/stack/include
+	OCTB_STACK_INCLUDEDIR=iotivity/resource/csdk/stack/include
+	OCTB_RANDOM_INCLUDEDIR=iotivity/resource/csdk/ocrandom/include
 
 	mkdir -p "${LIBDIR}" || return 1
 	if test "${PLATFORM}" = "darwin"; then
@@ -73,10 +74,13 @@ install() {
 	fi
 
 	mkdir -p "${INCLUDEDIR}/iotivity/resource/csdk/stack" || return 1
-	cp -a resource/csdk/stack/include "${INCLUDEDIR}/${OCTBSTACK_INCLUDEDIR}" || return 1
+	cp -a resource/csdk/stack/include "${INCLUDEDIR}/${OCTB_STACK_INCLUDEDIR}" || return 1
 
 	# FIXME: Necessary for 0.9.2
-	touch "${INCLUDEDIR}/${OCTBSTACK_INCLUDEDIR}"/logger.h || return 1
+	touch "${INCLUDEDIR}/${OCTB_STACK_INCLUDEDIR}"/logger.h || return 1
+
+	mkdir -p "${INCLUDEDIR}/iotivity/resource/csdk/ocrandom" || return 1
+	cp -a resource/csdk/stack/include "${INCLUDEDIR}/${OCTB_RANDOM_INCLUDEDIR}" || return 1
 }
 
 mkdir -p ./depbuild || exit 1
