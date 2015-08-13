@@ -80,7 +80,7 @@ install() {
 	touch "${INCLUDEDIR}/${OCTB_STACK_INCLUDEDIR}"/logger.h || return 1
 
 	mkdir -p "${INCLUDEDIR}/iotivity/resource/csdk/ocrandom" || return 1
-	cp -a resource/csdk/stack/include "${INCLUDEDIR}/${OCTB_RANDOM_INCLUDEDIR}" || return 1
+	cp -a resource/csdk/ocrandom/include "${INCLUDEDIR}/${OCTB_RANDOM_INCLUDEDIR}" || return 1
 }
 
 mkdir -p ./depbuild || exit 1
