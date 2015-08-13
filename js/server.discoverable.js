@@ -9,6 +9,8 @@ intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
 
+iotivity.OCSetDeviceInfo( { deviceName: "server.discoverable" } );
+
 // Create a new resource
 iotivity.OCCreateResource(
 

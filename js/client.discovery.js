@@ -1,4 +1,18 @@
 var intervalId,
+	options = ( function() {
+		var index;
+			returnValue = {
+				discoverDevices: false
+			};
+
+		for ( index in process.argv ) {
+			if ( process.argv[ index ] === "-d" || process.argv[ index ] === "--devices" ) {
+				returnValue.discoverDevices = true;
+			}
+		}
+
+		return returnValue;
+	} )();
 	handle = {},
 	iotivity = require( "iotivity" );
 
@@ -17,8 +31,10 @@ iotivity.OCDoResource(
 
 	iotivity.OCMethod.OC_REST_DISCOVER,
 
-	// Standard path for discovering resources
-	iotivity.OC_RSRVD_WELL_KNOWN_URI,
+	// Standard path for discovering devices/resources
+	options.discoverDevices ?
+		iotivity.OC_RSRVD_DEVICE_URI :
+		iotivity.OC_RSRVD_WELL_KNOWN_URI,
 
 	// There is no destination
 	null,
