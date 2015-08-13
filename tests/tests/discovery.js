@@ -67,6 +67,7 @@ test( "Resource discovery", function( assert ) {
 					function( handle, response ) {
 						testUtils.assertPathFromResponse( assert, response, resourcePath );
 						teardown();
+						return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 					},
 					null );
 				assert.strictEqual(
