@@ -12,11 +12,38 @@
 # The script also generates the function InitEnums() and InitConstants() which the files are
 # expected to export.
 
+
+find_include_paths() {
+	echo "$OCTBSTACK_CFLAGS" | awk '{
+		for ( idx = 1 ; idx <= NF ; idx++ ) {
+			if ( substr( $idx, 1, 2 ) == "-I" ) {
+				if ( length( $idx ) == 2 ) {
+					print( $(idx + 1) );
+				} else {
+					print( substr( $idx, 3 ) );
+				}
+			}
+		}
+	}'
+}
+
 if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
 	export OCTBSTACK_CFLAGS=`pkg-config --cflags octbstack`
 fi
 
-INCLUDE_PATH=`echo "${OCTBSTACK_CFLAGS}" | sed 's/-I//g' | awk '{ print $1;}'`
+INCLUDE_PATHS=$( find_include_paths )
+
+for ONE_PATH in $INCLUDE_PATHS; do
+	if test -f $ONE_PATH/octypes.h; then
+		OCTYPES_H=$ONE_PATH/octypes.h
+	fi
+	if test -f $ONE_PATH/ocstackconfig.h; then
+		OCSTACKCONFIG_H=$ONE_PATH/ocstackconfig.h
+	fi
+	if test -f $ONE_PATH/ocrandom.h; then
+		OCRANDOM_H=$ONE_PATH/ocrandom.h
+	fi
+done
 
 # enums.cc
 
@@ -32,7 +59,7 @@ cat src/enums.cc | \
 	> src/enums.cc.new || ( rm -f src/enums.cc.new && exit 1 )
 
 # Parse header for enums
-cat ${INCLUDE_PATH}/octypes.h | \
+cat ${OCTYPES_H} ${OCRANDOM_H} | \
   grep -vE '#(ifdef|define|endif)|^\s*/' | \
   grep -v '^$' | \
   awk -v PRINT=0 -v OUTPUT="" -v ENUM_LIST="" '{
@@ -99,7 +126,7 @@ echo -e 'void InitConstants(Handle<Object> exports) {\n' >> src/constants.cc.new
 # Parse ocstackconfig.h and append to the generated file
 echo '  // ocstackconfig.h: Stack configuration' >> src/constants.cc.new || \
 	( rm -f src/constants.cc.new && exit 1 )
-parseFileForConstants ${INCLUDE_PATH}/ocstackconfig.h >> src/constants.cc.new || \
+parseFileForConstants ${OCSTACKCONFIG_H} >> src/constants.cc.new || \
 	( rm -f src/constants.cc.new && exit 1 )
 
 # Separate the two sections with a newline
@@ -108,7 +135,16 @@ echo '' >> src/constants.cc.new || ( rm -f src/constants.cc.new && exit 1 )
 # Parse octypes.h and append to the generated file
 echo '  // octypes.h: Definitions' >> src/constants.cc.new || \
 	( rm -f src/constants.cc.new && exit 1 )
-parseFileForConstants ${INCLUDE_PATH}/octypes.h >> src/constants.cc.new || \
+parseFileForConstants ${OCTYPES_H} >> src/constants.cc.new || \
+	( rm -f src/constants.cc.new && exit 1 )
+
+# Separate the two sections with a newline
+echo '' >> src/constants.cc.new || ( rm -f src/constants.cc.new && exit 1 )
+
+# Parse octypes.h and append to the generated file
+echo '  // ocrandom.h: Definitions' >> src/constants.cc.new || \
+	( rm -f src/constants.cc.new && exit 1 )
+parseFileForConstants ${OCRANDOM_H} >> src/constants.cc.new || \
 	( rm -f src/constants.cc.new && exit 1 )
 
 # Close the function
