@@ -9,10 +9,7 @@ static Local<Array> jsArrayFromBytes( unsigned char *bytes, size_t length ) {
 	Local<Array> returnValue = NanNew<Array>( length );
 
 	for ( index = 0 ; index < length ; index++ ) {
-		returnValue->ForceSet(
-			NanNew<Number>( index ),
-			NanNew<Number>( bytes[ index ] ),
-			( PropertyAttribute )( ReadOnly | DontEnum | DontDelete ) );
+		returnValue->Set( NanNew<Number>( index ), NanNew<Number>( bytes[ index ] ) );
 	}
 	return returnValue;
 }
@@ -29,12 +26,7 @@ static bool fillCArrayFromJSArray( unsigned char *bytes, size_t length, Local<Ar
 	for ( index = 0 ; index < length ; index++ ) {
 		Local<Value> byte = array->Get( index );
 		VALIDATE_VALUE_TYPE( byte, IsUint32, "byte array item", false );
-		PropertyAttribute attributes = array->GetPropertyAttributes( NanNew<Number>( index ) );
-		if ( !( attributes & ( ReadOnly | DontEnum | DontDelete ) ) ) {
-			NanThrowError( "byte array item has been tampered with" );
-			return false;
-		}
-		bytes[ index ] = ( char )( byte->Uint32Value() );
+		bytes[ index ] = ( unsigned char )( byte->Uint32Value() );
 	}
 
 	return true;
