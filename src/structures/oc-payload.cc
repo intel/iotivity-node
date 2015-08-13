@@ -15,11 +15,11 @@ static bool c_OCRepPayload( Local<Object> jsPayload, OCRepPayload **p_payload );
 static Local<Object> js_OCRepPayload( OCRepPayload *payload );
 
 static Local<Value> stringOrUndefined( char *str ) {
-	return ( str ? Local<Value>::Cast( NanNew<String>( str ) ) : Local<Value>::Cast( NanUndefined() ) );
+	return ( str ? NanNew<Value>( NanNew<String>( str ) ) : NanNew<Value>( NanUndefined() ) );
 }
 
 static Local<Value> objectOrUndefined( OCRepPayload *payload ) {
-	return ( payload ? Local<Value>::Cast( js_OCRepPayload( payload ) ) : Local<Value>::Cast( NanUndefined() ) );
+	return ( payload ? NanNew<Value>( js_OCRepPayload( payload ) ) : NanNew<Value>( NanUndefined() ) );
 }
 
 static Local<Array> createPayloadValueArrayRecursively( OCRepPayloadValueArray *array, size_t *p_dataIndex, int dimensionIndex ) {
@@ -31,12 +31,12 @@ static Local<Array> createPayloadValueArrayRecursively( OCRepPayloadValueArray *
 			( dimensionIndex < MAX_REP_ARRAY_DEPTH - 1 && array->dimensions[ dimensionIndex + 1 ] > 0 ) ?
 
 				// Fill with arrays
-				Local<Value>::Cast( createPayloadValueArrayRecursively( array, p_dataIndex, dimensionIndex + 1 ) ) :
+				NanNew<Value>( createPayloadValueArrayRecursively( array, p_dataIndex, dimensionIndex + 1 ) ) :
 
 				// Fill with data
-				( array->type == OCREP_PROP_INT ? Local<Value>::Cast( NanNew<Number>( array->iArray[ (*p_dataIndex)++ ] ) ) :
-				array->type == OCREP_PROP_DOUBLE ? Local<Value>::Cast( NanNew<Number>( array->dArray[ (*p_dataIndex)++ ] ) ) :
-				array->type == OCREP_PROP_BOOL ? Local<Value>::Cast( NanNew<Boolean>( array->bArray[ (*p_dataIndex)++ ] ) ) :
+				( array->type == OCREP_PROP_INT ? NanNew<Value>( NanNew<Number>( array->iArray[ (*p_dataIndex)++ ] ) ) :
+				array->type == OCREP_PROP_DOUBLE ? NanNew<Value>( NanNew<Number>( array->dArray[ (*p_dataIndex)++ ] ) ) :
+				array->type == OCREP_PROP_BOOL ? NanNew<Value>( NanNew<Boolean>( array->bArray[ (*p_dataIndex)++ ] ) ) :
 				array->type == OCREP_PROP_STRING ? stringOrUndefined( array->strArray[ ( *p_dataIndex)++ ] ) :
 
 				// If the type is none of the above, we assume it must be an object
@@ -73,7 +73,7 @@ static Local<Object> js_OCRepPayload( OCRepPayload *payload ) {
 
 		Local<Array> types = NanNew<Array>( count );
 		for ( current = payload->types, index = 0; current; current = current->next, index++ ) {
-			types->Set( index, current->value ? Local<Value>::Cast( NanNew<String>( current->value ) ) : Local<Value>::Cast( NanUndefined() ) );
+			types->Set( index, current->value ? NanNew<Value>( NanNew<String>( current->value ) ) : NanNew<Value>( NanUndefined() ) );
 		}
 
 		returnValue->Set( NanNew<String>( "types" ), types );
@@ -87,7 +87,7 @@ static Local<Object> js_OCRepPayload( OCRepPayload *payload ) {
 
 		Local<Array> interfaces = NanNew<Array>( count );
 		for ( current = payload->interfaces, index = 0; current; current = current->next, index++ ) {
-			interfaces->Set( index, current->value ? Local<Value>::Cast( NanNew<String>( current->value ) ) : Local<Value>::Cast( NanUndefined() ) );
+			interfaces->Set( index, current->value ? NanNew<Value>( NanNew<String>( current->value ) ) : NanNew<Value>( NanUndefined() ) );
 		}
 
 		returnValue->Set( NanNew<String>( "interfaces" ), interfaces );
@@ -98,21 +98,21 @@ static Local<Object> js_OCRepPayload( OCRepPayload *payload ) {
 		Local<Object> values = NanNew<Object>();
 		for ( value = payload->values ; value ; value = value->next ) {
 			values->Set( NanNew<String>( value->name ),
-				OCREP_PROP_INT == value->type ? Local<Value>::Cast( NanNew<Number>( value->i ) ) :
-				OCREP_PROP_DOUBLE == value->type ? Local<Value>::Cast( NanNew<Number>( value->d ) ) :
-				OCREP_PROP_BOOL == value->type ? Local<Value>::Cast( NanNew<Boolean>( value->b ) ) :
+				OCREP_PROP_INT == value->type ? NanNew<Value>( NanNew<Number>( value->i ) ) :
+				OCREP_PROP_DOUBLE == value->type ? NanNew<Value>( NanNew<Number>( value->d ) ) :
+				OCREP_PROP_BOOL == value->type ? NanNew<Value>( NanNew<Boolean>( value->b ) ) :
 				OCREP_PROP_STRING == value->type ?
 					( value->str ?
-						Local<Value>::Cast( NanNew<String>( value->str ) ) :
-						Local<Value>::Cast( NanUndefined() ) ) :
+						NanNew<Value>( NanNew<String>( value->str ) ) :
+						NanNew<Value>( NanUndefined() ) ) :
 				OCREP_PROP_OBJECT == value->type ?
 					( value->obj ?
-						Local<Value>::Cast( js_OCRepPayload( value->obj ) ) :
-						Local<Value>::Cast( NanUndefined() ) ) :
-				OCREP_PROP_ARRAY == value->type ? Local<Value>::Cast( js_OCRepPayloadValueArray( &( value->arr ) ) ) :
+						NanNew<Value>( js_OCRepPayload( value->obj ) ) :
+						NanNew<Value>( NanUndefined() ) ) :
+				OCREP_PROP_ARRAY == value->type ? NanNew<Value>( js_OCRepPayloadValueArray( &( value->arr ) ) ) :
 
 				// If value->type is not any of the above, then we assume it must be OCREP_PROP_NULL
-				Local<Value>::Cast( NanNull() ) );
+				NanNew<Value>( NanNull() ) );
 		}
 		returnValue->Set( NanNew<String>( "values" ), values );
 	}
