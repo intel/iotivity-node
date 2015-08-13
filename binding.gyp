@@ -71,7 +71,8 @@
 				"src/structures/oc-dev-addr.cc",
 				"src/structures/oc-entity-handler-response.cc",
 				"src/structures/oc-header-option-array.cc",
-				"src/structures/oc-payload.cc"
+				"src/structures/oc-payload.cc",
+				"src/structures/string-primitive.cc"
 			],
 			"conditions": [
 				[ "'<!(echo $TESTING)'=='true'", {

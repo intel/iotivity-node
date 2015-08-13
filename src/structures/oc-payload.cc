@@ -1,6 +1,7 @@
 #include <nan.h>
 #include "../common.h"
 #include "oc-payload.h"
+#include "string-primitive.h"
 
 extern "C" {
 #include <string.h>
@@ -353,11 +354,9 @@ static bool fillArray( void *flatArray, int *p_index, Local<Array> array, OCRepP
 
 					case OCREP_PROP_STRING:
 						{
-							size_t length = strlen( (const char *)*String::Utf8Value( member ) ) + 1;
-							char *theString = (char *)malloc( length );
-							if ( theString ) {
-								theString[ length - 1 ] = 0;
-								strncpy( theString, (const char *)*String::Utf8Value( member ), length - 1 );
+							char *theString;
+
+							if ( c_StringNew( member->ToString(), &theString ) ) {
 								( ( char ** )flatArray )[ (*p_index)++ ] = theString;
 							} else {
 
