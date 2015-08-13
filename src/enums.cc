@@ -5,6 +5,7 @@
 
 extern "C" {
 #include <ocstack.h>
+#include <ocrandom.h>
 }
 
 using namespace v8;
@@ -238,6 +239,17 @@ static Local<Object> bind_OCStackApplicationResult() {
   return returnValue;
 }
 
+static Local<Object> bind_OCRandomUuidResult() {
+  Local<Object> returnValue = NanNew<Object>();
+
+  SET_CONSTANT_MEMBER(returnValue, Number, RAND_UUID_OK);
+  SET_CONSTANT_MEMBER(returnValue, Number, RAND_UUID_INVALID_PARAM);
+  SET_CONSTANT_MEMBER(returnValue, Number, RAND_UUID_READ_ERROR);
+  SET_CONSTANT_MEMBER(returnValue, Number, RAND_UUID_CONVERT_ERROR);
+
+  return returnValue;
+}
+
 void InitEnums(Handle<Object> exports) {
   SET_ENUM(exports, OCTransportAdapter);
   SET_ENUM(exports, OCTransportFlags);
@@ -254,4 +266,5 @@ void InitEnums(Handle<Object> exports) {
   SET_ENUM(exports, OCRepPayloadPropType);
   SET_ENUM(exports, OCEntityHandlerFlag);
   SET_ENUM(exports, OCStackApplicationResult);
+  SET_ENUM(exports, OCRandomUuidResult);
 }

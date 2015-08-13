@@ -5,6 +5,7 @@
 
 extern "C" {
 #include <ocstack.h>
+#include <ocrandom.h>
 }
 
 using namespace v8;
@@ -87,4 +88,8 @@ void InitConstants(Handle<Object> exports) {
   SET_CONSTANT_MEMBER(exports, String, OC_RSRVD_VERSION);
   SET_CONSTANT_MEMBER(exports, String, OC_RSRVD_WELL_KNOWN_URI);
   SET_CONSTANT_MEMBER(exports, String, OC_SPEC_VERSION);
+
+  // ocrandom.h: Definitions
+  SET_CONSTANT_MEMBER(exports, Number, UUID_SIZE);
+  SET_CONSTANT_MEMBER(exports, Number, UUID_STRING_SIZE);
 }
