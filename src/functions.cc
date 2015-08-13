@@ -24,6 +24,8 @@ void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   SET_FUNCTION(exports, OCBindResourceInterfaceToResource);
   SET_FUNCTION(exports, OCBindResourceTypeToResource);
   SET_FUNCTION(exports, OCDeleteResource);
+  SET_FUNCTION(exports, OCSetDeviceInfo);
+  SET_FUNCTION(exports, OCSetPlatformInfo);
   SET_FUNCTION(exports, OCStartPresence);
   SET_FUNCTION(exports, OCStopPresence);
   SET_FUNCTION(exports, OCDoResource);
