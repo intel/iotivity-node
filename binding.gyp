@@ -30,6 +30,11 @@
 				"src/callback-info.c"
 			],
 			"libraries": [ "<(PRODUCT_DIR)/libffi.a" ],
+			"xcode_settings": {
+				"OTHER_LDFLAGS": [
+					'-loctbstack', '-locsrm', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+				]
+			},
 			"conditions": [
 				[ "'<!(echo $TESTING)'=='true'",
 						{ "defines": [ "TESTING" ] } ]
@@ -47,7 +52,7 @@
 			"xcode_settings": {
 				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
 				"OTHER_LDFLAGS": [
-					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+					'-loctbstack', '-locsrm', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
 				]
 			}
 		},
@@ -60,7 +65,7 @@
 			"xcode_settings": {
 				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
 				"OTHER_LDFLAGS": [
-					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+					'-loctbstack', '-locsrm', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
 				]
 			}
 		},
@@ -73,7 +78,7 @@
 			"xcode_settings": {
 				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
 				"OTHER_LDFLAGS": [
-					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+					'-loctbstack', '-locsrm', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
 				]
 			}
 		},
@@ -86,7 +91,7 @@
 			"xcode_settings": {
 				"OTHER_CFLAGS": ['<!(pkg-config --cflags glib-2.0)'],
 				"OTHER_LDFLAGS": [
-					'-loctbstack', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
+					'-loctbstack', '-locsrm', '-lconnectivity_abstraction', '-lc_common', '-lcoap'
 				]
 			}
 		}
