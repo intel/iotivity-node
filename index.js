@@ -230,14 +230,14 @@ _.extend( OicDevice.prototype, {
 					  oicReq.type = "create";
 
 					  var obj = JSON.parse ( request.resJSONPayload );
-					  ._extend ( oicReq.res , obj );
+					  _.extend ( oicReq.res , obj );
 
 				  } else if ( request.method == iotivity.OCMethod.OC_REST_POST ) {
 					  oicReq.type = "update";
 
 					  //FIXME: Check if this is the right way of doing it.
 					  var obj = JSON.parse ( request.resJSONPayload );
-					  ._extend ( oicReq.res , obj );
+					  _.extend ( oicReq.res , obj );
 					  oicReq.updatedPropertyNames = _.difference ( resource , obj );
 				  } else if ( request.method == iotivity.OCMethod.OC_REST_DELETE )
 					  oicReq.type = "delete";
