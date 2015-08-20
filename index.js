@@ -198,60 +198,64 @@ _.extend( OicDevice.prototype, {
 							// Handle the request and raise events accordingly
 							var oicReq = new OicRequestEvent( );
 
-			  oicReq.requestId = request.requestHandle;
-			  oicReq.target = request.resourceHandle;
-			  oicReq.source = resource;
+							oicReq.requestId = request.requestHandle;
+							oicReq.target = request.resourceHandle;
+							oicReq.source = resource;
 
-			  if ( flag & iotivity.OCEntityHandlerFlag.OC_REQUEST_FLAG ) {
+							if ( flag & iotivity.OCEntityHandlerFlag.OC_REQUEST_FLAG ) {
 
-				  // Asper the C++ Code: The query format is q1=v1&;q1=v2;
-				  var seperator = "&;";
-				  var qparams = request.query.split ( separator );
-				  oicReq.queryOptions = new Array (qparams.length);
-				  for ( i=0; i< qparams.length; i++ ) {
-					var param = qparams [ i ].split( "=" );
-					oicReq.queryOptions [ i ].key = param [ 0 ];
-					oicReq.queryOptions [ i ].value = param [ 1 ];
-				  }
+								// Asper the C++ Code: The query format is q1=v1&;q1=v2;
+								var seperator = "&;";
+								var qparams = request.query.split ( seperator );
+								oicReq.queryOptions = new Array (qparams.length);
 
-				  oicReq.headerOptions = new Array ( request.numRcvdVendorSpecificHeaderOptions );
-				  if ( request.numRcvdVendorSpecificHeaderOptions != 0 ) {
-					  for ( i=0; i< request.numRcvdVendorSpecificHeaderOptions; i++ ) {
-						  var headerOption = new Object ();
-						  headerOption.name = request.rcvdVendorSpecificHeaderOptions [ i ].optionID;
-						  headerOption.value = request.rcvdVendorSpecificHeaderOptions [ i ].optionData;
-						  oicReq.headerOptions [ i ] = headerOption;
-					  }
-				  }
+								for ( i=0; request.query != "" && i< qparams.length; i++ ) {
+									var param = qparams [ i ].split( "=" );
+									oicReq.queryOptions [ i ] = [];
+									oicReq.queryOptions [ i ].key = param [ 0 ];
+									oicReq.queryOptions [ i ].value = param [ 1 ];
+								}
 
-				  if ( request.method == iotivity.OCMethod.OC_REST_GET )
-					  oicReq.type = "retrieve";
-				  else if ( request.method == iotivity.OCMethod.OC_REST_PUT ) {
-					  oicReq.type = "create";
+								oicReq.headerOptions = new Array ( request.numRcvdVendorSpecificHeaderOptions );
+								if ( request.numRcvdVendorSpecificHeaderOptions != 0 ) {
+									  for ( i=0; i< request.numRcvdVendorSpecificHeaderOptions; i++ ) {
+										var headerOption = new Object ();
+										headerOption.name = request.rcvdVendorSpecificHeaderOptions [ i ].optionID;
+										headerOption.value = request.rcvdVendorSpecificHeaderOptions [ i ].optionData;
+										oicReq.headerOptions [ i ] = headerOption;
+									}
+								}
 
-					  var obj = JSON.parse ( request.resJSONPayload );
-					  _.extend ( oicReq.res , obj );
+								if ( request.method == iotivity.OCMethod.OC_REST_GET )
+									oicReq.type = "retrieve";
+								else if ( request.method == iotivity.OCMethod.OC_REST_PUT ) {
+									oicReq.type = "create";
 
-				  } else if ( request.method == iotivity.OCMethod.OC_REST_POST ) {
-					  oicReq.type = "update";
+									var obj = JSON.parse ( request.resJSONPayload );
+									_.extend ( oicReq.res , obj );
 
-					  //FIXME: Check if this is the right way of doing it.
-					  var obj = JSON.parse ( request.resJSONPayload );
-					  _.extend ( oicReq.res , obj );
-					  oicReq.updatedPropertyNames = _.difference ( resource , obj );
-				  } else if ( request.method == iotivity.OCMethod.OC_REST_DELETE )
-					  oicReq.type = "delete";
-				  else if ( request.method == iotivity.OCMethod.OC_REST_OBSERVE )
-					  oicReq.type = "observe";
+								} else if ( request.method == iotivity.OCMethod.OC_REST_POST ) {
+									oicReq.type = "update";
 
-			  }
+									//FIXME: Check if this is the right way of doing it.
+									var obj = JSON.parse ( request.resJSONPayload );
+									_.extend ( oicReq.res , obj );
+									oicReq.updatedPropertyNames = _.difference ( resource , obj );
+								} else if ( request.method == iotivity.OCMethod.OC_REST_DELETE )
+									oicReq.type = "delete";
+								else if ( request.method == iotivity.OCMethod.OC_REST_OBSERVE )
+									oicReq.type = "observe";
 
-			  if (flag & iotivity.OCEntityHandlerFlag.OC_OBSERVE_FLAG ) {
-				  //TODO:
-			  }
-			  this.dispatchEvent ( "request", oicReq );
-		},
-		flag );
+							}
+
+							if (flag & iotivity.OCEntityHandlerFlag.OC_OBSERVE_FLAG ) {
+								//TODO:
+							}
+
+							console.log ( oicReq );
+							dispatchEvent ( "request", oicReq );
+						},
+						flag );
 
 				if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
 					reject( _.extend( new Error( "registerResource: OCCreateResource() failed" ), {
