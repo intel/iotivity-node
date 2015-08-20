@@ -60,10 +60,33 @@ _.extend( OicRequestEvent.prototype, {
 	_isOicRequestEvent: true,
 
 	sendResponse: function ( resource ) {
+		var oicResponse;
 
+		oicResponse.requestHandle = this.requestId;
+		oicResponse.resourceHandle = this.resourceHandle;
+		oicResponse.payload = JSON.stringify(resource);
+		oicResponse.payloadSize = oicResponse.payload.length;
+		oicResponse.numRcvdVendorSpecificHeaderOptions = this.headerOptions.length;
+		oicResponse.sendVendorSpecificHeaderOptions = new Array (this.headerOptions.length);
+		for (i=0; i<this.headerOptions.length; i++) {
+			oicResponse.sendVendorSpecificHeaderOptions [ i ] = [];
+			oicResponse.sendVendorSpecificHeaderOptions [ i ].name = this.headerOptions [ i ].name;
+			oicResponse.sendVendorSpecificHeaderOptions [ i ].value = this.headerOptions [ i ].value;
+		}
+
+		//FIXME: This url should be a FQDN or COAP URL ?
+		oicResponse.resourceUri = resource.url;
+		oicResponse.ehResult = iotivity.OCEntityHandlerResult.OC_EH_OK;
+		var ret = iotivity.OCDoResponse (oicResponse);
+		if (ret != iotivity.OCStackResult.OC_STACK_OK)
+			console.log ("DoResponse Error");
 	},
 	sendError: function ( error ) {
-
+		oicResponse.requestHandle = this.requestId;
+		oicResponse.resourceHandle = this.resourceHandle;
+		oicResponse.ehResult = error.message;		var ret = iotivity.OCDoResponse (oicResponse);
+		if (ret != iotivity.OCStackResult.OC_STACK_OK)
+			console.log ("DoResponse Error");
 	}
 } );
 
