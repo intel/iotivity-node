@@ -45,10 +45,26 @@ var iotivity = require( "bindings" )( "iotivity" ),
 		if ( init )
 			_.extend( this, init );
 
+	},
+	OicRequestEvent = function () {
+		if ( !this._isOicRequestEvent ) {
+			return new OicRequestEvent();
+		}
 	};
 
 _.extend( OicResource.prototype, {
 	_isOicResource: true,
+} );
+
+_.extend( OicRequestEvent.prototype, {
+	_isOicRequestEvent: true,
+
+	sendResponse: function ( resource ) {
+
+	},
+	sendError: function ( error ) {
+
+	}
 } );
 
 _.extend( OicDevice.prototype, {
@@ -170,22 +186,77 @@ _.extend( OicDevice.prototype, {
 				result = iotivity.OCCreateResource (
 						handle,
 
-						// FIXME: API SPEC mentions an array.Vagule remember that the first type is
+						// FIXME: API SPEC mentions an array.Vaguely remember that the first type is
 						// default from the Oic Spec. Check it up.
 						init.resourceTypes[ 0 ],
 
-						// FIXME: API SPEC mentions an array.Vagule remember that the first type is
+						// FIXME: API SPEC mentions an array.Vaguely remember that the first type is
 						// default from the Oic Spec. Check it up.
 						init.interfaces[ 0 ],
 						init.url,
 						function ( flag, request ) {
-
 							// Handle the request and raise events accordingly
+							var oicReq = new OicRequestEvent( );
+
+              oicReq.requestId = request.requestHandle;
+              oicReq.target = request.resourceHandle;
+              oicReq.source = resource;
+
+              if ( flag & iotivity.OCEntityHandlerFlag.OC_REQUEST_FLAG ) {
+
+                  // Asper the C++ Code: The query format is q1=v1&;q1=v2;
+                  var seperator = "&;";
+                  var qparams = request.query.split ( separator );
+                  oicReq.queryOptions = new Array (qparams.length);
+                  for ( i=0; i< qparams.length; i++ ) {
+                    var param = qparams [ i ].split( "=" );
+                    oicReq.queryOptions [ i ].key = param [ 0 ];
+                    oicReq.queryOptions [ i ].value = param [ 1 ];
+                  }
+
+                  oicReq.headerOptions = new Array ( request.numRcvdVendorSpecificHeaderOptions );
+                  if ( request.numRcvdVendorSpecificHeaderOptions != 0 ) {
+                      for ( i=0; i< request.numRcvdVendorSpecificHeaderOptions; i++ ) {
+                          var headerOption = new Object ();
+                          headerOption.name = request.rcvdVendorSpecificHeaderOptions [ i ].optionID;
+                          headerOption.value = request.rcvdVendorSpecificHeaderOptions [ i ].optionData;
+                          oicReq.headerOptions [ i ] = headerOption;
+                      }
+                  }
+
+                  if ( request.method == iotivity.OCMethod.OC_REST_GET )
+                      oicReq.type = "retrieve";
+                  else if ( request.method == iotivity.OCMethod.OC_REST_PUT ) {
+                      oicReq.type = "create";
+
+                      var obj = JSON.parse ( request.resJSONPayload );
+                      ._extend ( oicReq.res , obj );
+
+                  } else if ( request.method == iotivity.OCMethod.OC_REST_POST ) {
+                      oicReq.type = "update";
+
+                      //FIXME: Check if this is the right way of doing it.
+                      var obj = JSON.parse ( request.resJSONPayload );
+                      ._extend ( oicReq.res , obj );
+                      oicReq.updatedPropertyNames = _.difference ( resource , obj );
+
+                  } else if ( request.method == iotivity.OCMethod.OC_REST_DELETE )
+                      oicReq.type = "delete";
+                  else if ( request.method == iotivity.OCMethod.OC_REST_OBSERVE )
+                      oicReq.type = "observe";
+                  //TODO: What about other methods. What is Init method on the api.
+
+              }
+
+              if (flag & iotivity.OCEntityHandlerFlag.OC_OBSERVE_FLAG ) {
+                  //TODO:
+              }
+
 						},
 						flag );
 
 				if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
-					reject( _.extend( new Error( "enablePresence: OCStartPresence() failed" ), {
+					reject( _.extend( new Error( "registerResource: OCCreateResource() failed" ), {
 						result: result
 					} ) );
 					return;
@@ -238,5 +309,6 @@ _.extend( OicDevice.prototype, {
 
 module.exports = {
 	OicDevice: OicDevice,
-	OicResource: OicResource
+	OicResource: OicResource,
+	OicRequestEvent: OicRequestEvent
 };
