@@ -18,14 +18,14 @@ void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   SET_FUNCTION(exports, OCInit);
   SET_FUNCTION(exports, OCStop);
   SET_FUNCTION(exports, OCProcess);
-  SET_FUNCTION(exports, OCDevAddrToIPv4Addr);
-  SET_FUNCTION(exports, OCDevAddrToPort);
   SET_FUNCTION(exports, OCCreateResource);
   SET_FUNCTION(exports, OCBindResourceHandler);
   SET_FUNCTION(exports, OCBindResource);
   SET_FUNCTION(exports, OCBindResourceInterfaceToResource);
   SET_FUNCTION(exports, OCBindResourceTypeToResource);
   SET_FUNCTION(exports, OCDeleteResource);
+  SET_FUNCTION(exports, OCSetDeviceInfo);
+  SET_FUNCTION(exports, OCSetPlatformInfo);
   SET_FUNCTION(exports, OCStartPresence);
   SET_FUNCTION(exports, OCStopPresence);
   SET_FUNCTION(exports, OCDoResource);

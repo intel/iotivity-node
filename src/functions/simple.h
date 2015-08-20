@@ -8,7 +8,7 @@ NAN_METHOD(bind_OCStop);
 NAN_METHOD(bind_OCProcess);
 NAN_METHOD(bind_OCStartPresence);
 NAN_METHOD(bind_OCStopPresence);
-NAN_METHOD(bind_OCDevAddrToIPv4Addr);
-NAN_METHOD(bind_OCDevAddrToPort);
+NAN_METHOD(bind_OCSetDeviceInfo);
+NAN_METHOD(bind_OCSetPlatformInfo);
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_SIMPLE_H__ */

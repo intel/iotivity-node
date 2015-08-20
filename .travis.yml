@@ -4,6 +4,15 @@ language: node_js
 
 node_js:
 - "0.12"
+- "0.10"
+
+os:
+- linux
+- osx
+
+matrix:
+  allow_failures:
+    - os: osx
 
 install:
 - export CXX="g++-4.8" CC="gcc-4.8"
@@ -14,6 +23,7 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - libboost-all-dev
+    - libcurl4-openssl-dev
     - uuid-dev
     - g++-4.8
 

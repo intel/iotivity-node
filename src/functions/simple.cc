@@ -1,6 +1,6 @@
 #include <nan.h>
 #include "../common.h"
-#include "../structures.h"
+#include "../structures/string-primitive.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -50,52 +50,123 @@ NAN_METHOD(bind_OCStopPresence) {
   NanReturnValue(NanNew<Number>(OCStopPresence()));
 }
 
-NAN_METHOD(bind_OCDevAddrToIPv4Addr) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
-
-  OCDevAddr c_addr;
-
-  if (!c_OCDevAddr(args[0]->ToObject(), &c_addr)) {
-    NanReturnUndefined();
-  }
-
-  uint8_t a = 0, b = 0, c = 0, d = 0;
-
-  OCStackResult result =
-      (OCStackResult)OCDevAddrToIPv4Addr(&c_addr, &a, &b, &c, &d);
-
-  Local<Array> array = Local<Array>::Cast(args[1]);
-
-  array->Set(0, NanNew<Number>(a));
-  array->Set(1, NanNew<Number>(b));
-  array->Set(2, NanNew<Number>(c));
-  array->Set(3, NanNew<Number>(d));
-
-  NanReturnValue(NanNew<Number>(result));
+static bool c_OCDeviceInfo( Local<Object> devInfo, OCDeviceInfo *info ) {
+	Local<Value> deviceName = devInfo->Get( NanNew<String>( "deviceName" ) );
+	VALIDATE_VALUE_TYPE( deviceName, IsString, "deviceInfo.deviceName", false );
+	char *devName;
+	if ( !c_StringNew( deviceName->ToString(), &devName ) ) {
+		return false;
+	}
+	info->deviceName = devName;
+	return true;
 }
 
-NAN_METHOD(bind_OCDevAddrToPort) {
-  NanScope();
+NAN_METHOD(bind_OCSetDeviceInfo) {
+	NanScope();
 
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsObject);
+	VALIDATE_ARGUMENT_COUNT( args, 1 );
+	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
 
-  OCDevAddr c_addr;
+	OCDeviceInfo info;
 
-  if (!c_OCDevAddr(args[0]->ToObject(), &c_addr)) {
-    NanReturnUndefined();
-  }
+	if ( !c_OCDeviceInfo( args[ 0 ]->ToObject(), &info ) ) {
+		NanReturnUndefined();
+	}
 
-  uint16_t port = 0;
+	OCStackResult result = OCSetDeviceInfo( info );
 
-  OCStackResult result = (OCStackResult)OCDevAddrToPort(&c_addr, &port);
+	free( info.deviceName );
 
-  args[1]->ToObject()->Set(NanNew<String>("port"), NanNew<Number>(port));
+	NanReturnValue( NanNew<Number>( result ) );
+}
 
-  NanReturnValue(NanNew<Number>(result));
+static void c_OCPlatformInfoFreeMembers( OCPlatformInfo *info ) {
+	if ( info->platformID ) {
+		free( info->platformID );
+	}
+	if ( info->manufacturerName ) {
+		free( info->manufacturerName );
+	}
+	if ( info->manufacturerUrl ) {
+		free( info->manufacturerUrl );
+	}
+	if ( info->modelNumber ) {
+		free( info->modelNumber );
+	}
+	if ( info->dateOfManufacture ) {
+		free( info->dateOfManufacture );
+	}
+	if ( info->platformVersion ) {
+		free( info->platformVersion );
+	}
+	if ( info->operatingSystemVersion ) {
+		free( info->operatingSystemVersion );
+	}
+	if ( info->hardwareVersion ) {
+		free( info->hardwareVersion );
+	}
+	if ( info->firmwareVersion ) {
+		free( info->firmwareVersion );
+	}
+	if ( info->supportUrl ) {
+		free( info->supportUrl );
+	}
+	if ( info->systemTime ) {
+		free( info->systemTime );
+	}
+}
+
+// The macro below makes use of variables defined inside c_OCPlatformInfo
+#define C_PLATFORM_INFO_MEMBER( platformInfo, memberName ) \
+	if ( keepGoing && (platformInfo)->Has( NanNew<String>( #memberName ) ) ) { \
+		Local<Value> memberName = platformInfo->Get( NanNew<String>( #memberName ) ); \
+		if ( !memberName->IsString() ) { \
+			NanThrowTypeError( "platformInfo." #memberName " must be a string if it is present" ); \
+			keepGoing = false; \
+		} else if ( !c_StringNew( memberName->ToString(), &( local.memberName ) ) ) { \
+			keepGoing = false; \
+		} \
+	}
+
+static bool c_OCPlatformInfo( Local<Object> platformInfo, OCPlatformInfo *info ) {
+	OCPlatformInfo local = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	bool keepGoing = true;
+
+	C_PLATFORM_INFO_MEMBER( platformInfo, platformID );
+	C_PLATFORM_INFO_MEMBER( platformInfo, manufacturerName );
+	C_PLATFORM_INFO_MEMBER( platformInfo, manufacturerUrl );
+	C_PLATFORM_INFO_MEMBER( platformInfo, modelNumber );
+	C_PLATFORM_INFO_MEMBER( platformInfo, dateOfManufacture );
+	C_PLATFORM_INFO_MEMBER( platformInfo, platformVersion );
+	C_PLATFORM_INFO_MEMBER( platformInfo, operatingSystemVersion );
+	C_PLATFORM_INFO_MEMBER( platformInfo, hardwareVersion );
+	C_PLATFORM_INFO_MEMBER( platformInfo, firmwareVersion );
+	C_PLATFORM_INFO_MEMBER( platformInfo, supportUrl );
+	C_PLATFORM_INFO_MEMBER( platformInfo, systemTime );
+
+	if ( keepGoing ) {
+		memcpy( info, &local, sizeof( OCPlatformInfo ) );
+	} else {
+		c_OCPlatformInfoFreeMembers( &local );
+	}
+	return keepGoing;
+}
+
+NAN_METHOD(bind_OCSetPlatformInfo) {
+	NanScope();
+
+	VALIDATE_ARGUMENT_COUNT( args, 1 );
+	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
+
+	OCPlatformInfo info;
+
+	if ( !c_OCPlatformInfo( args[ 0 ]->ToObject(), &info ) ) {
+		NanReturnUndefined();
+	}
+
+	OCStackResult result = OCSetPlatformInfo( info );
+
+	c_OCPlatformInfoFreeMembers( &info );
+
+	NanReturnValue( NanNew<Number>( result ) );
 }

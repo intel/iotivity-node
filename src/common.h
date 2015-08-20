@@ -27,6 +27,13 @@
     return failReturn;                                             \
   }
 
+#define VALIDATE_VALUE_TYPE_OR_FREE(value, typecheck, message, failReturn, pointer_to_free, free_function) \
+  if (!(value)->typecheck()) {                                     \
+    NanThrowTypeError(message " must satisfy " #typecheck "()");   \
+	free_function((pointer_to_free));                              \
+    return failReturn;                                             \
+  }
+
 #define VALIDATE_ARGUMENT_TYPE_OR_NULL(args, index, typecheck)              \
   if (!((args)[(index)]->typecheck() || (args)[(index)]->IsNull())) {       \
     return NanThrowTypeError("Argument " #index " must satisfy " #typecheck \

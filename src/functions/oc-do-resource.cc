@@ -1,23 +1,27 @@
-#include <node_buffer.h>
 #include "oc-do-resource.h"
 #include "../common.h"
-#include "../structures.h"
+#include "../structures/handles.h"
+#include "../structures/oc-header-option-array.h"
+#include "../structures/oc-client-response.h"
+#include "../structures/oc-dev-addr.h"
+#include "../structures/oc-payload.h"
 
 extern "C" {
 #include <stdlib.h>
 #include <ocstack.h>
+#include <ocpayload.h>
 }
 
 using namespace v8;
 using namespace node;
 
-// Create an object containing the information from an OCCLientResponse
+// Create an object containing the information from an OCClientResponse
 // structure
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
   // Call the JS Callback
   Local<Value> jsCallbackArguments[2] = {
-      NanNewBufferHandle((char *)&handle, sizeof(OCDoHandle)),
+      js_OCDoHandle( handle ),
       js_OCClientResponse(clientResponse)};
   Local<Value> returnValue = NanMakeCallback(
       NanGetCurrentContext()->Global(),
@@ -31,70 +35,26 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
   return (OCStackApplicationResult)returnValue->Uint32Value();
 }
 
-static OCHeaderOption *oc_header_options_new(Handle<Array> array) {
-  int index, optionIndex, optionLength;
-  int count = array->Length();
-  OCHeaderOption *options =
-      (OCHeaderOption *)malloc(sizeof(OCHeaderOption) * count);
-
-  if (options) {
-    for (index = 0; index < count; index++) {
-      options[index].protocolID = (OCTransportProtocolID)array->Get(index)
-                                      ->ToObject()
-                                      ->Get(NanNew<String>("protocolID"))
-                                      ->Uint32Value();
-      options[index].optionID = (uint16_t)array->Get(index)
-                                    ->ToObject()
-                                    ->Get(NanNew<String>("optionID"))
-                                    ->Uint32Value();
-      options[index].optionLength = (uint16_t)array->Get(index)
-                                        ->ToObject()
-                                        ->Get(NanNew<String>("optionLength"))
-                                        ->Uint32Value();
-
-      Handle<Array> jsOption = Handle<Array>::Cast(
-          array->Get(index)->ToObject()->Get(NanNew<String>("optionData")));
-      optionLength = jsOption->Length();
-      optionLength = (optionLength > MAX_HEADER_OPTION_DATA_LENGTH)
-                         ? MAX_HEADER_OPTION_DATA_LENGTH
-                         : optionLength;
-
-      for (optionIndex = 0; optionIndex < optionLength; optionIndex++) {
-        options[index].optionData[optionIndex] =
-            (uint8_t)jsOption->Get(optionIndex)->Uint32Value();
-      }
-    }
-  }
-
-  return options;
-}
-
-// Always returns NULL
-static OCHeaderOption *oc_header_options_free(OCHeaderOption *options) {
-  if (options) {
-    free((void *)options);
-  }
-  return 0;
-}
-
 NAN_METHOD(bind_OCDoResource) {
   NanScope();
 
+  OCDevAddr *destination = 0, destinationToFillIn;
+  OCPayload *payload = 0;
   OCHeaderOption *options = 0;
+  uint8_t optionCount = 0;
   OCDoHandle handle;
   OCCallbackData data;
 
-  VALIDATE_ARGUMENT_COUNT(args, 9);
+  VALIDATE_ARGUMENT_COUNT(args, 8);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);
   VALIDATE_ARGUMENT_TYPE(args, 2, IsString);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 3, IsString);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 4, IsString);
+  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 3, IsObject);
+  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 4, IsObject);
   VALIDATE_ARGUMENT_TYPE(args, 5, IsUint32);
   VALIDATE_ARGUMENT_TYPE(args, 6, IsUint32);
   VALIDATE_ARGUMENT_TYPE(args, 7, IsFunction);
   VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 8, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 9, IsUint32);
 
   data.context =
       (void *)persistentJSCallback_new(Local<Function>::Cast(args[7]));
@@ -102,23 +62,52 @@ NAN_METHOD(bind_OCDoResource) {
   data.cd = (OCClientContextDeleter)persistentJSCallback_free;
 
   if (args[8]->IsArray()) {
-    options = oc_header_options_new(Handle<Array>::Cast(args[8]));
+  	options = (OCHeaderOption *)malloc( Local<Array>::Cast( args[ 8 ] )->Length() * sizeof( OCHeaderOption ) );
+	if ( !options ) {
+		return NanThrowError( "Ran out of memory attempting to allocate header options" );
+		NanReturnUndefined();
+	}
+  	if ( !c_OCHeaderOption( Local<Array>::Cast( args[ 8 ] ), options, &optionCount ) ) {
+		NanReturnUndefined();
+		free( options );
+	}
   }
 
-  Local<Number> returnValue = NanNew<Number>((double)OCDoResource(
-      &handle, (OCMethod)args[1]->Uint32Value(),
-      (const char *)*String::Utf8Value(args[2]),
-      (const char *)(args[3]->IsString() ? (*String::Utf8Value(args[3])) : 0),
-      (const char *)(args[4]->IsString() ? (*String::Utf8Value(args[4])) : 0),
-      (OCConnectivityType)args[5]->Uint32Value(),
-      (OCQualityOfService)args[6]->Uint32Value(), &data, options,
-      (uint8_t)args[9]->Uint32Value()));
+	// If a destination is given, we only use it if it can be converted to a OCDevAddr structure
+	if ( args[ 3 ]->IsObject() ) {
+		if ( c_OCDevAddr( args[ 3 ]->ToObject(), &destinationToFillIn ) ) {
+			destination = &destinationToFillIn;
+		} else {
+			if ( options ) {
+				free( options );
+			}
+			NanReturnUndefined();
+		}
+	}
 
-  options = oc_header_options_free(options);
+	// If a payload is given, we only use it if it can be converted to a OCPayload *
+	if ( args[ 4 ]->IsObject() ) {
+		if ( !c_OCPayload( args[ 4 ]->ToObject(), &payload ) ) {
+			if ( options ) {
+				free( options );
+			}
+			NanReturnUndefined();
+		}
+	}
 
-  args[0]->ToObject()->Set(
-      NanNew<String>("handle"),
-      NanNewBufferHandle((const char *)&handle, sizeof(OCDoHandle)));
+  Local<Number> returnValue = NanNew<Number>(
+      (double)OCDoResource(&handle, (OCMethod)args[1]->Uint32Value(),
+                           (const char *)*String::Utf8Value(args[2]),
+						   destination, payload,
+                           (OCConnectivityType)args[5]->Uint32Value(),
+                           (OCQualityOfService)args[6]->Uint32Value(), &data,
+                           options, (uint8_t)args[9]->Uint32Value()));
+
+	if ( options ) {
+		free( options );
+	}
+
+  args[0]->ToObject()->Set( NanNew<String>("handle"), js_OCDoHandle( handle ) );
 
   NanReturnValue(returnValue);
 }
