@@ -22,7 +22,7 @@ This project provides [iotivity](http://iotivity.org/) node.js bindings.
 ## Installation
 
 ### For the impatient:
-0. Install development headers for boost, libuuid, and glib 2.0
+0. Install development headers for boost and libuuid
 
     boost headers and the boost library are needed during the build process, but iotivity-node does not ultimately depend on the boost library.
 0. Install scons
