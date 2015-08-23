@@ -1,20 +1,25 @@
 var intervalId,
+	handle = {},
+	iotivity = require( "iotivity" ),
 	options = ( function() {
 		var index;
 			returnValue = {
-				discoverDevices: false
+
+				// by default we discover resources
+				discoveryUri: iotivity.OC_RSRVD_WELL_KNOWN_URI
 			};
 
 		for ( index in process.argv ) {
-			if ( process.argv[ index ] === "-d" || process.argv[ index ] === "--devices" ) {
-				returnValue.discoverDevices = true;
+			if ( process.argv[ index ] === "-d" || process.argv[ index ] === "--device" ) {
+				returnValue.discoveryUri = iotivity.OC_RSRVD_DEVICE_URI;
+			} else if ( process.argv[ index ] === "-p" || process.argv[ index ] === "-platform" ) {
+				returnValue.discoveryUri = iotivity.OC_RSRVD_PLATFORM_URI;
 			}
 		}
 
 		return returnValue;
 	} )();
-	handle = {},
-	iotivity = require( "iotivity" );
+
 
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
@@ -32,9 +37,7 @@ iotivity.OCDoResource(
 	iotivity.OCMethod.OC_REST_DISCOVER,
 
 	// Standard path for discovering devices/resources
-	options.discoverDevices ?
-		iotivity.OC_RSRVD_DEVICE_URI :
-		iotivity.OC_RSRVD_WELL_KNOWN_URI,
+	options.discoveryUri,
 
 	// There is no destination
 	null,

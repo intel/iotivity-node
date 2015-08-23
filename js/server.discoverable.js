@@ -10,6 +10,10 @@ intervalId = setInterval( function() {
 }, 1000 );
 
 iotivity.OCSetDeviceInfo( { deviceName: "server.discoverable" } );
+iotivity.OCSetPlatformInfo( {
+	platformID: "server.discoverable.sample",
+	manufacturerName: "iotivity-node"
+} );
 
 // Create a new resource
 iotivity.OCCreateResource(
