@@ -22,10 +22,13 @@ This project provides [iotivity](http://iotivity.org/) node.js bindings.
 ## Installation
 
 ### For the impatient:
-0. Install development headers for boost and libuuid
+0. Make sure [node](https://nodejs.org/) is up and running
+0. Install the following packages, which your distribution should provide:
+    0. unzip, scons, and make
+    0. Development headers for boost, libuuid, and libcurl
 
-    boost headers and the boost library are needed during the build process, but iotivity-node does not ultimately depend on the boost library.
-0. Install scons
+        boost and libcurl are needed during the build process, but iotivity-node does not ultimately depend on either.
+    0. A C compiler and a C++ compiler
 0. Run ```npm install```
 
 ### In more detail:
