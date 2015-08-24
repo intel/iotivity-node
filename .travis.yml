@@ -1,10 +1,10 @@
 sudo: false
 
-language: node_js
+language: cpp
 
-node_js:
-- "0.12"
-- "0.10"
+env:
+  - NODE_VERSION=0.10
+  - NODE_VERSION=0.12
 
 os:
 - linux
@@ -16,6 +16,11 @@ matrix:
 
 install:
 - export CXX="g++-4.8" CC="gcc-4.8"
+- rm -rf ~/.nvm
+- wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash
+- source ~/.nvm/nvm.sh
+- nvm install "${NODE_VERSION}"
+- test "x${TRAVIS_OS_NAME}x" = "xosxx" && brew install scons || true
 
 addons:
   apt:

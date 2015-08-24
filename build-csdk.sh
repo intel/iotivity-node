@@ -22,7 +22,7 @@ cd ./depbuild || exit 1
 
 		# iotivity wants us to clone this before it'll do anything
 		git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor
-		scons $SCONS_FLAGS liboctbstack || { cat config.log; exit 1; }
+		scons $SCONS_FLAGS liboctbstack libconnectivity_abstraction libcoap c_common libocsrm || { cat config.log; exit 1; }
 		PREFIX="$(pwd)/../../deps/iotivity" NO_PC="true" "$(pwd)/../../install.sh" || exit 1
 
 cd ../../ || exit 1
