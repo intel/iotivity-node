@@ -25,7 +25,7 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
 
   jsRequest->Set(NanNew<String>("method"), NanNew<Number>(request->method));
 
-  SET_STRING_IF_NOT_NULL( jsRequest, request, query );
+  SET_STRING_IF_NOT_NULL(jsRequest, request, query);
 
   Local<Object> obsInfo = NanNew<Object>();
   obsInfo->Set(NanNew<String>("action"),
@@ -33,13 +33,15 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
   obsInfo->Set(NanNew<String>("obsId"), NanNew<Number>(request->obsInfo.obsId));
   jsRequest->Set(NanNew<String>("obsInfo"), obsInfo);
 
-	jsRequest->Set( NanNew<String>( "rcvdVendorSpecificHeaderOptions" ),
-		js_OCHeaderOption( request->rcvdVendorSpecificHeaderOptions, request->numRcvdVendorSpecificHeaderOptions ) );
+  jsRequest->Set(
+      NanNew<String>("rcvdVendorSpecificHeaderOptions"),
+      js_OCHeaderOption(request->rcvdVendorSpecificHeaderOptions,
+                        request->numRcvdVendorSpecificHeaderOptions));
 
-	jsRequest->Set( NanNew<String>( "devAddr" ), js_OCDevAddr( &( request->devAddr ) ) );
-	if ( request->payload ) {
-		jsRequest->Set( NanNew<String>( "payload" ), js_OCPayload( request->payload ) );
-	}
+  jsRequest->Set(NanNew<String>("devAddr"), js_OCDevAddr(&(request->devAddr)));
+  if (request->payload) {
+    jsRequest->Set(NanNew<String>("payload"), js_OCPayload(request->payload));
+  }
 
   return jsRequest;
 }

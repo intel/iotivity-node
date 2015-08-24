@@ -20,7 +20,7 @@ NAN_METHOD(bind_OCNotifyAllObservers) {
   VALIDATE_ARGUMENT_TYPE(args, 1, IsNumber);
 
   OCResourceHandle handle;
-  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
     NanReturnUndefined();
   }
 
@@ -39,7 +39,7 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   VALIDATE_ARGUMENT_TYPE(args, 4, IsNumber);
 
   OCResourceHandle handle;
-  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
     NanReturnUndefined();
   }
 

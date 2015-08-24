@@ -6,6 +6,6 @@ extern "C" {
 #include <ocstack.h>
 }
 
-v8::Local<v8::Object> js_OCClientResponse( OCClientResponse *response );
+v8::Local<v8::Object> js_OCClientResponse(OCClientResponse *response);
 
 #endif /* __IOTIVITY_NODE_OCCLIENTRESPONSE_H__ */
