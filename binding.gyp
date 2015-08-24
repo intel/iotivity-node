@@ -25,6 +25,14 @@
 						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include -I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")'
 					]
 				}
+			} ],
+			[ "OS=='mac' and '<(externalOCTBStack)'=='false'", {
+				"libraries+": [
+					"-lconnectivity_abstraction",
+					"-lcoap",
+					"-lc_common",
+					"-locsrm"
+				]
 			} ]
 		],
 		"cflags_cc": [ '-std=c++11' ]
