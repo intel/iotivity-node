@@ -165,6 +165,7 @@ _.extend( OicDevice.prototype, {
 	_server: _.extend( {
 		onrequest: null,
 		listeners: {},
+		_interestedObservers: {},
 
 		addEventListener: function ( event, callback ) {
 			if ( !( event in this.listeners ) ) {
@@ -271,8 +272,20 @@ _.extend( OicDevice.prototype, {
 
 							}
 
-							if (flag & iotivity.OCEntityHandlerFlag.OC_OBSERVE_FLAG ) {
-								//TODO:
+							if ( flag & iotivity.OCEntityHandlerFlag.OC_OBSERVE_FLAG ) {
+								if ( request.obsInfo.action == iotivity.OCObserveAction.OC_OBSERVE_REGISTER ) {
+									_interestedObservers.push( request.obsInfo.obsId );
+								} else if ( request.obsInfo.action == iotivity.OCObserveAction.OC_OBSERVE_DEREGISTER ) {
+									var index = _interestedObservers.indexOf( request.obsInfo.obsId );
+									//FIXME: Should we loop and remove?
+									while ( index != -1 ) {
+										_interestedObservers.splice ( index, 1 );
+										index = _interestedObservers.indexOf( request.obsInfo.obsId );
+									}
+								}
+
+								//FIXME: Check how this should be done.
+								oicReq.type = "observe";
 							}
 
 							console.log ( oicReq );
@@ -345,6 +358,29 @@ _.extend( OicDevice.prototype, {
 				fulfill();
 			}, this ) );
 		},
+
+		notify: function ( resourceId, method, updatedPropertyNames ) {
+			return new Promise( _.bind( function( fulfill, reject ) {
+				var result;
+
+				//FIXME: Find how we define QoS
+				result = iotivity.OCNotifyListOfObservers ( resourceId,
+					_interestedObservers,
+					_interestedObservers.length,
+					JSON.stringify(updatedPropertyNames),
+					iotivity.OCQualityOfService.OC_NA_QOS
+					);
+
+				if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
+					reject( _.extend( new Error( "notify: OCNotifyListOfObservers() failed" ), {
+						result: result
+					} ) );
+					return;
+				}
+
+				fulfill();
+			}, this ) );
+		}
 
 	})
 } );
