@@ -3,6 +3,7 @@
 #include "oc-payload.h"
 #include "oc-sid.h"
 #include "string-primitive.h"
+#include "oc-platform-info.h"
 
 extern "C" {
 #include <string.h>
@@ -61,9 +62,7 @@ static Local<Object> js_OCRepPayload( OCRepPayload *payload ) {
 	returnValue->Set( NanNew<String>( "type" ), NanNew<Number>( payload->base.type ) );
 
 	// payload.uri
-	if ( payload->uri ) {
-		returnValue->Set( NanNew<String>( "uri" ), NanNew<String>( payload->uri ) );
-	}
+	SET_STRING_IF_NOT_NULL( returnValue, payload, uri );
 
 	// payload.types
 	if ( payload->types ) {
@@ -125,13 +124,13 @@ static Local<Object> js_OCRepPayload( OCRepPayload *payload ) {
 	return returnValue;
 }
 
-Local<Object> js_OCResourcePayload( OCResourcePayload *payload ) {
+static Local<Object> js_OCResourcePayload( OCResourcePayload *payload ) {
 	int index, length;
 	OCStringLL *item;
 	Local<Object> returnValue = NanNew<Object>();
 
 	// payload.uri
-	returnValue->Set( NanNew<String>( "uri" ), NanNew<String>( payload->uri ) );
+	SET_STRING_IF_NOT_NULL( returnValue, payload, uri );
 
 	// payload.sid
 	returnValue->Set( NanNew<String>( "sid" ), js_SID( payload->sid ) );
@@ -164,7 +163,7 @@ Local<Object> js_OCResourcePayload( OCResourcePayload *payload ) {
 	return returnValue;
 }
 
-Local<Object> js_OCDiscoveryPayload( OCDiscoveryPayload *payload ) {
+static Local<Object> js_OCDiscoveryPayload( OCDiscoveryPayload *payload ) {
 	Local<Object> returnValue = NanNew<Object>();
 	OCResourcePayload *resource = payload->resources;
 	int counter = 0;
@@ -188,30 +187,32 @@ Local<Object> js_OCDiscoveryPayload( OCDiscoveryPayload *payload ) {
 	return returnValue;
 }
 
-Local<Object> js_OCDevicePayload( OCDevicePayload *payload ) {
+static Local<Object> js_OCDevicePayload( OCDevicePayload *payload ) {
 	Local<Object> returnValue = NanNew<Object>();
 
 	returnValue->Set( NanNew<String>( "type" ), NanNew<Number>( payload->base.type ) );
 
-	if ( payload->uri ) {
-		returnValue->Set( NanNew<String>( "uri" ), NanNew<String>( payload->uri ) );
-	}
+	SET_STRING_IF_NOT_NULL( returnValue, payload, uri );
 
 	if ( payload->sid ) {
 		returnValue->Set( NanNew<String>( "sid" ), js_SID( payload->sid ) );
 	}
 
-	if ( payload->deviceName ) {
-		returnValue->Set( NanNew<String>( "deviceName" ), NanNew<String>( payload->deviceName ) );
-	}
+	SET_STRING_IF_NOT_NULL( returnValue, payload, deviceName );
+	SET_STRING_IF_NOT_NULL( returnValue, payload, specVersion );
+	SET_STRING_IF_NOT_NULL( returnValue, payload, dataModelVersion );
 
-	if ( payload->specVersion ) {
-		returnValue->Set( NanNew<String>( "specVersion" ), NanNew<String>( payload->specVersion ) );
-	}
+	return returnValue;
+}
 
-	if ( payload->dataModelVersion ) {
-		returnValue->Set( NanNew<String>( "dataModelVersion" ), NanNew<String>( payload->dataModelVersion ) );
-	}
+static Local<Object> js_OCPlatformPayload( OCPlatformPayload *payload ) {
+	Local<Object> returnValue = NanNew<Object>();
+
+	returnValue->Set( NanNew<String>( "type" ), NanNew<Number>( payload->base.type ) );
+
+	SET_STRING_IF_NOT_NULL( returnValue, payload, uri );
+
+	returnValue->Set( NanNew<String>( "info" ), js_OCPlatformInfo( &( payload->info ) ) );
 
 	return returnValue;
 }
@@ -226,6 +227,9 @@ Local<Value> js_OCPayload( OCPayload *payload ) {
 
 		case PAYLOAD_TYPE_DEVICE:
 			return js_OCDevicePayload( ( OCDevicePayload * )payload );
+
+		case PAYLOAD_TYPE_PLATFORM:
+			return js_OCPlatformPayload( ( OCPlatformPayload * )payload );
 
 		case PAYLOAD_TYPE_INVALID:
 		default:
