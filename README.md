@@ -50,7 +50,7 @@ During compilation, iotivity-node downloads iotivity from its git repository, bu
 
 Alternatively, you can use some rudimentary install scripts for both iotivity and this repository. Using them will help you avoid having to set the environment variables ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the scripts will supply them to the build process.
 
-0. Grab [install.sh](https://raw.githubusercontent.com/gabrielschulhof/iotivity/install/install.sh) and [octbstack.pc.in](https://raw.githubusercontent.com/gabrielschulhof/iotivity/install/octbstack.pc.in) and place them in the root of the iotivity repository.
+0. Grab [install.sh](https://raw.githubusercontent.com/otcshare/iotivity-node/dev/install.sh) and [octbstack.pc.in](https://raw.githubusercontent.com/otcshare/iotivity-node/dev/octbstack.pc.in) and place them in the root of the iotivity repository.
 0. As root, change directory to the iotivity repository and run ```./install.sh```. The script recognizes two environment variables: ```PREFIX``` is set to ```/usr``` by default, and ```DESTDIR``` is unset. Use ```PREFIX``` to install to a location other than ```/usr``` and use ```DESTDIR``` to set an additional prefix where to put the files. This latter option is especially useful for packaging. Examples:
 
     ```PREFIX=/usr/local ./install.sh``` will install the files into ```/usr/local``` instead.
@@ -59,7 +59,7 @@ Alternatively, you can use some rudimentary install scripts for both iotivity an
 0. After having installed iotivity using the above script, you can run ```./dist.sh``` from the root of this repository without first having to set any environment variables. The script will grab the environment via ```pkg-config``` from the file installed above, and will build, test, and create a directory structure under ```dist/``` which is suitable for deployment on a target device.
 
 ## Placing the binaries onto a device
-The distribution scripts (```dist.sh``` in iotivity-node, and ```install.sh``` in iotivity) when used together make it easy to create a binary tarball which can be unpacked into the root directory of a device:
+The distribution scripts ```dist.sh``` and ```install.sh``` when used together make it easy to create a binary tarball which can be unpacked into the root directory of a device:
 
 0. Change directory to the root of the ```iotivity``` repository and run ```DESTDIR=/tmp/iotivity-installation ./install.sh```
 0. ```mkdir -p /tmp/iotivity-installation/usr/lib/node_modules```
@@ -118,3 +118,5 @@ This signature allows us to throw an exception and return false if any part of `
 As a general principle, if a Javascript value fails validation, throw an exception immediately. Do not return false and expect the caller to throw the exception. Call it exception-at-the-point-of-failure.
 
 Pointers to structures received from the C API may always be null. The functions converting those pointers to Javascript objects (js_CStructureName()) assume that they are not null. So, wrap the call to such a function in a null-check.
+
+When filling out a C structure in a function c_CStructureName, create a local structure first, and only if all validations pass, memcpy() the local structure into the structure passed in.
