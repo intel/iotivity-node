@@ -1,0 +1,9 @@
+prefix=@PREFIX@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
+
+Name: liboctbstack
+Description: iotivity CSDK
+Version: 0.9.2
+Libs: -L${libdir} -loctbstack
+Cflags: -I${includedir}/@OCTB_STACK_INCLUDEDIR@ -I${includedir}/@OCTB_RANDOM_INCLUDEDIR@
