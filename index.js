@@ -295,6 +295,23 @@ _.extend( OicDevice.prototype, {
 
 		},
 
+		unregisterResource: function ( resourceId ) {
+			return new Promise( _.bind( function( fulfill, reject ) {
+				var result;
+
+				result = iotivity.OCDeleteResource ( resourceId );
+
+				if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
+					reject( _.extend( new Error( "unregisterResource: OCDeleteResource() failed" ), {
+						result: result
+					} ) );
+					return;
+				}
+
+				fulfill();
+			}, this ) );
+		},
+
 		enablePresence: function ( ttl ) {
 			return new Promise( _.bind( function( fulfill, reject ) {
 				var result;
