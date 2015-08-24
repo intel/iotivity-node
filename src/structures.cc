@@ -24,9 +24,8 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
                  js_OCRequestHandle(request->requestHandle));
 
   jsRequest->Set(NanNew<String>("method"), NanNew<Number>(request->method));
-  if (request->query) {
-    jsRequest->Set(NanNew<String>("query"), NanNew<String>(request->query));
-  }
+
+  SET_STRING_IF_NOT_NULL( jsRequest, request, query );
 
   Local<Object> obsInfo = NanNew<Object>();
   obsInfo->Set(NanNew<String>("action"),

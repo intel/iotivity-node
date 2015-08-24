@@ -40,6 +40,11 @@
                              "() or IsNull()");                             \
   }
 
+#define SET_STRING_IF_NOT_NULL( destination, source, memberName ) \
+	if ( source->memberName ) { \
+		destination->Set( NanNew<String>( #memberName ), NanNew<String>( source->memberName ) ); \
+	}
+
 v8::Persistent<v8::Function> *persistentJSCallback_new(
     v8::Local<v8::Function> callback);
 void persistentJSCallback_free(v8::Persistent<v8::Function> *callback);

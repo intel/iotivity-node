@@ -72,6 +72,7 @@
 				"src/structures/oc-entity-handler-response.cc",
 				"src/structures/oc-header-option-array.cc",
 				"src/structures/oc-payload.cc",
+				"src/structures/oc-platform-info.cc",
 				"src/structures/oc-sid.cc",
 				"src/structures/string-primitive.cc"
 			],
