@@ -27,11 +27,12 @@
     return failReturn;                                             \
   }
 
-#define VALIDATE_VALUE_TYPE_OR_FREE(value, typecheck, message, failReturn, pointer_to_free, free_function) \
-  if (!(value)->typecheck()) {                                     \
-    NanThrowTypeError(message " must satisfy " #typecheck "()");   \
-	free_function((pointer_to_free));                              \
-    return failReturn;                                             \
+#define VALIDATE_VALUE_TYPE_OR_FREE(value, typecheck, message, failReturn, \
+                                    pointer_to_free, free_function)        \
+  if (!(value)->typecheck()) {                                             \
+    NanThrowTypeError(message " must satisfy " #typecheck "()");           \
+    free_function((pointer_to_free));                                      \
+    return failReturn;                                                     \
   }
 
 #define VALIDATE_ARGUMENT_TYPE_OR_NULL(args, index, typecheck)              \
@@ -40,10 +41,11 @@
                              "() or IsNull()");                             \
   }
 
-#define SET_STRING_IF_NOT_NULL( destination, source, memberName ) \
-	if ( source->memberName ) { \
-		destination->Set( NanNew<String>( #memberName ), NanNew<String>( source->memberName ) ); \
-	}
+#define SET_STRING_IF_NOT_NULL(destination, source, memberName) \
+  if (source->memberName) {                                     \
+    destination->Set(NanNew<String>(#memberName),               \
+                     NanNew<String>(source->memberName));       \
+  }
 
 v8::Persistent<v8::Function> *persistentJSCallback_new(
     v8::Local<v8::Function> callback);

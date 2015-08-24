@@ -20,9 +20,8 @@ using namespace node;
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
   // Call the JS Callback
-  Local<Value> jsCallbackArguments[2] = {
-      js_OCDoHandle( handle ),
-      js_OCClientResponse(clientResponse)};
+  Local<Value> jsCallbackArguments[2] = {js_OCDoHandle(handle),
+                                         js_OCClientResponse(clientResponse)};
   Local<Value> returnValue = NanMakeCallback(
       NanGetCurrentContext()->Global(),
       NanNew(*(Persistent<Function> *)context), 2, jsCallbackArguments);
@@ -62,52 +61,55 @@ NAN_METHOD(bind_OCDoResource) {
   data.cd = (OCClientContextDeleter)persistentJSCallback_free;
 
   if (args[8]->IsArray()) {
-  	options = (OCHeaderOption *)malloc( Local<Array>::Cast( args[ 8 ] )->Length() * sizeof( OCHeaderOption ) );
-	if ( !options ) {
-		return NanThrowError( "Ran out of memory attempting to allocate header options" );
-		NanReturnUndefined();
-	}
-  	if ( !c_OCHeaderOption( Local<Array>::Cast( args[ 8 ] ), options, &optionCount ) ) {
-		NanReturnUndefined();
-		free( options );
-	}
+    options = (OCHeaderOption *)malloc(Local<Array>::Cast(args[8])->Length() *
+                                       sizeof(OCHeaderOption));
+    if (!options) {
+      return NanThrowError(
+          "Ran out of memory attempting to allocate header options");
+      NanReturnUndefined();
+    }
+    if (!c_OCHeaderOption(Local<Array>::Cast(args[8]), options, &optionCount)) {
+      NanReturnUndefined();
+      free(options);
+    }
   }
 
-	// If a destination is given, we only use it if it can be converted to a OCDevAddr structure
-	if ( args[ 3 ]->IsObject() ) {
-		if ( c_OCDevAddr( args[ 3 ]->ToObject(), &destinationToFillIn ) ) {
-			destination = &destinationToFillIn;
-		} else {
-			if ( options ) {
-				free( options );
-			}
-			NanReturnUndefined();
-		}
-	}
+  // If a destination is given, we only use it if it can be converted to a
+  // OCDevAddr structure
+  if (args[3]->IsObject()) {
+    if (c_OCDevAddr(args[3]->ToObject(), &destinationToFillIn)) {
+      destination = &destinationToFillIn;
+    } else {
+      if (options) {
+        free(options);
+      }
+      NanReturnUndefined();
+    }
+  }
 
-	// If a payload is given, we only use it if it can be converted to a OCPayload *
-	if ( args[ 4 ]->IsObject() ) {
-		if ( !c_OCPayload( args[ 4 ]->ToObject(), &payload ) ) {
-			if ( options ) {
-				free( options );
-			}
-			NanReturnUndefined();
-		}
-	}
+  // If a payload is given, we only use it if it can be converted to a OCPayload
+  // *
+  if (args[4]->IsObject()) {
+    if (!c_OCPayload(args[4]->ToObject(), &payload)) {
+      if (options) {
+        free(options);
+      }
+      NanReturnUndefined();
+    }
+  }
 
-  Local<Number> returnValue = NanNew<Number>(
-      (double)OCDoResource(&handle, (OCMethod)args[1]->Uint32Value(),
-                           (const char *)*String::Utf8Value(args[2]),
-						   destination, payload,
-                           (OCConnectivityType)args[5]->Uint32Value(),
-                           (OCQualityOfService)args[6]->Uint32Value(), &data,
-                           options, (uint8_t)args[9]->Uint32Value()));
+  Local<Number> returnValue = NanNew<Number>((double)OCDoResource(
+      &handle, (OCMethod)args[1]->Uint32Value(),
+      (const char *)*String::Utf8Value(args[2]), destination, payload,
+      (OCConnectivityType)args[5]->Uint32Value(),
+      (OCQualityOfService)args[6]->Uint32Value(), &data, options,
+      (uint8_t)args[9]->Uint32Value()));
 
-	if ( options ) {
-		free( options );
-	}
+  if (options) {
+    free(options);
+  }
 
-  args[0]->ToObject()->Set( NanNew<String>("handle"), js_OCDoHandle( handle ) );
+  args[0]->ToObject()->Set(NanNew<String>("handle"), js_OCDoHandle(handle));
 
   NanReturnValue(returnValue);
 }

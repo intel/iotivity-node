@@ -11,39 +11,46 @@ extern "C" {
 
 using namespace v8;
 
-Local<Object> js_OCClientResponse( OCClientResponse *response ) {
-	Local<Object> returnValue = NanNew<Object>();
+Local<Object> js_OCClientResponse(OCClientResponse *response) {
+  Local<Object> returnValue = NanNew<Object>();
 
-	// response.devAddr
-	returnValue->Set( NanNew<String>( "devAddr" ), js_OCDevAddr( &( response->devAddr ) ) );
+  // response.devAddr
+  returnValue->Set(NanNew<String>("devAddr"),
+                   js_OCDevAddr(&(response->devAddr)));
 
-	// response.addr
-	if ( response->addr ) {
-		returnValue->Set( NanNew<String>( "addr" ), js_OCDevAddr( response->addr ) );
-	}
+  // response.addr
+  if (response->addr) {
+    returnValue->Set(NanNew<String>("addr"), js_OCDevAddr(response->addr));
+  }
 
-	// response.connType
-	returnValue->Set( NanNew<String>( "connType" ), NanNew<Number>( response->connType ) );
+  // response.connType
+  returnValue->Set(NanNew<String>("connType"),
+                   NanNew<Number>(response->connType));
 
-	// response.result
-	returnValue->Set( NanNew<String>( "result" ), NanNew<Number>( response->result ) );
+  // response.result
+  returnValue->Set(NanNew<String>("result"), NanNew<Number>(response->result));
 
-	// response.sequenceNumber
-	returnValue->Set( NanNew<String>( "sequenceNumber" ), NanNew<Number>( response->sequenceNumber ) );
+  // response.sequenceNumber
+  returnValue->Set(NanNew<String>("sequenceNumber"),
+                   NanNew<Number>(response->sequenceNumber));
 
-	// response.resourceUri
-	if ( response->resourceUri ) {
-		returnValue->Set( NanNew<String>( "resourceUri" ), NanNew<String>( response->resourceUri ) );
-	}
+  // response.resourceUri
+  if (response->resourceUri) {
+    returnValue->Set(NanNew<String>("resourceUri"),
+                     NanNew<String>(response->resourceUri));
+  }
 
-	// response.payload
-	if ( response->payload ) {
-		returnValue->Set( NanNew<String>( "payload" ), js_OCPayload( response->payload ) );
-	}
+  // response.payload
+  if (response->payload) {
+    returnValue->Set(NanNew<String>("payload"),
+                     js_OCPayload(response->payload));
+  }
 
-	// response.rcvdVendorSpecificHeaderOptions
-	returnValue->Set( NanNew<String>( "rcvdVendorSpecificHeaderOptions" ),
-		js_OCHeaderOption( response->rcvdVendorSpecificHeaderOptions, response->numRcvdVendorSpecificHeaderOptions ) );
+  // response.rcvdVendorSpecificHeaderOptions
+  returnValue->Set(
+      NanNew<String>("rcvdVendorSpecificHeaderOptions"),
+      js_OCHeaderOption(response->rcvdVendorSpecificHeaderOptions,
+                        response->numRcvdVendorSpecificHeaderOptions));
 
-	return returnValue;
+  return returnValue;
 }

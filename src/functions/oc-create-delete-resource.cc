@@ -55,7 +55,8 @@ NAN_METHOD(bind_OCCreateResource) {
 
   // Save info to the handle
   annotation[handle] = callback;
-  args[ 0 ]->ToObject()->Set( NanNew<String>( "handle" ), js_OCResourceHandle( handle ) );
+  args[0]->ToObject()->Set(NanNew<String>("handle"),
+                           js_OCResourceHandle(handle));
   NanReturnValue(returnValue);
 }
 
@@ -69,7 +70,7 @@ NAN_METHOD(bind_OCDeleteResource) {
   OCResourceHandle handle = 0;
 
   // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
     NanReturnUndefined();
   }
 
@@ -98,7 +99,7 @@ NAN_METHOD(bind_OCBindResourceHandler) {
   OCResourceHandle handle = 0;
 
   // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
     NanReturnUndefined();
   }
 
@@ -135,10 +136,10 @@ NAN_METHOD(bind_OCBindResource) {
   VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
 
-  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &collectionHandle)) {
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &collectionHandle)) {
     NanReturnUndefined();
   }
-  if (!c_OCResourceHandle(Local<Array>::Cast( args[1] ), &resourceHandle)) {
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[1]), &resourceHandle)) {
     NanReturnUndefined();
   }
 
@@ -155,7 +156,7 @@ NAN_METHOD(bind_OCBindResourceInterfaceToResource) {
   VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
 
-  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
     NanReturnUndefined();
   }
 
@@ -172,7 +173,7 @@ NAN_METHOD(bind_OCBindResourceTypeToResource) {
   VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
 
-  if (!c_OCResourceHandle(Local<Array>::Cast( args[0] ), &handle)) {
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
     NanReturnUndefined();
   }
 

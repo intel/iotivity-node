@@ -18,7 +18,7 @@ NAN_METHOD(bind_OCInit) {
   VALIDATE_ARGUMENT_TYPE(args, 2, IsNumber);
 
   NanReturnValue(NanNew<Number>(OCInit(
-      (const char*)(args[0]->IsString() ? (*String::Utf8Value(args[0])) : 0),
+      (const char *)(args[0]->IsString() ? (*String::Utf8Value(args[0])) : 0),
       (uint16_t)args[1]->ToUint32()->Value(),
       (OCMode)args[2]->ToNumber()->Value())));
 }
@@ -51,51 +51,51 @@ NAN_METHOD(bind_OCStopPresence) {
   NanReturnValue(NanNew<Number>(OCStopPresence()));
 }
 
-static bool c_OCDeviceInfo( Local<Object> devInfo, OCDeviceInfo *info ) {
-	Local<Value> deviceName = devInfo->Get( NanNew<String>( "deviceName" ) );
-	VALIDATE_VALUE_TYPE( deviceName, IsString, "deviceInfo.deviceName", false );
-	char *devName;
-	if ( !c_StringNew( deviceName->ToString(), &devName ) ) {
-		return false;
-	}
-	info->deviceName = devName;
-	return true;
+static bool c_OCDeviceInfo(Local<Object> devInfo, OCDeviceInfo *info) {
+  Local<Value> deviceName = devInfo->Get(NanNew<String>("deviceName"));
+  VALIDATE_VALUE_TYPE(deviceName, IsString, "deviceInfo.deviceName", false);
+  char *devName;
+  if (!c_StringNew(deviceName->ToString(), &devName)) {
+    return false;
+  }
+  info->deviceName = devName;
+  return true;
 }
 
 NAN_METHOD(bind_OCSetDeviceInfo) {
-	NanScope();
+  NanScope();
 
-	VALIDATE_ARGUMENT_COUNT( args, 1 );
-	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
+  VALIDATE_ARGUMENT_COUNT(args, 1);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
 
-	OCDeviceInfo info;
+  OCDeviceInfo info;
 
-	if ( !c_OCDeviceInfo( args[ 0 ]->ToObject(), &info ) ) {
-		NanReturnUndefined();
-	}
+  if (!c_OCDeviceInfo(args[0]->ToObject(), &info)) {
+    NanReturnUndefined();
+  }
 
-	OCStackResult result = OCSetDeviceInfo( info );
+  OCStackResult result = OCSetDeviceInfo(info);
 
-	free( info.deviceName );
+  free(info.deviceName);
 
-	NanReturnValue( NanNew<Number>( result ) );
+  NanReturnValue(NanNew<Number>(result));
 }
 
 NAN_METHOD(bind_OCSetPlatformInfo) {
-	NanScope();
+  NanScope();
 
-	VALIDATE_ARGUMENT_COUNT( args, 1 );
-	VALIDATE_ARGUMENT_TYPE( args, 0, IsObject );
+  VALIDATE_ARGUMENT_COUNT(args, 1);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
 
-	OCPlatformInfo info;
+  OCPlatformInfo info;
 
-	if ( !c_OCPlatformInfo( args[ 0 ]->ToObject(), &info ) ) {
-		NanReturnUndefined();
-	}
+  if (!c_OCPlatformInfo(args[0]->ToObject(), &info)) {
+    NanReturnUndefined();
+  }
 
-	OCStackResult result = OCSetPlatformInfo( info );
+  OCStackResult result = OCSetPlatformInfo(info);
 
-	c_OCPlatformInfoFreeMembers( &info );
+  c_OCPlatformInfoFreeMembers(&info);
 
-	NanReturnValue( NanNew<Number>( result ) );
+  NanReturnValue(NanNew<Number>(result));
 }
