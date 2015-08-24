@@ -1,7 +1,7 @@
 # iotivity-node
 
 ## Description
-This project provides [iotivity](http://iotivity.org/) node.js bindings.
+This project provides [iotivity][] node.js bindings.
 
 ## Build status
 <dl>
@@ -22,7 +22,7 @@ This project provides [iotivity](http://iotivity.org/) node.js bindings.
 ## Installation
 
 ### For the impatient:
-0. Make sure [node](https://nodejs.org/) is up and running
+0. Make sure [node][] is up and running
 0. Install the following packages, which your distribution should provide:
     0. unzip, scons, and make
     0. Development headers for boost, libuuid, and libcurl
@@ -32,14 +32,14 @@ This project provides [iotivity](http://iotivity.org/) node.js bindings.
 0. Run ```npm install```
 
 ### In more detail:
-iotivity-node depends on [iotivity](http://iotivity.org/) proper. It has been tested against [0.9.2](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=0.9.2) on Linux. iotivity depends on development headers for libuuid and boost.
+iotivity-node depends on [iotivity][] proper. It has been tested against [0.9.2][] on Linux. iotivity depends on development headers for libuuid and boost.
 
 iotivity-node requires a compiler that implements the C++11 standard.
 
 During compilation, iotivity-node downloads iotivity from its git repository, builds it, and links against it. If you wish to build iotivity separately, set the environment variable OCTBSTACK_CFLAGS to contain the compiler arguments necessary for building against iotivity, and also set the environment variable OCTBSTACK_LIBS to contain the linker arguments necessary for linking against iotivity. If both variables are set to non-empty values, iotivity-node will skip the step of downloading and building iotivity from sources. If you choose to build iotivity separately, you can use the following procedure, which is known to work on Linux:
 
-0. Grab a [snapshot](https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=0.9.2;sf=tgz) of iotivity from its git repository and unpack it locally.
-0. Make sure a compiler, make, [scons](http://www.scons.org/) (a build tool), and the headers for the above-mentioned library dependencies (boost and libuuid) are installed. Your distribution should provide all these tools and libraries.
+0. Grab a [snapshot][] of iotivity from its git repository and unpack it locally.
+0. Make sure a compiler, make, [scons][] (a build tool), and the headers for the above-mentioned library dependencies (boost and libuuid) are installed. Your distribution should provide all these tools and libraries.
 0. ```cd iotivity```
 0. scons has the concept of targets just like make. You can get a list of targets contained in the iotivity repository, as well as a listing of recognized build flags via ```scons --help```. The only target you need for the node.js bindings is ```liboctbstack```. Thus, run ```scons liboctbstack``` to build this target.
 0. Now that iotivity is built, clone this repository, and change directory into it.
@@ -50,7 +50,7 @@ During compilation, iotivity-node downloads iotivity from its git repository, bu
 
 Alternatively, you can use some rudimentary install scripts for both iotivity and this repository. Using them will help you avoid having to set the environment variables ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the scripts will supply them to the build process.
 
-0. Grab [install.sh](https://raw.githubusercontent.com/otcshare/iotivity-node/dev/install.sh) and [octbstack.pc.in](https://raw.githubusercontent.com/otcshare/iotivity-node/dev/octbstack.pc.in) and place them in the root of the iotivity repository.
+0. Grab [install.sh][] and [octbstack.pc.in][] and place them in the root of the iotivity repository.
 0. As root, change directory to the iotivity repository and run ```./install.sh```. The script recognizes two environment variables: ```PREFIX``` is set to ```/usr``` by default, and ```DESTDIR``` is unset. Use ```PREFIX``` to install to a location other than ```/usr``` and use ```DESTDIR``` to set an additional prefix where to put the files. This latter option is especially useful for packaging. Examples:
 
     ```PREFIX=/usr/local ./install.sh``` will install the files into ```/usr/local``` instead.
@@ -96,7 +96,7 @@ To build against a new upstream versions:
 The script ```./update-enums-and-constants.sh``` reads the header files ocstackconfig.h and octypes.h and generates the contents of src/constants.cc and src/enums.cc. Read the comments in the script before you modify either src/constants.cc or src/enums.cc.
 
 ## Coding Style And Principles
-Please follow the [jQuery](http://contribute.jquery.org/style-guide/js/) coding style for the JavaScript files.
+Please follow the [jQuery][] coding style for the JavaScript files.
 
 The C++ files can be formatted using ```clang-format -style=Google```:
 ```BASH
@@ -120,3 +120,12 @@ As a general principle, if a Javascript value fails validation, throw an excepti
 Pointers to structures received from the C API may always be null. The functions converting those pointers to Javascript objects (js_CStructureName()) assume that they are not null. So, wrap the call to such a function in a null-check.
 
 When filling out a C structure in a function c_CStructureName, create a local structure first, and only if all validations pass, memcpy() the local structure into the structure passed in.
+
+[iotivity]: http://iotivity.org/
+[node]: https://nodejs.org/
+[0.9.2]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=0.9.2
+[snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=0.9.2;sf=tgz
+[scons]: http://www.scons.org/
+[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/dev/install.sh
+[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/dev/octbstack.pc.in
+[jQuery]: http://contribute.jquery.org/style-guide/js/
