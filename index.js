@@ -37,7 +37,19 @@ var iotivity = require( "bindings" )( "iotivity" ),
 			this._settings = settings;
 		}
 	},
-	OicResource = function ( init ) {
+	OicServer = function() {
+		if ( !this._isOicServer ) {
+			return new OicServer();
+		}
+
+	},
+	OicClient = function() {
+		if ( !this._isOicClient ) {
+			return new OicClient();
+		}
+
+	},
+	OicResource = function( init ) {
 		if ( !this._isOicResource ) {
 			return new OicResource( init );
 		}
@@ -59,7 +71,7 @@ _.extend( OicResource.prototype, {
 _.extend( OicRequestEvent.prototype, {
 	_isOicRequestEvent: true,
 
-	sendResponse: function ( resource ) {
+	sendResponse: function( resource ) {
 		var oicResponse;
 
 		oicResponse.requestHandle = this.requestId;
@@ -162,12 +174,13 @@ _.extend( OicDevice.prototype, {
 		}, this ) );
 	},
 
-	_server: _.extend( {
+	_server: _.extend( OicServer.prototype, {
+		_isOicServer: true,
 		onrequest: null,
 		listeners: {},
-		_interestedObservers: {},
+		_interestedObservers: [],
 
-		addEventListener: function ( event, callback ) {
+		addEventListener: function( event, callback ) {
 			if ( !( event in this.listeners ) ) {
 				this.listeners[ event ] = [];
 			}
@@ -175,7 +188,7 @@ _.extend( OicDevice.prototype, {
 			this.listeners[ event ].push( callback );
 		},
 
-		removeEventListener: function ( event, callback ) {
+		removeEventListener: function( event, callback ) {
 			if ( event in this.listeners ) {
 				this.listeners [ event ] = this.listeners [ event ].filter ( function ( ev ) {
 					return ev !== callback;
@@ -194,7 +207,7 @@ _.extend( OicDevice.prototype, {
 			}
 		},
 
-		registerResource: function ( init ) {
+		registerResource: function( init ) {
 			return new Promise( _.bind( function( fulfill, reject ) {
 				var result = 0;
 				var flag = 0;
@@ -274,13 +287,13 @@ _.extend( OicDevice.prototype, {
 
 							if ( flag & iotivity.OCEntityHandlerFlag.OC_OBSERVE_FLAG ) {
 								if ( request.obsInfo.action == iotivity.OCObserveAction.OC_OBSERVE_REGISTER ) {
-									_interestedObservers.push( request.obsInfo.obsId );
+									this._interestedObservers.push( request.obsInfo.obsId );
 								} else if ( request.obsInfo.action == iotivity.OCObserveAction.OC_OBSERVE_DEREGISTER ) {
 									var index = _interestedObservers.indexOf( request.obsInfo.obsId );
 									//FIXME: Should we loop and remove?
 									while ( index != -1 ) {
-										_interestedObservers.splice ( index, 1 );
-										index = _interestedObservers.indexOf( request.obsInfo.obsId );
+										this._interestedObservers.splice ( index, 1 );
+										index = this._interestedObservers.indexOf( request.obsInfo.obsId );
 									}
 								}
 
@@ -308,7 +321,7 @@ _.extend( OicDevice.prototype, {
 
 		},
 
-		unregisterResource: function ( resourceId ) {
+		unregisterResource: function( resourceId ) {
 			return new Promise( _.bind( function( fulfill, reject ) {
 				var result;
 
@@ -325,7 +338,7 @@ _.extend( OicDevice.prototype, {
 			}, this ) );
 		},
 
-		enablePresence: function ( ttl ) {
+		enablePresence: function( ttl ) {
 			return new Promise( _.bind( function( fulfill, reject ) {
 				var result;
 
@@ -342,7 +355,7 @@ _.extend( OicDevice.prototype, {
 			}, this ) );
 		},
 
-		disablePresence: function () {
+		disablePresence: function() {
 			return new Promise( _.bind( function( fulfill, reject ) {
 				var result;
 
@@ -359,7 +372,7 @@ _.extend( OicDevice.prototype, {
 			}, this ) );
 		},
 
-		notify: function ( resourceId, method, updatedPropertyNames ) {
+		notify: function( resourceId, method, updatedPropertyNames ) {
 			return new Promise( _.bind( function( fulfill, reject ) {
 				var result;
 
@@ -387,6 +400,8 @@ _.extend( OicDevice.prototype, {
 
 module.exports = {
 	OicDevice: OicDevice,
+	OicServer: OicServer,
+	OicClient: OicClient,
 	OicResource: OicResource,
 	OicRequestEvent: OicRequestEvent
 };
