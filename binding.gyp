@@ -7,7 +7,13 @@
 			"<!(node -e \"require('nan')\")"
 		],
 		"conditions": [
-			[ "'<(externalOCTBStack)'=='false'", {
+			[ "'<(externalOCTBStack)'=='true'", {
+				"libraries": [ '<!@(echo "$OCTBSTACK_LIBS")' ],
+				"cflags": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ],
+				"xcode_settings": {
+					"OTHER_CFLAGS": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ]
+				}
+			}, {
 				"libraries": [
 					'<!@(echo "-L$(pwd)/deps/iotivity/lib -loctbstack -Wl,-rpath $(pwd)/deps/iotivity/lib")'
 				],
@@ -18,13 +24,6 @@
 					"OTHER_CFLAGS": [
 						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include -I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")'
 					]
-				}
-			} ],
-			[ "'<(externalOCTBStack)'=='true'", {
-				"libraries": [ '<!@(echo "$OCTBSTACK_LIBS")' ],
-				"cflags": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ],
-				"xcode_settings": {
-					"OTHER_CFLAGS": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ]
 				}
 			} ]
 		],

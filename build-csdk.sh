@@ -12,7 +12,7 @@ mkdir -p ./depbuild || exit 1
 
 # Download and build iotivity from tarball
 cd ./depbuild || exit 1
-	wget -O iotivity.tar.gz 'https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h='"${CSDK_REVISION}"';sf=tgz' || exit 1
+	wget -qO iotivity.tar.gz 'https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h='"${CSDK_REVISION}"';sf=tgz' || exit 1
 	tar xzf iotivity.tar.gz || exit 1
 	rm -f iotivity.tar.gz || exit 1
 
