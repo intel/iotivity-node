@@ -8,6 +8,12 @@ var intervalId,
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 
+iotivity.OCSetDeviceInfo( { deviceName: "server.get" } );
+iotivity.OCSetPlatformInfo( {
+	platformID: "server.get.sample",
+	manufacturerName: "iotivity-node"
+} );
+
 intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
