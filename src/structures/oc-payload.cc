@@ -260,6 +260,18 @@ static Local<Object> js_OCPlatformPayload(OCPlatformPayload *payload) {
   return returnValue;
 }
 
+static Local<Object> js_OCPresencePayload(OCPresencePayload *payload) {
+	Local<Object> returnValue = NanNew<Object>();
+
+	returnValue->Set( NanNew<String>( "type" ), NanNew<Number>( payload->base.type ) );
+	returnValue->Set( NanNew<String>( "sequenceNumber" ), NanNew<Number>( payload->sequenceNumber ) );
+	returnValue->Set( NanNew<String>( "maxAge" ), NanNew<Number>( payload->maxAge ) );
+	returnValue->Set( NanNew<String>( "trigger" ), NanNew<Number>( payload->trigger ) );
+	SET_STRING_IF_NOT_NULL( returnValue, payload, resourceType );
+
+	return returnValue;
+}
+
 Local<Value> js_OCPayload(OCPayload *payload) {
   switch (payload->type) {
     case PAYLOAD_TYPE_DISCOVERY:
@@ -273,6 +285,9 @@ Local<Value> js_OCPayload(OCPayload *payload) {
 
     case PAYLOAD_TYPE_PLATFORM:
       return js_OCPlatformPayload((OCPlatformPayload *)payload);
+
+	case PAYLOAD_TYPE_PRESENCE:
+		return js_OCPresencePayload((OCPresencePayload *)payload);
 
     case PAYLOAD_TYPE_INVALID:
     default:
