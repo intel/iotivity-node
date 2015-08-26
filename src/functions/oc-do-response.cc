@@ -1,5 +1,4 @@
-#include <node_buffer.h>
-#include "oc-do-resource.h"
+#include "oc-do-response.h"
 #include "../common.h"
 #include "../structures/oc-entity-handler-response.h"
 
