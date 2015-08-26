@@ -38,15 +38,14 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
   uint32_t index, length;
   OCDevAddr local;
 
-  // addr.adapter
-  Local<Value> adapter = jsDevAddr->Get(NanNew<String>("adapter"));
-  VALIDATE_VALUE_TYPE(adapter, IsNumber, "addr.adapter", false);
-  local.adapter = (OCTransportAdapter)adapter->Uint32Value();
-
-  // addr.flags
-  Local<Value> flags = jsDevAddr->Get(NanNew<String>("flags"));
-  VALIDATE_VALUE_TYPE(flags, IsNumber, "addr.flags", false);
-  local.flags = (OCTransportFlags)flags->Uint32Value();
+  VALIDATE_AND_ASSIGN(local, adapter, OCTransportAdapter, IsNumber, "addr",
+                      false, jsDevAddr, Uint32Value);
+  VALIDATE_AND_ASSIGN(local, flags, OCTransportFlags, IsNumber, "addr", false,
+                      jsDevAddr, Uint32Value);
+  VALIDATE_AND_ASSIGN(local, interface, uint32_t, IsNumber, "addr", false,
+                      jsDevAddr, Uint32Value);
+  VALIDATE_AND_ASSIGN(local, port, uint16_t, IsNumber, "addr", false, jsDevAddr,
+                      Uint32Value);
 
   // addr.addr
   Local<Value> addr = jsDevAddr->Get(NanNew<String>("addr"));
@@ -68,16 +67,6 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
       local.addr[index] = 0;
     }
   }
-
-  // addr.interface
-  Local<Value> interface = jsDevAddr->Get(NanNew<String>("interface"));
-  VALIDATE_VALUE_TYPE(interface, IsNumber, "addr.interface", false);
-  local.interface = interface->Uint32Value();
-
-  // addr.port
-  Local<Value> port = jsDevAddr->Get(NanNew<String>("port"));
-  VALIDATE_VALUE_TYPE(port, IsNumber, "addr.port", false);
-  local.port = port->Uint32Value();
 
   // addr.identity
   Local<Value> identity = jsDevAddr->Get(NanNew<String>("identity"));

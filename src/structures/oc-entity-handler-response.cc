@@ -36,10 +36,9 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
   }
 
   // ehResult
-  Local<Value> ehResult = jsResponse->Get(NanNew<String>("ehResult"));
-  VALIDATE_VALUE_TYPE(ehResult, IsUint32, "entity handler response result",
-                      false);
-  response.ehResult = (OCEntityHandlerResult)ehResult->Uint32Value();
+  VALIDATE_AND_ASSIGN(response, ehResult, OCEntityHandlerResult, IsUint32,
+                      "(entity handler response)", false, jsResponse,
+                      Uint32Value);
 
   // payload
   Local<Value> payload = jsResponse->Get(NanNew<String>("payload"));

@@ -50,29 +50,19 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
   if (length > 0) {
     for (index = 0; index < length; index++) {
       // option[ index ]
-      Local<Value> jsOptionsItem = jsOptions->Get(index);
-      VALIDATE_VALUE_TYPE(jsOptionsItem, IsObject, "OCHeaderOption array item",
-                          false);
-      Local<Object> jsOptionsItemObject = Local<Object>::Cast(jsOptionsItem);
+      Local<Value> item = jsOptions->Get(index);
+      VALIDATE_VALUE_TYPE(item, IsObject, "OCHeaderOption array item", false);
+      Local<Object> itemObject = Local<Object>::Cast(item);
 
-      // option[ index ].protocolID
-      Local<Value> protocolID =
-          jsOptionsItemObject->Get(NanNew<String>("protocolID"));
-      VALIDATE_VALUE_TYPE(protocolID, IsNumber,
-                          "(OCHeaderOption array item).protocolID", false);
-      options[index].protocolID =
-          (OCTransportProtocolID)protocolID->Uint32Value();
-
-      // option[ index ].optionID
-      Local<Value> optionID =
-          jsOptionsItemObject->Get(NanNew<String>("optionID"));
-      VALIDATE_VALUE_TYPE(optionID, IsNumber,
-                          "(OCHeaderOption array item).optionID", false);
-      options[index].optionID = (uint16_t)optionID->Uint32Value();
+      VALIDATE_AND_ASSIGN(options[index], protocolID, OCTransportProtocolID,
+                          IsNumber, "(OCHeaderOption array item)", false,
+                          itemObject, Uint32Value);
+      VALIDATE_AND_ASSIGN(options[index], optionID, uint16_t, IsNumber,
+                          "(OCHeaderOption array item)", false, itemObject,
+                          Uint32Value);
 
       // option[ index ].optionData
-      Local<Value> optionData =
-          jsOptionsItemObject->Get(NanNew<String>("optionData"));
+      Local<Value> optionData = itemObject->Get(NanNew<String>("optionData"));
       VALIDATE_VALUE_TYPE(optionData, IsArray,
                           "(OCHeaderOption array item).optionData", false);
       Local<Array> optionDataArray = Local<Array>::Cast(optionData);

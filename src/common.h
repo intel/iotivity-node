@@ -51,4 +51,11 @@
   (destination)                                                    \
       ->Set(NanNew<String>(#memberName), NanNew<type>((source)->memberName));
 
+#define VALIDATE_AND_ASSIGN(destination, memberName, destinationType,         \
+                            typecheck, message, failReturn, source, accessor) \
+  Local<Value> memberName = source->Get(NanNew<String>(#memberName));         \
+  VALIDATE_VALUE_TYPE(memberName, typecheck, message "." #memberName,         \
+                      failReturn);                                            \
+  destination.memberName = (destinationType)memberName->accessor();
+
 #endif /* __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__ */
