@@ -12,11 +12,10 @@ Local<Object> js_OCDevAddr(OCDevAddr *address) {
   uint32_t index;
   Local<Object> returnValue = NanNew<Object>();
 
-  // addr.adapter
-  returnValue->Set(NanNew<String>("adapter"), NanNew<Number>(address->adapter));
-
-  // addr.flags
-  returnValue->Set(NanNew<String>("flags"), NanNew<Number>(address->flags));
+  SET_VALUE_ON_OBJECT(returnValue, Number, address, adapter);
+  SET_VALUE_ON_OBJECT(returnValue, Number, address, flags);
+  SET_VALUE_ON_OBJECT(returnValue, Number, address, interface);
+  SET_VALUE_ON_OBJECT(returnValue, Number, address, port);
 
   // addr.addr
   Local<Array> addr = NanNew<Array>(MAX_ADDR_STR_SIZE);
@@ -24,13 +23,6 @@ Local<Object> js_OCDevAddr(OCDevAddr *address) {
     addr->Set(index, NanNew<Number>(address->addr[index]));
   }
   returnValue->Set(NanNew<String>("addr"), addr);
-
-  // addr.interface
-  returnValue->Set(NanNew<String>("interface"),
-                   NanNew<Number>(address->interface));
-
-  // addr.port
-  returnValue->Set(NanNew<String>("port"), NanNew<Number>(address->port));
 
   // addr.identity
   Local<Array> identity = NanNew<Array>(address->identity.id_length);

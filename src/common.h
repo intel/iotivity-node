@@ -42,9 +42,13 @@
   }
 
 #define SET_STRING_IF_NOT_NULL(destination, source, memberName) \
-  if (source->memberName) {                                     \
-    destination->Set(NanNew<String>(#memberName),               \
-                     NanNew<String>(source->memberName));       \
+  if ((source)->memberName) {                                   \
+    (destination)->Set(NanNew<String>(#memberName),             \
+                       NanNew<String>((source)->memberName));   \
   }
+
+#define SET_VALUE_ON_OBJECT(destination, type, source, memberName) \
+  (destination)                                                    \
+      ->Set(NanNew<String>(#memberName), NanNew<type>((source)->memberName));
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__ */

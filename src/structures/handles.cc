@@ -9,7 +9,7 @@ static Local<Array> jsArrayFromBytes(unsigned char *bytes, size_t length) {
   Local<Array> returnValue = NanNew<Array>(length);
 
   for (index = 0; index < length; index++) {
-    returnValue->Set(NanNew<Number>(index), NanNew<Number>(bytes[index]));
+    returnValue->Set(index, NanNew<Number>(bytes[index]));
   }
   return returnValue;
 }

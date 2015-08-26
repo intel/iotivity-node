@@ -193,14 +193,9 @@ static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
   }
   returnValue->Set(NanNew<String>("interfaces"), interfaces);
 
-  // payload.bitmap
-  returnValue->Set(NanNew<String>("bitmap"), NanNew<Number>(payload->bitmap));
-
-  // payload.secure
-  returnValue->Set(NanNew<String>("secure"), NanNew<Boolean>(payload->secure));
-
-  // payload.port
-  returnValue->Set(NanNew<String>("port"), NanNew<Number>(payload->port));
+  SET_VALUE_ON_OBJECT(returnValue, Number, payload, bitmap);
+  SET_VALUE_ON_OBJECT(returnValue, Boolean, payload, secure);
+  SET_VALUE_ON_OBJECT(returnValue, Number, payload, port);
 
   return returnValue;
 }
@@ -261,15 +256,15 @@ static Local<Object> js_OCPlatformPayload(OCPlatformPayload *payload) {
 }
 
 static Local<Object> js_OCPresencePayload(OCPresencePayload *payload) {
-	Local<Object> returnValue = NanNew<Object>();
+  Local<Object> returnValue = NanNew<Object>();
 
-	returnValue->Set( NanNew<String>( "type" ), NanNew<Number>( payload->base.type ) );
-	returnValue->Set( NanNew<String>( "sequenceNumber" ), NanNew<Number>( payload->sequenceNumber ) );
-	returnValue->Set( NanNew<String>( "maxAge" ), NanNew<Number>( payload->maxAge ) );
-	returnValue->Set( NanNew<String>( "trigger" ), NanNew<Number>( payload->trigger ) );
-	SET_STRING_IF_NOT_NULL( returnValue, payload, resourceType );
+  returnValue->Set(NanNew<String>("type"), NanNew<Number>(payload->base.type));
+  SET_VALUE_ON_OBJECT(returnValue, Number, payload, sequenceNumber);
+  SET_VALUE_ON_OBJECT(returnValue, Number, payload, maxAge);
+  SET_VALUE_ON_OBJECT(returnValue, Number, payload, trigger);
+  SET_STRING_IF_NOT_NULL(returnValue, payload, resourceType);
 
-	return returnValue;
+  return returnValue;
 }
 
 Local<Value> js_OCPayload(OCPayload *payload) {
@@ -286,8 +281,8 @@ Local<Value> js_OCPayload(OCPayload *payload) {
     case PAYLOAD_TYPE_PLATFORM:
       return js_OCPlatformPayload((OCPlatformPayload *)payload);
 
-	case PAYLOAD_TYPE_PRESENCE:
-		return js_OCPresencePayload((OCPresencePayload *)payload);
+    case PAYLOAD_TYPE_PRESENCE:
+      return js_OCPresencePayload((OCPresencePayload *)payload);
 
     case PAYLOAD_TYPE_INVALID:
     default:

@@ -19,13 +19,8 @@ v8::Local<v8::Array> js_OCHeaderOption(OCHeaderOption *options,
     // options[ index ]
     Local<Object> item = NanNew<Object>();
 
-    // options[ index ].protocolID
-    item->Set(NanNew<String>("protocolID"),
-              NanNew<Number>(options[index].protocolID));
-
-    // option[ index ].optionID
-    item->Set(NanNew<String>("optionID"),
-              NanNew<Number>(options[index].optionID));
+    SET_VALUE_ON_OBJECT(item, Number, &options[index], protocolID);
+    SET_VALUE_ON_OBJECT(item, Number, &options[index], optionID);
 
     // option[ index ].optionData
     Local<Array> optionData = NanNew<Array>(options[index].optionLength);

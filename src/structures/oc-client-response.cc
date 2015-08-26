@@ -23,22 +23,10 @@ Local<Object> js_OCClientResponse(OCClientResponse *response) {
     returnValue->Set(NanNew<String>("addr"), js_OCDevAddr(response->addr));
   }
 
-  // response.connType
-  returnValue->Set(NanNew<String>("connType"),
-                   NanNew<Number>(response->connType));
-
-  // response.result
-  returnValue->Set(NanNew<String>("result"), NanNew<Number>(response->result));
-
-  // response.sequenceNumber
-  returnValue->Set(NanNew<String>("sequenceNumber"),
-                   NanNew<Number>(response->sequenceNumber));
-
-  // response.resourceUri
-  if (response->resourceUri) {
-    returnValue->Set(NanNew<String>("resourceUri"),
-                     NanNew<String>(response->resourceUri));
-  }
+  SET_VALUE_ON_OBJECT(returnValue, Number, response, connType);
+  SET_VALUE_ON_OBJECT(returnValue, Number, response, result);
+  SET_VALUE_ON_OBJECT(returnValue, Number, response, sequenceNumber);
+  SET_STRING_IF_NOT_NULL(returnValue, response, resourceUri);
 
   // response.payload
   if (response->payload) {

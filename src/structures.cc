@@ -23,14 +23,12 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
   jsRequest->Set(NanNew<String>("requestHandle"),
                  js_OCRequestHandle(request->requestHandle));
 
-  jsRequest->Set(NanNew<String>("method"), NanNew<Number>(request->method));
-
+  SET_VALUE_ON_OBJECT(jsRequest, Number, request, method);
   SET_STRING_IF_NOT_NULL(jsRequest, request, query);
 
   Local<Object> obsInfo = NanNew<Object>();
-  obsInfo->Set(NanNew<String>("action"),
-               NanNew<Number>(request->obsInfo.action));
-  obsInfo->Set(NanNew<String>("obsId"), NanNew<Number>(request->obsInfo.obsId));
+  SET_VALUE_ON_OBJECT(obsInfo, Number, &(request->obsInfo), action);
+  SET_VALUE_ON_OBJECT(obsInfo, Number, &(request->obsInfo), obsId);
   jsRequest->Set(NanNew<String>("obsInfo"), obsInfo);
 
   jsRequest->Set(
