@@ -69,6 +69,7 @@
 				"src/functions/oc-do-resource.cc",
 				"src/functions/oc-do-response.cc",
 				"src/functions/oc-notify.cc",
+				"src/functions/oc-set-default-device-entity-handler.cc",
 				"src/functions/simple.cc",
 				"src/main.cc",
 				"src/structures.cc",

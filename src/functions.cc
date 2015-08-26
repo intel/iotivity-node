@@ -5,6 +5,7 @@
 #include "functions/oc-do-resource.h"
 #include "functions/oc-do-response.h"
 #include "functions/oc-notify.h"
+#include "functions/oc-set-default-device-entity-handler.h"
 #include "functions/simple.h"
 
 using namespace v8;
@@ -24,6 +25,7 @@ void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   SET_FUNCTION(exports, OCBindResourceInterfaceToResource);
   SET_FUNCTION(exports, OCBindResourceTypeToResource);
   SET_FUNCTION(exports, OCDeleteResource);
+  SET_FUNCTION(exports, OCSetDefaultDeviceEntityHandler);
   SET_FUNCTION(exports, OCSetDeviceInfo);
   SET_FUNCTION(exports, OCSetPlatformInfo);
   SET_FUNCTION(exports, OCStartPresence);
