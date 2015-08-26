@@ -15,7 +15,7 @@ using namespace v8;
 using namespace node;
 
 // Associate the callback info with a resource handle
-static std::map<OCResourceHandle, Persistent<Function> *> annotation;
+static std::map<OCResourceHandle, NanCallback *> annotation;
 
 static OCEntityHandlerResult defaultEntityHandler(
     OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *context) {
@@ -23,9 +23,8 @@ static OCEntityHandlerResult defaultEntityHandler(
   // return value
   Local<Value> jsCallbackArguments[2] = {NanNew<Number>(flag),
                                          js_OCEntityHandlerRequest(request)};
-  Local<Value> returnValue = NanMakeCallback(
-      NanGetCurrentContext()->Global(),
-      NanNew(*(Persistent<Function> *)context), 2, jsCallbackArguments);
+  Local<Value> returnValue = ((NanCallback *)context)->Call(
+      NanGetCurrentContext()->Global(), 2, jsCallbackArguments);
 
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsNumber, "OCEntityHandler");
 
@@ -44,8 +43,7 @@ NAN_METHOD(bind_OCCreateResource) {
   VALIDATE_ARGUMENT_TYPE(args, 5, IsUint32);
 
   OCResourceHandle handle = 0;
-  Persistent<Function> *callback =
-      persistentJSCallback_new(Local<Function>::Cast(args[4]));
+  NanCallback *callback = new NanCallback(Local<Function>::Cast(args[4]));
 
   Local<Number> returnValue = NanNew<Number>(OCCreateResource(
       &handle, (const char *)*String::Utf8Value(args[1]),
@@ -79,10 +77,10 @@ NAN_METHOD(bind_OCDeleteResource) {
 
   if (returnValue == OC_STACK_OK) {
     // If deleting the resource worked, get rid of the entity handler
-    Persistent<Function> *callback = annotation[handle];
+    NanCallback *callback = annotation[handle];
     annotation.erase(handle);
     if (callback) {
-      persistentJSCallback_free(callback);
+      delete callback;
     }
   }
 
@@ -103,8 +101,7 @@ NAN_METHOD(bind_OCBindResourceHandler) {
     NanReturnUndefined();
   }
 
-  Persistent<Function> *callback =
-      persistentJSCallback_new(Local<Function>::Cast(args[1]));
+  NanCallback *callback = new NanCallback(Local<Function>::Cast(args[1]));
 
   // Replace the existing entity handler with the new callback
   OCStackResult returnValue =
@@ -113,15 +110,15 @@ NAN_METHOD(bind_OCBindResourceHandler) {
   if (returnValue == OC_STACK_OK) {
     // If setting the new entity handler worked, get rid of the original entity
     // handler and associate the new one with the handle.
-    Persistent<Function> *oldCallback = annotation[handle];
+    NanCallback *oldCallback = annotation[handle];
     if (oldCallback) {
-      persistentJSCallback_free(oldCallback);
+      delete oldCallback;
     }
     annotation[handle] = callback;
   } else {
     // If the stack was not able to make use of the new entity handler, get rid
     // of the reference we created above.
-    persistentJSCallback_free(callback);
+    delete callback;
   }
 
   NanReturnValue(NanNew<Number>(returnValue));

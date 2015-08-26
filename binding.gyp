@@ -62,7 +62,6 @@
 		{
 			"target_name": "iotivity",
 			"sources": [
-				"src/common.cc",
 				"src/constants.cc",
 				"src/enums.cc",
 				"src/functions.cc",

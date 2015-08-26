@@ -276,11 +276,6 @@ Local<Value> js_OCPayload(OCPayload *payload) {
 
     case PAYLOAD_TYPE_INVALID:
     default:
-      NanThrowTypeError(
-          PAYLOAD_TYPE_INVALID == payload->type
-              ? "Constructing payload for Javascript: Invalid payload type"
-              : "Constructing payload for Javascript: payload type not "
-                "implemented");
       break;
   }
   return NanNull();

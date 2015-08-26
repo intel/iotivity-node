@@ -15,16 +15,20 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
+static void deleteNanCallback(NanCallback *callback) { delete callback; }
+
 // Create an object containing the information from an OCClientResponse
 // structure
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
+  NanScope();
+
   // Call the JS Callback
   Local<Value> jsCallbackArguments[2] = {js_OCDoHandle(handle),
                                          js_OCClientResponse(clientResponse)};
-  Local<Value> returnValue = NanMakeCallback(
-      NanGetCurrentContext()->Global(),
-      NanNew(*(Persistent<Function> *)context), 2, jsCallbackArguments);
+
+  Local<Value> returnValue = ((NanCallback *)context)->Call(
+      NanGetCurrentContext()->Global(), 2, jsCallbackArguments);
 
   // Validate value we got back from it
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
@@ -55,10 +59,9 @@ NAN_METHOD(bind_OCDoResource) {
   VALIDATE_ARGUMENT_TYPE(args, 7, IsFunction);
   VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 8, IsArray);
 
-  data.context =
-      (void *)persistentJSCallback_new(Local<Function>::Cast(args[7]));
+  data.context = (void *)(new NanCallback(Local<Function>::Cast(args[7])));
   data.cb = defaultOCClientResponseHandler;
-  data.cd = (OCClientContextDeleter)persistentJSCallback_free;
+  data.cd = (OCClientContextDeleter)deleteNanCallback;
 
   if (args[8]->IsArray()) {
     options = (OCHeaderOption *)malloc(Local<Array>::Cast(args[8])->Length() *

@@ -47,8 +47,4 @@
                      NanNew<String>(source->memberName));       \
   }
 
-v8::Persistent<v8::Function> *persistentJSCallback_new(
-    v8::Local<v8::Function> callback);
-void persistentJSCallback_free(v8::Persistent<v8::Function> *callback);
-
 #endif /* __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__ */
