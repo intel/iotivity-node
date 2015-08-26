@@ -126,6 +126,6 @@ When filling out a C structure in a function c_CStructureName, create a local st
 [0.9.2]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=0.9.2
 [snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=0.9.2;sf=tgz
 [scons]: http://www.scons.org/
-[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/dev/install.sh
-[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/dev/octbstack.pc.in
+[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/master/install.sh
+[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/master/octbstack.pc.in
 [jQuery]: http://contribute.jquery.org/style-guide/js/
