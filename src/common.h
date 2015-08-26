@@ -10,9 +10,9 @@
         message " callback return value type must satisfy " #typecheck "()"); \
   }
 
-#define VALIDATE_ARGUMENT_COUNT(args, length)                \
-  if ((args).Length() < (length)) {                          \
-    return NanThrowRangeError("Need " #length " arguments"); \
+#define VALIDATE_ARGUMENT_COUNT(args, length)                             \
+  if ((args).Length() < (length)) {                                       \
+    return NanThrowRangeError("Argument count must be exactly " #length); \
   }
 
 #define VALIDATE_ARGUMENT_TYPE(args, index, typecheck)                      \
