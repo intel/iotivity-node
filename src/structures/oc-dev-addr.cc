@@ -25,8 +25,11 @@ Local<Object> js_OCDevAddr(OCDevAddr *address) {
   returnValue->Set(NanNew<String>("addr"), addr);
 
   // addr.identity
-  Local<Array> identity = NanNew<Array>(address->identity.id_length);
-  for (index = 0; index < address->identity.id_length; index++) {
+  uint16_t identityLength = (address->identity.id_length > MAX_IDENTITY_SIZE
+                                 ? MAX_IDENTITY_SIZE
+                                 : address->identity.id_length);
+  Local<Array> identity = NanNew<Array>(identityLength);
+  for (index = 0; index < identityLength; index++) {
     identity->Set(index, NanNew<Number>(address->identity.id[index]));
   }
   returnValue->Set(NanNew<String>("identity"), identity);

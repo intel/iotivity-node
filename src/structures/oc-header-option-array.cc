@@ -23,8 +23,12 @@ v8::Local<v8::Array> js_OCHeaderOption(OCHeaderOption *options,
     SET_VALUE_ON_OBJECT(item, Number, &options[index], optionID);
 
     // option[ index ].optionData
-    Local<Array> optionData = NanNew<Array>(options[index].optionLength);
-    for (dataIndex = 0; dataIndex < options[index].optionLength; dataIndex++) {
+    uint16_t optionLength =
+        (options[index].optionLength > MAX_HEADER_OPTION_DATA_LENGTH
+             ? MAX_HEADER_OPTION_DATA_LENGTH
+             : options[index].optionLength);
+    Local<Array> optionData = NanNew<Array>(optionLength);
+    for (dataIndex = 0; dataIndex < optionLength; dataIndex++) {
       optionData->Set(dataIndex,
                       NanNew<Number>(options[index].optionData[dataIndex]));
     }
