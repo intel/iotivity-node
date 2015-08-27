@@ -14,6 +14,6 @@ v8::Local<v8::Array> js_OCRequestHandle(OCRequestHandle handle);
 bool c_OCRequestHandle(v8::Local<v8::Array> handle, OCRequestHandle *p_cHandle);
 
 v8::Local<v8::Array> js_OCDoHandle(OCDoHandle handle);
-bool c_OCRequestHandle(v8::Local<v8::Array> handle, OCDoHandle *p_cHandle);
+bool c_OCDoHandle(v8::Local<v8::Array> handle, OCDoHandle *p_cHandle);
 
 #endif /* __IOTIVITY_NODE_HANDLES_H__ */

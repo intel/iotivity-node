@@ -65,6 +65,7 @@
 				"src/constants.cc",
 				"src/enums.cc",
 				"src/functions.cc",
+				"src/functions/oc-cancel.cc",
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
 				"src/functions/oc-do-response.cc",

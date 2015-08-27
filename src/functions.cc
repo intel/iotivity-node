@@ -1,6 +1,7 @@
 #include <node.h>
 #include <nan.h>
 
+#include "functions/oc-cancel.h"
 #include "functions/oc-create-delete-resource.h"
 #include "functions/oc-do-resource.h"
 #include "functions/oc-do-response.h"
@@ -16,6 +17,7 @@ using namespace v8;
             NanNew<FunctionTemplate>(bind_##functionName)->GetFunction())
 
 void InitFunctions(Handle<Object> exports, Handle<Object> module) {
+  SET_FUNCTION(exports, OCCancel);
   SET_FUNCTION(exports, OCInit);
   SET_FUNCTION(exports, OCStop);
   SET_FUNCTION(exports, OCProcess);
