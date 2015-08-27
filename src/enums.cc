@@ -250,6 +250,16 @@ static Local<Object> bind_OCRandomUuidResult() {
   return returnValue;
 }
 
+static Local<Object> bind_OCPresenceTrigger() {
+  Local<Object> returnValue = NanNew<Object>();
+
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_PRESENCE_TRIGGER_CREATE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_PRESENCE_TRIGGER_CHANGE);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_PRESENCE_TRIGGER_DELETE);
+
+  return returnValue;
+}
+
 void InitEnums(Handle<Object> exports) {
   SET_ENUM(exports, OCTransportAdapter);
   SET_ENUM(exports, OCTransportFlags);
@@ -267,4 +277,5 @@ void InitEnums(Handle<Object> exports) {
   SET_ENUM(exports, OCEntityHandlerFlag);
   SET_ENUM(exports, OCStackApplicationResult);
   SET_ENUM(exports, OCRandomUuidResult);
+  SET_ENUM(exports, OCPresenceTrigger);
 }

@@ -37,6 +37,9 @@ for ONE_PATH in $INCLUDE_PATHS; do
 	if test -f $ONE_PATH/octypes.h; then
 		OCTYPES_H=$ONE_PATH/octypes.h
 	fi
+	if test -f $ONE_PATH/octypes.h; then
+		OCPRESENCE_H=$ONE_PATH/ocpresence.h
+	fi
 	if test -f $ONE_PATH/ocstackconfig.h; then
 		OCSTACKCONFIG_H=$ONE_PATH/ocstackconfig.h
 	fi
@@ -59,7 +62,7 @@ cat src/enums.cc | \
 	> src/enums.cc.new || ( rm -f src/enums.cc.new && exit 1 )
 
 # Parse header for enums
-cat ${OCTYPES_H} ${OCRANDOM_H} | \
+cat ${OCTYPES_H} ${OCRANDOM_H} ${OCPRESENCE_H} | \
   grep -vE '#(ifdef|define|endif)|^\s*/' | \
   grep -v '^$' | \
   awk -v PRINT=0 -v OUTPUT="" -v ENUM_LIST="" '{
