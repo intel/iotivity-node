@@ -46,7 +46,7 @@ test( "Simple server", function( assert ) {
 
 	// Since some of our assertions are inside asynchronously called functions, this asserts that
 	// all the assertions are reached, but it does not assert the order in which they are reached.
-	assert.expect( 10 );
+	assert.expect( 6 );
 
 	// Make sure the stack starts up correctly
 	if ( testUtils.testStartup( iotivity.OCMode.OC_SERVER ) ===
@@ -83,8 +83,10 @@ test( "Simple server", function( assert ) {
 			stopTestClient = testUtils.startTestClient( teardown, {
 				method: "OC_REST_DISCOVER",
 				logResponse: function( response ) {
-					testUtils.assertPathFromResponse( assert, response, resourcePath );
-					teardown();
+					if ( testUtils.findResourceInResponse( resourcePath, response ) ) {
+						assert.ok( true, "Resource found" );
+						teardown();
+					}
 				},
 				path: iotivity.OC_RSRVD_WELL_KNOWN_URI
 			} );

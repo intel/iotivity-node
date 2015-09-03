@@ -5,7 +5,7 @@ var iotivity = require( "../../index" ),
 	resourcePath = "/simple-client-" + Math.round( Math.random() * 1048576 );
 
 test( "Resource discovery", function( assert ) {
-	expect( 10 );
+	expect( 6 );
 
 	var result, stopProcessing, stopTestServer,
 		done = assert.async(),
@@ -65,9 +65,12 @@ test( "Resource discovery", function( assert ) {
 					iotivity.OCConnectivityType.CT_DEFAULT,
 					iotivity.OCQualityOfService.OC_HIGH_QOS,
 					function( handle, response ) {
-						testUtils.assertPathFromResponse( assert, response, resourcePath );
-						teardown();
-						return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
+						if ( testUtils.findResourceInResponse( resourcePath, response ) ) {
+							assert.ok( true, "Resource found" );
+							teardown();
+							return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
+						}
+						return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
 					},
 					null );
 				assert.strictEqual(

@@ -53,7 +53,7 @@ if ( result === iotivity.OCStackResult.OC_STACK_OK ) {
 						"OCDoResource response": response
 					} ) );
 				}
-				return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
+				return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
 			},
 			null,
 			0 );

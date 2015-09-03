@@ -92,16 +92,17 @@ _.extend( testUtils.prototype, {
 		}, this );
 	},
 
-	assertPathFromResponse: function( assert, response, resourcePath ) {
-		assert.ok( response, "Response received" );
-		assert.ok( response.payload, "Response has payload" );
-		assert.ok( response.payload.resources, "Payload has resources" );
-		assert.ok(
-			response.payload.resources.length,
-			"At least one resource is present" );
-		assert.ok(
-			findResourceByUri( response.payload.resources, resourcePath ),
-			"Test resource found" );
+	findResourceInResponse: function( resourcePath, response ) {
+		if ( response &&
+				response.payload &&
+				response.payload.resources &&
+				response.payload.resources.length ) {
+
+			if ( findResourceByUri( response.payload.resources, resourcePath ) ) {
+				return true;
+			}
+		}
+		return false;
 	},
 
 	startTestServer: function( whenReady, teardown, options ) {
