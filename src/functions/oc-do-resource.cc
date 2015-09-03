@@ -64,16 +64,20 @@ NAN_METHOD(bind_OCDoResource) {
   data.cd = (OCClientContextDeleter)deleteNanCallback;
 
   if (args[8]->IsArray()) {
-    options = (OCHeaderOption *)malloc(Local<Array>::Cast(args[8])->Length() *
-                                       sizeof(OCHeaderOption));
-    if (!options) {
-      return NanThrowError(
-          "Ran out of memory attempting to allocate header options");
-      NanReturnUndefined();
-    }
-    if (!c_OCHeaderOption(Local<Array>::Cast(args[8]), options, &optionCount)) {
-      NanReturnUndefined();
-      free(options);
+    Local<Array> optionArray = Local<Array>::Cast(args[8]);
+    size_t length = optionArray->Length();
+
+    if (length > 0) {
+      options = (OCHeaderOption *)malloc(length * sizeof(OCHeaderOption));
+      if (!options) {
+        return NanThrowError(
+            "Ran out of memory attempting to allocate header options");
+        NanReturnUndefined();
+      }
+      if (!c_OCHeaderOption(optionArray, options, &optionCount)) {
+        NanReturnUndefined();
+        free(options);
+      }
     }
   }
 

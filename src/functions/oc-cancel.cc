@@ -19,19 +19,21 @@ NAN_METHOD(bind_OCCancel) {
   VALIDATE_ARGUMENT_COUNT(args, 3);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);
-  VALIDATE_ARGUMENT_TYPE(args, 2, IsArray);
+  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 2, IsArray);
 
   OCDoHandle handle;
   OCHeaderOption headerOptions[MAX_HEADER_OPTIONS];
-  uint8_t numberOfOptions;
+  uint8_t numberOfOptions = 0;
 
   if (!c_OCDoHandle(Local<Array>::Cast(args[0]), &handle)) {
     NanReturnUndefined();
   }
 
-  if (!c_OCHeaderOption(Local<Array>::Cast(args[2]), headerOptions,
-                        &numberOfOptions)) {
-    NanReturnUndefined();
+  if (args[2]->IsArray()) {
+    if (!c_OCHeaderOption(Local<Array>::Cast(args[2]), headerOptions,
+                          &numberOfOptions)) {
+      NanReturnUndefined();
+    }
   }
 
   NanReturnValue(NanNew<Number>(
