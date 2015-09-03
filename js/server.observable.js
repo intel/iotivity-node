@@ -52,7 +52,6 @@ iotivity.OCCreateResource(
 			sendVendorSpecificHeaderOptions: []
 		} );
 
-		// By default we error out
 		return iotivity.OCEntityHandlerResult.OC_EH_OK;
 	},
 	iotivity.OCResourceProperty.OC_DISCOVERABLE |
