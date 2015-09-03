@@ -33,6 +33,10 @@ fs.readdir( testsPath, function( error, files ) {
 		async.eachSeries( files,
 			function( item, callback ) {
 				var singleTest = path.join( testsPath, item );
+				if ( !fs.lstatSync( singleTest ).isFile() ) {
+					callback( null );
+					return;
+				}
 				child_process
 					.spawn(
 						"node",
