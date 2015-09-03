@@ -6,7 +6,6 @@ var iotivity = require( "../../index" ),
 test( "Simple server", function( assert ) {
 	var result, stopProcessing, stopTestClient,
 		resourcePath = "/a/simple-server-" + Math.round( Math.random() * 10000 ),
-		magicRequest = { "setAnswer": 42 },
 		done = assert.async(),
 		failsafeTimeoutId = null,
 		handle = {},
