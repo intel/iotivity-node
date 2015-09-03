@@ -1,5 +1,5 @@
 var intervalId,
-	handle = {},
+	handleReceptacle = {},
 
 	// This is the same value as server.get.js
 	sampleUri = "/a/iotivity-node-observe-sample",
@@ -22,14 +22,16 @@ intervalId = setInterval( function() {
 require( "./mock-sensor" )().on( "change", function( data ) {
 	console.log( "Sensor data has changed. Notifying all observers." );
 	currentData = data;
-	iotivity.OCNotifyAllObservers( handle.handle, iotivity.OCQualityOfService.OC_HIGH_QOS );
+	iotivity.OCNotifyAllObservers(
+		handleReceptacle.handle,
+		iotivity.OCQualityOfService.OC_HIGH_QOS );
 } );
 
 // Create a new resource
 iotivity.OCCreateResource(
 
 	// The bindings fill in this object
-	handle,
+	handleReceptacle,
 
 	"core.fan",
 	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
@@ -63,7 +65,7 @@ process.on( "SIGINT", function() {
 
 	// Tear down the processing loop and stop iotivity
 	clearInterval( intervalId );
-	iotivity.OCDeleteResource( handle.handle );
+	iotivity.OCDeleteResource( handleReceptacle.handle );
 	iotivity.OCStop();
 
 	// Exit

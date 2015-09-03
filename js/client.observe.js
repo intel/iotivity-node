@@ -1,8 +1,9 @@
 var intervalId,
-	handle = {},
+	handleReceptacle = {},
 
 	// This is the same value as server.get.js
 	sampleUri = "/a/iotivity-node-observe-sample",
+	observerResponseCount = 0,
 	iotivity = require( "iotivity" ),
 	resourceMissing = true;
 
@@ -17,7 +18,7 @@ intervalId = setInterval( function() {
 iotivity.OCDoResource(
 
 	// The bindings fill in this object
-	handle,
+	handleReceptacle,
 
 	iotivity.OCMethod.OC_REST_DISCOVER,
 
@@ -36,7 +37,7 @@ iotivity.OCDoResource(
 		console.log( JSON.stringify( response, null, 4 ) );
 		var index,
 			destination = response.addr,
-			getHandle = {},
+			getHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
 			resourceCount = resources.length ? resources.length : 0;
 
@@ -50,7 +51,7 @@ iotivity.OCDoResource(
 					console.log( "Observing " + sampleUri );
 
 					iotivity.OCDoResource(
-						getHandle,
+						getHandleReceptacle,
 						iotivity.OCMethod.OC_REST_OBSERVE,
 						sampleUri,
 						destination,
@@ -60,7 +61,17 @@ iotivity.OCDoResource(
 						function( handle, response ) {
 							console.log( "Received response to OBSERVE request:" );
 							console.log( JSON.stringify( response, null, 4 ) );
-							return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
+							if ( ++observerResponseCount >= 10 ) {
+								console.log( "Enough observations. Calling OCCancel()" );
+								iotivity.OCCancel(
+									handle,
+									iotivity.OCQualityOfService.OC_HIGH_QOS,
+									[] );
+								return iotivity.OCStackApplicationResult
+									.OC_STACK_DELETE_TRANSACTION;
+							} else {
+								return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
+							}
 						},
 						null );
 				}

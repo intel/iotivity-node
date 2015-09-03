@@ -1,5 +1,5 @@
 var intervalId,
-	handle = {},
+	handleReceptacle = {},
 
 	// This is the same value as server.presence.js
 	sampleUri = "/a/iotivity-node-presence-sample",
@@ -16,7 +16,7 @@ intervalId = setInterval( function() {
 iotivity.OCDoResource(
 
 	// The bindings fill in this object
-	handle,
+	handleReceptacle,
 
 	iotivity.OCMethod.OC_REST_DISCOVER,
 
@@ -35,7 +35,7 @@ iotivity.OCDoResource(
 		console.log( JSON.stringify( response, null, 4 ) );
 		var index,
 			destination = response.addr,
-			presenceHandle = {},
+			presenceHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
 			resourceCount = resources.length ? resources.length : 0;
 
@@ -43,7 +43,7 @@ iotivity.OCDoResource(
 		for ( index = 0 ; index < resourceCount ; index++ ) {
 			if ( resources[ index ].uri === sampleUri ) {
 				iotivity.OCDoResource(
-					presenceHandle,
+					presenceHandleReceptacle,
 					iotivity.OCMethod.OC_REST_PRESENCE,
 					iotivity.OC_RSRVD_PRESENCE_URI,
 					destination,

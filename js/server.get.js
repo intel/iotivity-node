@@ -1,5 +1,5 @@
 var intervalId,
-	handle = {},
+	handleReceptacle = {},
 
 	// This is the same value as server.get.js
 	sampleUri = "/a/iotivity-node-get-sample",
@@ -22,7 +22,7 @@ intervalId = setInterval( function() {
 iotivity.OCCreateResource(
 
 	// The bindings fill in this object
-	handle,
+	handleReceptacle,
 
 	"core.fan",
 	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
@@ -65,7 +65,7 @@ process.on( "SIGINT", function() {
 
 	// Tear down the processing loop and stop iotivity
 	clearInterval( intervalId );
-	iotivity.OCDeleteResource( handle.handle );
+	iotivity.OCDeleteResource( handleReceptacle.handle );
 	iotivity.OCStop();
 
 	// Exit

@@ -1,5 +1,5 @@
 var intervalId,
-	handle = {},
+	handleReceptacle = {},
 	iotivity = require( "iotivity" ),
 	options = ( function() {
 		var index;
@@ -32,7 +32,7 @@ intervalId = setInterval( function() {
 iotivity.OCDoResource(
 
 	// The bindings fill in this object
-	handle,
+	handleReceptacle,
 
 	iotivity.OCMethod.OC_REST_DISCOVER,
 
