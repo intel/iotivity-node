@@ -3,6 +3,7 @@
 
 #include "../common.h"
 #include "../structures/handles.h"
+#include "../structures/oc-payload.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -34,7 +35,7 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 2, IsNumber);
-  VALIDATE_ARGUMENT_TYPE(args, 3, IsString);
+  VALIDATE_ARGUMENT_TYPE(args, 3, IsObject);
   VALIDATE_ARGUMENT_TYPE(args, 4, IsNumber);
 
   OCResourceHandle handle;
@@ -70,8 +71,15 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
     c_observations[index] = (OCObservationId)oneObservationId->Uint32Value();
   }
 
+  OCRepPayload* payload;
+  if (args[3]->IsObject()) {
+    if (!c_OCPayload(args[3]->ToObject(), (OCPayload **)&payload)) {
+      NanReturnUndefined();
+    }
+  }
+
   Local<Number> returnValue = NanNew<Number>(
-      OCNotifyListOfObservers(handle, c_observations, numberOfIds, 0,
+      OCNotifyListOfObservers(handle, c_observations, numberOfIds, payload,
                               (OCQualityOfService)args[4]->Uint32Value()));
 
   free(c_observations);
