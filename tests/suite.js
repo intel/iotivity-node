@@ -73,19 +73,7 @@ function spawnOne( assert, options ) {
 	return theChild;
 }
 
-function pathsFromTestName( testName ) {
-	var singleTest = path.join( __dirname, "tests", testName );
-
-	return {
-		singleTest: singleTest,
-		clientPath: path.join( singleTest, "client.js" ),
-		serverPath: path.join( singleTest, "server.js" )
-	};
-}
-
-// Otherwise, each subdirectory is expected to contain two files: client.js and server.js. For each
-// subdirectory that conforms to this rule, run server.js first, and when it reports that it is
-// ready, run client.js. Create a new UUID and pass it to both.
+// process low level API tests
 fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 	if ( error ) {
 		throw error;
@@ -93,21 +81,24 @@ fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 	}
 
 	_.each( files, function( item ) {
-		var paths = pathsFromTestName( item );
+		var
+			singleTest = path.join( __dirname, "tests", item ),
+			clientPath = path.join( singleTest, "client.js" ),
+			serverPath = path.join( singleTest, "server.js" );
 
-		if ( !fs.lstatSync( paths.singleTest ).isDirectory() ) {
+		if ( !fs.lstatSync( singleTest ).isDirectory() ) {
 			callback( null );
 			return;
 		}
 
-		if ( !( fs.lstatSync( paths.clientPath ).isFile() ) ) {
-			throw new Error( "Cannot find client at " + paths.clientPath );
+		if ( !( fs.lstatSync( clientPath ).isFile() ) ) {
+			throw new Error( "Cannot find client at " + clientPath );
 			callback( null );
 			return;
 		}
 
-		if ( !( fs.lstatSync( paths.serverPath ).isFile() ) ) {
-			throw new Error( "Cannot find server at " + paths.serverPath );
+		if ( !( fs.lstatSync( serverPath ).isFile() ) ) {
+			throw new Error( "Cannot find server at " + serverPath );
 			callback( null );
 			return;
 		}
@@ -173,11 +164,11 @@ fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 			// because the server may be designed to run "forever".
 			server = spawnOne( assert, _.extend( {}, spawnOptions, {
 				name: "server",
-				path: paths.serverPath,
+				path: serverPath,
 				onReady: function() {
 					client = spawnOne( assert, _.extend( {}, spawnOptions, {
 						name: "client",
-						path: paths.clientPath
+						path: clientPath
 					} ) );
 				}
 			} ) );
