@@ -4,7 +4,7 @@ var result,
 	processLoop = null,
 	discoverHandleReceptacle = {},
 	observeResponseCount = 0,
-	iotivity = require( "../../../index" ),
+	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
 console.log( JSON.stringify( { assertionCount: 12 } ) );

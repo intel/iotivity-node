@@ -3,7 +3,7 @@ var result,
 	processCallCount = 0,
 	processLoop = null,
 	resourceHandleReceptacle = {},
-	iotivity = require( "../../../index" ),
+	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
 console.log( JSON.stringify( { assertionCount: 8 } ) );
