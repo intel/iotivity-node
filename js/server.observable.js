@@ -57,7 +57,6 @@ iotivity.OCCreateResource(
 	iotivity.OCResourceProperty.OC_DISCOVERABLE |
 	iotivity.OCResourceProperty.OC_OBSERVABLE );
 
-
 // Exit gracefully when interrupted
 process.on( "SIGINT", function() {
 	console.log( "SIGINT: Quitting..." );

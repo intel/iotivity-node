@@ -1,13 +1,13 @@
 var QUnit,
 	_ = require( "underscore" ),
-	child_process = require( "child_process" ),
+	childProcess = require( "child_process" ),
 	fs = require( "fs" ),
 	path = require( "path" ),
 	uuid = require( "uuid" );
 
 // Spawn a single child and process its stdout.
 function spawnOne( assert, options ) {
-	var theChild = child_process.spawn( "node", [ options.path, options.uuid ], {
+	var theChild = childProcess.spawn( "node", [ options.path, options.uuid ], {
 		stdio: [ process.stdin, "pipe", process.stderr ]
 	} );
 
@@ -35,7 +35,7 @@ function spawnOne( assert, options ) {
 			// Attempt to retrieve a JSON object from stdout.
 			try {
 				jsonObject = JSON.parse( value );
-			} catch( e ) {
+			} catch ( e ) {
 				options.teardown( "Error parsing " + options.name + " JSON: '" + value + "'" +
 					( e.message ? e.message : e ), true );
 			}
@@ -73,7 +73,7 @@ function spawnOne( assert, options ) {
 	return theChild;
 }
 
-// process low level API tests
+// Process low level API tests
 fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 	if ( error ) {
 		throw error;

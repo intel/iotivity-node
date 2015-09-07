@@ -19,7 +19,7 @@ QUnit.load();
 QUnit.config.testTimeout = 30000;
 QUnit.config.callbacks.moduleStart.push( function( status ) {
 
-	// status: { name, tests }
+	// Parameters: status: { name, tests }
 
 	if ( status.name ) {
 		console.log( "\n### " + status.name );
@@ -27,7 +27,7 @@ QUnit.config.callbacks.moduleStart.push( function( status ) {
 } );
 QUnit.config.callbacks.testStart.push( function( status ) {
 
-	// status: { name, module, testId }
+	// Parameters: status: { name, module, testId }
 
 	if ( status.name ) {
 		console.log( "\n" + status.name );
@@ -35,7 +35,7 @@ QUnit.config.callbacks.testStart.push( function( status ) {
 } );
 QUnit.config.callbacks.log.push( function( status ) {
 
-	// status: { module, result(t/f), message, actual, expected, testId, runtime }
+	// Parameters: status: { module, result(t/f), message, actual, expected, testId, runtime }
 
 	console.log(
 		( status.result ? success : failure ) +

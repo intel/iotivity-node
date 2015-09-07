@@ -36,6 +36,7 @@ result = iotivity.OCDoResource(
 	iotivity.OCConnectivityType.CT_DEFAULT,
 	iotivity.OCQualityOfService.OC_HIGH_QOS,
 	function( handle, response ) {
+
 		// We retain the discovery callback until we've found the resource identified by the uuid.
 		var returnValue = iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
 

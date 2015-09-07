@@ -5,7 +5,7 @@ var intervalId,
 		var index;
 			returnValue = {
 
-				// by default we discover resources
+				// By default we discover resources
 				discoveryUri: iotivity.OC_RSRVD_WELL_KNOWN_URI
 			};
 
@@ -19,7 +19,6 @@ var intervalId,
 
 		return returnValue;
 	} )();
-
 
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
