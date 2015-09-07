@@ -7,6 +7,7 @@
 
 extern "C" {
 #include <ocstack.h>
+#include <ocpayload.h>
 }
 
 using namespace v8;
@@ -83,6 +84,7 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
                               (OCQualityOfService)args[4]->Uint32Value()));
 
   free(c_observations);
+  OCRepPayloadDestroy(payload);
 
   NanReturnValue(returnValue);
 }
