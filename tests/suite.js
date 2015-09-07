@@ -1,6 +1,6 @@
-var _ = require( "underscore" ),
+var QUnit,
+	_ = require( "underscore" ),
 	child_process = require( "child_process" ),
-	async = require( "async" ),
 	fs = require( "fs" ),
 	path = require( "path" ),
 	uuid = require( "uuid" ),
@@ -81,81 +81,6 @@ function pathsFromTestName( testName ) {
 	};
 }
 
-// If we have a test to run, run it and exit
-if ( testToRun ) {
-	QUnit = require( "./setup" );
-	QUnit.test( testToRun, function( assert ) {
-		var client, server,
-			paths = pathsFromTestName( testToRun );
-
-			// Turn this test async
-			done = assert.async(),
-
-			// Count how many children have exited. Consider the test done when that number
-			// reaches two (the client and the server).
-			childrenExited = 0,
-
-			// Count assertions, including those made by the children. Report them to
-			// assert.expect() when both children have reported their number of assertions.
-			// Initially there are 4 assertions, because spawnOne() makes two assertions:
-			// - that the process has exited with success
-			// - that the process has not segfaulted
-			// It makes these two assertions once for the client, and once for the server
-			totalAssertions = 4,
-			childrenAssertionsReported = 0,
-
-			spawnOptions = {
-				uuid: uuid.v4(),
-				teardown: function( message, isError, theChildThatRequested ) {
-
-					var signal = isError ? "SIGTERM" : "SIGINT";
-					if ( client && client !== theChildThatRequested ) {
-						client.kill( signal );
-					}
-					if ( server && server !== theChildThatRequested ) {
-						server.kill( signal );
-					}
-					if ( isError ) {
-						throw new Error( message );
-					}
-				},
-				maybeQuit: function( theChildThatQuit ) {
-					if ( theChildThatQuit === client ) {
-						client = null;
-					} else if ( theChildThatQuit === server ) {
-						server = null;
-					}
-					childrenExited++;
-					if ( childrenExited == 2 ) {
-						done();
-					}
-				},
-				reportAssertions: function( assertionCount ) {
-					childrenAssertionsReported++;
-					totalAssertions += assertionCount;
-					if ( childrenAssertionsReported == 2 ) {
-						assert.expect( totalAssertions );
-					}
-				}
-			};
-
-		// We run the server first, because the server has to be there before the client
-		// can run. OTOH, if the client exits successfully, we may need to kill the server,
-		// because the server may be designed to run "forever".
-		server = spawnOne( assert, _.extend( {}, spawnOptions, {
-			name: "server",
-			path: paths.serverPath,
-			onReady: function() {
-				client = spawnOne( assert, _.extend( {}, spawnOptions, {
-					name: "client",
-					path: paths.clientPath
-				} ) );
-			}
-		} ) );
-	} );
-	return;
-}
-
 // Otherwise, each subdirectory is expected to contain two files: client.js and server.js. For each
 // subdirectory that conforms to this rule, run server.js first, and when it reports that it is
 // ready, run client.js. Create a new UUID and pass it to both.
@@ -165,7 +90,7 @@ fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 		return;
 	}
 
-	async.eachSeries( files, function( item, callback ) {
+	_.each( files, function( item ) {
 		var paths = pathsFromTestName( item );
 
 		if ( !fs.lstatSync( paths.singleTest ).isDirectory() ) {
@@ -185,17 +110,77 @@ fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 			return;
 		}
 
-		child_process.spawn( "node", [ __filename, item ], { stdio: "inherit" } )
-			.on( "close", function( code ) {
-				if ( code === 0 || code === null ) {
-					callback( null );
-				} else {
-					callback( new Error( "Test " + item + " exited unsuccessfully" ) );
-				}
-			} );
-	}, function( error ) {
-		if ( error ) {
-			throw error;
+		if ( !QUnit ) {
+			QUnit = require( "./setup" );
 		}
+
+		QUnit.test( item, function( assert ) {
+			var client, server,
+
+				// Turn this test async
+				done = assert.async(),
+
+				// Count how many children have exited. Consider the test done when that number
+				// reaches two (the client and the server).
+				childrenExited = 0,
+
+				// Count assertions, including those made by the children. Report them to
+				// assert.expect() when both children have reported their number of assertions.
+				// Initially there are 4 assertions, because spawnOne() makes two assertions:
+				// - that the process has exited with success
+				// - that the process has not segfaulted
+				// It makes these two assertions once for the client, and once for the server
+				totalAssertions = 4,
+				childrenAssertionsReported = 0,
+
+				spawnOptions = {
+					uuid: uuid.v4(),
+					teardown: function( message, isError, theChildThatRequested ) {
+
+						var signal = isError ? "SIGTERM" : "SIGINT";
+						if ( client && client !== theChildThatRequested ) {
+							client.kill( signal );
+						}
+						if ( server && server !== theChildThatRequested ) {
+							server.kill( signal );
+						}
+						if ( isError ) {
+							throw new Error( message );
+						}
+					},
+					maybeQuit: function( theChildThatQuit ) {
+						if ( theChildThatQuit === client ) {
+							client = null;
+						} else if ( theChildThatQuit === server ) {
+							server = null;
+						}
+						childrenExited++;
+						if ( childrenExited == 2 ) {
+							done();
+						}
+					},
+					reportAssertions: function( assertionCount ) {
+						childrenAssertionsReported++;
+						totalAssertions += assertionCount;
+						if ( childrenAssertionsReported == 2 ) {
+							assert.expect( totalAssertions );
+						}
+					}
+				};
+
+			// We run the server first, because the server has to be there before the client
+			// can run. OTOH, if the client exits successfully, we may need to kill the server,
+			// because the server may be designed to run "forever".
+			server = spawnOne( assert, _.extend( {}, spawnOptions, {
+				name: "server",
+				path: paths.serverPath,
+				onReady: function() {
+					client = spawnOne( assert, _.extend( {}, spawnOptions, {
+						name: "client",
+						path: paths.clientPath
+					} ) );
+				}
+			} ) );
+		} );
 	} );
 } );

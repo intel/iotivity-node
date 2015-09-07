@@ -17,9 +17,6 @@ function formatRuntime( runtime ) {
 
 QUnit.load();
 QUnit.config.testTimeout = 30000;
-QUnit.config.blocking = false;
-QUnit.config.autorun = false;
-QUnit.config.updateRate = 0;
 QUnit.config.callbacks.moduleStart.push( function( status ) {
 
 	// status: { name, tests }
