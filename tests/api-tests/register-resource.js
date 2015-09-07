@@ -33,7 +33,7 @@ QUnit.test( "Register Resource", function( assert ) {
 		} ).then(
 			function( resource ) {
 				assert.ok( true, "Resource registered successfully" );
-				console.log ( resource );
+				console.log( resource );
 				done();
 			},
 			function( error ) {

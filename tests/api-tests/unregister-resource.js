@@ -48,7 +48,7 @@ QUnit.test( "Unregister Resource", function( assert ) {
 				assert.ok(
 					false,
 					"Resource not registered while testing Unregister, error with code: " +
-						error.result );
+					error.result );
 				done();
 			} );
 	}

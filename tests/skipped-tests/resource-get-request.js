@@ -34,7 +34,7 @@ QUnit.test( "Register Resource", function( assert ) {
 			function( resource ) {
 				lightResource = resource;
 				device.onrequest = requestHandler;
-				console.log ( resource );
+				console.log( resource );
 			},
 			function( error ) {
 				assert.ok( false, "Resource not registered, error with code: " + error.result );
