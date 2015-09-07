@@ -15,7 +15,6 @@ function randomDelay() {
 }
 
 module.exports = function mockSensor() {
-	debugger;
 	var returnValue = new emitter(),
 		trigger = function() {
 			returnValue.emit( "change", {

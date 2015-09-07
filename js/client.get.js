@@ -37,7 +37,12 @@ iotivity.OCDoResource(
 			destination = response.addr,
 			getHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
-			resourceCount = resources.length ? resources.length : 0;
+			resourceCount = resources.length ? resources.length : 0,
+			getResponseHandler = function( handle, response ) {
+				console.log( "Received response to GET request:" );
+				console.log( JSON.stringify( response, null, 4 ) );
+				return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
+			};
 
 		// If the sample URI is among the resources, issue the GET request to it
 		for ( index = 0 ; index < resourceCount ; index++ ) {
@@ -55,11 +60,7 @@ iotivity.OCDoResource(
 					},
 					iotivity.OCConnectivityType.CT_DEFAULT,
 					iotivity.OCQualityOfService.OC_HIGH_QOS,
-					function( handle, response ) {
-						console.log( "Received response to GET request:" );
-						console.log( JSON.stringify( response, null, 4 ) );
-						return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
-					},
+					getResponseHandler,
 					null );
 			}
 		}

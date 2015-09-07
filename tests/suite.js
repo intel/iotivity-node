@@ -77,7 +77,6 @@ function spawnOne( assert, options ) {
 fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 	if ( error ) {
 		throw error;
-		return;
 	}
 
 	_.each( files, function( item ) {
@@ -93,14 +92,10 @@ fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 
 		if ( !( fs.lstatSync( clientPath ).isFile() ) ) {
 			throw new Error( "Cannot find client at " + clientPath );
-			callback( null );
-			return;
 		}
 
 		if ( !( fs.lstatSync( serverPath ).isFile() ) ) {
 			throw new Error( "Cannot find server at " + serverPath );
-			callback( null );
-			return;
 		}
 
 		if ( !QUnit ) {

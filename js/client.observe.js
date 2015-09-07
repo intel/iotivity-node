@@ -39,7 +39,22 @@ iotivity.OCDoResource(
 			destination = response.addr,
 			observeHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
-			resourceCount = resources.length ? resources.length : 0;
+			resourceCount = resources.length ? resources.length : 0,
+			observeResponseHandler = function( handle, response ) {
+				console.log( "Received response to OBSERVE request:" );
+				console.log( JSON.stringify( response, null, 4 ) );
+				if ( ++observerResponseCount >= 10 ) {
+					console.log( "Enough observations. Calling OCCancel()" );
+					iotivity.OCCancel(
+						handle,
+						iotivity.OCQualityOfService.OC_HIGH_QOS,
+						[] );
+					return iotivity.OCStackApplicationResult
+						.OC_STACK_DELETE_TRANSACTION;
+				} else {
+					return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
+				}
+			};
 
 		if ( resourceMissing ) {
 
@@ -58,21 +73,7 @@ iotivity.OCDoResource(
 						null,
 						iotivity.OCConnectivityType.CT_DEFAULT,
 						iotivity.OCQualityOfService.OC_HIGH_QOS,
-						function( handle, response ) {
-							console.log( "Received response to OBSERVE request:" );
-							console.log( JSON.stringify( response, null, 4 ) );
-							if ( ++observerResponseCount >= 10 ) {
-								console.log( "Enough observations. Calling OCCancel()" );
-								iotivity.OCCancel(
-									handle,
-									iotivity.OCQualityOfService.OC_HIGH_QOS,
-									[] );
-								return iotivity.OCStackApplicationResult
-									.OC_STACK_DELETE_TRANSACTION;
-							} else {
-								return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
-							}
-						},
+						observeResponseHandler,
 						null );
 				}
 			}
