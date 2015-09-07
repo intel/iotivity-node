@@ -107,6 +107,3 @@ function cleanup() {
 		process.exit( 0 );
 	}
 }
-
-// Exit gracefully when interrupted
-process.on( "SIGINT", cleanup );

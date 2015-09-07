@@ -47,8 +47,8 @@ function notifyObservers() {
 		}
 	}
 
-	// Run this function again between 500 and 1000 ms from now
-	notifyObserversTimeoutId = setTimeout( notifyObservers, Math.random() * 500 + 500 );
+	// Run this function again between 200 and 400 ms from now
+	notifyObserversTimeoutId = setTimeout( notifyObservers, Math.random() * 200 + 200 );
 }
 
 // Create a new resource
