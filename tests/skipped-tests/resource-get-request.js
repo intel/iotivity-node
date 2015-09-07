@@ -2,10 +2,9 @@ var QUnit = require( "../setup" ),
 	OicDevice = require( "../../index" ).OicDevice;
 
 QUnit.test( "Register Resource", function( assert ) {
-	var done = assert.async();
-
 	assert.expect( 1 );
 
+	var done = assert.async();
 	var device = OicDevice();
 	var settings = {
 		role: "server",
@@ -13,16 +12,16 @@ QUnit.test( "Register Resource", function( assert ) {
 		info: {
 			uuid: "INTEL"
 		}
+	};
 
-	}
 	device.configure( settings );
 
 	var lightResource = null;
-	if (device._settings.info.uuid) {
+	if ( device._settings.info.uuid ) {
 		var deviceId = device._settings.info.uuid;
 		var connMode = device._settings.connectionMode;
 
-		device._server.registerResource({
+		device._server.registerResource( {
 			url: "/a/light2",
 			deviceId: deviceId,
 			connectionMode: connMode,
@@ -31,7 +30,7 @@ QUnit.test( "Register Resource", function( assert ) {
 			discoverable: true,
 			observable: true,
 			properties: { color: "light-blue", dimmer: 0.2 }
-		}).then(
+		} ).then(
 			function( resource ) {
 				lightResource = resource;
 				device.onrequest = requestHandler;
@@ -44,9 +43,9 @@ QUnit.test( "Register Resource", function( assert ) {
 	}
 
 	function requestHandler( request ) {
-		if (request.type == "retrieve") {
-			request.sendResponse(lightResource);
-			assert.ok( true, "Get resource successfully responded")
+		if ( request.type == "retrieve" ) {
+			request.sendResponse( lightResource );
+			assert.ok( true, "Get resource successfully responded" );
 		}
 	}
 } );
