@@ -73,7 +73,6 @@ result = iotivity.OCCreateResource(
 				sendVendorSpecificHeaderOptions: []
 			} );
 			testUtils.stackOKOrDie( "Server", "OCDoResponse", responseResult );
-			cleanup();
 
 			returnValue = iotivity.OCEntityHandlerResult.OC_EH_OK;
 		}
@@ -107,3 +106,6 @@ function cleanup() {
 		process.exit( 0 );
 	}
 }
+
+// Exit gracefully when interrupted
+process.on( "SIGINT", cleanup );

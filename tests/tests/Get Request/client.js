@@ -117,6 +117,7 @@ function cleanup() {
 
 	cleanupResult = iotivity.OCStop();
 	if ( testUtils.stackOKOrDie( "Client", "OCStop", cleanupResult ) ) {
+		console.log( JSON.stringify( { killPeer: true } ) );
 		process.exit( 0 );
 	}
 }

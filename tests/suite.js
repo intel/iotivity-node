@@ -3,12 +3,11 @@ var QUnit,
 	child_process = require( "child_process" ),
 	fs = require( "fs" ),
 	path = require( "path" ),
-	uuid = require( "uuid" ),
-	testToRun = ( process.argv.length > 2 && process.argv[ 2 ] );
+	uuid = require( "uuid" );
 
 // Spawn a single child and process its stdout.
 function spawnOne( assert, options ) {
-	var theChild = child_process.spawn( "node", [ options.path, options.id ], {
+	var theChild = child_process.spawn( "node", [ options.path, options.uuid ], {
 		stdio: [ process.stdin, "pipe", process.stderr ]
 	} );
 
@@ -21,7 +20,7 @@ function spawnOne( assert, options ) {
 			assert.ok( signalOK, options.name + " did not segfault" );
 		} )
 		.on( "close", function() {
-			options.maybeQuit( theChild );
+			options.maybeQuit();
 		} );
 
 	// The stdout of the child is a sequence of \n-separated stringified JSON objects.
@@ -48,8 +47,11 @@ function spawnOne( assert, options ) {
 			// The child has requested a teardown.
 			} else if ( jsonObject.teardown ) {
 				options.teardown(
-					options.name + " requested teardown: " + jsonObject.message,
-					jsonObject.isError, theChild );
+					options.name + " requested teardown: " + jsonObject.message );
+
+			// The child has requested that its peer be killed.
+			} else if ( jsonObject.killPeer ) {
+				options.killPeer( theChild );
 
 			// The child is reporting that it is ready. Only servers do this.
 			} else if ( jsonObject.ready ) {
@@ -135,25 +137,23 @@ fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 
 				spawnOptions = {
 					uuid: uuid.v4(),
-					teardown: function( message, isError, theChildThatRequested ) {
+					teardown: function( message ) {
+						if ( client ) {
+							client.kill( "SIGTERM" );
+						}
+						if ( server ) {
+							server.kill( "SIGTERM" );
+						}
+						throw new Error( message );
+					},
+					killPeer: function( whosePeer ) {
+						var thePeer = ( whosePeer === client ? server : client );
 
-						var signal = isError ? "SIGTERM" : "SIGINT";
-						if ( client && client !== theChildThatRequested ) {
-							client.kill( signal );
-						}
-						if ( server && server !== theChildThatRequested ) {
-							server.kill( signal );
-						}
-						if ( isError ) {
-							throw new Error( message );
+						if ( thePeer ) {
+							thePeer.kill( "SIGINT" );
 						}
 					},
-					maybeQuit: function( theChildThatQuit ) {
-						if ( theChildThatQuit === client ) {
-							client = null;
-						} else if ( theChildThatQuit === server ) {
-							server = null;
-						}
+					maybeQuit: function() {
 						childrenExited++;
 						if ( childrenExited == 2 ) {
 							done();
