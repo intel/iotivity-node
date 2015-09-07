@@ -1,19 +1,18 @@
-require( "../setup" );
+var QUnit = require( "../setup" ),
+	OicDevice = require( "../../index" ).OicDevice;
 
-var OicDevice = require( "../../index" ).OicDevice;
-
-test( "Start the stack", function( assert ) {
+QUnit.test( "Start the stack", function( assert ) {
 	var done = assert.async();
 
-	expect( 1 );
+	assert.expect( 1 );
 
 	OicDevice().configure().then(
 		function() {
-			ok( true, "Stack started successfully" );
+			assert.ok( true, "Stack started successfully" );
 			done();
 		},
 		function( error ) {
-			ok( false, "Stack failed to start with code: " + error.result );
+			assert.ok( false, "Stack failed to start with code: " + error.result );
 			done();
 		} );
 } );

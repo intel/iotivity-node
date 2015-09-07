@@ -1,11 +1,10 @@
-require( "../setup" );
+var QUnit = require( "../setup" ),
+	OicDevice = require( "../../index" ).OicDevice;
 
-var OicDevice = require( "../../index" ).OicDevice;
-
-test( "Register Resource", function( assert ) {
+QUnit.test( "Register Resource", function( assert ) {
 	var done = assert.async();
 
-	expect( 1 );
+	assert.expect( 1 );
 
 	var device = OicDevice();
 	var settings = {
@@ -34,12 +33,12 @@ test( "Register Resource", function( assert ) {
 			properties: { color: "light-blue", dimmer: 0.2 }
 		}).then(
 			function( resource ) {
-				ok( true, "Resource registered successfully" );
+				assert.ok( true, "Resource registered successfully" );
 				console.log ( resource );
 				done();
 			},
 			function( error ) {
-				ok( false, "Resource not registered, error with code: " + error.result );
+				assert.ok( assert.false, "Resource not registered, error with code: " + error.result );
 				done();
 			} );
 	}

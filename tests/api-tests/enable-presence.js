@@ -1,11 +1,10 @@
-require( "../setup" );
+var QUnit = require( "../setup" ),
+	OicDevice = require( "../../index" ).OicDevice;
 
-var OicDevice = require( "../../index" ).OicDevice;
-
-test( "Enable Presence", function( assert ) {
+QUnit.test( "Enable Presence", function( assert ) {
 	var done = assert.async();
 
-	expect( 1 );
+	assert.expect( 1 );
 
 	var device = OicDevice();
 	var settings = {
@@ -15,11 +14,11 @@ test( "Enable Presence", function( assert ) {
 
 	device._server.enablePresence( 1000 ).then(
 		function() {
-			ok( true, "Presence Enabled successfully" );
+			assert.ok( true, "Presence Enabled successfully" );
 			done();
 		},
 		function( error ) {
-			ok( false, "Presence Enable error with code: " + error.result );
+			assert.ok( false, "Presence Enable error with code: " + error.result );
 			done();
 		} );
 } );

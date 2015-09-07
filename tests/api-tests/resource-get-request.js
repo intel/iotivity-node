@@ -1,11 +1,10 @@
-require( "../setup" );
+var QUnit = require( "../setup" ),
+	OicDevice = require( "../../index" ).OicDevice;
 
-var OicDevice = require( "../../index" ).OicDevice;
-
-test( "Register Resource", function( assert ) {
+QUnit.test( "Register Resource", function( assert ) {
 	var done = assert.async();
 
-	expect( 1 );
+	assert.expect( 1 );
 
 	var device = OicDevice();
 	var settings = {
@@ -39,7 +38,7 @@ test( "Register Resource", function( assert ) {
 				console.log ( resource );
 			},
 			function( error ) {
-				ok( false, "Resource not registered, error with code: " + error.result );
+				assert.ok( false, "Resource not registered, error with code: " + error.result );
 				done();
 			} );
 	}
@@ -47,7 +46,7 @@ test( "Register Resource", function( assert ) {
 	function requestHandler( request ) {
 		if (request.type == "retrieve") {
 			request.sendResponse(lightResource);
-			ok ( true, "Get resource successfully responded")
+			assert.ok( true, "Get resource successfully responded")
 		}
 	}
 } );

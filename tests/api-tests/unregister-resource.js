@@ -1,11 +1,10 @@
-require( "../setup" );
+var QUnit = require( "../setup" ),
+	OicDevice = require( "../../index" ).OicDevice;
 
-var OicDevice = require( "../../index" ).OicDevice;
-
-test( "Unregister Resource", function( assert ) {
+QUnit.test( "Unregister Resource", function( assert ) {
 	var done = assert.async();
 
-	expect( 1 );
+	assert.expect( 1 );
 
 	var device = OicDevice();
 	var settings = {
@@ -36,16 +35,16 @@ test( "Unregister Resource", function( assert ) {
 			function( resource ) {
         device._server.unregisterResource( resource.id ).then(
   			  function( resourceId ) {
-            ok( true, "Resource unregistered successfully" );
+            assert.ok( true, "Resource unregistered successfully" );
 				    done();
           },
           function( error ) {
-				    ok( false, "Resource cannot be unregistered, error with code: " + error.result );
+				    assert.ok( false, "Resource cannot be unregistered, error with code: " + error.result );
 				    done();
           } );
 			},
 			function( error ) {
-				ok( false, "Resource not registered while testing Unregister, error with code: " + error.result );
+				assert.ok( false, "Resource not registered while testing Unregister, error with code: " + error.result );
 				done();
 			} );
 	}
