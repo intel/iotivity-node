@@ -37,7 +37,7 @@ iotivity.OCDoResource(
 		console.log( JSON.stringify( response, null, 4 ) );
 		var index,
 			destination = response.addr,
-			getHandleReceptacle = {},
+			observeHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
 			resourceCount = resources.length ? resources.length : 0;
 
@@ -51,7 +51,7 @@ iotivity.OCDoResource(
 					console.log( "Observing " + sampleUri );
 
 					iotivity.OCDoResource(
-						getHandleReceptacle,
+						observeHandleReceptacle,
 						iotivity.OCMethod.OC_REST_OBSERVE,
 						sampleUri,
 						destination,
