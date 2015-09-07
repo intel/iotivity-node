@@ -45,7 +45,7 @@ iotivity.OCDoResource(
 			};
 
 		// If the sample URI is among the resources, issue the GET request to it
-		for ( index = 0 ; index < resourceCount ; index++ ) {
+		for ( index = 0; index < resourceCount; index++ ) {
 			if ( resources[ index ].uri === sampleUri ) {
 				iotivity.OCDoResource(
 					getHandleReceptacle,

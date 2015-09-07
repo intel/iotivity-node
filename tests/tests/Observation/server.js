@@ -168,7 +168,7 @@ function cleanup() {
 	console.log( JSON.stringify( {
 		assertion: "ok",
 		arguments: [ true, "Server: OCNotifyAllObservers succeeded " +
-			notificationCount + " times" ]
+		notificationCount + " times" ]
 	} ) );
 
 	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );

@@ -58,9 +58,9 @@ _.extend( testUtils.prototype, {
 			returnValue = false;
 
 		if ( response &&
-			response.payload &&
-			response.payload.resources &&
-			response.payload.resources.length ) {
+				response.payload &&
+				response.payload.resources &&
+				response.payload.resources.length ) {
 
 			resources = response.payload.resources;
 

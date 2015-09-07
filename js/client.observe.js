@@ -59,7 +59,7 @@ iotivity.OCDoResource(
 		if ( resourceMissing ) {
 
 			// If the sample URI is among the resources, issue the OBSERVE request to it
-			for ( index = 0 ; index < resourceCount ; index++ ) {
+			for ( index = 0; index < resourceCount; index++ ) {
 				if ( resources[ index ].uri === sampleUri ) {
 					resourceMissing = false;
 

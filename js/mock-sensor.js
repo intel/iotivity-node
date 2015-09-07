@@ -15,20 +15,20 @@ function randomDelay() {
 }
 
 module.exports = function mockSensor() {
-	var returnValue = new emitter(),
-		trigger = function() {
-			returnValue.emit( "change", {
-				someValue: Math.round( Math.random() * 42 ),
-				someOtherValue:
-					possibleStringValues[
-						Math.round( Math.random() * possibleStringValues.length - 1 )
-					]
-			} );
-			setTimeout( trigger, randomDelay() );
-		};
+var returnValue = new emitter(),
+	trigger = function() {
+		returnValue.emit( "change", {
+			someValue: Math.round( Math.random() * 42 ),
+			someOtherValue:
+			possibleStringValues[
+				Math.round( Math.random() * possibleStringValues.length - 1 )
+			]
+		} );
+		setTimeout( trigger, randomDelay() );
+	};
 
-	setTimeout( trigger, randomDelay() );
+setTimeout( trigger, randomDelay() );
 
-	return returnValue;
+return returnValue;
 };
 

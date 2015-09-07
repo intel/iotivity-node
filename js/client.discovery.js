@@ -3,11 +3,11 @@ var intervalId,
 	iotivity = require( "iotivity" ),
 	options = ( function() {
 		var index;
-			returnValue = {
+		returnValue = {
 
-				// By default we discover resources
-				discoveryUri: iotivity.OC_RSRVD_WELL_KNOWN_URI
-			};
+			// By default we discover resources
+			discoveryUri: iotivity.OC_RSRVD_WELL_KNOWN_URI
+		};
 
 		for ( index in process.argv ) {
 			if ( process.argv[ index ] === "-d" || process.argv[ index ] === "--device" ) {

@@ -8,7 +8,7 @@ function formatRuntime( runtime ) {
 		str = "" + runtime,
 		indent = "";
 
-	for ( index = 0 ; index < Math.max( 0, 10 - str.length ) ; index++ ) {
+	for ( index = 0; index < Math.max( 0, 10 - str.length ); index++ ) {
 		indent += " ";
 	}
 
