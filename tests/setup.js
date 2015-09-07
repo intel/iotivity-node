@@ -1,7 +1,6 @@
-require( "qunitjs/qunit/qunit" );
-
 var success = "\033[42;30m✓\033[0m",
-	failure = "\033[41;30m✗\033[0m";
+	failure = "\033[41;30m✗\033[0m",
+	QUnit = require( "qunitjs" );
 
 // Right-align runtime in a field that's 10 columns wide
 function formatRuntime( runtime ) {
@@ -16,10 +15,10 @@ function formatRuntime( runtime ) {
 	return indent + str;
 }
 
-QUnit.init();
+QUnit.load();
 QUnit.config.testTimeout = 30000;
 QUnit.config.blocking = false;
-QUnit.config.autorun = true;
+QUnit.config.autorun = false;
 QUnit.config.updateRate = 0;
 QUnit.config.callbacks.moduleStart.push( function( status ) {
 
@@ -62,3 +61,5 @@ QUnit.config.callbacks.done.push( function( status ) {
 
 	process.exit( status.failed > 0 ? 1 : 0 );
 } );
+
+module.exports = QUnit;
