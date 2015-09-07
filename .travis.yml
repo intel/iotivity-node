@@ -21,6 +21,7 @@ install:
 - source ~/.nvm/nvm.sh
 - nvm install "${NODE_VERSION}"
 - test "x${TRAVIS_OS_NAME}x" = "xosxx" && brew install scons || true
+- npm install -g grunt-cli
 
 addons:
   apt:
