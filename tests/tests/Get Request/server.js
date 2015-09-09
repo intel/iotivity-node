@@ -36,28 +36,19 @@ result = iotivity.OCCreateResource(
 		var responseResult,
 			returnValue = iotivity.OCEntityHandlerResult.OC_EH_ERROR;
 
-		console.log( JSON.stringify( {
-			assertion: "deepEqual",
-			arguments: [
-				testUtils.lookupBitfieldValueNames( "OCEntityHandlerFlag", flag ),
-				{ OC_REQUEST_FLAG: true },
-				"Server: Incoming request has the correct flags"
-			]
-		} ) );
+		testUtils.assert( "deepEqual",
+			testUtils.lookupBitfieldValueNames( "OCEntityHandlerFlag", flag ),
+			{ OC_REQUEST_FLAG: true },
+			"Server: Incoming request has the correct flags" );
 
 		if ( request &&
 				request.payload &&
 				request.payload.type === iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION &&
 				request.payload.values &&
 				request.payload.values.question ) {
-			console.log( JSON.stringify( {
-				assertion: "strictEqual",
-				arguments: [
-					request.payload.values.question,
+			testUtils.assert( "strictEqual", request.payload.values.question,
 					"How many angels can dance on the head of a pin?",
-					"Server: Correct request received"
-				]
-			} ) );
+					"Server: Correct request received" );
 
 			responseResult = iotivity.OCDoResponse( {
 				requestHandle: request.requestHandle,
@@ -75,6 +66,9 @@ result = iotivity.OCCreateResource(
 			testUtils.stackOKOrDie( "Server", "OCDoResponse", responseResult );
 
 			returnValue = iotivity.OCEntityHandlerResult.OC_EH_OK;
+		} else {
+			testUtils.die( "Server: Unexpected GET request:\n***" +
+				JSON.stringify( response, null, 4 ) + "\n***" );
 		}
 
 		return returnValue;
@@ -93,10 +87,7 @@ function cleanup() {
 		processLoop = null;
 	}
 
-	console.log( JSON.stringify( {
-		assertion: "ok",
-		arguments: [ true, "Server: OCProcess succeeded " + processCallCount + " times" ]
-	} ) );
+	testUtils.assert( "ok", true, "Server: OCProcess succeeded " + processCallCount + " times" );
 
 	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
 	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );

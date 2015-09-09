@@ -64,59 +64,32 @@ result = iotivity.OCCreateResource(
 
 		// We expect the first request to be the attachment of an observer
 		if ( getRequestCount === 0 ) {
-			console.log( JSON.stringify( {
-				assertion: "deepEqual",
-				arguments: [
-					testUtils.lookupBitfieldValueNames( "OCEntityHandlerFlag", flag ),
-					{ OC_REQUEST_FLAG: true, OC_OBSERVE_FLAG: true },
-					"Server: The first request has both the request and observe flags set"
-				]
-			} ) );
-			console.log( JSON.stringify( {
-				assertion: "ok",
-				arguments: [
-					request.obsInfo.obsId !== 0,
-					"Server: Observation ID is not zero (" + request.obsInfo.obsId + ")"
-				]
-			} ) );
-			console.log( JSON.stringify( {
-				assertion: "strictEqual",
-				arguments: [
-					testUtils.lookupEnumValueName( "OCObserveAction", request.obsInfo.action ),
-					"OC_OBSERVE_REGISTER",
-					"Server: Action is set to OC_OBSERVE_REGISTER"
-				]
-			} ) );
+			testUtils.assert( "deepEqual",
+				testUtils.lookupBitfieldValueNames( "OCEntityHandlerFlag", flag ),
+				{ OC_REQUEST_FLAG: true, OC_OBSERVE_FLAG: true },
+				"Server: The first request has both the request and observe flags set" );
+			testUtils.assert( "ok", request.obsInfo.obsId !== 0,
+					"Server: Observation ID is not zero (" + request.obsInfo.obsId + ")" );
+			testUtils.assert( "strictEqual",
+				testUtils.lookupEnumValueName( "OCObserveAction", request.obsInfo.action ),
+				"OC_OBSERVE_REGISTER",
+				"Server: Action is set to OC_OBSERVE_REGISTER" );
 
 			observationId = request.obsInfo.obsId;
 			notifyObserversTimeoutId = setTimeout( notifyObservers, 0 );
 
 		// We expect the last request to be the detachment of the observer
 		} else if ( getRequestCount === 5 ) {
-			console.log( JSON.stringify( {
-				assertion: "deepEqual",
-				arguments: [
-					testUtils.lookupBitfieldValueNames( "OCEntityHandlerFlag", flag ),
-					{ OC_REQUEST_FLAG: true, OC_OBSERVE_FLAG: true },
-					"Server: The last request has both the request and observe flags set"
-				]
-			} ) );
-			console.log( JSON.stringify( {
-				assertion: "strictEqual",
-				arguments: [
-					request.obsInfo.obsId,
-					observationId,
-					"Server: Observation ID is the same as during the initial request"
-				]
-			} ) );
-			console.log( JSON.stringify( {
-				assertion: "strictEqual",
-				arguments: [
-					testUtils.lookupEnumValueName( "OCObserveAction", request.obsInfo.action ),
-					"OC_OBSERVE_DEREGISTER",
-					"Server: Action is set to OC_OBSERVE_DEREGISTER"
-				]
-			} ) );
+			testUtils.assert( "deepEqual",
+				testUtils.lookupBitfieldValueNames( "OCEntityHandlerFlag", flag ),
+				{ OC_REQUEST_FLAG: true, OC_OBSERVE_FLAG: true },
+				"Server: The last request has both the request and observe flags set" );
+			testUtils.assert( "strictEqual", request.obsInfo.obsId, observationId,
+				"Server: Observation ID is the same as during the initial request" );
+			testUtils.assert( "strictEqual",
+				testUtils.lookupEnumValueName( "OCObserveAction", request.obsInfo.action ),
+				"OC_OBSERVE_DEREGISTER",
+				"Server: Action is set to OC_OBSERVE_DEREGISTER" );
 
 			// This test is concluded so we clean up
 			cleanup();
@@ -160,16 +133,10 @@ function cleanup() {
 		notifyObserversTimeoutId = null;
 	}
 
-	console.log( JSON.stringify( {
-		assertion: "ok",
-		arguments: [ true, "Server: OCProcess succeeded " + processCallCount + " times" ]
-	} ) );
+	testUtils.assert( "ok", true, "Server: OCProcess succeeded " + processCallCount + " times" );
 
-	console.log( JSON.stringify( {
-		assertion: "ok",
-		arguments: [ true, "Server: OCNotifyAllObservers succeeded " +
-		notificationCount + " times" ]
-	} ) );
+	testUtils.assert( "ok", true,
+		"Server: OCNotifyAllObservers succeeded " + notificationCount + " times" );
 
 	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
 	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );

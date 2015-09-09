@@ -43,10 +43,8 @@ result = iotivity.OCDoResource(
 		if ( testUtils.findResource( response, uuid ) ) {
 
 			// We've successfully found the resource so let's issue a GET request on it.
-			console.log( JSON.stringify( {
-				assertion: "ok",
-				arguments: [ true, "Client: Resource found" ]
-			} ) );
+			testUtils.assert( "ok", true, "Client: Resource found" );
+
 			doGetRequest( response.addr );
 			returnValue = iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 		}
@@ -83,17 +81,15 @@ function doGetRequest( destination ) {
 					response.payload.values.answer ) {
 
 				// We've received an answer. Let's assert that it's correct, and clean up.
-				console.log( JSON.stringify( {
-					assertion: "strictEqual",
-					arguments: [
-						response.payload.values.answer,
+				testUtils.assert( "strictEqual", response.payload.values.answer,
 						"As many as wanting.",
-						"Client: Correct response received"
-					]
-				} ) );
+						"Client: Correct response received" );
 
 				returnValue = iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 				cleanup();
+			} else {
+				testUtils.die( "Client: Unexpected GET response:\n***" +
+					JSON.stringify( response, null, 4 ) + "\n***" );
 			}
 
 			return returnValue;
@@ -110,10 +106,7 @@ function cleanup() {
 		processLoop = null;
 	}
 
-	console.log( JSON.stringify( {
-		assertion: "ok",
-		arguments: [ true, "Client: OCProcess succeeded " + processCallCount + " times" ]
-	} ) );
+	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
 
 	cleanupResult = iotivity.OCStop();
 	if ( testUtils.stackOKOrDie( "Client", "OCStop", cleanupResult ) ) {

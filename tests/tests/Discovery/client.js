@@ -43,10 +43,7 @@ result = iotivity.OCDoResource(
 		if ( testUtils.findResource( response, uuid ) ) {
 
 			// We've successfully completed the test so let's kill the server and test the cleanup.
-			console.log( JSON.stringify( {
-				assertion: "ok",
-				arguments: [ true, "Client: Resource found" ]
-			} ) );
+			testUtils.assert( "ok", true, "Client: Resource found" );
 			returnValue = iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 			cleanup();
 
@@ -65,10 +62,7 @@ function cleanup() {
 		processLoop = null;
 	}
 
-	console.log( JSON.stringify( {
-		assertion: "ok",
-		arguments: [ true, "Client: OCProcess succeeded " + processCallCount + " times" ]
-	} ) );
+	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
 
 	cleanupResult = iotivity.OCStop();
 	if ( testUtils.stackOKOrDie( "Client", "OCStop", cleanupResult ) ) {

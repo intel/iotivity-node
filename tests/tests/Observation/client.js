@@ -53,10 +53,7 @@ result = iotivity.OCDoResource(
 		if ( testUtils.findResource( response, uuid ) ) {
 
 			// We've successfully found the resource so let's issue a GET request on it.
-			console.log( JSON.stringify( {
-				assertion: "ok",
-				arguments: [ true, "Client: Resource found" ]
-			} ) );
+			testUtils.assert( "ok", true, "Client: Resource found" );
 			doObserveRequest( response.addr );
 			returnValue = iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 		}
@@ -83,14 +80,10 @@ function doObserveRequest( destination ) {
 		function( handle, response ) {
 			var cancelResult;
 
-			console.log( JSON.stringify( {
-				assertion: "deepEqual",
-				arguments: [
-					response.payload,
-					{ type: 4, values: { observedValue: uuid + "-" + observeResponseCount } },
-					"Client: Observed value is as expected"
-				]
-			} ) );
+			testUtils.assert( "deepEqual",
+				response.payload,
+				{ type: 4, values: { observedValue: uuid + "-" + observeResponseCount } },
+				"Client: Observed value is as expected" );
 
 			if ( ++observeResponseCount >= 5 ) {
 				cancelResult = iotivity.OCCancel(
@@ -115,10 +108,7 @@ function cleanup() {
 		processLoop = null;
 	}
 
-	console.log( JSON.stringify( {
-		assertion: "ok",
-		arguments: [ true, "Client: OCProcess succeeded " + processCallCount + " times" ]
-	} ) );
+	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
 
 	cleanupResult = iotivity.OCStop();
 	testUtils.stackOKOrDie( "Client", "OCStop", cleanupResult );

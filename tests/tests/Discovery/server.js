@@ -55,10 +55,7 @@ function cleanup() {
 		processLoop = null;
 	}
 
-	console.log( JSON.stringify( {
-		assertion: "ok",
-		arguments: [ true, "Server: OCProcess succeeded " + processCallCount + " times" ]
-	} ) );
+	testUtils.assert( "ok", true, "Server: OCProcess succeeded " + processCallCount + " times" );
 
 	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
 	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );
