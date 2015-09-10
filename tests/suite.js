@@ -1,15 +1,19 @@
-var QUnit,
+var QUnit, suites,
 	_ = require( "underscore" ),
 	childProcess = require( "child_process" ),
 	fs = require( "fs" ),
 	path = require( "path" ),
-	uuid = require( "uuid" );
+	uuid = require( "uuid" ),
+	runningProcesses = [];
 
 // Spawn a single child and process its stdout.
 function spawnOne( assert, options ) {
 	var theChild = childProcess.spawn( "node", [ options.path, options.uuid ], {
 		stdio: [ process.stdin, "pipe", process.stderr ]
 	} );
+
+	theChild.commandLine = "node" + " " + options.path + " " + options.uuid;
+	runningProcesses.push( theChild );
 
 	theChild
 		.on( "exit", function( code, signal ) {
@@ -20,6 +24,10 @@ function spawnOne( assert, options ) {
 			assert.ok( signalOK, options.name + " did not segfault" );
 		} )
 		.on( "close", function() {
+			var childIndex = runningProcesses.indexOf( theChild );
+			if ( childIndex >= 0 ) {
+				runningProcesses.splice( childIndex, 1 );
+			}
 			options.maybeQuit();
 		} );
 
@@ -73,12 +81,7 @@ function spawnOne( assert, options ) {
 	return theChild;
 }
 
-// Process low level API tests
-fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
-	if ( error ) {
-		throw error;
-	}
-
+function runTestSuites( files ) {
 	_.each( files, function( item ) {
 		var
 			singleTest = path.join( __dirname, "tests", item ),
@@ -169,4 +172,26 @@ fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
 			} ) );
 		} );
 	} );
+}
+
+// Process low level API tests. If no tests were specified on the command line, we scan the tests
+// directory and run all the tests we find therein.
+if ( process.argv.length > 2 ) {
+	runTestSuites( process.argv[ 2 ].split( "," ) );
+} else {
+	fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
+		if ( error ) {
+			throw error;
+		}
+
+		runTestSuites( files );
+	} );
+}
+
+process.on( "exit", function() {
+	var childIndex;
+
+	for ( childIndex in runningProcesses ) {
+		runningProcesses[ childIndex ].kill( "SIGTERM" );
+	}
 } );
