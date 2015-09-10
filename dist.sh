@@ -6,6 +6,8 @@ DEBUG=""
 while [[ $# -gt 0 ]]; do
 	if test "x$1x" = "x--testonlyx" -o "x$1x" = "x-tx"; then
 		TESTONLY="TRUE"
+	elif test "x$1x" = "x--buildonlyx" -o "x$1x" = "x-bx"; then
+		BUILDONLY="TRUE"
 	elif test "x$1x" = "x--debugx" -o "x$1x" = "x-dx"; then
 		DEBUG="--debug"
 	elif test "x$1x" = "x--helpx" -o "x$1x" = "x-hx"; then
@@ -37,6 +39,10 @@ fi
 rm -rf dist && \
 mkdir -p dist/iotivity &&
 npm install ${DEBUG}
+
+if test "x${BUILDONLY}x" = "xTRUEx"; then
+	exit 0
+fi
 
 if ! npm test; then
 	echo "Repair build first."
