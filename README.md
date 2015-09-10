@@ -93,7 +93,7 @@ To build against a new upstream versions:
 0. Run ```./update-enums-and-constants.sh```
 0. Run ```./dist.sh```
 
-The script ```./update-enums-and-constants.sh``` reads the header files ocstackconfig.h, octypes.h, and ocrandom.h and generates the contents of src/constants.cc and src/enums.cc. Read the comments in the script before you modify either src/constants.cc or src/enums.cc.
+The script ```./update-enums-and-constants.sh``` reads the C SDK header files and generates the contents of src/constants.cc and src/enums.cc. Read the comments in the script before you modify either src/constants.cc or src/enums.cc.
 
 ## Coding Style And Principles
 Please follow the [jQuery][] coding style for the JavaScript files. You can format all JS and C++ files with the following command:
