@@ -3,6 +3,15 @@
 TESTONLY=""
 DEBUG=""
 
+buildBroken() {
+	echo "Repair build first."
+	exit 1
+}
+
+DO_BUILD=TRUE
+DO_TEST=TRUE
+DO_DIST=TRUE
+
 while [[ $# -gt 0 ]]; do
 	if test "x$1x" = "x--testonlyx" -o "x$1x" = "x-tx"; then
 		TESTONLY="TRUE"
@@ -11,14 +20,27 @@ while [[ $# -gt 0 ]]; do
 	elif test "x$1x" = "x--debugx" -o "x$1x" = "x-dx"; then
 		DEBUG="--debug"
 	elif test "x$1x" = "x--helpx" -o "x$1x" = "x-hx"; then
-		echo "$( basename "$0" ) [--debug|-d] [--testonly|-t] [--help|-h]"
-		echo "--debug or -d   : Build in debug mode"
-		echo "--testonly or -t: Stop after testing"
-		echo "--help or -h    : Print this message and exit"
+		echo "$( basename "$0" ) [--debug|-d] [--testonly|-t] [--buildonly|-b] [--help|-h]"
+		echo "--debug or -d    : Build in debug mode"
+		echo "--testonly or -t : Build for testing, run tests, and exit"
+		echo "--buildonly or -b: Build and exit"
+		echo "--help or -h     : Print this message and exit"
 		exit 0
 	fi
 	shift
 done
+
+if test "x${TESTONLY}x" = "xTRUEx"; then
+	DO_BUILD=FALSE
+	DO_TEST=TRUE
+	DO_DIST=FALSE
+fi
+
+if test "x${BUILDONLY}x" = "xTRUEx"; then
+	DO_BUILD=TRUE
+	DO_TEST=FALSE
+	DO_DIST=FALSE
+fi
 
 if test "x${DEBUG}x" = "xx"; then
 	MODULE_LOCATION="Release"
@@ -36,32 +58,47 @@ if test "x${OCTBSTACK_LIBS}x" = "xx"; then
 	export OCTBSTACK_LIBS=$( pkg-config --libs octbstack )
 fi
 
-rm -rf dist && \
-mkdir -p dist/iotivity &&
-npm install ${DEBUG}
+if test "x${DO_TEST}x" = "xTRUEx"; then
+	echo "*** Performing test build/run ***"
+	export TESTING=true
 
-if test "x${BUILDONLY}x" = "xTRUEx"; then
-	exit 0
+	if ! npm install ${DEBUG}; then
+		buildBroken
+	fi
+
+	if ! npm test; then
+		buildBroken
+	fi
+
+	unset TESTING
 fi
 
-if ! npm test; then
-	echo "Repair build first."
-	exit 1
+if test "x${DO_DIST}x" = "xTRUEx"; then
+	echo "*** Performing distribution ***"
+	rm -rf dist &&
+	mkdir -p dist/iotivity &&
+	if ! npm install ${DEBUG}; then
+		buildBroken
+	fi
+
+	# https://github.com/npm/npm/issues/5590 is why prune needs to run twice
+	npm prune --production &&
+	npm prune --production &&
+	cp -a AUTHORS.txt index.js MIT-LICENSE.txt node_modules README.md dist/iotivity &&
+	mkdir -p dist/iotivity/build/${MODULE_LOCATION} &&
+	cp build/${MODULE_LOCATION}/iotivity.node dist/iotivity/build/${MODULE_LOCATION} &&
+	if test -d deps; then
+		mkdir -p dist/iotivity/deps/iotivity/lib
+		cp deps/iotivity/lib/liboctbstack.so dist/iotivity/deps/iotivity/lib
+	fi
+	cd dist &&
+	tar cvjf iotivity.tar.bz2 iotivity &&
+	cd ..
 fi
 
-if test "x${TESTONLY}x" = "xTRUEx"; then
-	exit 0
+if test "x${DO_BUILD}x" = "xTRUEx"; then
+	echo "*** Performing build ***"
+	if ! npm install ${DEBUG}; then
+		buildBroken
+	fi
 fi
-
-npm prune --production &&
-cp -a AUTHORS.txt index.js MIT-LICENSE.txt node_modules README.md dist/iotivity &&
-mkdir -p dist/iotivity/build/${MODULE_LOCATION} &&
-cp build/${MODULE_LOCATION}/iotivity.node dist/iotivity/build/${MODULE_LOCATION} &&
-if test -d deps; then
-	mkdir -p dist/iotivity/deps/iotivity/lib
-	cp deps/iotivity/lib/liboctbstack.so dist/iotivity/deps/iotivity/lib
-fi
-cd dist &&
-tar cvjf iotivity.tar.bz2 iotivity &&
-cd .. &&
-npm install ${DEBUG}
