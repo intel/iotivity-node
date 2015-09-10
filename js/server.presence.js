@@ -3,6 +3,7 @@ var intervalId,
 
 	// This is the same value as client.presence.js
 	sampleUri = "/a/iotivity-node-presence-sample",
+	interruptSequence = 0,
 	iotivity = require( "iotivity" );
 
 // Start iotivity and set up the processing loop
@@ -18,7 +19,8 @@ iotivity.OCSetPlatformInfo( {
 	manufacturerName: "iotivity-node"
 } );
 
-iotivity.OCStartPresence( 0 );
+console.log( "The first SIGINT will start presence.\nThe second SIGINT will stop presence.\n" +
+	"The third SIGINT will quit the server." );
 
 // Create a new resource
 iotivity.OCCreateResource(
@@ -38,14 +40,25 @@ iotivity.OCCreateResource(
 
 // Exit gracefully when interrupted
 process.on( "SIGINT", function() {
-	console.log( "SIGINT: Quitting..." );
+	if ( interruptSequence === 0 ) {
+		console.log( "\nSIGINT: Starting presence..." );
 
-	// Tear down the processing loop and stop iotivity
-	clearInterval( intervalId );
-	iotivity.OCDeleteResource( handleReceptacle.handle );
-	iotivity.OCStopPresence();
-	iotivity.OCStop();
+		iotivity.OCStartPresence( 0 );
+	} else if ( interruptSequence === 1 ) {
+		console.log( "\nSIGINT: Stopping presence..." );
 
-	// Exit
-	process.exit( 0 );
+		iotivity.OCStopPresence();
+	} else {
+		console.log( "\nSIGINT: Quitting..." );
+
+		// Tear down the processing loop and stop iotivity
+		clearInterval( intervalId );
+		iotivity.OCDeleteResource( handleReceptacle.handle );
+		iotivity.OCStopPresence();
+		iotivity.OCStop();
+
+		// Exit
+		process.exit( 0 );
+	}
+	interruptSequence++;
 } );
