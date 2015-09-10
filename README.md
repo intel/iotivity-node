@@ -93,16 +93,12 @@ To build against a new upstream versions:
 0. Run ```./update-enums-and-constants.sh```
 0. Run ```./dist.sh```
 
-The script ```./update-enums-and-constants.sh``` reads the header files ocstackconfig.h and octypes.h and generates the contents of src/constants.cc and src/enums.cc. Read the comments in the script before you modify either src/constants.cc or src/enums.cc.
+The script ```./update-enums-and-constants.sh``` reads the header files ocstackconfig.h, octypes.h, and ocrandom.h and generates the contents of src/constants.cc and src/enums.cc. Read the comments in the script before you modify either src/constants.cc or src/enums.cc.
 
 ## Coding Style And Principles
-Please follow the [jQuery][] coding style for the JavaScript files.
-
-The C++ files can be formatted using ```clang-format -style=Google```:
-```BASH
-find src -type f | while read; do
-  clang-format -style=Google "$REPLY" > "$REPLY".new && mv "$REPLY".new "$REPLY"
-done
+Please follow the [jQuery][] coding style for the JavaScript files. You can format all JS and C++ files with the following command:
+```
+grunt format
 ```
 
 When writing the bindings, data arriving from Javascript is considered unreliable and must be validated. If it does not validate correctly, an exception must be thrown immediately after the failed check, and the process must be aborted. Data arriving from C is considered reliable and can be assigned to Javascript immediately.
