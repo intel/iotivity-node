@@ -58,8 +58,7 @@ function doDiscovery() {
 
 // Tell the server to turn presence on/off
 function requestServerPresence( destination, turnOnPresence ) {
-	var
-		handleReceptacle = {},
+	var handleReceptacle = {},
 		result = iotivity.OCDoResource(
 			handleReceptacle,
 			iotivity.OCMethod.OC_REST_PUT,

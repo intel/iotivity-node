@@ -82,8 +82,8 @@ function doGetRequest( destination ) {
 
 				// We've received an answer. Let's assert that it's correct, and clean up.
 				testUtils.assert( "strictEqual", response.payload.values.answer,
-						"As many as wanting.",
-						"Client: Correct response received" );
+					"As many as wanting.",
+					"Client: Correct response received" );
 
 				returnValue = iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 				cleanup();

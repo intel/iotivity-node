@@ -69,7 +69,7 @@ result = iotivity.OCCreateResource(
 				{ OC_REQUEST_FLAG: true, OC_OBSERVE_FLAG: true },
 				"Server: The first request has both the request and observe flags set" );
 			testUtils.assert( "ok", request.obsInfo.obsId !== 0,
-					"Server: Observation ID is not zero (" + request.obsInfo.obsId + ")" );
+				"Server: Observation ID is not zero (" + request.obsInfo.obsId + ")" );
 			testUtils.assert( "strictEqual",
 				testUtils.lookupEnumValueName( "OCObserveAction", request.obsInfo.action ),
 				"OC_OBSERVE_REGISTER",

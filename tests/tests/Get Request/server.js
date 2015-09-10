@@ -47,8 +47,8 @@ result = iotivity.OCCreateResource(
 				request.payload.values &&
 				request.payload.values.question ) {
 			testUtils.assert( "strictEqual", request.payload.values.question,
-					"How many angels can dance on the head of a pin?",
-					"Server: Correct request received" );
+				"How many angels can dance on the head of a pin?",
+				"Server: Correct request received" );
 
 			responseResult = iotivity.OCDoResponse( {
 				requestHandle: request.requestHandle,
