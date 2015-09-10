@@ -88,7 +88,7 @@ function doGetRequest( destination ) {
 				returnValue = iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 				cleanup();
 			} else {
-				testUtils.die( "Client: Unexpected GET response:\n***" +
+				testUtils.die( "Client: Unexpected GET response:\n***\n" +
 					JSON.stringify( response, null, 4 ) + "\n***" );
 			}
 
