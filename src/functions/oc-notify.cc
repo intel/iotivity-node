@@ -72,7 +72,7 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
     c_observations[index] = (OCObservationId)oneObservationId->Uint32Value();
   }
 
-  OCRepPayload* payload;
+  OCRepPayload *payload;
   if (args[3]->IsObject()) {
     if (!c_OCPayload(args[3]->ToObject(), (OCPayload **)&payload)) {
       NanReturnUndefined();

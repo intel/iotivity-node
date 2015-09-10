@@ -23,22 +23,28 @@ Local<Object> js_OCClientResponse(OCClientResponse *response) {
     returnValue->Set(NanNew<String>("addr"), js_OCDevAddr(response->addr));
   }
 
-  SET_VALUE_ON_OBJECT(returnValue, Number, response, connType);
-  SET_VALUE_ON_OBJECT(returnValue, Number, response, result);
-  SET_VALUE_ON_OBJECT(returnValue, Number, response, sequenceNumber);
-  SET_STRING_IF_NOT_NULL(returnValue, response, resourceUri);
-
   // response.payload
   if (response->payload) {
     returnValue->Set(NanNew<String>("payload"),
                      js_OCPayload(response->payload));
   }
 
-  // response.rcvdVendorSpecificHeaderOptions
-  returnValue->Set(
-      NanNew<String>("rcvdVendorSpecificHeaderOptions"),
-      js_OCHeaderOption(response->rcvdVendorSpecificHeaderOptions,
-                        response->numRcvdVendorSpecificHeaderOptions));
+  SET_VALUE_ON_OBJECT(returnValue, Number, response, connType);
+  SET_VALUE_ON_OBJECT(returnValue, Number, response, result);
+  SET_VALUE_ON_OBJECT(returnValue, Number, response, sequenceNumber);
+
+  // FIXME - iotivity has a bug whereby these fields are left uninitialized in
+  // a presence response
+  if (!(response->payload &&
+        response->payload->type == PAYLOAD_TYPE_PRESENCE)) {
+    SET_STRING_IF_NOT_NULL(returnValue, response, resourceUri);
+
+    // response.rcvdVendorSpecificHeaderOptions
+    returnValue->Set(
+        NanNew<String>("rcvdVendorSpecificHeaderOptions"),
+        js_OCHeaderOption(response->rcvdVendorSpecificHeaderOptions,
+                          response->numRcvdVendorSpecificHeaderOptions));
+  }
 
   return returnValue;
 }
