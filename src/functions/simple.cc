@@ -1,5 +1,6 @@
 #include <nan.h>
 #include "../common.h"
+#include "../structures/handles.h"
 #include "../structures/oc-platform-info.h"
 #include "../structures/string-primitive.h"
 
@@ -98,4 +99,172 @@ NAN_METHOD(bind_OCSetPlatformInfo) {
   c_OCPlatformInfoFreeMembers(&info);
 
   NanReturnValue(NanNew<Number>(result));
+}
+
+NAN_METHOD(bind_OCGetNumberOfResourceInterfaces) {
+  NanScope();
+
+  VALIDATE_ARGUMENT_COUNT(args, 2);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsObject);
+
+  OCResourceHandle handle = 0;
+  uint8_t interfaceCount = 0;
+  OCStackResult result;
+
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
+    NanReturnUndefined();
+  }
+
+  result = OCGetNumberOfResourceInterfaces(handle, &interfaceCount);
+
+  args[1]->ToObject()->Set(NanNew<String>("count"),
+                           NanNew<Number>(interfaceCount));
+
+  NanReturnValue(NanNew<Number>(result));
+}
+
+NAN_METHOD(bind_OCGetNumberOfResourceTypes) {
+  NanScope();
+
+  VALIDATE_ARGUMENT_COUNT(args, 2);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsObject);
+
+  OCResourceHandle handle = 0;
+  uint8_t typeCount = 0;
+  OCStackResult result;
+
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
+    NanReturnUndefined();
+  }
+
+  result = OCGetNumberOfResourceInterfaces(handle, &typeCount);
+
+  args[1]->ToObject()->Set(NanNew<String>("count"), NanNew<Number>(typeCount));
+
+  NanReturnValue(NanNew<Number>(result));
+}
+
+NAN_METHOD(bind_OCGetNumberOfResources) {
+  NanScope();
+
+  VALIDATE_ARGUMENT_COUNT(args, 1);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+
+  OCStackResult result;
+  uint8_t resourceCount = 0;
+
+  result = OCGetNumberOfResources(&resourceCount);
+
+  args[0]->ToObject()->Set(NanNew<String>("count"),
+                           NanNew<Number>(resourceCount));
+
+  NanReturnValue(NanNew<Number>(result));
+}
+
+NAN_METHOD(bind_OCGetResourceHandle) {
+  NanScope();
+
+  VALIDATE_ARGUMENT_COUNT(args, 1);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsUint32);
+
+  OCResourceHandle handle = 0;
+
+  handle = OCGetResourceHandle((uint8_t)(args[0]->Uint32Value()));
+
+  if (handle) {
+    NanReturnValue(js_OCResourceHandle(handle));
+  } else {
+    NanReturnNull();
+  }
+}
+
+#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()                   \
+  NanScope();                                                      \
+  OCResourceHandle handle = 0;                                     \
+  VALIDATE_ARGUMENT_COUNT(args, 2);                                \
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);                        \
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);                       \
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) { \
+    NanReturnUndefined();                                          \
+  }
+
+NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
+  RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();
+
+  OCResourceHandle resourceHandle =
+      OCGetResourceHandleFromCollection(handle, args[1]->Uint32Value());
+
+  if (resourceHandle) {
+    NanReturnValue(js_OCResourceHandle(resourceHandle));
+  } else {
+    NanReturnNull();
+  }
+}
+
+#define GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(apiFunction) \
+  RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();                        \
+  const char *resultOf##apiFunction =                              \
+      apiFunction(handle, args[1]->Uint32Value());                 \
+  if (resultOf##apiFunction) {                                     \
+    NanReturnValue(NanNew<String>(resultOf##apiFunction));         \
+  } else {                                                         \
+    NanReturnNull();                                               \
+  }
+
+NAN_METHOD(bind_OCGetResourceInterfaceName) {
+  GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(OCGetResourceInterfaceName);
+}
+
+NAN_METHOD(bind_OCGetResourceTypeName) {
+  GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(OCGetResourceTypeName);
+}
+
+#define LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE()             \
+  NanScope();                                                      \
+  VALIDATE_ARGUMENT_COUNT(args, 1);                                \
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);                        \
+  OCResourceHandle handle = 0;                                     \
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) { \
+    NanReturnUndefined();                                          \
+  }
+
+NAN_METHOD(bind_OCGetResourceProperties) {
+  LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE();
+
+  NanReturnValue(NanNew<Number>(OCGetResourceProperties(handle)));
+}
+
+NAN_METHOD(bind_OCGetResourceUri) {
+  LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE();
+
+  const char *uri = OCGetResourceUri(handle);
+
+  if (uri) {
+    NanReturnValue(NanNew<String>(uri));
+  } else {
+    NanReturnNull();
+  }
+}
+
+NAN_METHOD(bind_OCUnBindResource) {
+  NanScope();
+
+  VALIDATE_ARGUMENT_COUNT(args, 2);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
+
+  OCResourceHandle collectionHandle = 0, resourceHandle = 0;
+
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &collectionHandle)) {
+    NanReturnUndefined();
+  }
+
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[1]), &resourceHandle)) {
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(
+      NanNew<Number>(OCUnBindResource(collectionHandle, resourceHandle)));
 }

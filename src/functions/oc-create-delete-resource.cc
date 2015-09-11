@@ -176,3 +176,20 @@ NAN_METHOD(bind_OCBindResourceTypeToResource) {
   NanReturnValue(NanNew<Number>(OCBindResourceTypeToResource(
       handle, (const char *)*String::Utf8Value(args[1]))));
 }
+
+// This is not actually a binding. We get the resource handler from the
+// annotation.
+NAN_METHOD(bind_OCGetResourceHandler) {
+  NanScope();
+
+  OCResourceHandle handle = 0;
+
+  VALIDATE_ARGUMENT_COUNT(args, 1);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
+
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
+    NanReturnUndefined();
+  }
+
+  NanReturnValue((*(*annotation[handle])));
+}

@@ -9,5 +9,6 @@ NAN_METHOD(bind_OCBindResourceHandler);
 NAN_METHOD(bind_OCBindResource);
 NAN_METHOD(bind_OCBindResourceInterfaceToResource);
 NAN_METHOD(bind_OCBindResourceTypeToResource);
+NAN_METHOD(bind_OCGetResourceHandler);
 
 #endif /* __IOTIVITY_NODE_OC_CREATE_DELETE_RESOURCE_H__ */
