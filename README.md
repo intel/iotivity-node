@@ -85,6 +85,14 @@ To run the tests, simply run ```npm test```. A script called ```dist.sh``` is al
 
 The ```dist.sh``` script accepts the optional command line argument ```--testonly```. This will cause the script to exit after having run the tests.
 
+A crude way of estimating which functions still need to be tested is this:
+
+```
+diff -u \
+	<( find tests/tests -type f | zerosep | xargs -0 grep -E 'iotivity\.[_a-zA-Z0-9]*\(' | sed -r 's/^.*iotivity\.([_A-Za-z0-9]*)\(.*$/\1/'  | sort -u ) \
+	<( cat src/functions.cc | grep '^  SET_FUNCTION' | sed 's/);$//' | awk '{ print $2;}' | sort )
+```
+
 ## Maintenance
 
 To build against a new upstream versions:
