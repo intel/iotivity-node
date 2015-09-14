@@ -1,5 +1,5 @@
-var success = "\033[42;30m✓\033[0m",
-	failure = "\033[41;30m✗\033[0m",
+var success = "\x1b[42;30m✓\x1b[0m",
+	failure = "\x1b[41;30m✗\x1b[0m",
 	QUnit = require( "qunitjs" );
 
 // Right-align runtime in a field that's 10 columns wide
@@ -50,8 +50,8 @@ QUnit.config.callbacks.log.push( function( status ) {
 } );
 
 QUnit.config.callbacks.done.push( function( status ) {
-	var passed = "\033[42;30m " + status.passed + " \033[0m",
-		failed = "\033[41;30m " + status.failed + " \033[0m";
+	var passed = "\x1b[42;30m " + status.passed + " \x1b[0m",
+		failed = "\x1b[41;30m " + status.failed + " \x1b[0m";
 
 	console.log( "Total assertions: " +
 		"(" + passed + ( status.failed > 0 ? "+" + failed : "" ) + ") / " + status.total );

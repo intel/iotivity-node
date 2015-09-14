@@ -4,13 +4,22 @@ var QUnit, suites,
 	fs = require( "fs" ),
 	path = require( "path" ),
 	uuid = require( "uuid" ),
-	runningProcesses = [];
+	runningProcesses = [],
+	getQUnit = function() {
+		if ( !QUnit ) {
+			QUnit = require( "./setup" );
+		}
+		return QUnit;
+	};
 
 // Spawn a single child and process its stdout.
 function spawnOne( assert, options ) {
-	var theChild = childProcess.spawn( "node", [ options.path, options.uuid ], {
-		stdio: [ process.stdin, "pipe", process.stderr ]
-	} );
+	var theChild = childProcess.spawn(
+		"node",
+		[ options.path ].concat( options.uuid ? [ options.uuid ] : [] ),
+		{
+			stdio: [ process.stdin, "pipe", process.stderr ]
+		} );
 
 	theChild.commandLine = "node" + " " + options.path + " " + options.uuid;
 	runningProcesses.push( theChild );
@@ -48,9 +57,10 @@ function spawnOne( assert, options ) {
 					( e.message ? e.message : e ), true );
 			}
 
-			// The child is reporting the number of assertions it will be making.
+			// The child is reporting the number of assertions it will be making. We add our own
+			// two assertions ( 1.) successful exit and 2.) no segfault) to that count.
 			if ( jsonObject.assertionCount ) {
-				options.reportAssertions( jsonObject.assertionCount );
+				options.reportAssertions( jsonObject.assertionCount + 2 );
 
 			// The child has requested a teardown.
 			} else if ( jsonObject.teardown ) {
@@ -59,7 +69,9 @@ function spawnOne( assert, options ) {
 
 			// The child has requested that its peer be killed.
 			} else if ( jsonObject.killPeer ) {
-				options.killPeer( theChild );
+				if ( options.killPeer ) {
+					options.killPeer( theChild );
+				}
 
 			// The child is reporting that it is ready. Only servers do this.
 			} else if ( jsonObject.ready ) {
@@ -83,13 +95,31 @@ function spawnOne( assert, options ) {
 
 function runTestSuites( files ) {
 	_.each( files, function( item ) {
-		var
-			singleTest = path.join( __dirname, "tests", item ),
+		var singleTest = path.join( __dirname, "tests", item ),
 			clientPath = path.join( singleTest, "client.js" ),
 			serverPath = path.join( singleTest, "server.js" );
 
+		if ( fs.lstatSync( singleTest ).isFile() ) {
+			getQUnit().test( item.replace( /\.js$/, "" ), function( assert ) {
+				var theChild,
+					spawnOptions = {
+						uuid: uuid.v4(),
+						name: "Test",
+						path: singleTest,
+						teardown: function() {
+							if ( theChild ) {
+								theChild.kill( "SIGTERM" );
+							}
+						},
+						maybeQuit: assert.async(),
+						reportAssertions: _.bind( assert.expect, assert )
+					};
+				theChild = spawnOne( assert, spawnOptions );
+			} );
+			return;
+		}
+
 		if ( !fs.lstatSync( singleTest ).isDirectory() ) {
-			callback( null );
 			return;
 		}
 
@@ -101,11 +131,7 @@ function runTestSuites( files ) {
 			throw new Error( "Cannot find server at " + serverPath );
 		}
 
-		if ( !QUnit ) {
-			QUnit = require( "./setup" );
-		}
-
-		QUnit.test( item, function( assert ) {
+		getQUnit().test( item, function( assert ) {
 			var client, server,
 
 				// Turn this test async
@@ -115,13 +141,9 @@ function runTestSuites( files ) {
 				// reaches two (the client and the server).
 				childrenExited = 0,
 
-				// Count assertions, including those made by the children. Report them to
-				// assert.expect() when both children have reported their number of assertions.
-				// Initially there are 4 assertions, because spawnOne() makes two assertions:
-				// - that the process has exited with success
-				// - that the process has not segfaulted
-				// It makes these two assertions once for the client, and once for the server
-				totalAssertions = 4,
+				// Count assertions made by the children. Report them to assert.expect() when both
+				// children have reported their number of assertions.
+				totalAssertions = 0,
 				childrenAssertionsReported = 0,
 
 				spawnOptions = {

@@ -47,12 +47,20 @@ _.extend( testUtils.prototype, {
 		} ) );
 	},
 	stackOKOrDie: function( module, nameOfStep, result ) {
+
+		// Two-argument configuration means module was skipped
+		if ( arguments.length == 2 ) {
+			result = nameOfStep;
+			nameOfStep = module;
+			module = "";
+		}
+
 		console.log( JSON.stringify( {
 			assertion: "strictEqual",
 			arguments: [
 				this.lookupEnumValueName( "OCStackResult", result ),
 				"OC_STACK_OK",
-				module + ": " + nameOfStep + " successful"
+				( module ? module + ": " : "" ) + nameOfStep + " successful"
 			]
 		} ) );
 		if ( result === this._iotivity.OCStackResult.OC_STACK_OK ) {
