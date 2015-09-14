@@ -1,4 +1,5 @@
 var QUnit, suites,
+	glob = require( "glob" ),
 	_ = require( "underscore" ),
 	childProcess = require( "child_process" ),
 	fs = require( "fs" ),
@@ -37,7 +38,7 @@ function spawnOne( assert, options ) {
 			if ( childIndex >= 0 ) {
 				runningProcesses.splice( childIndex, 1 );
 			}
-			options.maybeQuit();
+			options.maybeQuit( theChild );
 		} );
 
 	// The stdout of the child is a sequence of \n-separated stringified JSON objects.
@@ -69,9 +70,7 @@ function spawnOne( assert, options ) {
 
 			// The child has requested that its peer be killed.
 			} else if ( jsonObject.killPeer ) {
-				if ( options.killPeer ) {
-					options.killPeer( theChild );
-				}
+				options.teardown( null, theChild );
 
 			// The child is reporting that it is ready. Only servers do this.
 			} else if ( jsonObject.ready ) {
@@ -95,8 +94,9 @@ function spawnOne( assert, options ) {
 
 function runTestSuites( files ) {
 	_.each( files, function( item ) {
-		var singleTest = path.join( __dirname, "tests", item ),
-			clientPath = path.join( singleTest, "client.js" ),
+		var clientPathIndex,
+			singleTest = path.join( __dirname, "tests", item ),
+			clientPaths = glob.sync( path.join( singleTest, "client*.js" ) ),
 			serverPath = path.join( singleTest, "server.js" );
 
 		if ( fs.lstatSync( singleTest ).isFile() ) {
@@ -106,7 +106,7 @@ function runTestSuites( files ) {
 						uuid: uuid.v4(),
 						name: "Test",
 						path: singleTest,
-						teardown: function() {
+						teardown: function( error ) {
 							if ( theChild ) {
 								theChild.kill( "SIGTERM" );
 							}
@@ -123,8 +123,10 @@ function runTestSuites( files ) {
 			return;
 		}
 
-		if ( !( fs.lstatSync( clientPath ).isFile() ) ) {
-			throw new Error( "Cannot find client at " + clientPath );
+		for ( clientPathIndex in clientPaths ) {
+			if ( !( fs.lstatSync( clientPaths[ clientPathIndex ] ).isFile() ) ) {
+				throw new Error( "Cannot find client at " + clientPaths[ cllientPathIndex ] );
+			}
 		}
 
 		if ( !( fs.lstatSync( serverPath ).isFile() ) ) {
@@ -132,14 +134,26 @@ function runTestSuites( files ) {
 		}
 
 		getQUnit().test( item, function( assert ) {
-			var client, server,
+			var totalChildren = clientPaths.length + 1,
+
+				// Track the child processes involved in this test in this array
+				children = [],
+
+				// When killing child processes in a loop we have to copy the array because it may
+				// become modified by the incoming notifications that a process has exited.
+				copyChildren = function() {
+					var index,
+						theCopy = [];
+
+					for ( index in children ) {
+						theCopy.push( children[ index ] );
+					}
+
+					return theCopy;
+				},
 
 				// Turn this test async
 				done = assert.async(),
-
-				// Count how many children have exited. Consider the test done when that number
-				// reaches two (the client and the server).
-				childrenExited = 0,
 
 				// Count assertions made by the children. Report them to assert.expect() when both
 				// children have reported their number of assertions.
@@ -148,50 +162,57 @@ function runTestSuites( files ) {
 
 				spawnOptions = {
 					uuid: uuid.v4(),
-					teardown: function( message ) {
-						if ( client ) {
-							client.kill( "SIGTERM" );
-						}
-						if ( server ) {
-							server.kill( "SIGTERM" );
-						}
-						throw new Error( message );
-					},
-					killPeer: function( whosePeer ) {
-						var thePeer = ( whosePeer === client ? server : client );
+					teardown: function( error, sourceProcess ) {
+						var index,
+							signal = error ? "SIGTERM" : "SIGINT",
+							copyOfChildren = copyChildren();
 
-						if ( thePeer ) {
-							thePeer.kill( "SIGINT" );
+						for ( index in copyOfChildren ) {
+							if ( sourceProcess && sourceProcess === copyOfChildren[ index ] ) {
+								continue;
+							}
+							copyOfChildren[ index ].kill( signal );
+						}
+
+						if ( error ) {
+							throw new Error( error );
 						}
 					},
-					maybeQuit: function() {
-						childrenExited++;
-						if ( childrenExited == 2 ) {
+					maybeQuit: function( theChild ) {
+						var childIndex = children.indexOf( theChild );
+						if ( childIndex >= 0 ) {
+							children.splice( childIndex, 1 );
+						}
+						if ( children.length === 0 ) {
 							done();
 						}
 					},
 					reportAssertions: function( assertionCount ) {
 						childrenAssertionsReported++;
 						totalAssertions += assertionCount;
-						if ( childrenAssertionsReported == 2 ) {
+						if ( childrenAssertionsReported == totalChildren ) {
 							assert.expect( totalAssertions );
 						}
 					}
 				};
 
-			// We run the server first, because the server has to be there before the client
-			// can run. OTOH, if the client exits successfully, we may need to kill the server,
-			// because the server may be designed to run "forever".
-			server = spawnOne( assert, _.extend( {}, spawnOptions, {
+			// We run the server first, because the server has to be there before the clients
+			// can run. OTOH, the clients may initiate the termination of the test via a non-error
+			// teardown request.
+			children.push( spawnOne( assert, _.extend( {}, spawnOptions, {
 				name: "server",
 				path: serverPath,
 				onReady: function() {
-					client = spawnOne( assert, _.extend( {}, spawnOptions, {
-						name: "client",
-						path: clientPath
-					} ) );
+					var clientPathIndex;
+
+					for ( clientPathIndex in clientPaths ) {
+						children.push( spawnOne( assert, _.extend( {}, spawnOptions, {
+							name: "client" +
+								( clientPaths.length > 1 ? " " + clientPathIndex : "" ),
+						path: clientPaths[ clientPathIndex ] } ) ) );
+					}
 				}
-			} ) );
+			} ) ) );
 		} );
 	} );
 }
