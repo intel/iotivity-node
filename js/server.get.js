@@ -34,7 +34,7 @@ iotivity.OCCreateResource(
 		// If we find the magic question in the request, we return the magic answer
 		if ( request && request.payload && request.payload.values &&
 				request.payload.values.question ===
-		"How many angels can dance on the head of a pin?" ) {
+				"How many angels can dance on the head of a pin?" ) {
 
 			iotivity.OCDoResponse( {
 				requestHandle: request.requestHandle,

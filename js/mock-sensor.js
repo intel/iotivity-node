@@ -19,8 +19,7 @@ var returnValue = new emitter(),
 	trigger = function() {
 		returnValue.emit( "change", {
 			someValue: Math.round( Math.random() * 42 ),
-			someOtherValue:
-			possibleStringValues[
+			someOtherValue: possibleStringValues[
 				Math.round( Math.random() * possibleStringValues.length - 1 )
 			]
 		} );
