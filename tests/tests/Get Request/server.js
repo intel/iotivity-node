@@ -67,8 +67,8 @@ result = iotivity.OCCreateResource(
 
 			returnValue = iotivity.OCEntityHandlerResult.OC_EH_OK;
 		} else {
-			testUtils.die( "Server: Unexpected GET request:\n***\n" +
-				JSON.stringify( response, null, 4 ) + "\n***" );
+			testUtils.die( "Server: Unexpected request:\n***\n" +
+				JSON.stringify( request, null, 4 ) + "\n***" );
 		}
 
 		return returnValue;
