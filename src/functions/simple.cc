@@ -268,3 +268,29 @@ NAN_METHOD(bind_OCUnBindResource) {
   NanReturnValue(
       NanNew<Number>(OCUnBindResource(collectionHandle, resourceHandle)));
 }
+
+#ifdef TESTING
+NAN_METHOD(bind___compareResourceHandles) {
+  NanScope();
+
+  VALIDATE_ARGUMENT_COUNT(args, 2);
+  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
+
+  OCResourceHandle lhs = 0, rhs = 0;
+
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &lhs)) {
+    NanReturnUndefined();
+  }
+
+  if (!c_OCResourceHandle(Local<Array>::Cast(args[1]), &rhs)) {
+    NanReturnUndefined();
+  }
+
+  if (lhs == rhs) {
+    NanReturnValue(NanTrue());
+  } else {
+    NanReturnValue(NanFalse());
+  }
+}
+#endif /* def TESTING */
