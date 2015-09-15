@@ -8,7 +8,7 @@ var result, notifyObserversTimeoutId, observationId,
 	iotivity = require( "../../../index" ),
 	testUtils = require( "../../utils" )( iotivity );
 
-console.log( JSON.stringify( { assertionCount: 12 } ) );
+console.log( JSON.stringify( { assertionCount: 17 } ) );
 
 // Initialize
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
@@ -61,6 +61,7 @@ result = iotivity.OCCreateResource(
 	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
 	"/a/" + uuid,
 	function( flag, request ) {
+		var responseResult;
 
 		// We expect the first request to be the attachment of an observer
 		if ( getRequestCount === 0 ) {
@@ -95,7 +96,7 @@ result = iotivity.OCCreateResource(
 			cleanup();
 		}
 
-		iotivity.OCDoResponse( {
+		responseResult = iotivity.OCDoResponse( {
 			requestHandle: request.requestHandle,
 			resourceHandle: request.resource,
 			ehResult: iotivity.OCEntityHandlerResult.OC_EH_OK,
@@ -108,6 +109,7 @@ result = iotivity.OCCreateResource(
 			resourceUri: "/a/" + uuid,
 			sendVendorSpecificHeaderOptions: []
 		} );
+		testUtils.stackOKOrDie( "Server", "OCDoResponse", responseResult );
 
 		getRequestCount++;
 
