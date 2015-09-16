@@ -28,39 +28,17 @@ v8::Local<v8::Object> js_OCPlatformInfo(OCPlatformInfo *info) {
 }
 
 void c_OCPlatformInfoFreeMembers(OCPlatformInfo *info) {
-  if (info->platformID) {
-    free(info->platformID);
-  }
-  if (info->manufacturerName) {
-    free(info->manufacturerName);
-  }
-  if (info->manufacturerUrl) {
-    free(info->manufacturerUrl);
-  }
-  if (info->modelNumber) {
-    free(info->modelNumber);
-  }
-  if (info->dateOfManufacture) {
-    free(info->dateOfManufacture);
-  }
-  if (info->platformVersion) {
-    free(info->platformVersion);
-  }
-  if (info->operatingSystemVersion) {
-    free(info->operatingSystemVersion);
-  }
-  if (info->hardwareVersion) {
-    free(info->hardwareVersion);
-  }
-  if (info->firmwareVersion) {
-    free(info->firmwareVersion);
-  }
-  if (info->supportUrl) {
-    free(info->supportUrl);
-  }
-  if (info->systemTime) {
-    free(info->systemTime);
-  }
+  free(info->platformID);
+  free(info->manufacturerName);
+  free(info->manufacturerUrl);
+  free(info->modelNumber);
+  free(info->dateOfManufacture);
+  free(info->platformVersion);
+  free(info->operatingSystemVersion);
+  free(info->hardwareVersion);
+  free(info->firmwareVersion);
+  free(info->supportUrl);
+  free(info->systemTime);
 }
 
 // The macro below makes use of variables defined inside c_OCPlatformInfo

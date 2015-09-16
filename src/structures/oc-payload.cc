@@ -416,8 +416,8 @@ static bool validateRepPayloadArray(Local<Array> array, bool *p_typeEstablished,
 
 // Fill the array
 // p_index contains the index into flatArray where the next item will land. It
-// is passed by
-// reference into the recursive instances so that it advances monotonically.
+// is passed by reference into the recursive instances so that it advances
+// monotonically.
 static bool fillArray(void *flatArray, int *p_index, Local<Array> array,
                       OCRepPayloadPropType arrayType) {
   size_t length = array->Length();

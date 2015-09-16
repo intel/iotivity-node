@@ -52,6 +52,10 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
     }
   }
 
+  //
+  // After this point we need to free the payload whenever we bail.
+  //
+
   // sendVendorSpecificHeaderOptions and numSendVendorSpecificHeaderOptions
   Local<Value> sendVendorSpecificHeaderOptions =
       jsResponse->Get(NanNew<String>("sendVendorSpecificHeaderOptions"));

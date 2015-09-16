@@ -38,47 +38,31 @@ Local<Array> js_OCResourceHandle(OCResourceHandle handle) {
                           sizeof(OCResourceHandle));
 }
 
-bool c_OCResourceHandle(Local<Array> handle, OCResourceHandle *p_cHandle) {
-  OCResourceHandle local;
-
-  if (!fillCArrayFromJSArray(((unsigned char *)&local),
-                             sizeof(OCResourceHandle), handle)) {
-    return false;
-  }
-
-  *p_cHandle = local;
+#define C_HANDLE(jsHandle, cType, destination)                         \
+  cType local;                                                         \
+  if (!fillCArrayFromJSArray(((unsigned char *)&local), sizeof(cType), \
+                             jsHandle)) {                              \
+    return false;                                                      \
+  }                                                                    \
+  *destination = local;                                                \
   return true;
+
+bool c_OCResourceHandle(Local<Array> handle, OCResourceHandle *p_cHandle) {
+  C_HANDLE(handle, OCResourceHandle, p_cHandle);
 }
 
+bool c_OCRequestHandle(Local<Array> handle, OCRequestHandle *p_cHandle) {
+  C_HANDLE(handle, OCRequestHandle, p_cHandle);
+}
+
+bool c_OCDoHandle(Local<Array> handle, OCDoHandle *p_cHandle) {
+  C_HANDLE(handle, OCDoHandle, p_cHandle);
+}
 Local<Array> js_OCRequestHandle(OCRequestHandle handle) {
   return jsArrayFromBytes(((unsigned char *)(&handle)),
                           sizeof(OCRequestHandle));
 }
 
-bool c_OCRequestHandle(Local<Array> handle, OCRequestHandle *p_cHandle) {
-  OCRequestHandle local;
-
-  if (!fillCArrayFromJSArray(((unsigned char *)&local), sizeof(OCRequestHandle),
-                             handle)) {
-    return false;
-  }
-
-  *p_cHandle = local;
-  return true;
-}
-
 Local<Array> js_OCDoHandle(OCDoHandle handle) {
   return jsArrayFromBytes(((unsigned char *)(&handle)), sizeof(OCDoHandle));
-}
-
-bool c_OCDoHandle(Local<Array> handle, OCDoHandle *p_cHandle) {
-  OCDoHandle local;
-
-  if (!fillCArrayFromJSArray(((unsigned char *)&local), sizeof(OCDoHandle),
-                             handle)) {
-    return false;
-  }
-
-  *p_cHandle = local;
-  return true;
 }

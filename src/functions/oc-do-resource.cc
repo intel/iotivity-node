@@ -75,8 +75,8 @@ NAN_METHOD(bind_OCDoResource) {
         NanReturnUndefined();
       }
       if (!c_OCHeaderOption(optionArray, options, &optionCount)) {
-        NanReturnUndefined();
         free(options);
+        NanReturnUndefined();
       }
     }
   }
@@ -87,9 +87,7 @@ NAN_METHOD(bind_OCDoResource) {
     if (c_OCDevAddr(args[3]->ToObject(), &destinationToFillIn)) {
       destination = &destinationToFillIn;
     } else {
-      if (options) {
-        free(options);
-      }
+      free(options);
       NanReturnUndefined();
     }
   }
@@ -98,9 +96,7 @@ NAN_METHOD(bind_OCDoResource) {
   // *
   if (args[4]->IsObject()) {
     if (!c_OCPayload(args[4]->ToObject(), &payload)) {
-      if (options) {
-        free(options);
-      }
+      free(options);
       NanReturnUndefined();
     }
   }
@@ -112,9 +108,9 @@ NAN_METHOD(bind_OCDoResource) {
       (OCQualityOfService)args[6]->Uint32Value(), &data, options,
       (uint8_t)args[9]->Uint32Value()));
 
-  if (options) {
-    free(options);
-  }
+  free( options );
+
+  // We need not free the payload because it seems iotivity takes ownership.
 
   args[0]->ToObject()->Set(NanNew<String>("handle"), js_OCDoHandle(handle));
 
