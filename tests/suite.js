@@ -95,17 +95,16 @@ function spawnOne( assert, options ) {
 function runTestSuites( files ) {
 	_.each( files, function( item ) {
 		var clientPathIndex,
-			singleTest = path.join( __dirname, "tests", item ),
-			clientPaths = glob.sync( path.join( singleTest, "client*.js" ) ),
-			serverPath = path.join( singleTest, "server.js" );
+			clientPaths = glob.sync( path.join( item, "client*.js" ) ),
+			serverPath = path.join( item, "server.js" );
 
-		if ( fs.lstatSync( singleTest ).isFile() ) {
-			getQUnit().test( item.replace( /\.js$/, "" ), function( assert ) {
+		if ( fs.lstatSync( item ).isFile() ) {
+			getQUnit().test( path.basename( item ).replace( /\.js$/, "" ), function( assert ) {
 				var theChild,
 					spawnOptions = {
 						uuid: uuid.v4(),
 						name: "Test",
-						path: singleTest,
+						path: item,
 						teardown: function( error ) {
 							if ( theChild ) {
 								theChild.kill( "SIGTERM" );
@@ -119,7 +118,7 @@ function runTestSuites( files ) {
 			return;
 		}
 
-		if ( !fs.lstatSync( singleTest ).isDirectory() ) {
+		if ( !fs.lstatSync( item ).isDirectory() ) {
 			return;
 		}
 
@@ -133,7 +132,7 @@ function runTestSuites( files ) {
 			throw new Error( "Cannot find server at " + serverPath );
 		}
 
-		getQUnit().test( item, function( assert ) {
+		getQUnit().test( path.basename( item ), function( assert ) {
 			var totalChildren = clientPaths.length + 1,
 
 				// Track the child processes involved in this test in this array
@@ -217,19 +216,13 @@ function runTestSuites( files ) {
 	} );
 }
 
-// Process low level API tests. If no tests were specified on the command line, we scan the tests
-// directory and run all the tests we find therein.
-if ( process.argv.length > 2 ) {
-	runTestSuites( process.argv[ 2 ].split( "," ) );
-} else {
-	fs.readdir( path.join( __dirname, "tests" ), function( error, files ) {
-		if ( error ) {
-			throw error;
-		}
-
-		runTestSuites( files );
-	} );
-}
+// Run tests. If no tests were specified on the command line, we scan the tests directory and run
+// all the tests we find therein.
+runTestSuites( ( ( process.argv.length > 2 ) ?
+	( _.map( process.argv[ 2 ].split( "," ), function( item ) {
+		return path.join( __dirname, "tests", item );
+	} ) ) :
+	( glob.sync( path.join( __dirname, "tests", "*" ) ) ) ) );
 
 process.on( "exit", function() {
 	var childIndex;
