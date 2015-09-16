@@ -7,7 +7,7 @@
   "main": "index.js",
   "scripts": {
     "ci": "TESTING=true npm install && npm test",
-    "test": "grunt"
+    "test": "grunt test"
   },
   "gypfile": true,
   "dependencies": {
