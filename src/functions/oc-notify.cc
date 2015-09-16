@@ -32,12 +32,11 @@ NAN_METHOD(bind_OCNotifyAllObservers) {
 NAN_METHOD(bind_OCNotifyListOfObservers) {
   NanScope();
 
-  VALIDATE_ARGUMENT_COUNT(args, 5);
+  VALIDATE_ARGUMENT_COUNT(args, 4);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 2, IsNumber);
-  VALIDATE_ARGUMENT_TYPE(args, 3, IsObject);
-  VALIDATE_ARGUMENT_TYPE(args, 4, IsNumber);
+  VALIDATE_ARGUMENT_TYPE(args, 2, IsObject);
+  VALIDATE_ARGUMENT_TYPE(args, 3, IsNumber);
 
   OCResourceHandle handle;
   if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
@@ -47,41 +46,40 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   // Construct the C array of observation IDs.
   Local<Array> obsIds = Local<Array>::Cast(args[1]);
   uint8_t arrayLength = (uint8_t)obsIds->Length();
-  uint8_t numberOfIds = (uint8_t)args[2]->Uint32Value();
 
-  // If the array contains fewer IDs than the reported number, we use the lower
-  // number
-  numberOfIds = (numberOfIds < arrayLength ? numberOfIds : arrayLength);
+  OCObservationId *c_observations = 0;
 
-  OCObservationId *c_observations =
-      (OCObservationId *)malloc(numberOfIds * sizeof(OCObservationId));
-  if (!c_observations && numberOfIds > 0) {
-    NanThrowError(
-        "OCNotifyListOfObservers: Failed to allocate list of observers");
-    NanReturnUndefined();
+  if (arrayLength > 0) {
+    c_observations =
+        (OCObservationId *)malloc(arrayLength * sizeof(OCObservationId));
+    if (!c_observations && arrayLength > 0) {
+      NanThrowError(
+          "OCNotifyListOfObservers: Failed to allocate list of observers");
+      NanReturnUndefined();
+    }
   }
 
   // Populate a C-like array from the V8 array
   int index;
-  for (index = 0; index < numberOfIds; index++) {
+  for (index = 0; index < arrayLength; index++) {
     Local<Value> oneObservationId = obsIds->Get(index);
-    if (!(oneObservationId->IsNumber())) {
+    if (!(oneObservationId->IsUint32())) {
+      free(c_observations);
       NanThrowTypeError("OCObservationID must satisfy IsNumber()");
       NanReturnUndefined();
     }
     c_observations[index] = (OCObservationId)oneObservationId->Uint32Value();
   }
 
-  OCRepPayload *payload;
-  if (args[3]->IsObject()) {
-    if (!c_OCPayload(args[3]->ToObject(), (OCPayload **)&payload)) {
-      NanReturnUndefined();
-    }
+  OCRepPayload *payload = 0;
+  if (!c_OCPayload(args[2]->ToObject(), (OCPayload **)&payload)) {
+    free(c_observations);
+    NanReturnUndefined();
   }
 
   Local<Number> returnValue = NanNew<Number>(
-      OCNotifyListOfObservers(handle, c_observations, numberOfIds, payload,
-                              (OCQualityOfService)args[4]->Uint32Value()));
+      OCNotifyListOfObservers(handle, c_observations, arrayLength, payload,
+                              (OCQualityOfService)args[3]->Uint32Value()));
 
   free(c_observations);
   OCRepPayloadDestroy(payload);
