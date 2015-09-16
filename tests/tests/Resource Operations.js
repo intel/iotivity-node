@@ -2,7 +2,7 @@ var result, countReceptacle, initialResourceCount,
 	childResourceHandleReceptacle = {},
 	resourceHandleReceptacle = {},
 	uuid = process.argv[ 2 ],
-	iotivity = require( "../../index" ),
+	iotivity = require( "../../lowlevel" ),
 	testUtils = require( "../utils" )( iotivity ),
 	initialEntityHandler = function( flag, request ) {
 		return iotivity.OCEntityHandlerResult.OC_EH_ERROR;

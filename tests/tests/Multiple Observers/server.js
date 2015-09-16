@@ -5,7 +5,7 @@ var result, notifyObserversTimeoutId, observationId,
 	processCallCount = 0,
 	processLoop = null,
 	resourceHandleReceptacle = {},
-	iotivity = require( "../../../index" ),
+	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity ),
 	listOfObservers = [];
 

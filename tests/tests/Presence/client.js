@@ -2,7 +2,7 @@ var uuid = process.argv[ 2 ],
 	countdownToCleanup = 0,
 	processCallCount = 0,
 	processLoop = null,
-	iotivity = require( "../../../index" ),
+	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
 console.log( JSON.stringify( { assertionCount: 15 } ) );

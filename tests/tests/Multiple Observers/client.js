@@ -6,7 +6,7 @@ var messagePrefix = "Client",
 	processCallCount = 0,
 	processLoop = null,
 	discoverHandleReceptacle = {},
-	iotivity = require( "../../../index" ),
+	iotivity = require( "../../../lowlevel" ),
 	result = iotivity.OCStackResult.OC_STACK_ERROR,
 	testUtils = require( "../../utils" )( iotivity );
 
