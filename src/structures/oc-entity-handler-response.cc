@@ -8,6 +8,7 @@
 
 extern "C" {
 #include <string.h>
+#include <ocpayload.h>
 }
 
 using namespace v8;
@@ -41,33 +42,40 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
                       Uint32Value);
 
   // payload
+  response.payload = 0;
   Local<Value> payload = jsResponse->Get(NanNew<String>("payload"));
-  VALIDATE_VALUE_TYPE(payload, IsObject, "entity handler response payload",
-                      false);
-  if (!c_OCPayload(payload->ToObject(), &(response.payload))) {
-    return false;
+  if (!payload->IsNull()) {
+    VALIDATE_VALUE_TYPE(payload, IsObject, "entity handler response payload",
+                        false);
+    if (!c_OCPayload(payload->ToObject(), &(response.payload))) {
+      return false;
+    }
   }
 
   // sendVendorSpecificHeaderOptions and numSendVendorSpecificHeaderOptions
   Local<Value> sendVendorSpecificHeaderOptions =
       jsResponse->Get(NanNew<String>("sendVendorSpecificHeaderOptions"));
-  VALIDATE_VALUE_TYPE(sendVendorSpecificHeaderOptions, IsArray,
-                      "entity handler response header options", false);
+  VALIDATE_VALUE_TYPE_OR_FREE(sendVendorSpecificHeaderOptions, IsArray,
+                              "entity handler response header options", false,
+                              response.payload, OCPayloadDestroy);
   if (!c_OCHeaderOption(Local<Array>::Cast(sendVendorSpecificHeaderOptions),
                         response.sendVendorSpecificHeaderOptions,
                         &(response.numSendVendorSpecificHeaderOptions))) {
+    OCPayloadDestroy(response.payload);
     return false;
   }
 
   // resourceUri
   Local<Value> resourceUri = jsResponse->Get(NanNew<String>("resourceUri"));
-  VALIDATE_VALUE_TYPE(resourceUri, IsString,
-                      "entity handler response resource URI", false);
+  VALIDATE_VALUE_TYPE_OR_FREE(resourceUri, IsString,
+                              "entity handler response resource URI", false,
+                              response.payload, OCPayloadDestroy);
   size_t length = strlen((const char *)*String::Utf8Value(resourceUri));
   if (length >= MAX_URI_LENGTH) {
     NanThrowRangeError(
         "entity handler response resource URI cannot fit inside MAX_URI_LENGTH "
         "(remember terminating zero)");
+    OCPayloadDestroy(response.payload);
     return false;
   }
   strcpy(response.resourceUri, (const char *)*String::Utf8Value(resourceUri));
