@@ -682,7 +682,7 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
 bool c_OCPayload(Local<Object> jsPayload, OCPayload **p_payload) {
   if (!jsPayload->IsNull()) {
     Local<Value> type = jsPayload->Get(NanNew<String>("type"));
-    VALIDATE_VALUE_TYPE(type, IsNumber, "payload.type", false);
+    VALIDATE_VALUE_TYPE(type, IsUint32, "payload.type", false);
 
     switch (type->Uint32Value()) {
       case PAYLOAD_TYPE_REPRESENTATION:

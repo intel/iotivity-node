@@ -23,7 +23,7 @@ static OCEntityHandlerResult defaultDeviceEntityHandler(
   Local<Value> returnValue = ((NanCallback *)context)->Call(
       NanGetCurrentContext()->Global(), 3, jsCallbackArguments);
 
-  VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsNumber,
+  VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
                                       "OCDeviceEntityHandler");
 
   return (OCEntityHandlerResult)(returnValue->Uint32Value());

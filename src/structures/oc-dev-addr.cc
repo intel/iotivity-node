@@ -41,13 +41,13 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
   uint32_t index, length;
   OCDevAddr local;
 
-  VALIDATE_AND_ASSIGN(local, adapter, OCTransportAdapter, IsNumber, "addr",
+  VALIDATE_AND_ASSIGN(local, adapter, OCTransportAdapter, IsUint32, "addr",
                       false, jsDevAddr, Uint32Value);
-  VALIDATE_AND_ASSIGN(local, flags, OCTransportFlags, IsNumber, "addr", false,
+  VALIDATE_AND_ASSIGN(local, flags, OCTransportFlags, IsUint32, "addr", false,
                       jsDevAddr, Uint32Value);
-  VALIDATE_AND_ASSIGN(local, interface, uint32_t, IsNumber, "addr", false,
+  VALIDATE_AND_ASSIGN(local, interface, uint32_t, IsUint32, "addr", false,
                       jsDevAddr, Uint32Value);
-  VALIDATE_AND_ASSIGN(local, port, uint16_t, IsNumber, "addr", false, jsDevAddr,
+  VALIDATE_AND_ASSIGN(local, port, uint16_t, IsUint32, "addr", false, jsDevAddr,
                       Uint32Value);
 
   // addr.addr
@@ -64,7 +64,7 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
   for (index = 0; index < MAX_ADDR_STR_SIZE; index++) {
     if (index < length) {
       Local<Value> addressItem = addrArray->Get(index);
-      VALIDATE_VALUE_TYPE(addressItem, IsNumber, "addr.addr item", false);
+      VALIDATE_VALUE_TYPE(addressItem, IsUint32, "addr.addr item", false);
       local.addr[index] = (char)addressItem->Uint32Value();
     } else {
       local.addr[index] = 0;
@@ -85,7 +85,7 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
   for (index = 0; index < MAX_IDENTITY_SIZE; index++) {
     if (index < length) {
       Local<Value> identityItem = identityArray->Get(index);
-      VALIDATE_VALUE_TYPE(identityItem, IsNumber, "addr.identity.id item",
+      VALIDATE_VALUE_TYPE(identityItem, IsUint32, "addr.identity.id item",
                           false);
       local.identity.id[index] = (unsigned char)identityItem->Uint32Value();
     } else {

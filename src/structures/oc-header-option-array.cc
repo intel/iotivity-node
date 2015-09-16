@@ -59,9 +59,9 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
       Local<Object> itemObject = Local<Object>::Cast(item);
 
       VALIDATE_AND_ASSIGN(options[index], protocolID, OCTransportProtocolID,
-                          IsNumber, "(OCHeaderOption array item)", false,
+                          IsUint32, "(OCHeaderOption array item)", false,
                           itemObject, Uint32Value);
-      VALIDATE_AND_ASSIGN(options[index], optionID, uint16_t, IsNumber,
+      VALIDATE_AND_ASSIGN(options[index], optionID, uint16_t, IsUint32,
                           "(OCHeaderOption array item)", false, itemObject,
                           Uint32Value);
 
@@ -82,7 +82,7 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
            dataIndex++) {
         if (dataIndex < dataLength) {
           Local<Value> optionDataItem = optionDataArray->Get(dataIndex);
-          VALIDATE_VALUE_TYPE(optionDataItem, IsNumber,
+          VALIDATE_VALUE_TYPE(optionDataItem, IsUint32,
                               "(OCHeaderOption array item).optionData item",
                               false);
           options[index].optionData[dataIndex] =

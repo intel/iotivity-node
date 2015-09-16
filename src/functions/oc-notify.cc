@@ -18,7 +18,7 @@ NAN_METHOD(bind_OCNotifyAllObservers) {
 
   VALIDATE_ARGUMENT_COUNT(args, 2);
   VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsNumber);
+  VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);
 
   OCResourceHandle handle;
   if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
@@ -36,7 +36,7 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
   VALIDATE_ARGUMENT_TYPE(args, 2, IsObject);
-  VALIDATE_ARGUMENT_TYPE(args, 3, IsNumber);
+  VALIDATE_ARGUMENT_TYPE(args, 3, IsUint32);
 
   OCResourceHandle handle;
   if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
@@ -65,7 +65,7 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
     Local<Value> oneObservationId = obsIds->Get(index);
     if (!(oneObservationId->IsUint32())) {
       free(c_observations);
-      NanThrowTypeError("OCObservationID must satisfy IsNumber()");
+      NanThrowTypeError("OCObservationID must satisfy IsUint32()");
       NanReturnUndefined();
     }
     c_observations[index] = (OCObservationId)oneObservationId->Uint32Value();
