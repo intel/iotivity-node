@@ -13,6 +13,16 @@ var QUnit, suites,
 		return QUnit;
 	};
 
+function havePromises() {
+	var nodeVersion = _.map(
+		process.versions.node.split( "." ),
+		function( item ) { return +item; } );
+
+	return ( nodeVersion.length > 1 &&
+		( nodeVersion[ 0 ] > 0 ||
+		nodeVersion[ 0 ] === 0 && nodeVersion[ 1 ] > 11 ) );
+}
+
 // Spawn a single child and process its stdout.
 function spawnOne( assert, options ) {
 	var theChild = childProcess.spawn(
@@ -222,7 +232,7 @@ runTestSuites( ( ( process.argv.length > 2 ) ?
 	( _.map( process.argv[ 2 ].split( "," ), function( item ) {
 		return path.join( __dirname, "tests", item );
 	} ) ) :
-	( glob.sync( path.join( __dirname, "tests", "*" ) ) ) ) );
+	( glob.sync( path.join( __dirname, "tests", ( havePromises() ? "" : "!(API)" ) + "*" ) ) ) ) );
 
 process.on( "exit", function() {
 	var childIndex;
