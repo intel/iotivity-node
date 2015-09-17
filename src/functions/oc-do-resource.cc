@@ -108,7 +108,7 @@ NAN_METHOD(bind_OCDoResource) {
       (OCQualityOfService)args[6]->Uint32Value(), &data, options,
       (uint8_t)args[9]->Uint32Value()));
 
-  free( options );
+  free(options);
 
   // We need not free the payload because it seems iotivity takes ownership.
 
