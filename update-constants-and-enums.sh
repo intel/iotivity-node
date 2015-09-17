@@ -68,9 +68,11 @@ cat ${OCTYPES_H} ${OCRANDOM_H} ${OCPRESENCE_H} | \
   awk -v PRINT=0 -v OUTPUT="" -v ENUM_LIST="" '{
     if ( $0 == "typedef enum" ) PRINT=1;
     if ( PRINT == 1 ) {
-      if ( !( $1 ~ /^[{}]/ ) && $1 != "typedef" )
-        OUTPUT = OUTPUT "  SET_CONSTANT_MEMBER(returnValue, Number, " $1 ");\n";
-      else if ( $1 ~ /^}/ ) {
+      if ( !( $1 ~ /^[{}]/ ) && $1 != "typedef" ) {
+	    if ( $1 ~ /^[A-Z]/ ) {
+          OUTPUT = OUTPUT "  SET_CONSTANT_MEMBER(returnValue, Number, " $1 ");\n";
+        }
+      } else if ( $1 ~ /^}/ ) {
 	    ENUM_NAME = $0;
 	    gsub( /^} */, "", ENUM_NAME );
 	    gsub( / *;.*$/, "", ENUM_NAME );
