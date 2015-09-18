@@ -267,6 +267,17 @@ static Local<Object> js_OCPresencePayload(OCPresencePayload *payload) {
   return returnValue;
 }
 
+static Local<Object> js_OCSecurityPayload(OCSecurityPayload *payload) {
+  Local<Object> returnValue = NanNew<Object>();
+
+	returnValue->Set(NanNew<String>( "type" ),
+	                 NanNew<Number>(payload->base.type));
+
+	SET_STRING_IF_NOT_NULL(returnValue, payload, securityData);
+
+  return returnValue;
+}
+
 Local<Value> js_OCPayload(OCPayload *payload) {
   switch (payload->type) {
     case PAYLOAD_TYPE_DISCOVERY:
@@ -283,6 +294,9 @@ Local<Value> js_OCPayload(OCPayload *payload) {
 
     case PAYLOAD_TYPE_PRESENCE:
       return js_OCPresencePayload((OCPresencePayload *)payload);
+
+	case PAYLOAD_TYPE_SECURITY:
+		return js_OCSecurityPayload((OCSecurityPayload *)payload);
 
     case PAYLOAD_TYPE_INVALID:
     default:
