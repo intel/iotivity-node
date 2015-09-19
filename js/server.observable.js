@@ -21,9 +21,9 @@ intervalId = setInterval( function() {
 
 require( "./mock-sensor" )().on( "change", function( data ) {
 	console.log( "Sensor data has changed. " +
-		( observerIds.length > 0
-			? "Notifying " + observerIds.length + " observers."
-			: "No observers in list." ) );
+		( observerIds.length > 0 ?
+			"Notifying " + observerIds.length + " observers." :
+			"No observers in list." ) );
 	if ( observerIds.length > 0 ) {
 		iotivity.OCNotifyListOfObservers(
 			handleReceptacle.handle,
