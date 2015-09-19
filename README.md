@@ -4,20 +4,9 @@
 This project provides [iotivity][] node.js bindings.
 
 ## Build status
-<dl>
-	<dt>master:</dt>
-	<dd>
-		<a href="https://travis-ci.org/otcshare/iotivity-node">
-			<img alt="Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=master"></img>
-		</a>
-	</dd>
-	<dt>special-api:</dt>
-	<dd>
-		<a href="https://travis-ci.org/otcshare/iotivity-node">
-			<img alt="Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=special-api"></img>
-		</a>
-	</dd>
-</dl>
+<a href="https://travis-ci.org/otcshare/iotivity-node">
+	<img alt="Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=master"></img>
+</a>
 
 ## Installation
 
@@ -56,7 +45,7 @@ Alternatively, you can use some rudimentary install scripts for both iotivity an
     ```PREFIX=/usr/local ./install.sh``` will install the files into ```/usr/local``` instead.
 
     ```PREFIX=/usr/local DESTDIR=/home/username/iotivity-installation ./install.sh``` will install the files into ```/home/username/iotivity-installation/usr/local```, but will configure liboctbstack to work when loaded from ```/usr/local```.
-0. After having installed iotivity using the above script, you can run ```./dist.sh``` from the root of this repository without first having to set any environment variables. The script will grab the environment via ```pkg-config``` from the file installed above, and will build, test, and create a directory structure under ```dist/``` which is suitable for deployment on a target device.
+0. After having installed iotivity using the above script, you can run ```./dist.sh``` from the root of this repository without first having to set any environment variables. The script will grab the environment via ```pkg-config``` from the file installed above, and will build, test, and create a directory structure under ```dist/``` which is suitable for deployment on a target device. See ```./dist.sh --help``` for more options.
 
 ## Placing the binaries onto a device
 The distribution scripts ```dist.sh``` and ```install.sh``` when used together make it easy to create a binary tarball which can be unpacked into the root directory of a device:
