@@ -1,10 +1,10 @@
 var intervalId,
 	handleReceptacle = {},
+	observerIds = [],
 
 	// This is the same value as server.get.js
 	sampleUri = "/a/iotivity-node-observe-sample",
-	iotivity = require( "iotivity" ),
-	currentData = {};
+	iotivity = require( "iotivity" );
 
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
@@ -20,11 +20,20 @@ intervalId = setInterval( function() {
 }, 1000 );
 
 require( "./mock-sensor" )().on( "change", function( data ) {
-	console.log( "Sensor data has changed. Notifying all observers." );
-	currentData = data;
-	iotivity.OCNotifyAllObservers(
-		handleReceptacle.handle,
-		iotivity.OCQualityOfService.OC_HIGH_QOS );
+	console.log( "Sensor data has changed. " +
+		( observerIds.length > 0
+			? "Notifying " + observerIds.length + " observers."
+			: "No observers in list." ) );
+	if ( observerIds.length > 0 ) {
+		iotivity.OCNotifyListOfObservers(
+			handleReceptacle.handle,
+			observerIds,
+			{
+				type: iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION,
+				values: data
+			},
+			iotivity.OCQualityOfService.OC_HIGH_QOS );
+	}
 } );
 
 // Create a new resource
@@ -37,20 +46,37 @@ iotivity.OCCreateResource(
 	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
 	sampleUri,
 	function( flag, request ) {
+		var observerIdIndex;
+
 		console.log( "Entity handler called with flag = " + flag + " and the following request:" );
 		console.log( JSON.stringify( request, null, 4 ) );
 
-		iotivity.OCDoResponse( {
-			requestHandle: request.requestHandle,
-			resourceHandle: request.resource,
-			ehResult: iotivity.OCEntityHandlerResult.OC_EH_OK,
-			payload: {
-				type: iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION,
-				values: currentData
-			},
-			resourceUri: sampleUri,
-			sendVendorSpecificHeaderOptions: []
-		} );
+		if ( flag & iotivity.OCEntityHandlerFlag.OC_OBSERVE_FLAG ) {
+			if ( request.obsInfo.obsId !== 0 ) {
+				if ( request.obsInfo.action === iotivity.OCObserveAction.OC_OBSERVE_REGISTER ) {
+
+					// Add new observer to list.
+					observerIds.push( request.obsInfo.obsId );
+				} else if ( request.obsInfo.action ===
+						iotivity.OCObserveAction.OC_OBSERVE_DEREGISTER ) {
+
+					// Remove requested observer from list.
+					observerIdIndex = observerIds.indexOf( request.obsInfo.obsId );
+					if ( observerIdIndex >= 0 ) {
+						observerIds.splice( observerIdIndex, 1 );
+					}
+				}
+			}
+
+			iotivity.OCDoResponse( {
+				requestHandle: request.requestHandle,
+				resourceHandle: request.resource,
+				ehResult: iotivity.OCEntityHandlerResult.OC_EH_OK,
+				payload: null,
+				resourceUri: sampleUri,
+				sendVendorSpecificHeaderOptions: []
+			} );
+		}
 
 		return iotivity.OCEntityHandlerResult.OC_EH_OK;
 	},
