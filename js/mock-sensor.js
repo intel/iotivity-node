@@ -1,7 +1,7 @@
 // This mock sensor implementation triggers an event with some data every once in a while
 
 var emitter = require( "events" ).EventEmitter,
-	possibleStringValues = [
+	possibleStrings = [
 		"Helsinki",
 		"Espoo",
 		"Tampere",
@@ -10,8 +10,9 @@ var emitter = require( "events" ).EventEmitter,
 		"Ii"
 	];
 
-function randomDelay() {
-	return Math.round( ( 1 + Math.random() ) * 1000 );
+// Return a random integer between 0 and @upperLimit
+function randomInteger( upperLimit ) {
+	return Math.round( ( 1 + Math.random() ) * upperLimit );
 }
 
 module.exports = function mockSensor() {
@@ -19,14 +20,11 @@ var returnValue = new emitter(),
 	trigger = function() {
 		returnValue.emit( "change", {
 			someValue: Math.round( Math.random() * 42 ),
-			someOtherValue: possibleStringValues[
-				Math.round( Math.random() * possibleStringValues.length - 1 )
-			]
-		} );
-		setTimeout( trigger, randomDelay() );
+		someOtherValue: possibleStrings[ randomInteger( possibleStrings.length - 1 ) ] } );
+		setTimeout( trigger, randomInteger( 1000 ) + 1000 );
 	};
 
-setTimeout( trigger, randomDelay() );
+setTimeout( trigger, randomInteger( 1000 ) + 1000 );
 
 return returnValue;
 };
