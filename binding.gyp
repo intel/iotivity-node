@@ -15,14 +15,18 @@
 				}
 			}, {
 				"libraries": [
-					'<!@(echo "-L$(pwd)/deps/iotivity/lib -loctbstack -Wl,-rpath $(pwd)/deps/iotivity/lib")'
+					'<!@(echo "-L$(pwd)/deps/iotivity/lib")',
+					'-loctbstack',
+					'<!@(echo "-Wl,-rpath $(pwd)/deps/iotivity/lib")'
 				],
 				"cflags": [
-					'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include -I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")'
+					'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")',
+					'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")'
 				],
 				"xcode_settings": {
 					"OTHER_CFLAGS": [
-						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include -I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")'
+						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")',
+						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")'
 					]
 				}
 			} ],
