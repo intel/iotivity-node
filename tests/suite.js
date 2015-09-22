@@ -16,7 +16,9 @@ var QUnit, suites,
 function havePromises() {
 	var nodeVersion = _.map(
 		process.versions.node.split( "." ),
-		function( item ) { return +item; } );
+		function( item ) {
+			return +item;
+		} );
 
 	return ( nodeVersion.length > 1 &&
 		( nodeVersion[ 0 ] > 0 ||
