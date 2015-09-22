@@ -68,9 +68,11 @@ The JavaScript examples are located in [js/](./js/) and come in pairs of one cli
 
 Make sure no firewall is running (or one is properly configured to allow iotivity-related traffic) on the machine(s) where these applications are running.
 
-## Tests
+## Maintenance
 
-To run the tests, simply run ```npm test```. A script called ```dist.sh``` is also provided. It runs ```npm install```, runs the tests, then runs ```npm prune --production``` to remove all sources, headers, and build dependencies. After that, it copies relevant files to ```dist/``` and creates a tarball from them. This is followed by running ```npm install``` again to restore the development environment.
+### Tests
+
+To run the tests, simply run ```grunt test```. A script called ```dist.sh``` is also provided. It runs ```npm install```, runs the tests, then runs ```npm prune --production``` to remove all sources, headers, and build dependencies. After that, it copies relevant files to ```dist/``` and creates a tarball from them. This is followed by running ```npm install``` again to restore the development environment.
 
 The ```dist.sh``` script accepts the optional command line argument ```--testonly```. This will cause the script to exit after having run the tests.
 
@@ -81,8 +83,6 @@ diff -u \
 	<( find tests/tests -type f | zerosep | xargs -0 grep -E 'iotivity\.[_a-zA-Z0-9]*\(' | sed -r 's/^.*iotivity\.([_A-Za-z0-9]*)\(.*$/\1/'  | sort -u ) \
 	<( cat src/functions.cc | grep '^  SET_FUNCTION' | sed 's/);$//' | awk '{ print $2;}' | sort )
 ```
-
-## Maintenance
 
 ### To build against a new upstream version:
 
