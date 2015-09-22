@@ -1,6 +1,6 @@
 var intervalId,
 	handleReceptacle = {},
-	iotivity = require( "iotivity" );
+	iotivity = require( "iotivity/lowlevel" );
 
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );

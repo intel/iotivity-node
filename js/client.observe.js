@@ -4,7 +4,7 @@ var intervalId,
 	// This is the same value as server.get.js
 	sampleUri = "/a/iotivity-node-observe-sample",
 	observerResponseCount = 0,
-	iotivity = require( "iotivity" ),
+	iotivity = require( "iotivity/lowlevel" ),
 	resourceMissing = true;
 
 // Start iotivity and set up the processing loop

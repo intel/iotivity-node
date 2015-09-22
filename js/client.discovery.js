@@ -1,6 +1,6 @@
 var intervalId,
 	handleReceptacle = {},
-	iotivity = require( "iotivity" ),
+	iotivity = require( "iotivity/lowlevel" ),
 	options = ( function() {
 		var index;
 		returnValue = {
