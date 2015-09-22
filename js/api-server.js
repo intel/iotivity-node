@@ -52,7 +52,7 @@ if ( device._settings.info.uuid ) {
 	} ).then(
 		function( resource ) {
 			lightResource = resource;
-			resource._server.onrequest = lightResourceOnRequest;
+			resource._server.addEventListener( "request", lightResourceOnRequest );
 		},
 		function( error ) {
 			throw error;
