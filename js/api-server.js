@@ -31,6 +31,14 @@ sensor.on( "change", function( newData ) {
 	}
 } );
 
+function lightResourceOnRequest( request ) {
+	console.log( "lightResourceOnRequest: request:\n" +
+		JSON.stringify( request, null, 4 ) );
+	if ( request.type === "retrieve" ) {
+		request.sendResponse( null );
+	}
+}
+
 if ( device._settings.info.uuid ) {
 	device._server.registerResource( {
 		url: "/light/ambience/blue",
@@ -44,6 +52,7 @@ if ( device._settings.info.uuid ) {
 	} ).then(
 		function( resource ) {
 			lightResource = resource;
+			resource._server.onrequest = lightResourceOnRequest;
 		},
 		function( error ) {
 			throw error;
