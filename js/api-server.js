@@ -6,7 +6,13 @@ var lightResource,
 		role: "server",
 		connectionMode: "acked",
 		info: {
-			uuid: "INTEL"
+			uuid: "INTEL",
+			name: "api-server-example",
+			manufacturerName: "Intel",
+			manufactureDate: "Wed Sep 23 10:04:17 EEST 2015",
+			platformVersion: "0.9.2",
+			firmwareVersion: "0.0.1",
+			supportUrl: "http://example.com/"
 		}
 	};
 
