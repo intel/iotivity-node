@@ -1,7 +1,6 @@
 var lightResource,
 	sensor = require( "./mock-sensor" )(),
-	iotivity = require( "iotivity" ),
-	device = iotivity.OicDevice(),
+	device = require( "iotivity" ),
 	settings = {
 		role: "server",
 		connectionMode: "acked",

@@ -4,10 +4,10 @@ var result, countReceptacle, initialResourceCount,
 	uuid = process.argv[ 2 ],
 	iotivity = require( "../../lowlevel" ),
 	testUtils = require( "../utils" )( iotivity ),
-	initialEntityHandler = function( flag, request ) {
+	initialEntityHandler = function() {
 		return iotivity.OCEntityHandlerResult.OC_EH_ERROR;
 	},
-	alternateEntityHandler = function( flag, request ) {
+	alternateEntityHandler = function() {
 		return iotivity.OCEntityHandlerResult.OC_EH_ERROR;
 	};
 

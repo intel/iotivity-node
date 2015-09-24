@@ -1,4 +1,4 @@
-var QUnit, suites,
+var QUnit,
 	glob = require( "glob" ),
 	_ = require( "underscore" ),
 	childProcess = require( "child_process" ),
@@ -117,7 +117,7 @@ function runTestSuites( files ) {
 						uuid: uuid.v4(),
 						name: "Test",
 						path: item,
-						teardown: function( error ) {
+						teardown: function() {
 							if ( theChild ) {
 								theChild.kill( "SIGTERM" );
 							}
@@ -136,7 +136,7 @@ function runTestSuites( files ) {
 
 		for ( clientPathIndex in clientPaths ) {
 			if ( !( fs.lstatSync( clientPaths[ clientPathIndex ] ).isFile() ) ) {
-				throw new Error( "Cannot find client at " + clientPaths[ cllientPathIndex ] );
+				throw new Error( "Cannot find client at " + clientPaths[ clientPathIndex ] );
 			}
 		}
 
@@ -201,7 +201,7 @@ function runTestSuites( files ) {
 					reportAssertions: function( assertionCount ) {
 						childrenAssertionsReported++;
 						totalAssertions += assertionCount;
-						if ( childrenAssertionsReported == totalChildren ) {
+						if ( childrenAssertionsReported === totalChildren ) {
 							assert.expect( totalAssertions );
 						}
 					}

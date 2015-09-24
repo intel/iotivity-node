@@ -14,7 +14,7 @@ grunt.task.registerTask( "clangformat", "Format the C++ files", function() {
 			"done"
 		],
 		{ stdio: "inherit" } )
-		.on( "exit", function( code, signal ) {
+		.on( "exit", function( code ) {
 			done.apply( this, ( code === 0 ? [] : [ false ] ) );
 		} );
 } );

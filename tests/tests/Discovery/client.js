@@ -6,6 +6,23 @@ var result,
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
+function cleanup() {
+	var cleanupResult;
+
+	if ( processLoop ) {
+		clearInterval( processLoop );
+		processLoop = null;
+	}
+
+	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
+
+	cleanupResult = iotivity.OCStop();
+	if ( testUtils.stackOKOrDie( "Client", "OCStop", cleanupResult ) ) {
+		console.log( JSON.stringify( { killPeer: true } ) );
+		process.exit( 0 );
+	}
+}
+
 console.log( JSON.stringify( { assertionCount: 5 } ) );
 
 // Initialize
@@ -53,20 +70,3 @@ result = iotivity.OCDoResource(
 	},
 	null );
 testUtils.stackOKOrDie( "Client", "OCDoResource(discovery)", result );
-
-function cleanup() {
-	var cleanupResult;
-
-	if ( processLoop ) {
-		clearInterval( processLoop );
-		processLoop = null;
-	}
-
-	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
-
-	cleanupResult = iotivity.OCStop();
-	if ( testUtils.stackOKOrDie( "Client", "OCStop", cleanupResult ) ) {
-		console.log( JSON.stringify( { killPeer: true } ) );
-		process.exit( 0 );
-	}
-}

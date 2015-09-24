@@ -1,9 +1,8 @@
-var OicDevice = require( "../../index" ).OicDevice,
-	testUtils = require( "../utils" )( require( "../../lowlevel" ) );
+var testUtils = require( "../utils" )( require( "../../lowlevel" ) );
 
 console.log( JSON.stringify( { assertionCount: 1 } ) );
 
-var device = OicDevice();
+var device = require( "../../index" )();
 var settings = {
 	role: "server"
 };

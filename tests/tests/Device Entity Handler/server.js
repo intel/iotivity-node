@@ -77,7 +77,7 @@ result = iotivity.OCCreateResource(
 	"core.fan",
 	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
 	"/a/" + uuid,
-	function( flag, request ) {
+	function() {
 		testUtils.die( "Server: resource entity handler should not get called" );
 		return iotivity.OCEntityHandlerResult.OC_EH_ERROR;
 	},

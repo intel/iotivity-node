@@ -49,7 +49,7 @@ _.extend( testUtils.prototype, {
 	stackOKOrDie: function( module, nameOfStep, result ) {
 
 		// Two-argument configuration means module was skipped
-		if ( arguments.length == 2 ) {
+		if ( arguments.length === 2 ) {
 			result = nameOfStep;
 			nameOfStep = module;
 			module = "";

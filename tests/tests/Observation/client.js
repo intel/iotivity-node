@@ -7,6 +7,55 @@ var result,
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
+function cleanup() {
+	var cleanupResult;
+
+	if ( processLoop ) {
+		clearInterval( processLoop );
+		processLoop = null;
+	}
+
+	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
+
+	cleanupResult = iotivity.OCStop();
+	testUtils.stackOKOrDie( "Client", "OCStop", cleanupResult );
+}
+
+function doObserveRequest( destination ) {
+	var observeResult,
+		observeHandleReceptacle = {};
+
+	observeResult = iotivity.OCDoResource(
+		observeHandleReceptacle,
+		iotivity.OCMethod.OC_REST_OBSERVE,
+		"/a/" + uuid,
+		destination,
+		null,
+		iotivity.OCConnectivityType.CT_DEFAULT,
+		iotivity.OCQualityOfService.OC_HIGH_QOS,
+		function( handle, response ) {
+			var cancelResult;
+
+			testUtils.assert( "deepEqual",
+				response.payload,
+				{ type: 4, values: { observedValue: uuid + "-" + observeResponseCount } },
+				"Client: Observed value is as expected" );
+
+			if ( ++observeResponseCount >= 5 ) {
+				cancelResult = iotivity.OCCancel(
+					handle,
+					iotivity.OCQualityOfService.OC_HIGH_QOS,
+					[] );
+				testUtils.stackOKOrDie( "Client", "OCCancel", cancelResult );
+
+				return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
+			}
+			return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
+		},
+		null );
+	testUtils.stackOKOrDie( "Client", "OCDoResource(observation)", observeResult );
+}
+
 console.log( JSON.stringify( { assertionCount: 12 } ) );
 
 // Initialize
@@ -64,55 +113,6 @@ result = iotivity.OCDoResource(
 	// There are no header options
 	null );
 testUtils.stackOKOrDie( "Client", "OCDoResource(discovery)", result );
-
-function doObserveRequest( destination ) {
-	var observeResult,
-		observeHandleReceptacle = {};
-
-	observeResult = iotivity.OCDoResource(
-		observeHandleReceptacle,
-		iotivity.OCMethod.OC_REST_OBSERVE,
-		"/a/" + uuid,
-		destination,
-		null,
-		iotivity.OCConnectivityType.CT_DEFAULT,
-		iotivity.OCQualityOfService.OC_HIGH_QOS,
-		function( handle, response ) {
-			var cancelResult;
-
-			testUtils.assert( "deepEqual",
-				response.payload,
-				{ type: 4, values: { observedValue: uuid + "-" + observeResponseCount } },
-				"Client: Observed value is as expected" );
-
-			if ( ++observeResponseCount >= 5 ) {
-				cancelResult = iotivity.OCCancel(
-					handle,
-					iotivity.OCQualityOfService.OC_HIGH_QOS,
-					[] );
-				testUtils.stackOKOrDie( "Client", "OCCancel", cancelResult );
-
-				return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
-			}
-			return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
-		},
-		null );
-	testUtils.stackOKOrDie( "Client", "OCDoResource(observation)", observeResult );
-}
-
-function cleanup() {
-	var cleanupResult;
-
-	if ( processLoop ) {
-		clearInterval( processLoop );
-		processLoop = null;
-	}
-
-	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
-
-	cleanupResult = iotivity.OCStop();
-	testUtils.stackOKOrDie( "Client", "OCStop", cleanupResult );
-}
 
 // Exit gracefully when interrupted
 process.on( "SIGINT", cleanup );

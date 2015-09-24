@@ -1,4 +1,4 @@
-var result, notifyObserversTimeoutId, observationId,
+var result, notifyObserversTimeoutId,
 	clientsComplete = 0,
 	uuid = process.argv[ 2 ],
 	notificationCount = 0,
@@ -10,6 +10,34 @@ var result, notifyObserversTimeoutId, observationId,
 	listOfObservers = [];
 
 console.log( JSON.stringify( { assertionCount: 12 } ) );
+
+function cleanup() {
+	var cleanupResult;
+
+	if ( processLoop ) {
+		clearInterval( processLoop );
+		processLoop = null;
+	}
+
+	if ( notifyObserversTimeoutId ) {
+		clearTimeout( notifyObserversTimeoutId );
+		notifyObserversTimeoutId = null;
+	}
+
+	testUtils.assert( "ok", true, "Server: OCProcess succeeded " + processCallCount + " times" );
+
+	testUtils.assert( "ok", true,
+		"Server: OCNotifyListOfObservers succeeded " + notificationCount + " times" );
+
+	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
+	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );
+
+	cleanupResult = iotivity.OCStop();
+	if ( testUtils.stackOKOrDie( "Server", "OCStop", result ) ) {
+		console.log( JSON.stringify( { killPeer: true } ) );
+		process.exit( 0 );
+	}
+}
 
 // Tally up how many of our clients have informed us that they have made the requisite number of
 // observations and quit if all have reported in.
@@ -134,31 +162,3 @@ testUtils.stackOKOrDie( "Server", "OCCreateResource", result );
 
 // Report that the server has successfully created its resource(s).
 console.log( JSON.stringify( { ready: true } ) );
-
-function cleanup() {
-	var cleanupResult, oneAddress;
-
-	if ( processLoop ) {
-		clearInterval( processLoop );
-		processLoop = null;
-	}
-
-	if ( notifyObserversTimeoutId ) {
-		clearTimeout( notifyObserversTimeoutId );
-		notifyObserversTimeoutId = null;
-	}
-
-	testUtils.assert( "ok", true, "Server: OCProcess succeeded " + processCallCount + " times" );
-
-	testUtils.assert( "ok", true,
-		"Server: OCNotifyListOfObservers succeeded " + notificationCount + " times" );
-
-	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
-	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );
-
-	cleanupResult = iotivity.OCStop();
-	if ( testUtils.stackOKOrDie( "Server", "OCStop", result ) ) {
-		console.log( JSON.stringify( { killPeer: true } ) );
-		process.exit( 0 );
-	}
-}

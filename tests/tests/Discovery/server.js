@@ -6,6 +6,25 @@ var result,
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
+function cleanup() {
+	var cleanupResult;
+
+	if ( processLoop ) {
+		clearInterval( processLoop );
+		processLoop = null;
+	}
+
+	testUtils.assert( "ok", true, "Server: OCProcess succeeded " + processCallCount + " times" );
+
+	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
+	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );
+
+	cleanupResult = iotivity.OCStop();
+	if ( testUtils.stackOKOrDie( "Server", "OCStop", result ) ) {
+		process.exit( 0 );
+	}
+}
+
 console.log( JSON.stringify( { assertionCount: 5 } ) );
 
 // Initialize
@@ -32,7 +51,7 @@ result = iotivity.OCCreateResource(
 	"core.fan",
 	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
 	"/a/" + uuid,
-	function( flag, request ) {
+	function() {
 
 		// The entity handler should not receive any calls
 		console.log( JSON.stringify( {
@@ -46,25 +65,6 @@ testUtils.stackOKOrDie( "Server", "OCCreateResource", result );
 
 // Report that the server has successfully created its resource(s).
 console.log( JSON.stringify( { ready: true } ) );
-
-function cleanup() {
-	var cleanupResult;
-
-	if ( processLoop ) {
-		clearInterval( processLoop );
-		processLoop = null;
-	}
-
-	testUtils.assert( "ok", true, "Server: OCProcess succeeded " + processCallCount + " times" );
-
-	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
-	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );
-
-	cleanupResult = iotivity.OCStop();
-	if ( testUtils.stackOKOrDie( "Server", "OCStop", result ) ) {
-		process.exit( 0 );
-	}
-}
 
 // Exit gracefully when interrupted
 process.on( "SIGINT", cleanup );

@@ -8,6 +8,34 @@ var result, notifyObserversTimeoutId, observationId,
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
+function cleanup() {
+	var cleanupResult;
+
+	if ( processLoop ) {
+		clearInterval( processLoop );
+		processLoop = null;
+	}
+
+	if ( notifyObserversTimeoutId ) {
+		clearTimeout( notifyObserversTimeoutId );
+		notifyObserversTimeoutId = null;
+	}
+
+	testUtils.assert( "ok", true, "Server: OCProcess succeeded " + processCallCount + " times" );
+
+	testUtils.assert( "ok", true,
+		"Server: OCNotifyAllObservers succeeded " + notificationCount + " times" );
+
+	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
+	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );
+
+	cleanupResult = iotivity.OCStop();
+	if ( testUtils.stackOKOrDie( "Server", "OCStop", result ) ) {
+		console.log( JSON.stringify( { killPeer: true } ) );
+		process.exit( 0 );
+	}
+}
+
 console.log( JSON.stringify( { assertionCount: 17 } ) );
 
 // Initialize
@@ -121,31 +149,3 @@ testUtils.stackOKOrDie( "Server", "OCCreateResource", result );
 
 // Report that the server has successfully created its resource(s).
 console.log( JSON.stringify( { ready: true } ) );
-
-function cleanup() {
-	var cleanupResult;
-
-	if ( processLoop ) {
-		clearInterval( processLoop );
-		processLoop = null;
-	}
-
-	if ( notifyObserversTimeoutId ) {
-		clearTimeout( notifyObserversTimeoutId );
-		notifyObserversTimeoutId = null;
-	}
-
-	testUtils.assert( "ok", true, "Server: OCProcess succeeded " + processCallCount + " times" );
-
-	testUtils.assert( "ok", true,
-		"Server: OCNotifyAllObservers succeeded " + notificationCount + " times" );
-
-	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
-	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );
-
-	cleanupResult = iotivity.OCStop();
-	if ( testUtils.stackOKOrDie( "Server", "OCStop", result ) ) {
-		console.log( JSON.stringify( { killPeer: true } ) );
-		process.exit( 0 );
-	}
-}

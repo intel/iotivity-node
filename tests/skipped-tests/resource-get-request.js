@@ -1,11 +1,10 @@
-var QUnit = require( "../setup" ),
-	OicDevice = require( "../../index" ).OicDevice;
+var QUnit = require( "../setup" );
 
 QUnit.test( "Register Resource", function( assert ) {
 	assert.expect( 1 );
 
 	var done = assert.async();
-	var device = OicDevice();
+	var device = require( "../../index" )();
 	var settings = {
 		role: "server",
 		connectionMode: "acked",
@@ -43,7 +42,7 @@ QUnit.test( "Register Resource", function( assert ) {
 	}
 
 	function requestHandler( request ) {
-		if ( request.type == "retrieve" ) {
+		if ( request.type === "retrieve" ) {
 			request.sendResponse( lightResource );
 			assert.ok( true, "Get resource successfully responded" );
 		}

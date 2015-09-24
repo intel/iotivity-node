@@ -1,9 +1,8 @@
-var OicDevice = require( "../../index" ).OicDevice,
-	testUtils = require( "../utils" )( require( "../../lowlevel" ) );
+var testUtils = require( "../utils" )( require( "../../lowlevel" ) );
 
 console.log( JSON.stringify( { assertionCount: 1 } ) );
 
-OicDevice().configure().then(
+require( "../../index" )().configure().then(
 	function() {
 		testUtils.assert( "ok", true, "Stack started successfully" );
 		process.exit( 0 );

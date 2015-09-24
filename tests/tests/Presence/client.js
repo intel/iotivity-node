@@ -1,59 +1,34 @@
-var uuid = process.argv[ 2 ],
+var result,
+	uuid = process.argv[ 2 ],
 	countdownToCleanup = 0,
 	processCallCount = 0,
 	processLoop = null,
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
-console.log( JSON.stringify( { assertionCount: 15 } ) );
+function cleanup() {
+	var result;
 
-// Initialize
-result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
-testUtils.stackOKOrDie( "Client", "OCInit", result );
-
-// Set up OCProcess loop
-processLoop = setInterval( function() {
-	var processResult = iotivity.OCProcess();
-
-	if ( processResult === iotivity.OCStackResult.OC_STACK_OK ) {
-		processCallCount++;
-	} else {
-		testUtils.stackOKOrDie(
-			"Client",
-			"OCProcess(after " + processCallCount + " successful calls)",
-			processResult );
+	if ( processLoop ) {
+		clearInterval( processLoop );
+		processLoop = null;
 	}
-}, 100 );
 
-function doDiscovery() {
-	var handleReceptacle = {},
-		result = iotivity.OCDoResource(
-			handleReceptacle,
-			iotivity.OCMethod.OC_REST_DISCOVER,
-			iotivity.OC_RSRVD_WELL_KNOWN_URI,
-			null,
-			null,
-			iotivity.OCConnectivityType.CT_DEFAULT,
-			iotivity.OCQualityOfService.OC_HIGH_QOS,
-			function( handle, response ) {
+	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
 
-				// We retain the discovery callback until we've found the resource with the uuid.
-				var returnValue = iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
+	result = iotivity.OCStop();
+	if ( testUtils.stackOKOrDie( "Client", "OCStop", result ) ) {
+		console.log( JSON.stringify( { killPeer: true } ) );
+		process.exit( 0 );
+	}
+}
 
-				if ( testUtils.findResource( response, uuid ) ) {
+function maybeCleanup() {
+	countdownToCleanup++;
 
-					// We've successfully completed the test so let's move to the next step.
-					testUtils.assert( "ok", true, "Client: Resource found" );
-					returnValue = iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
-
-					// We know where the resource is so let's do the presence dance.
-					trackPresence( response.addr );
-				}
-
-				return returnValue;
-			},
-			null );
-	testUtils.stackOKOrDie( "Client", "OCDoResource(discovery)", result );
+	if ( countdownToCleanup === 2 ) {
+		cleanup();
+	}
 }
 
 // Tell the server to turn presence on/off
@@ -158,29 +133,55 @@ function trackPresence( destination ) {
 	testUtils.stackOKOrDie( "Client", "OCDoResource(presence tracking)", presenceResult );
 }
 
-function maybeCleanup() {
-	countdownToCleanup++;
+console.log( JSON.stringify( { assertionCount: 15 } ) );
 
-	if ( countdownToCleanup === 2 ) {
-		cleanup();
+// Initialize
+result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
+testUtils.stackOKOrDie( "Client", "OCInit", result );
+
+// Set up OCProcess loop
+processLoop = setInterval( function() {
+	var processResult = iotivity.OCProcess();
+
+	if ( processResult === iotivity.OCStackResult.OC_STACK_OK ) {
+		processCallCount++;
+	} else {
+		testUtils.stackOKOrDie(
+			"Client",
+			"OCProcess(after " + processCallCount + " successful calls)",
+			processResult );
 	}
-}
+}, 100 );
 
-function cleanup() {
-	var result;
+function doDiscovery() {
+	var handleReceptacle = {},
+		result = iotivity.OCDoResource(
+			handleReceptacle,
+			iotivity.OCMethod.OC_REST_DISCOVER,
+			iotivity.OC_RSRVD_WELL_KNOWN_URI,
+			null,
+			null,
+			iotivity.OCConnectivityType.CT_DEFAULT,
+			iotivity.OCQualityOfService.OC_HIGH_QOS,
+			function( handle, response ) {
 
-	if ( processLoop ) {
-		clearInterval( processLoop );
-		processLoop = null;
-	}
+				// We retain the discovery callback until we've found the resource with the uuid.
+				var returnValue = iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
 
-	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
+				if ( testUtils.findResource( response, uuid ) ) {
 
-	result = iotivity.OCStop();
-	if ( testUtils.stackOKOrDie( "Client", "OCStop", result ) ) {
-		console.log( JSON.stringify( { killPeer: true } ) );
-		process.exit( 0 );
-	}
+					// We've successfully completed the test so let's move to the next step.
+					testUtils.assert( "ok", true, "Client: Resource found" );
+					returnValue = iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
+
+					// We know where the resource is so let's do the presence dance.
+					trackPresence( response.addr );
+				}
+
+				return returnValue;
+			},
+			null );
+	testUtils.stackOKOrDie( "Client", "OCDoResource(discovery)", result );
 }
 
 doDiscovery();
