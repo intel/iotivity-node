@@ -1,9 +1,5 @@
-module.exports = [
-	"index.js",
-	"lowlevel.js",
-	"js/*.js",
-	"lib/*.js",
-	"Gruntfile.js",
-	"tests/**/*.js",
-	"grunt-build/**/*.js"
-];
+module.exports = []
+	.concat( require( "./js-example-and-test-files" ) )
+	.concat( require( "./js-lib-files" ) )
+	.concat( require( "./js-build-files" ) );
+
