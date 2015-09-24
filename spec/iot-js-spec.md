@@ -313,7 +313,7 @@ function observe(device, res) {
         .then((red) => {
             console.log("Observing " + res.url);
             red.properties.dimmer = 0.5;
-            device.updateResource(red)
+            device.updateResource(red.id, red)
               .then(() => { console.log("Changed red light dimmer"); })
               .catch(() => { console.log("Error changing red light"); });
          }).catch((error) => { console.log("Cannot observe " + res.url); };
