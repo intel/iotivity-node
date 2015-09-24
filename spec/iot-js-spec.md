@@ -61,7 +61,7 @@ Device identification is UUID. Each device has an associated address + port.
 
 Resource identification is URL, in full form or short form (containing only the <path> part, and the rest is fetched from the device owning the resource).
 
-Platform needs to be discoverable on /oic/p, devices on /oic/d and resources on /oic/res but the API should hide the hardcoded paths behind explicit function names/parameters.
+Platform needs to be discoverable on /oic/p, devices on /oic/d and resources on /oic/res but the API hides the hardcoded paths behind explicit function names/parameters.
 
 The Core spec specifies discovery with resource type, whereas IoTivity API uses “uri”.
 This API uses both a resource type and  URL (id) in DiscoveryOptions. Example:
@@ -128,7 +128,7 @@ interface OicClient: EventTarget {
   // client API: CRUDN
   Promise<OicResource> createResource(OicResourceInit resource);  // create remote res
   Promise<OicResource> retrieveResource(USVString resourceId);  // get remote res
-  Promise<void> updateResource(OicResource resource);  // post or put remote res
+  Promise<void> updateResource(USVString resourceId, OicResourceInit resource);  // post or put remote res
   Promise<void> deleteResource(USVString resourceId);  // delete remote res
   Promise<OicResource> startObserving(USVString resourceId);  // retrieve + observe flag
   Promise<void> cancelObserving(USVString id);
@@ -153,6 +153,7 @@ interface OicServer: EventTarget {
 };
 
 typedef   enum { “init”, “observe”, “create”, “retrieve”, “update”, “delete” } OicMethod;
+
 interface OicRequestEvent : Event {
   readonly attribute OicMethod type;
   readonly attribute unsigned long requestId;
@@ -312,7 +313,7 @@ function observe(device, res) {
         .then((red) => {
             console.log("Observing " + res.url);
             red.properties.dimmer = 0.5;
-            device.updateResource(red)
+            device.updateResource(red.id, red)
               .then(() => { console.log("Changed red light dimmer"); })
               .catch(() => { console.log("Error changing red light"); });
          }).catch((error) => { console.log("Cannot observe " + res.url); };
