@@ -1,11 +1,11 @@
 var lightResource,
 	sensor = require( "./mock-sensor" )(),
-	device = require( "iotivity" ),
+	device = require( "iotivity" )(),
 	settings = {
 		role: "server",
 		connectionMode: "acked",
 		info: {
-			uuid: "INTEL",
+			uuid: "INTEL-server",
 			name: "api-server-example",
 			manufacturerName: "Intel",
 			manufactureDate: "Wed Sep 23 10:04:17 EEST 2015",
