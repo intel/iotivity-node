@@ -1,4 +1,4 @@
-var testUtils = require( "../utils" )( require( "../../lowlevel" ) );
+var testUtils = require( "../assert-to-console" );
 
 console.log( JSON.stringify( { assertionCount: 1 } ) );
 
