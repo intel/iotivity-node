@@ -39,14 +39,14 @@ sensor.on( "change", function( newData ) {
 function lightResourceOnRequest( request ) {
 	console.log( "lightResourceOnRequest: request:\n" +
 		JSON.stringify( request, null, 4 ) );
-	if ( request.type === "retrieve" ) {
+	if ( request.type === "retrieve" || request.type === "observe" ) {
 		request.sendResponse( null );
 	}
 }
 
 if ( device._settings.info.uuid ) {
 	device._server.registerResource( {
-		url: "/light/ambience/blue",
+		url: "/a/high-level-example",
 		deviceId: device._settings.info.uuid,
 		connectionMode: device._settings.connectionMode,
 		resourceTypes: [ "Light" ],
