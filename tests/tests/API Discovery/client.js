@@ -1,4 +1,5 @@
-var quitConditionCount = 0,
+var resourceFound = false,
+	quitConditionCount = 0,
 	utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )(),
 	uuid = process.argv[ 2 ];
@@ -23,7 +24,8 @@ device.configure( {
 
 		device._client.addEventListener( "resourcefound", function( event ) {
 
-			if ( event.resource.uri === "/a/" + uuid ) {
+			if ( !resourceFound && event.resource.uri === "/a/" + uuid ) {
+				resourceFound = true;
 				utils.assert( "ok", true, "Client: Resource found" );
 
 				// We found the resource, so we have completed one step towards concluding the test

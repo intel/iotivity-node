@@ -27,9 +27,8 @@ if ( device._settings.info.uuid ) {
 		observable: true,
 		properties: { color: "light-blue", dimmer: 0.2 }
 	} ).then(
-		function( resource ) {
+		function() {
 			testUtils.assert( "ok", true, "Resource registered successfully" );
-			console.error( resource );
 			process.exit( 0 );
 		},
 		function( error ) {
