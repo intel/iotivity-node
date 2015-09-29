@@ -16,6 +16,7 @@ function formatRuntime( runtime ) {
 }
 
 QUnit.load();
+QUnit.config.requireExpects = true;
 QUnit.config.testTimeout = 30000;
 QUnit.config.callbacks.moduleStart.push( function( status ) {
 
