@@ -37,8 +37,6 @@ sensor.on( "change", function( newData ) {
 } );
 
 function lightResourceOnRequest( request ) {
-	console.log( "lightResourceOnRequest: request:\n" +
-		JSON.stringify( request, null, 4 ) );
 	if ( request.type === "retrieve" || request.type === "observe" ) {
 		request.sendResponse( null );
 	}
