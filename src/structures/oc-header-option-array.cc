@@ -91,7 +91,7 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
           options[index].optionData[dataIndex] = 0;
         }
       }
-	  options[index].optionLength = dataLength;
+      options[index].optionLength = dataLength;
     }
   }
 

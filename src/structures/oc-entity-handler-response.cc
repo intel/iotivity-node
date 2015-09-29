@@ -15,8 +15,8 @@ using namespace v8;
 
 bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
                                OCEntityHandlerResponse *p_response) {
-  OCEntityHandlerResponse response = { 0, 0, OC_EH_ERROR, 0, 0,
-	{ { OC_INVALID_ID, 0, 0, { 0 } } }, { 0 }, false };
+  OCEntityHandlerResponse response = {
+      0, 0, OC_EH_ERROR, 0, 0, {{OC_INVALID_ID, 0, 0, {0}}}, {0}, false};
 
   // requestHandle
   Local<Value> requestHandle = jsResponse->Get(NanNew<String>("requestHandle"));
