@@ -71,7 +71,7 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
                           "(OCHeaderOption array item).optionData", false);
       Local<Array> optionDataArray = Local<Array>::Cast(optionData);
       dataLength = optionDataArray->Length();
-      if (length > MAX_HEADER_OPTION_DATA_LENGTH) {
+      if (dataLength > MAX_HEADER_OPTION_DATA_LENGTH) {
         NanThrowRangeError(
             "(OCHeaderOption array item).optionData: Number of JS structure "
             "data bytes exceeds "
@@ -91,6 +91,7 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
           options[index].optionData[dataIndex] = 0;
         }
       }
+	  options[index].optionLength = dataLength;
     }
   }
 
