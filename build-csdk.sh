@@ -1,6 +1,9 @@
 #!/bin/bash
 
-CSDK_REVISION="0.9.2"
+# Use node to parse package.json and extract the upstream version from the package version. This
+# assumes the package version is of the form major.minor.patch[-dev-commitid]. It grabs whatever
+# follows a zero-or-more-length-series of tokens that end in a dash.
+CSDK_REVISION="$(node -e 'console.log( require( "./package.json" ).version.replace( /^([^-]*-)*/, "" ) );')"
 
 if test "x$1x" = "x--debugx"; then
 	SCONS_FLAGS="RELEASE=False"
