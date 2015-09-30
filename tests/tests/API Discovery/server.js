@@ -21,7 +21,7 @@ device.configure( {
 			url: "/a/" + uuid,
 			deviceId: uuid,
 			connectionMode: "acked",
-			resourceTypes: [ "Light" ],
+			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],
 			discoverable: true,
 			properties: { someValue: 0 }

@@ -24,8 +24,8 @@ device.configure( settings ).then(
 			url: "/a/" + uuid,
 			deviceId: uuid,
 			connectionMode: device._settings.connectionMode,
-			resourceTypes: [ "Light" ],
-			interfaces: [ "/oic/if/rw" ],
+			resourceTypes: [ "core.light" ],
+			interfaces: [ "oic.if.baseline" ],
 			discoverable: true,
 			observable: true,
 			properties: { someValue: 0, someOtherValue: "Helsinki" }

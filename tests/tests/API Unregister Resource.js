@@ -21,8 +21,8 @@ if ( device._settings.info.uuid ) {
 		url: "/light/ambience/blue",
 		deviceId: deviceId,
 		connectionMode: connMode,
-		resourceTypes: [ "Light" ],
-		interfaces: [ "/oic/if/rw" ],
+		resourceTypes: [ "core.light" ],
+		interfaces: [ "oic.if.baseline" ],
 		discoverable: true,
 		observable: true,
 		properties: { color: "light-blue", dimmer: 0.2 }
