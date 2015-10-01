@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DISTONLY=""
+BUILDONLY=""
 TESTONLY=""
 DEBUG=""
 
@@ -17,6 +19,8 @@ while [[ $# -gt 0 ]]; do
 		TESTONLY="TRUE"
 	elif test "x$1x" = "x--buildonlyx" -o "x$1x" = "x-bx"; then
 		BUILDONLY="TRUE"
+	elif test "x$1x" = "x--distonlyx" -o "x$1x" = "x-ix"; then
+		DISTONLY="TRUE"
 	elif test "x$1x" = "x--debugx" -o "x$1x" = "x-dx"; then
 		DEBUG="--debug"
 	elif test "x$1x" = "x--helpx" -o "x$1x" = "x-hx"; then
@@ -24,6 +28,7 @@ while [[ $# -gt 0 ]]; do
 		echo "--debug or -d    : Build in debug mode"
 		echo "--testonly or -t : Build for testing, run tests, and exit"
 		echo "--buildonly or -b: Build and exit"
+		echo "--distonly or -i : Build distributable tree and exit"
 		echo "--help or -h     : Print this message and exit"
 		exit 0
 	fi
@@ -40,6 +45,12 @@ if test "x${BUILDONLY}x" = "xTRUEx"; then
 	DO_BUILD=TRUE
 	DO_TEST=FALSE
 	DO_DIST=FALSE
+fi
+
+if test "x${DISTONLY}x" = "xTRUEx"; then
+	DO_BUILD=FALSE
+	DO_TEST=FALSE
+	DO_DIST=TRUE
 fi
 
 if test "x${DEBUG}x" = "xx"; then
@@ -75,16 +86,20 @@ fi
 
 if test "x${DO_DIST}x" = "xTRUEx"; then
 	echo "*** Performing distribution ***"
+
 	rm -rf dist &&
 	mkdir -p dist/iotivity &&
-	if ! npm install ${DEBUG}; then
-		buildBroken
-	fi
+
+	( if test "x${DISTONLY}x" != "xTRUEx"; then
+		if ! npm install ${DEBUG}; then
+			buildBroken
+		fi
+	fi; ) &&
 
 	# https://github.com/npm/npm/issues/5590 is why prune needs to run twice
 	npm prune --production &&
 	npm prune --production &&
-	cp -a AUTHORS.txt index.js MIT-LICENSE.txt node_modules README.md dist/iotivity &&
+	cp -a AUTHORS.txt index.js lowlevel.js lib MIT-LICENSE.txt node_modules README.md dist/iotivity &&
 	mkdir -p dist/iotivity/build/${MODULE_LOCATION} &&
 	cp build/${MODULE_LOCATION}/iotivity.node dist/iotivity/build/${MODULE_LOCATION} &&
 	if test -d deps; then
