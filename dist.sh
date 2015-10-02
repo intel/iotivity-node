@@ -96,6 +96,7 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 		fi
 	fi; ) &&
 
+	# Remove the devDependencies while keeping the production dependencies
 	# https://github.com/npm/npm/issues/5590 is why prune needs to run twice
 	npm prune --production &&
 	npm prune --production &&
@@ -109,6 +110,10 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 	cd dist &&
 	tar cvjf iotivity.tar.bz2 iotivity &&
 	cd ..
+
+	# Restore devDependencies after having created the distribution package
+	node -e 'Object.keys( require( "./package.json" ).devDependencies )
+		.map( function( item ){ console.log( item ) } );' | xargs npm install
 fi
 
 if test "x${DO_BUILD}x" = "xTRUEx"; then
