@@ -59,14 +59,18 @@ else
 	MODULE_LOCATION="Debug"
 fi
 
-# npm install needs these variables to be in place. If they're not, let's try to establish them
-# using pkg-config.
-if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
-	export OCTBSTACK_CFLAGS=$( pkg-config --cflags octbstack )
-fi
+# We don't need build flags if we're just going to be copying files
+if ! test "x${DO_DIST}x" = "xTRUEx" -a "x${DISTONLY}x" = "xTRUEx"; then
 
-if test "x${OCTBSTACK_LIBS}x" = "xx"; then
-	export OCTBSTACK_LIBS=$( pkg-config --libs octbstack )
+	# npm install needs these variables to be in place. If they're not, let's try to establish them
+	# using pkg-config.
+	if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
+		export OCTBSTACK_CFLAGS=$( pkg-config --cflags octbstack )
+	fi
+
+	if test "x${OCTBSTACK_LIBS}x" = "xx"; then
+		export OCTBSTACK_LIBS=$( pkg-config --libs octbstack )
+	fi
 fi
 
 if test "x${DO_TEST}x" = "xTRUEx"; then
