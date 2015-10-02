@@ -13,6 +13,7 @@ buildBroken() {
 DO_BUILD=TRUE
 DO_TEST=TRUE
 DO_DIST=TRUE
+DO_DEVREINST=TRUE
 
 while [[ $# -gt 0 ]]; do
 	if test "x$1x" = "x--testonlyx" -o "x$1x" = "x-tx"; then
@@ -21,15 +22,18 @@ while [[ $# -gt 0 ]]; do
 		BUILDONLY="TRUE"
 	elif test "x$1x" = "x--distonlyx" -o "x$1x" = "x-ix"; then
 		DISTONLY="TRUE"
+	elif test "x$1x" = "x--noreinstallx" -o "x$1x" = "x-nx"; then
+		DO_DEVREINST="FALSE"
 	elif test "x$1x" = "x--debugx" -o "x$1x" = "x-dx"; then
 		DEBUG="--debug"
 	elif test "x$1x" = "x--helpx" -o "x$1x" = "x-hx"; then
 		echo "$( basename "$0" ) [--debug|-d] [--testonly|-t] [--buildonly|-b] [--help|-h]"
-		echo "--debug or -d    : Build in debug mode"
-		echo "--testonly or -t : Build for testing, run tests, and exit"
-		echo "--buildonly or -b: Build and exit"
-		echo "--distonly or -i : Build distributable tree and exit"
-		echo "--help or -h     : Print this message and exit"
+		echo "--debug or -d       : Build in debug mode"
+		echo "--testonly or -t    : Build for testing, run tests, and exit"
+		echo "--buildonly or -b   : Build and exit"
+		echo "--distonly or -i    : Build distributable tree and exit"
+		echo "--noreinstall or -n : Do not reinstall dev dependencies after distribution"
+		echo "--help or -h        : Print this message and exit"
 		exit 0
 	fi
 	shift
@@ -115,9 +119,12 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 	tar cvjf iotivity.tar.bz2 iotivity &&
 	cd ..
 
-	# Restore devDependencies after having created the distribution package
-	node -e 'Object.keys( require( "./package.json" ).devDependencies )
-		.map( function( item ){ console.log( item ) } );' | xargs npm install
+	if test "x${DO_DEVREINST}x" = "xTRUEx"; then
+
+		# Restore devDependencies after having created the distribution package
+		node -e 'Object.keys( require( "./package.json" ).devDependencies )
+			.map( function( item ){ console.log( item ) } );' | xargs npm install
+	fi
 fi
 
 if test "x${DO_BUILD}x" = "xTRUEx"; then
