@@ -31,6 +31,22 @@ iotivity.OCCreateResource(
 	},
 	iotivity.OCResourceProperty.OC_DISCOVERABLE );
 
+// Create a new resource
+iotivity.OCCreateResource(
+
+	// The bindings fill in this object
+	handleReceptacle,
+
+	"core.light",
+	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
+	"/a/light",
+	function( flag, request ) {
+		console.log( "Entity handler called with flag = " + flag + " and the following request:" );
+		console.log( JSON.stringify( request, null, 4 ) );
+		return iotivity.OCEntityHandlerResult.OC_EH_OK;
+	},
+	iotivity.OCResourceProperty.OC_DISCOVERABLE );
+
 // Exit gracefully when interrupted
 process.on( "SIGINT", function() {
 	console.log( "SIGINT: Quitting..." );
