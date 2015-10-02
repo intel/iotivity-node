@@ -69,6 +69,7 @@ function spawnOne( assert, options ) {
 			} catch ( e ) {
 				options.teardown( "Error parsing " + options.name + " JSON: '" + value + "'" +
 					( e.message ? e.message : e ), true );
+				return;
 			}
 
 			// The child is reporting the number of assertions it will be making. We add our own
