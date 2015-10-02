@@ -47,8 +47,8 @@ if ( device._settings.info.uuid ) {
 		url: "/a/high-level-example",
 		deviceId: device._settings.info.uuid,
 		connectionMode: device._settings.connectionMode,
-		resourceTypes: [ "Light" ],
-		interfaces: [ "/oic/if/rw" ],
+		resourceTypes: [ "core.light" ],
+		interfaces: [ "oic.if.baseline" ],
 		discoverable: true,
 		observable: true,
 		properties: { someValue: 0, someOtherValue: "Helsinki" }
