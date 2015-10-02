@@ -1,4 +1,5 @@
 var QUnit,
+	async = require( "async" ),
 	glob = require( "glob" ),
 	_ = require( "underscore" ),
 	childProcess = require( "child_process" ),
@@ -211,17 +212,20 @@ function runTestSuites( files ) {
 			// can run. OTOH, the clients may initiate the termination of the test via a non-error
 			// teardown request.
 			children.push( spawnOne( assert, _.extend( {}, spawnOptions, {
-				name: "server",
+				name: "Server",
 				path: serverPath,
 				onReady: function() {
-					var clientPathIndex;
-
-					for ( clientPathIndex in clientPaths ) {
+					var clientIndex = 0;
+					async.eachSeries( clientPaths, function startOneChild( item, callback ) {
 						children.push( spawnOne( assert, _.extend( {}, spawnOptions, {
-							name: "client" +
-								( clientPaths.length > 1 ? " " + clientPathIndex : "" ),
-						path: clientPaths[ clientPathIndex ] } ) ) );
-					}
+							name: "Client" +
+								( clientPaths.length > 1 ? " " + ( ++clientIndex ) : "" ),
+						path: item } ) ) );
+
+						// Spawn clients at least two seconds apart to avoid message uniqueness
+						// issue in iotivity: https://jira.iotivity.org/browse/IOT-724
+						setTimeout( callback, 2000 );
+					} );
 				}
 			} ) ) );
 		} );
