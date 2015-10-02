@@ -31,8 +31,7 @@ device.configure( {
 				device._client.retrieveResource( event.resource.id ).then(
 					function( resource ) {
 						utils.assert( "deepEqual", resource.properties, {
-							"How many angels can dance on the head of a pin?":
-								"As many as wanting."
+							"How many angels can dance on the head of a pin?": "As many as wanting."
 						}, "Retrieved properties are as expected." );
 
 						// We have retrieved the resource, so we have completed one step towards

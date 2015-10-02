@@ -9,7 +9,7 @@ grunt.task.registerTask( "testdist", "Test the distributed version", function() 
 		[
 			"-c",
 			"./dist.sh -i " + ( grunt.option( "ci" ) ? "-n" : "" ) +
-				"&& cd dist/iotivity && node ./index.js && node ./lowlevel.js"
+			"&& cd dist/iotivity && node ./index.js && node ./lowlevel.js"
 		],
 		{ stdio: "inherit" } )
 		.on( "exit", function( code ) {
