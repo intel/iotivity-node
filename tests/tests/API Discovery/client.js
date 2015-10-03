@@ -39,7 +39,8 @@ device.configure( {
 				maybeQuit();
 			},
 			function( error ) {
-				utils.die( "Client: findResources() failed with: " + error );
+				utils.die( "Client: findResources() failed with: " + error + " and result " +
+					error.result );
 			} );
 	},
 	function( error ) {
