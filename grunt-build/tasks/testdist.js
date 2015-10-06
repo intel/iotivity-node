@@ -1,6 +1,7 @@
 module.exports = function( grunt ) {
 
-var spawn = require( "child_process" ).spawn;
+var spawn = require( "child_process" ).spawn,
+	packageName = grunt.file.readJSON( "package.json" ).name;
 
 grunt.task.registerTask( "testdist", "Test the distributed version", function() {
 	var done = this.async();
@@ -9,7 +10,7 @@ grunt.task.registerTask( "testdist", "Test the distributed version", function() 
 		[
 			"-c",
 			"./dist.sh -i " + ( grunt.option( "ci" ) ? "-n" : "" ) +
-			"&& cd dist/iotivity && node ./index.js && node ./lowlevel.js"
+			"&& cd dist/" + packageName + " && node ./index.js && node ./lowlevel.js"
 		],
 		{ stdio: "inherit" } )
 		.on( "exit", function( code ) {

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PACKAGE_NAME=$( node -e 'console.log( require( "./package.json" ).name );' )
+
 DISTONLY=""
 BUILDONLY=""
 TESTONLY=""
@@ -96,7 +98,7 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 	echo "*** Performing distribution ***"
 
 	rm -rf dist &&
-	mkdir -p dist/iotivity &&
+	mkdir -p dist/${PACKAGE_NAME} &&
 
 	( if test "x${DISTONLY}x" != "xTRUEx"; then
 		if ! npm install ${DEBUG}; then
@@ -108,15 +110,15 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 	# https://github.com/npm/npm/issues/5590 is why prune needs to run twice
 	npm prune --production &&
 	npm prune --production &&
-	cp -a AUTHORS.txt index.js lowlevel.js lib MIT-LICENSE.txt node_modules README.md dist/iotivity &&
-	mkdir -p dist/iotivity/build/${MODULE_LOCATION} &&
-	cp build/${MODULE_LOCATION}/iotivity.node dist/iotivity/build/${MODULE_LOCATION} &&
+	cp -a AUTHORS.txt index.js lowlevel.js lib MIT-LICENSE.txt node_modules README.md dist/${PACKAGE_NAME} &&
+	mkdir -p dist/${PACKAGE_NAME}/build/${MODULE_LOCATION} &&
+	cp build/${MODULE_LOCATION}/iotivity.node dist/${PACKAGE_NAME}/build/${MODULE_LOCATION} &&
 	if test -d deps; then
-		mkdir -p dist/iotivity/deps/iotivity/lib
-		cp deps/iotivity/lib/liboctbstack.so dist/iotivity/deps/iotivity/lib
+		mkdir -p dist/${PACKAGE_NAME}/deps/iotivity/lib
+		cp deps/${PACKAGE_NAME}/lib/liboctbstack.so dist/${PACKAGE_NAME}/deps/iotivity/lib
 	fi
 	cd dist &&
-	tar cvjf iotivity.tar.bz2 iotivity &&
+	tar cvjf iotivity.tar.bz2 ${PACKAGE_NAME} &&
 	cd ..
 
 	if test "x${DO_DEVREINST}x" = "xTRUEx"; then

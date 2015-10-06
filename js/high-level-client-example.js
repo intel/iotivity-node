@@ -1,5 +1,5 @@
 var observationCount = 0,
-	device = require( "iotivity" )();
+	device = require( "iotivity-node" )();
 
 device.configure( {
 	role: "client",
