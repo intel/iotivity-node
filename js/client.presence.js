@@ -3,7 +3,7 @@ var intervalId,
 
 	// This is the same value as server.presence.js
 	sampleUri = "/a/iotivity-node-presence-sample",
-	iotivity = require( "iotivity/lowlevel" );
+	iotivity = require( "iotivity-node/lowlevel" );
 
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );

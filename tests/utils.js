@@ -7,7 +7,7 @@ var _ = require( "underscore" ),
 		this._iotivity = iotivity;
 	};
 
-_.extend( testUtils.prototype, {
+_.extend( testUtils.prototype, require( "./assert-to-console" ), {
 	_isTestUtils: true,
 
 	lookupEnumValueName: function( enumName, value ) {
@@ -33,19 +33,6 @@ _.extend( testUtils.prototype, {
 		return bits;
 	},
 
-	// Create an assertion and pass it to the parent process via stdout
-	assert: function( assertion ) {
-		var copyOfArguments;
-
-		// Copy the arguments and remove the assertion
-		copyOfArguments = Array.prototype.slice.call( arguments, 0 );
-		copyOfArguments.shift();
-
-		console.log( JSON.stringify( {
-			assertion: assertion,
-			arguments: copyOfArguments
-		} ) );
-	},
 	stackOKOrDie: function( module, nameOfStep, result ) {
 
 		// Two-argument configuration means module was skipped
@@ -69,10 +56,6 @@ _.extend( testUtils.prototype, {
 			this.die( module + ": " + nameOfStep + " failed" );
 			return false;
 		}
-	},
-	die: function( message ) {
-		console.log( JSON.stringify( { teardown: true, message: message, isError: true } ) );
-		process.exit( 1 );
 	},
 	findResource: function( response, uuid ) {
 		var index,

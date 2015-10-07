@@ -1,11 +1,11 @@
 var lightResource,
 	sensor = require( "./mock-sensor" )(),
-	device = require( "iotivity" ),
+	device = require( "iotivity-node" )(),
 	settings = {
 		role: "server",
 		connectionMode: "acked",
 		info: {
-			uuid: "INTEL",
+			uuid: "INTEL-server",
 			name: "api-server-example",
 			manufacturerName: "Intel",
 			manufactureDate: "Wed Sep 23 10:04:17 EEST 2015",
@@ -37,20 +37,18 @@ sensor.on( "change", function( newData ) {
 } );
 
 function lightResourceOnRequest( request ) {
-	console.log( "lightResourceOnRequest: request:\n" +
-		JSON.stringify( request, null, 4 ) );
-	if ( request.type === "retrieve" ) {
+	if ( request.type === "retrieve" || request.type === "observe" ) {
 		request.sendResponse( null );
 	}
 }
 
 if ( device._settings.info.uuid ) {
 	device._server.registerResource( {
-		url: "/light/ambience/blue",
+		url: "/a/high-level-example",
 		deviceId: device._settings.info.uuid,
 		connectionMode: device._settings.connectionMode,
-		resourceTypes: [ "Light" ],
-		interfaces: [ "/oic/if/rw" ],
+		resourceTypes: [ "core.light" ],
+		interfaces: [ "oic.if.baseline" ],
 		discoverable: true,
 		observable: true,
 		properties: { someValue: 0, someOtherValue: "Helsinki" }

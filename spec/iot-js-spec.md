@@ -237,7 +237,7 @@ Code Examples
 var device = new OicDevice();
 // implementation will try to get default configuration from the HW/platform
 // but if we cannot get it, could do a hard-coded configuration (not recommended)
-if (device.settings.uuid) {  // configuration is valid
+if (device.settings.info.uuid) {  // configuration is valid
   startServer();
   startClient();
 }

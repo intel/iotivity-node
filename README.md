@@ -86,13 +86,15 @@ diff -u \
 
 ### To build against a new upstream version:
 
-0. Modify the "version" field in ```package.json```, setting it to the version of iotivity against which you're building
-0. Modify the references to the version in ```README.md```
-0. Build and optionally install the new version of iotivity
+0. Modify the ```"version"``` field in ```package.json```, setting it to the version of iotivity against which you're building.
+
+    If you're building against a released version, set the version as that version. Otherwise, set the version to the next patchlevel release and append ```-pre-<commitid>``` where ```<commitid>``` is the commitid of the revision against which you're building. Use the resulting version number in ```README.md``` as well as ```octbstack.pc.in```. Examples of version numbers are ```0.8.0``` and ```0.8.1-pre-1057bc0fbad1a6fee15bad6e75f00dca5ec105ed```.
+0. Modify the references to the version in ```README.md```.
+0. Modify the value of the variable ```version``` in ```octbstack.pc.in```.
+0. Build and optionally install the new version of iotivity.
 0. If you haven't installed iotivity in the previous step, you must now export environment variables ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the next step needs them.
-0. Run ```./update-enums-and-constants.sh``` followed by ```grunt format``` to re-format ```src/constants.cc``` and ```src/enums.cc```
-0. Update the commitid in ```build-csdk.sh```
-0. If the ```CFLAGS``` and/or ```LIBS``` have changed, modify ```install.sh``` and/or ```octbstack.pc.in``` and make the same modifications in ```binding.gyp```
+0. Run ```./update-enums-and-constants.sh``` to update ```src/constants.cc``` and ```src/enums.cc``` followed by ```grunt format``` to re-format the source.
+0. If the ```CFLAGS``` and/or ```LIBS``` have changed, modify ```install.sh``` and/or ```octbstack.pc.in``` and make the same modifications in ```binding.gyp```.
 0. Test the build with both built-in iotivity and with iotivity via pkgconfig:
 
     ```sh

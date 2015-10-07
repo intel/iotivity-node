@@ -1,4 +1,4 @@
-var testUtils = require( "../utils" )( require( "../../lowlevel" ) );
+var testUtils = require( "../assert-to-console" );
 
 console.log( JSON.stringify( { assertionCount: 1 } ) );
 
@@ -21,15 +21,14 @@ if ( device._settings.info.uuid ) {
 		url: "/light/ambience/blue",
 		deviceId: deviceId,
 		connectionMode: connMode,
-		resourceTypes: [ "Light" ],
-		interfaces: [ "/oic/if/rw" ],
+		resourceTypes: [ "core.light" ],
+		interfaces: [ "oic.if.baseline" ],
 		discoverable: true,
 		observable: true,
 		properties: { color: "light-blue", dimmer: 0.2 }
 	} ).then(
-		function( resource ) {
+		function() {
 			testUtils.assert( "ok", true, "Resource registered successfully" );
-			console.error( resource );
 			process.exit( 0 );
 		},
 		function( error ) {

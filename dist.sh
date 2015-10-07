@@ -1,5 +1,9 @@
 #!/bin/bash
 
+PACKAGE_NAME=$( node -e 'console.log( require( "./package.json" ).name );' )
+
+DISTONLY=""
+BUILDONLY=""
 TESTONLY=""
 DEBUG=""
 
@@ -11,20 +15,27 @@ buildBroken() {
 DO_BUILD=TRUE
 DO_TEST=TRUE
 DO_DIST=TRUE
+DO_DEVREINST=TRUE
 
 while [[ $# -gt 0 ]]; do
 	if test "x$1x" = "x--testonlyx" -o "x$1x" = "x-tx"; then
 		TESTONLY="TRUE"
 	elif test "x$1x" = "x--buildonlyx" -o "x$1x" = "x-bx"; then
 		BUILDONLY="TRUE"
+	elif test "x$1x" = "x--distonlyx" -o "x$1x" = "x-ix"; then
+		DISTONLY="TRUE"
+	elif test "x$1x" = "x--noreinstallx" -o "x$1x" = "x-nx"; then
+		DO_DEVREINST="FALSE"
 	elif test "x$1x" = "x--debugx" -o "x$1x" = "x-dx"; then
 		DEBUG="--debug"
 	elif test "x$1x" = "x--helpx" -o "x$1x" = "x-hx"; then
 		echo "$( basename "$0" ) [--debug|-d] [--testonly|-t] [--buildonly|-b] [--help|-h]"
-		echo "--debug or -d    : Build in debug mode"
-		echo "--testonly or -t : Build for testing, run tests, and exit"
-		echo "--buildonly or -b: Build and exit"
-		echo "--help or -h     : Print this message and exit"
+		echo "--debug or -d       : Build in debug mode"
+		echo "--testonly or -t    : Build for testing, run tests, and exit"
+		echo "--buildonly or -b   : Build and exit"
+		echo "--distonly or -i    : Build distributable tree and exit"
+		echo "--noreinstall or -n : Do not reinstall dev dependencies after distribution"
+		echo "--help or -h        : Print this message and exit"
 		exit 0
 	fi
 	shift
@@ -42,20 +53,30 @@ if test "x${BUILDONLY}x" = "xTRUEx"; then
 	DO_DIST=FALSE
 fi
 
+if test "x${DISTONLY}x" = "xTRUEx"; then
+	DO_BUILD=FALSE
+	DO_TEST=FALSE
+	DO_DIST=TRUE
+fi
+
 if test "x${DEBUG}x" = "xx"; then
 	MODULE_LOCATION="Release"
 else
 	MODULE_LOCATION="Debug"
 fi
 
-# npm install needs these variables to be in place. If they're not, let's try to establish them
-# using pkg-config.
-if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
-	export OCTBSTACK_CFLAGS=$( pkg-config --cflags octbstack )
-fi
+# We don't need build flags if we're just going to be copying files
+if ! test "x${DO_DIST}x" = "xTRUEx" -a "x${DISTONLY}x" = "xTRUEx"; then
 
-if test "x${OCTBSTACK_LIBS}x" = "xx"; then
-	export OCTBSTACK_LIBS=$( pkg-config --libs octbstack )
+	# npm install needs these variables to be in place. If they're not, let's try to establish them
+	# using pkg-config.
+	if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
+		export OCTBSTACK_CFLAGS=$( pkg-config --cflags octbstack )
+	fi
+
+	if test "x${OCTBSTACK_LIBS}x" = "xx"; then
+		export OCTBSTACK_LIBS=$( pkg-config --libs octbstack )
+	fi
 fi
 
 if test "x${DO_TEST}x" = "xTRUEx"; then
@@ -75,25 +96,37 @@ fi
 
 if test "x${DO_DIST}x" = "xTRUEx"; then
 	echo "*** Performing distribution ***"
-	rm -rf dist &&
-	mkdir -p dist/iotivity &&
-	if ! npm install ${DEBUG}; then
-		buildBroken
-	fi
 
+	rm -rf dist &&
+	mkdir -p dist/${PACKAGE_NAME} &&
+
+	( if test "x${DISTONLY}x" != "xTRUEx"; then
+		if ! npm install ${DEBUG}; then
+			buildBroken
+		fi
+	fi; ) &&
+
+	# Remove the devDependencies while keeping the production dependencies
 	# https://github.com/npm/npm/issues/5590 is why prune needs to run twice
 	npm prune --production &&
 	npm prune --production &&
-	cp -a AUTHORS.txt index.js MIT-LICENSE.txt node_modules README.md dist/iotivity &&
-	mkdir -p dist/iotivity/build/${MODULE_LOCATION} &&
-	cp build/${MODULE_LOCATION}/iotivity.node dist/iotivity/build/${MODULE_LOCATION} &&
+	cp -a AUTHORS.txt index.js lowlevel.js lib MIT-LICENSE.txt node_modules README.md dist/${PACKAGE_NAME} &&
+	mkdir -p dist/${PACKAGE_NAME}/build/${MODULE_LOCATION} &&
+	cp build/${MODULE_LOCATION}/iotivity.node dist/${PACKAGE_NAME}/build/${MODULE_LOCATION} &&
 	if test -d deps; then
-		mkdir -p dist/iotivity/deps/iotivity/lib
-		cp deps/iotivity/lib/liboctbstack.so dist/iotivity/deps/iotivity/lib
+		mkdir -p dist/${PACKAGE_NAME}/deps/iotivity/lib
+		cp deps/${PACKAGE_NAME}/lib/liboctbstack.so dist/${PACKAGE_NAME}/deps/iotivity/lib
 	fi
 	cd dist &&
-	tar cvjf iotivity.tar.bz2 iotivity &&
+	tar cvjf iotivity.tar.bz2 ${PACKAGE_NAME} &&
 	cd ..
+
+	if test "x${DO_DEVREINST}x" = "xTRUEx"; then
+
+		# Restore devDependencies after having created the distribution package
+		node -e 'Object.keys( require( "./package.json" ).devDependencies )
+			.map( function( item ){ console.log( item ) } );' | xargs npm install
+	fi
 fi
 
 if test "x${DO_BUILD}x" = "xTRUEx"; then

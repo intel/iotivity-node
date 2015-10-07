@@ -1,6 +1,6 @@
 var intervalId,
 	handleReceptacle = {},
-	iotivity = require( "iotivity/lowlevel" );
+	iotivity = require( "iotivity-node/lowlevel" );
 
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
@@ -24,6 +24,22 @@ iotivity.OCCreateResource(
 	"core.fan",
 	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
 	"/a/fan",
+	function( flag, request ) {
+		console.log( "Entity handler called with flag = " + flag + " and the following request:" );
+		console.log( JSON.stringify( request, null, 4 ) );
+		return iotivity.OCEntityHandlerResult.OC_EH_OK;
+	},
+	iotivity.OCResourceProperty.OC_DISCOVERABLE );
+
+// Create a new resource
+iotivity.OCCreateResource(
+
+	// The bindings fill in this object
+	handleReceptacle,
+
+	"core.light",
+	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
+	"/a/light",
 	function( flag, request ) {
 		console.log( "Entity handler called with flag = " + flag + " and the following request:" );
 		console.log( JSON.stringify( request, null, 4 ) );
