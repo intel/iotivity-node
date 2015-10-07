@@ -7,6 +7,9 @@
 			"<!(node -e \"require('nan')\")"
 		],
 		"conditions": [
+
+			# Platform-independent conditions
+
 			[ "'<(externalOCTBStack)'=='true'", {
 				"libraries": [ '<!@(echo "$OCTBSTACK_LIBS")' ],
 				"cflags": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ],
@@ -30,6 +33,9 @@
 					]
 				}
 			} ],
+
+			# OSX-specific conditions
+
 			[ "OS=='mac' and '<(externalOCTBStack)'=='false'", {
 				"libraries+": [
 					"-lconnectivity_abstraction",
@@ -37,9 +43,12 @@
 					"-lc_common",
 					"-locsrm"
 				]
+			} ],
+			[ "OS=='mac'", {
+				"xcode_settings": { "OTHER_CFLAGS": [ '-std=c++11' ] }
 			} ]
 		],
-		"cflags_cc": [ '-std=c++11' ]
+		"cflags_cc": [ '-std=c++11' ],
 	},
 	"targets": [
 		{
