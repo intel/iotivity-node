@@ -29,7 +29,9 @@ while [[ $# -gt 0 ]]; do
 	elif test "x$1x" = "x--debugx" -o "x$1x" = "x-dx"; then
 		DEBUG="--debug"
 	elif test "x$1x" = "x--helpx" -o "x$1x" = "x-hx"; then
-		echo "$( basename "$0" ) [--debug|-d] [--testonly|-t] [--buildonly|-b] [--help|-h]"
+		echo "$( basename "$0" ) [options...]"
+		echo ""
+		echo "Possible options:"
 		echo "--debug or -d       : Build in debug mode"
 		echo "--testonly or -t    : Build for testing, run tests, and exit"
 		echo "--buildonly or -b   : Build and exit"

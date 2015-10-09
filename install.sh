@@ -22,8 +22,10 @@ PLATFORM="$(ls "${SOURCE}/out" | head -n 1)"
 
 if test "${PLATFORM}" = "darwin"; then
   ARCH=x86_64
+  PLATFORM_LIBS="-lconnectivity_abstraction -lcoap -lc_common -locsrm"
 else
   ARCH="$(ls "${SOURCE}/out/${PLATFORM}" | head -n 1)"
+  PLATFORM_LIBS=""
 fi
 
 CONFIGURATION="$(ls "${SOURCE}/out/${PLATFORM}/${ARCH}" | grep -E "release|debug" | head -n 1)"
@@ -60,14 +62,15 @@ touch "${ACTUAL_INCLUDEDIR}/${OCTB_STACK_INCLUDEDIR}"/logger.h
 mkdir -p "${ACTUAL_INCLUDEDIR}/iotivity/${OCTB_RANDOM_DIR}" || exit 1
 cp -a "${SOURCE}/${OCTB_RANDOM_DIR}/include" "${ACTUAL_INCLUDEDIR}/${OCTB_RANDOM_INCLUDEDIR}" || exit 1
 
-if test "x${NO_PC}x" = "xx"; then
+if test "x${INSTALL_PC}x" = "xtruex"; then
   mkdir -p "${ACTUAL_LIBDIR}/pkgconfig"
-  cat octbstack.pc.in | \
+  cat ./octbstack.pc.in | \
     sed \
       -e "s!@PREFIX@!${PREFIX}!g" \
       -e "s!@LIBDIR@!${LIBDIR}!g" \
       -e "s!@INCLUDEDIR@!${INCLUDEDIR}!g" \
       -e "s!@OCTB_STACK_INCLUDEDIR@!${OCTB_STACK_INCLUDEDIR}!g" \
       -e "s!@OCTB_RANDOM_INCLUDEDIR@!${OCTB_RANDOM_INCLUDEDIR}!g" \
+      -e "s!@PLATFORM_LIBS@!${PLATFORM_LIBS}!g" \
     > "${ACTUAL_LIBDIR}/pkgconfig/octbstack.pc"
 fi
