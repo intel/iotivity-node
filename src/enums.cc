@@ -22,6 +22,7 @@ static Local<Object> bind_OCTransportAdapter() {
   SET_CONSTANT_MEMBER(returnValue, Number, OC_ADAPTER_IP);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_ADAPTER_GATT_BTLE);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_ADAPTER_RFCOMM_BTEDR);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_ADAPTER_TCP);
 
   return returnValue;
 }
@@ -52,6 +53,7 @@ static Local<Object> bind_OCConnectivityType() {
   SET_CONSTANT_MEMBER(returnValue, Number, CT_ADAPTER_IP);
   SET_CONSTANT_MEMBER(returnValue, Number, CT_ADAPTER_GATT_BTLE);
   SET_CONSTANT_MEMBER(returnValue, Number, CT_ADAPTER_RFCOMM_BTEDR);
+  SET_CONSTANT_MEMBER(returnValue, Number, CT_ADAPTER_TCP);
   SET_CONSTANT_MEMBER(returnValue, Number, CT_FLAG_SECURE);
   SET_CONSTANT_MEMBER(returnValue, Number, CT_IP_USE_V6);
   SET_CONSTANT_MEMBER(returnValue, Number, CT_IP_USE_V4);
@@ -83,12 +85,23 @@ static Local<Object> bind_OCMethod() {
   return returnValue;
 }
 
+static Local<Object> bind_OCPayloadFormat() {
+  Local<Object> returnValue = NanNew<Object>();
+
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_FORMAT_CBOR);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_FORMAT_UNDEFINED);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_FORMAT_UNSUPPORTED);
+
+  return returnValue;
+}
+
 static Local<Object> bind_OCMode() {
   Local<Object> returnValue = NanNew<Object>();
 
   SET_CONSTANT_MEMBER(returnValue, Number, OC_CLIENT);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_SERVER);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_CLIENT_SERVER);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_GATEWAY);
 
   return returnValue;
 }
@@ -161,6 +174,9 @@ static Local<Object> bind_OCStackResult() {
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_INVALID_DEVICE_INFO);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_INVALID_JSON);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_UNAUTHORIZED_REQ);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_PDM_IS_NOT_INITIALIZED);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_DUPLICATE_UUID);
+  SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_INCONSISTENT_DB);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_PRESENCE_STOPPED);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_PRESENCE_TIMEOUT);
   SET_CONSTANT_MEMBER(returnValue, Number, OC_STACK_PRESENCE_DO_NOT_HANDLE);
@@ -203,6 +219,7 @@ static Local<Object> bind_OCPayloadType() {
   SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_REPRESENTATION);
   SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_SECURITY);
   SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_PRESENCE);
+  SET_CONSTANT_MEMBER(returnValue, Number, PAYLOAD_TYPE_RD);
 
   return returnValue;
 }
@@ -265,6 +282,7 @@ void InitEnums(Handle<Object> exports) {
   SET_ENUM(exports, OCTransportFlags);
   SET_ENUM(exports, OCConnectivityType);
   SET_ENUM(exports, OCMethod);
+  SET_ENUM(exports, OCPayloadFormat);
   SET_ENUM(exports, OCMode);
   SET_ENUM(exports, OCQualityOfService);
   SET_ENUM(exports, OCResourceProperty);

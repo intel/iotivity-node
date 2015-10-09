@@ -24,16 +24,6 @@ Local<Object> js_OCDevAddr(OCDevAddr *address) {
   }
   returnValue->Set(NanNew<String>("addr"), addr);
 
-  // addr.identity
-  uint16_t identityLength = (address->identity.id_length > MAX_IDENTITY_SIZE
-                                 ? MAX_IDENTITY_SIZE
-                                 : address->identity.id_length);
-  Local<Array> identity = NanNew<Array>(identityLength);
-  for (index = 0; index < identityLength; index++) {
-    identity->Set(index, NanNew<Number>(address->identity.id[index]));
-  }
-  returnValue->Set(NanNew<String>("identity"), identity);
-
   return returnValue;
 }
 
@@ -70,29 +60,6 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
       local.addr[index] = 0;
     }
   }
-
-  // addr.identity
-  Local<Value> identity = jsDevAddr->Get(NanNew<String>("identity"));
-  VALIDATE_VALUE_TYPE(identity, IsArray, "addr.identity", false);
-  Local<Array> identityArray = Local<Array>::Cast(identity);
-  length = identityArray->Length();
-  if (length > MAX_IDENTITY_SIZE) {
-    NanThrowRangeError(
-        "OCDevAddr: Number of JS structure identity bytes exceeds "
-        "MAX_IDENTITY_SIZE");
-    return false;
-  }
-  for (index = 0; index < MAX_IDENTITY_SIZE; index++) {
-    if (index < length) {
-      Local<Value> identityItem = identityArray->Get(index);
-      VALIDATE_VALUE_TYPE(identityItem, IsUint32, "addr.identity.id item",
-                          false);
-      local.identity.id[index] = (unsigned char)identityItem->Uint32Value();
-    } else {
-      local.identity.id[index] = 0;
-    }
-  }
-  local.identity.id_length = length;
 
   // We only touch the structure we're supposed to fill in if all retrieval from
   // JS has gone well

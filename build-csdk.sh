@@ -56,7 +56,7 @@ cd ./depbuild || exit 1
 
 		# iotivity wants us to clone this before it'll do anything
 		git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor
-		scons $SCONS_FLAGS liboctbstack libconnectivity_abstraction libcoap c_common libocsrm || { cat config.log; exit 1; }
+		scons $SCONS_FLAGS liboctbstack libconnectivity_abstraction libcoap c_common libocsrm routingmanager || { cat config.log; exit 1; }
 
 cd ../../ || exit 1
 SOURCE="${SOURCE}" PREFIX="$(pwd)/deps/iotivity" INSTALL_PC="${DO_PC}" "$(pwd)/install.sh" || exit 1

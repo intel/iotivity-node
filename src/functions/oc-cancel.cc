@@ -22,7 +22,8 @@ NAN_METHOD(bind_OCCancel) {
   VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 2, IsArray);
 
   OCDoHandle handle;
-  OCHeaderOption headerOptions[MAX_HEADER_OPTIONS];
+  OCHeaderOption headerOptions[MAX_HEADER_OPTIONS] = {
+      {OC_INVALID_ID, 0, 0, {0}}};
   uint8_t numberOfOptions = 0;
 
   if (!c_OCDoHandle(Local<Array>::Cast(args[0]), &handle)) {

@@ -41,12 +41,18 @@
 				],
 				"cflags": [
 					'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")',
-					'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")'
+					'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")',
+					'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/c_common")',
+					'-DROUTING_EP',
+					'-DTCP_ADAPTER'
 				],
 				"xcode_settings": {
 					"OTHER_CFLAGS": [
 						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")',
-						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")'
+						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")',
+						'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/c_common")',
+						'-DROUTING_EP',
+						'-DTCP_ADAPTER'
 					]
 				}
 			} ],
@@ -58,6 +64,7 @@
 					"-lconnectivity_abstraction",
 					"-lcoap",
 					"-lc_common",
+					"-lroutingmanager",
 					"-locsrm"
 				]
 			} ],
