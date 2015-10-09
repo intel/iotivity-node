@@ -46,4 +46,4 @@ addons:
     - uuid-dev
     - g++-4.8
 
-script: if test "x${BUILD_ONLY}x" = "xtruex"; then npm install && grunt testdist --ci; else npm run-script ci; fi
+script: if test "x${BUILD_ONLY}x" = "xtruex"; then npm run-script ci-basic; else npm run-script ci; fi
