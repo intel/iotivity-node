@@ -6,6 +6,7 @@ DISTONLY=""
 BUILDONLY=""
 TESTONLY=""
 DEBUG=""
+REINSTONLY=""
 
 buildBroken() {
 	echo "Repair build first."
@@ -26,18 +27,21 @@ while [[ $# -gt 0 ]]; do
 		DISTONLY="TRUE"
 	elif test "x$1x" = "x--noreinstallx" -o "x$1x" = "x-nx"; then
 		DO_DEVREINST="FALSE"
+	elif test "x$1x" = "x--reinstallonlyx" -o "x$1x" = "x-rx"; then
+		REINSTONLY="TRUE"
 	elif test "x$1x" = "x--debugx" -o "x$1x" = "x-dx"; then
 		DEBUG="--debug"
 	elif test "x$1x" = "x--helpx" -o "x$1x" = "x-hx"; then
 		echo "$( basename "$0" ) [options...]"
 		echo ""
 		echo "Possible options:"
-		echo "--debug or -d       : Build in debug mode"
-		echo "--testonly or -t    : Build for testing, run tests, and exit"
-		echo "--buildonly or -b   : Build and exit"
-		echo "--distonly or -i    : Build distributable tree and exit"
-		echo "--noreinstall or -n : Do not reinstall dev dependencies after distribution"
-		echo "--help or -h        : Print this message and exit"
+		echo "--debug or -d         : Build in debug mode"
+		echo "--testonly or -t      : Build for testing, run tests, and exit"
+		echo "--buildonly or -b     : Build and exit"
+		echo "--distonly or -i      : Build distributable tree and exit"
+		echo "--noreinstall or -n   : Do not reinstall dev dependencies after distribution"
+		echo "--reinstallonly or -r : Reinstall dev dependencies and exit"
+		echo "--help or -h          : Print this message and exit"
 		exit 0
 	fi
 	shift
@@ -47,18 +51,27 @@ if test "x${TESTONLY}x" = "xTRUEx"; then
 	DO_BUILD=FALSE
 	DO_TEST=TRUE
 	DO_DIST=FALSE
+	DO_DEVREINST=FALSE
 fi
 
 if test "x${BUILDONLY}x" = "xTRUEx"; then
 	DO_BUILD=TRUE
 	DO_TEST=FALSE
 	DO_DIST=FALSE
+	DO_DEVREINST=FALSE
 fi
 
 if test "x${DISTONLY}x" = "xTRUEx"; then
 	DO_BUILD=FALSE
 	DO_TEST=FALSE
 	DO_DIST=TRUE
+fi
+
+if test "x${REINSTONLY}x" = "xTRUEx"; then
+	DO_BUILD=FALSE
+	DO_TEST=FALSE
+	DO_DIST=FALSE
+	DO_DEVREINST=TRUE
 fi
 
 if test "x${DEBUG}x" = "xx"; then
@@ -122,13 +135,14 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 	cd dist &&
 	tar cvjf iotivity.tar.bz2 ${PACKAGE_NAME} &&
 	cd ..
+fi
 
-	if test "x${DO_DEVREINST}x" = "xTRUEx"; then
+if test "x${DO_DEVREINST}x" = "xTRUEx"; then
+	echo "*** Re-installing development dependencies ***"
 
-		# Restore devDependencies after having created the distribution package
-		node -e 'Object.keys( require( "./package.json" ).devDependencies )
-			.map( function( item ){ console.log( item ) } );' | xargs npm install
-	fi
+	# Restore devDependencies after having created the distribution package
+	node -e 'Object.keys( require( "./package.json" ).devDependencies )
+		.map( function( item ){ console.log( item ) } );' | xargs npm install
 fi
 
 if test "x${DO_BUILD}x" = "xTRUEx"; then
