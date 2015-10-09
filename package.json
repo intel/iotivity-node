@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "ci": "TESTING=true npm install && npm test -- --ci",
-    "ci-basic": "TESTING=true npm install && npm test -- --suites='API Start Stack.js' --ci",
+    "ci-basic": "TESTING=true npm install && npm test -- --suites='Load Library.js' --ci",
     "test": "grunt test"
   },
   "gypfile": true,

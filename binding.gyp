@@ -2,6 +2,23 @@
 	"variables": {
 		"externalOCTBStack": '<!(if test "x${OCTBSTACK_CFLAGS}x" != "xx" -a "x${OCTBSTACK_CFLAGS}x" != "xx"; then echo true; else echo false; fi)',
 	},
+
+	"conditions": [
+
+		# Build dlopennow when testing so we can make sure the library has all the symbols it needs
+		[ "'<!(echo $TESTING)'=='true'", {
+			"targets+": [
+				{
+					"target_name": "dlopennow",
+					"sources": [ "tests/dlopennow.cc" ],
+					"include_dirs": [
+					"<!(node -e \"require('nan')\")"
+					]
+				}
+			]
+		} ]
+	],
+
 	"target_defaults": {
 		"include_dirs": [
 			"<!(node -e \"require('nan')\")"
@@ -50,6 +67,7 @@
 		],
 		"cflags_cc": [ '-std=c++11' ],
 	},
+
 	"targets": [
 		{
 			"target_name": "csdk",
