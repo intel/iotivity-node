@@ -8,6 +8,21 @@ TESTONLY=""
 DEBUG=""
 REINSTONLY=""
 
+do_npm_install() { # arguments passed through to npm install
+
+	# npm install needs these variables to be in place. If they're not, let's try to establish them
+	# using pkg-config.
+	if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
+		export OCTBSTACK_CFLAGS=$( pkg-config --cflags octbstack )
+	fi
+
+	if test "x${OCTBSTACK_LIBS}x" = "xx"; then
+		export OCTBSTACK_LIBS=$( pkg-config --libs octbstack )
+	fi
+
+	npm install "$@"
+}
+
 buildBroken() {
 	echo "Repair build first."
 	exit 1
@@ -80,25 +95,11 @@ else
 	MODULE_LOCATION="Debug"
 fi
 
-# We don't need build flags if we're just going to be copying files
-if ! test "x${DO_DIST}x" = "xTRUEx" -a "x${DISTONLY}x" = "xTRUEx"; then
-
-	# npm install needs these variables to be in place. If they're not, let's try to establish them
-	# using pkg-config.
-	if test "x${OCTBSTACK_CFLAGS}x" = "xx"; then
-		export OCTBSTACK_CFLAGS=$( pkg-config --cflags octbstack )
-	fi
-
-	if test "x${OCTBSTACK_LIBS}x" = "xx"; then
-		export OCTBSTACK_LIBS=$( pkg-config --libs octbstack )
-	fi
-fi
-
 if test "x${DO_TEST}x" = "xTRUEx"; then
 	echo "*** Performing test build/run ***"
 	export TESTING=true
 
-	if ! npm install ${DEBUG}; then
+	if ! do_npm_install ${DEBUG}; then
 		buildBroken
 	fi
 
@@ -116,7 +117,7 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 	mkdir -p dist/${PACKAGE_NAME} &&
 
 	( if test "x${DISTONLY}x" != "xTRUEx"; then
-		if ! npm install ${DEBUG}; then
+		if ! do_npm_install ${DEBUG}; then
 			buildBroken
 		fi
 	fi; ) &&
@@ -138,16 +139,17 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 fi
 
 if test "x${DO_DEVREINST}x" = "xTRUEx"; then
-	echo "*** Re-installing development dependencies ***"
+	echo "*** Re-installing dependencies ***"
 
 	# Restore devDependencies after having created the distribution package
 	node -e 'Object.keys( require( "./package.json" ).devDependencies )
+		.concat( Object.keys( require( "./package.json" ).dependencies ) )
 		.map( function( item ){ console.log( item ) } );' | xargs npm install
 fi
 
 if test "x${DO_BUILD}x" = "xTRUEx"; then
 	echo "*** Performing build ***"
-	if ! npm install ${DEBUG}; then
+	if ! do_npm_install ${DEBUG}; then
 		buildBroken
 	fi
 fi
