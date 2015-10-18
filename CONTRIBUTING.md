@@ -1,5 +1,27 @@
 ## Maintenance
 
+### Coding Style And Principles
+Please follow the [jQuery][] coding style for the JavaScript files. You can format all JS and C++ files with the following command:
+```
+grunt format
+```
+
+When writing the bindings, data arriving from Javascript is considered unreliable and must be validated. If it does not validate correctly, an exception must be thrown immediately after the failed check, and the function must return immediately. Data arriving from C is considered reliable and can be assigned to Javascript immediately.
+
+Functions converting Javascript structures to C structures are named ```c_CStructureName``` and have the following signature:
+
+```C++
+bool c_CStructureName( Local<Object> jsStructureName, CStructureName **p_putStructurePointerHere );
+```
+
+This signature allows us to throw an exception and return false if any part of ```jsStructureName``` fails validation. The caller can then also return false immediately, and the binding can ultimately return undefined immediately.
+
+As a general principle, if a Javascript value fails validation, throw an exception immediately. Do not return false and expect the caller to throw the exception. Call it exception-at-the-point-of-failure.
+
+Pointers to structures received from the C API may always be null. The functions converting those pointers to Javascript objects (js_CStructureName()) assume that they are not null. So, wrap the call to such a function in a null-check.
+
+When filling out a C structure in a function c_CStructureName, create a local structure first, and only if all validations pass, memcpy() the local structure into the structure passed in.
+
 ### Tests
 
 To run the tests, simply run ```grunt test```. A script called ```dist.sh``` is also provided. It runs ```npm install```, runs the tests, then runs ```npm prune --production``` to remove all sources, headers, and build dependencies. After that, it copies relevant files to ```dist/``` and creates a tarball from them. This is followed by running ```npm install``` again to restore the development environment.
@@ -45,27 +67,5 @@ diff -u \
     The build may fail in ```src/constants.cc``` or ```src/enums.cc```, complaining about undefined constants. That's because ```update-constants-and-enums.sh``` is unaware of C precompiler definitions and so it may harvest constants which are not actually defined under the set of precompiler flags used for building. Thus, you may need to edit ```src/constants.cc``` and ```src/enums.cc``` by hand **after** having run ```update-constants-and-enums.sh```.
 
 The script ```./update-constants-and-enums.sh``` reads the C SDK header files and generates the contents of ```src/constants.cc``` and ```src/enums.cc```. Read the comments in the script before you modify either ```src/constants.cc``` or ```src/enums.cc```.
-
-### Coding Style And Principles
-Please follow the [jQuery][] coding style for the JavaScript files. You can format all JS and C++ files with the following command:
-```
-grunt format
-```
-
-When writing the bindings, data arriving from Javascript is considered unreliable and must be validated. If it does not validate correctly, an exception must be thrown immediately after the failed check, and the process must be aborted. Data arriving from C is considered reliable and can be assigned to Javascript immediately.
-
-Functions converting Javascript structures to C structures are named ```c_CStructureName``` and have the following signature:
-
-```C++
-bool c_CStructureName( Local<Object> jsStructureName, CStructureName **p_putStructurePointerHere );
-```
-
-This signature allows us to throw an exception and return false if any part of ```jsStructureName``` fails validation. The caller can then also return false immediately, and the binding can ultimately return undefined immediately.
-
-As a general principle, if a Javascript value fails validation, throw an exception immediately. Do not return false and expect the caller to throw the exception. Call it exception-at-the-point-of-failure.
-
-Pointers to structures received from the C API may always be null. The functions converting those pointers to Javascript objects (js_CStructureName()) assume that they are not null. So, wrap the call to such a function in a null-check.
-
-When filling out a C structure in a function c_CStructureName, create a local structure first, and only if all validations pass, memcpy() the local structure into the structure passed in.
 
 [jQuery]: http://contribute.jquery.org/style-guide/js/
