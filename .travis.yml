@@ -4,46 +4,64 @@ language: cpp
 
 matrix:
   include:
-    - env: NODE_VERSION=0.10 BUILD_ONLY=false
+    - env: NODE_VERSION=0.10 BUILD_ONLY=false LINT_ONLY=false
       os: linux
-    - env: NODE_VERSION=0.12 BUILD_ONLY=false
+      addons: &buildpackages
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - libboost-all-dev
+          - libcurl4-openssl-dev
+          - uuid-dev
+          - g++-4.8
+
+    - env: NODE_VERSION=0.12 BUILD_ONLY=false LINT_ONLY=false
       os: linux
-    - env: NODE_VERSION=0.12 BUILD_ONLY=true
+      addons: *buildpackages
+
+    - env: NODE_VERSION=0.12 BUILD_ONLY=false LINT_ONLY=true
+      os: linux
+
+    - env: NODE_VERSION=0.12 BUILD_ONLY=true LINT_ONLY=false
       os: osx
 
     # Allowed failures must be specified twice - once in "include" to have them
     # run, and again in "allowed_failures" to not have them break the build.
     # Below are the allowed failures:
 
-    - env: NODE_VERSION=0.10 BUILD_ONLY=false
+    - env: NODE_VERSION=0.10 BUILD_ONLY=false LINT_ONLY=false
       os: osx
-    - env: NODE_VERSION=0.12 BUILD_ONLY=false
+    - env: NODE_VERSION=0.12 BUILD_ONLY=false LINT_ONLY=false
       os: osx
 
   allow_failures:
-    - env: NODE_VERSION=0.10 BUILD_ONLY=false
+    - env: NODE_VERSION=0.10 BUILD_ONLY=false LINT_ONLY=false
       os: osx
-    - env: NODE_VERSION=0.12 BUILD_ONLY=false
+    - env: NODE_VERSION=0.12 BUILD_ONLY=false LINT_ONLY=false
       os: osx
 
 install:
-- if test "x${TRAVIS_OS_NAME}x" = "xlinuxx"; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+- >
+  if test "x${TRAVIS_OS_NAME}x" = "xlinuxx"; then
+    export CXX="g++-4.8" CC="gcc-4.8"
+  fi
 - rm -rf ~/.nvm
 - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash
 - source ~/.nvm/nvm.sh
 - nvm install "${NODE_VERSION}"
 - npm install -g npm@^2.14.2
-- if test "x${TRAVIS_OS_NAME}x" = "xosxx"; then brew install scons; fi
+- >
+  if test "x${TRAVIS_OS_NAME}x" = "xosxx"; then
+    brew install scons
+  fi
 - npm install -g grunt-cli
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - libboost-all-dev
-    - libcurl4-openssl-dev
-    - uuid-dev
-    - g++-4.8
-
-script: if test "x${BUILD_ONLY}x" = "xtruex"; then npm run-script ci-basic; else npm run-script ci; fi
+script: >
+  if test "x${LINT_ONLY}x" = "xtruex"; then
+    npm run-script ci-lint
+  elif test "x${BUILD_ONLY}x" = "xtruex"; then
+    npm run-script ci-basic
+  else
+    npm run-script ci;
+  fi

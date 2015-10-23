@@ -7,8 +7,9 @@
   "engine": "node 0.12.2",
   "main": "index.js",
   "scripts": {
-    "ci": "TESTING=true npm install && npm test -- --ci",
-    "ci-basic": "TESTING=true npm install && npm test -- --suites='Load Library.js' --ci",
+    "ci": "TESTING=true npm install && grunt testsuite testdist --ci",
+    "ci-basic": "TESTING=true npm install && grunt testsuite testdist --suites='Load Library.js' --ci",
+    "ci-lint": "./dist.sh -r && grunt lint",
     "test": "grunt test"
   },
   "gypfile": true,
@@ -29,6 +30,7 @@
     "load-grunt-config": "^0.17.2",
     "load-grunt-tasks": "^3.2.0",
     "qunitjs": "^1.18.0",
+    "shelljs": "^0.5.3",
     "uuid": "^2.0.1"
   }
 }

@@ -22,6 +22,9 @@ Pointers to structures received from the C API may always be null. The functions
 
 When filling out a C structure in a function c_CStructureName, create a local structure first, and only if all validations pass, memcpy() the local structure into the structure passed in.
 
+### Additional dependencies
+```clang-format``` is required for formatting the C++ source code and, since the test suite ensures that the code is properly formatted by comparing the code as present to the code after an application of ```grunt format```, ```clang-format``` is also required for running the tests. Your distribution should provide this utility.
+
 ### Tests
 
 To run the tests, simply run ```grunt test```. A script called ```dist.sh``` is also provided. It runs ```npm install```, runs the tests, then runs ```npm prune --production``` to remove all sources, headers, and build dependencies. After that, it copies relevant files to ```dist/``` and creates a tarball from them. This is followed by running ```npm install``` again to restore the development environment.

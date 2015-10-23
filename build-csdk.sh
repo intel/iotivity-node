@@ -13,7 +13,7 @@ DO_DEBUG=false
 DO_CLEANUP=true
 DO_PC=false
 
-while [[ $# -gt 0 ]]; do
+while test $# -gt 0; do
 	if test "x$1x" = "x--debugx" -o "x$1x" = "x-dx"; then
 		DO_DEBUG=true
 		DO_CLEANUP=false
