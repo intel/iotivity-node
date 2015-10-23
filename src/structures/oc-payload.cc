@@ -600,40 +600,41 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
     for (index = 0; index < length; index++) {
       Local<Value> value = valuesObject->Get(keys->Get(index)->ToString());
       if (value->IsNull()) {
-        if (!OCRepPayloadSetNull(
-                payload, (const char *)*String::Utf8Value(keys->Get(index)))) {
+        String::Utf8Value name(keys->Get(index));
+        if (!OCRepPayloadSetNull(payload, (const char *)*name)) {
           NanThrowError("reppayload: Failed to set null property");
           OCRepPayloadDestroy(payload);
           return false;
         }
       } else if (value->IsUint32()) {
-        if (!OCRepPayloadSetPropInt(
-                payload, (const char *)*String::Utf8Value(keys->Get(index)),
-                (int64_t)value->Uint32Value())) {
+        String::Utf8Value name(keys->Get(index));
+        if (!OCRepPayloadSetPropInt(payload, (const char *)*name,
+                                    (int64_t)value->Uint32Value())) {
           OCRepPayloadDestroy(payload);
           NanThrowError("reppayload: Failed to set integer property");
           return false;
         }
       } else if (value->IsNumber()) {
-        if (!OCRepPayloadSetPropDouble(
-                payload, (const char *)*String::Utf8Value(keys->Get(index)),
-                value->NumberValue())) {
+        String::Utf8Value name(keys->Get(index));
+        if (!OCRepPayloadSetPropDouble(payload, (const char *)*name,
+                                       value->NumberValue())) {
           OCRepPayloadDestroy(payload);
           NanThrowError("reppayload: Failed to set floating point property");
           return false;
         }
       } else if (value->IsBoolean()) {
-        if (!OCRepPayloadSetPropBool(
-                payload, (const char *)*String::Utf8Value(keys->Get(index)),
-                value->BooleanValue())) {
+        String::Utf8Value name(keys->Get(index));
+        if (!OCRepPayloadSetPropBool(payload, (const char *)*name,
+                                     value->BooleanValue())) {
           NanThrowError("reppayload: Failed to set boolean property");
           OCRepPayloadDestroy(payload);
           return false;
         }
       } else if (value->IsString()) {
-        if (!OCRepPayloadSetPropString(
-                payload, (const char *)*String::Utf8Value(keys->Get(index)),
-                (const char *)*String::Utf8Value(value))) {
+        String::Utf8Value name(keys->Get(index));
+        String::Utf8Value stringValue(value);
+        if (!OCRepPayloadSetPropString(payload, (const char *)*name,
+                                       (const char *)*stringValue)) {
           NanThrowError("reppayload: Failed to set string property");
           OCRepPayloadDestroy(payload);
           return false;
@@ -642,9 +643,9 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
         OCRepPayload *child_payload = 0;
 
         if (c_OCRepPayload(value->ToObject(), &child_payload)) {
-          if (!OCRepPayloadSetPropObjectAsOwner(
-                  payload, (const char *)*String::Utf8Value(keys->Get(index)),
-                  child_payload)) {
+          String::Utf8Value name(keys->Get(index));
+          if (!OCRepPayloadSetPropObjectAsOwner(payload, (const char *)*name,
+                                                child_payload)) {
             NanThrowError("reppayload: Failed to set object property");
             OCRepPayloadDestroy(payload);
             return false;
