@@ -10,18 +10,18 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-NanCallback *g_currentCallback = 0;
+Nan::Callback *g_currentCallback = 0;
 
 static OCEntityHandlerResult defaultDeviceEntityHandler(
     OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, char *uri,
     void *context) {
   Local<Value> jsCallbackArguments[3] = {
-      NanNew<Number>(flag), js_OCEntityHandlerRequest(request),
-      (uri ? NanNew<Value>(NanNew<String>(uri))
-           : NanNew<Value>(NanUndefined()))};
+      Nan::New(flag), js_OCEntityHandlerRequest(request),
+      (uri ? Nan::New<Value>((Handle<String>)Nan::New(uri).ToLocalChecked())
+           : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()))};
 
-  Local<Value> returnValue = ((NanCallback *)context)->Call(
-      NanGetCurrentContext()->Global(), 3, jsCallbackArguments);
+  Local<Value> returnValue =
+      ((Nan::Callback *)context)->Call(3, jsCallbackArguments);
 
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
                                       "OCDeviceEntityHandler");
@@ -30,16 +30,14 @@ static OCEntityHandlerResult defaultDeviceEntityHandler(
 }
 
 NAN_METHOD(bind_OCSetDefaultDeviceEntityHandler) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 0, IsFunction);
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 0, IsFunction);
 
   OCDeviceEntityHandler newHandler = 0;
-  NanCallback *newCallback = 0, *callbackToDelete = 0;
+  Nan::Callback *newCallback = 0, *callbackToDelete = 0;
 
-  if (args[0]->IsFunction()) {
-    newCallback = new NanCallback(Local<Function>::Cast(args[0]));
+  if (info[0]->IsFunction()) {
+    newCallback = new Nan::Callback(Local<Function>::Cast(info[0]));
     newHandler = defaultDeviceEntityHandler;
   }
 
@@ -57,5 +55,5 @@ NAN_METHOD(bind_OCSetDefaultDeviceEntityHandler) {
     delete callbackToDelete;
   }
 
-  NanReturnValue(NanNew<Number>(result));
+  info.GetReturnValue().Set(Nan::New(result));
 }

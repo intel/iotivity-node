@@ -15,20 +15,18 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-static void deleteNanCallback(NanCallback *callback) { delete callback; }
+static void deleteNanCallback(Nan::Callback *callback) { delete callback; }
 
 // Create an object containing the information from an OCClientResponse
 // structure
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
-  NanScope();
-
   // Call the JS Callback
   Local<Value> jsCallbackArguments[2] = {js_OCDoHandle(handle),
                                          js_OCClientResponse(clientResponse)};
 
-  Local<Value> returnValue = ((NanCallback *)context)->Call(
-      NanGetCurrentContext()->Global(), 2, jsCallbackArguments);
+  Local<Value> returnValue =
+      ((Nan::Callback *)context)->Call(2, jsCallbackArguments);
 
   // Validate value we got back from it
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
@@ -39,7 +37,16 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
 }
 
 NAN_METHOD(bind_OCDoResource) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 8);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
+  VALIDATE_ARGUMENT_TYPE(info, 2, IsString);
+  VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 3, IsObject);
+  VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 4, IsObject);
+  VALIDATE_ARGUMENT_TYPE(info, 5, IsUint32);
+  VALIDATE_ARGUMENT_TYPE(info, 6, IsUint32);
+  VALIDATE_ARGUMENT_TYPE(info, 7, IsFunction);
+  VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 8, IsArray);
 
   OCDevAddr *destination = 0, destinationToFillIn;
   OCPayload *payload = 0;
@@ -48,71 +55,61 @@ NAN_METHOD(bind_OCDoResource) {
   OCDoHandle handle;
   OCCallbackData data;
 
-  VALIDATE_ARGUMENT_COUNT(args, 8);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);
-  VALIDATE_ARGUMENT_TYPE(args, 2, IsString);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 3, IsObject);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 4, IsObject);
-  VALIDATE_ARGUMENT_TYPE(args, 5, IsUint32);
-  VALIDATE_ARGUMENT_TYPE(args, 6, IsUint32);
-  VALIDATE_ARGUMENT_TYPE(args, 7, IsFunction);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 8, IsArray);
-
-  data.context = (void *)(new NanCallback(Local<Function>::Cast(args[7])));
+  data.context = (void *)(new Nan::Callback(Local<Function>::Cast(info[7])));
   data.cb = defaultOCClientResponseHandler;
   data.cd = (OCClientContextDeleter)deleteNanCallback;
 
-  if (args[8]->IsArray()) {
-    Local<Array> optionArray = Local<Array>::Cast(args[8]);
+  if (info[8]->IsArray()) {
+    Local<Array> optionArray = Local<Array>::Cast(info[8]);
     size_t length = optionArray->Length();
 
     if (length > 0) {
       options = (OCHeaderOption *)malloc(length * sizeof(OCHeaderOption));
       if (!options) {
-        return NanThrowError(
+        Nan::ThrowError(
             "Ran out of memory attempting to allocate header options");
-        NanReturnUndefined();
+        return;
       }
       if (!c_OCHeaderOption(optionArray, options, &optionCount)) {
         free(options);
-        NanReturnUndefined();
+        return;
       }
     }
   }
 
   // If a destination is given, we only use it if it can be converted to a
   // OCDevAddr structure
-  if (args[3]->IsObject()) {
-    if (c_OCDevAddr(args[3]->ToObject(), &destinationToFillIn)) {
+  if (info[3]->IsObject()) {
+    if (c_OCDevAddr(info[3]->ToObject(), &destinationToFillIn)) {
       destination = &destinationToFillIn;
     } else {
       free(options);
-      NanReturnUndefined();
+      return;
     }
   }
 
   // If a payload is given, we only use it if it can be converted to a OCPayload
   // *
-  if (args[4]->IsObject()) {
-    if (!c_OCPayload(args[4]->ToObject(), &payload)) {
+  if (info[4]->IsObject()) {
+    if (!c_OCPayload(info[4]->ToObject(), &payload)) {
       free(options);
-      NanReturnUndefined();
+      return;
     }
   }
 
-  Local<Number> returnValue = NanNew<Number>((double)OCDoResource(
-      &handle, (OCMethod)args[1]->Uint32Value(),
-      (const char *)*String::Utf8Value(args[2]), destination, payload,
-      (OCConnectivityType)args[5]->Uint32Value(),
-      (OCQualityOfService)args[6]->Uint32Value(), &data, options,
-      (uint8_t)args[9]->Uint32Value()));
+  Local<Number> returnValue = Nan::New(
+      OCDoResource(&handle, (OCMethod)info[1]->Uint32Value(),
+                   (const char *)*String::Utf8Value(info[2]), destination,
+                   payload, (OCConnectivityType)info[5]->Uint32Value(),
+                   (OCQualityOfService)info[6]->Uint32Value(), &data, options,
+                   (uint8_t)info[9]->Uint32Value()));
 
   free(options);
 
   // We need not free the payload because it seems iotivity takes ownership.
 
-  args[0]->ToObject()->Set(NanNew<String>("handle"), js_OCDoHandle(handle));
+  info[0]->ToObject()->Set(Nan::New("handle").ToLocalChecked(),
+                           js_OCDoHandle(handle));
 
-  NanReturnValue(returnValue);
+  info.GetReturnValue().Set(returnValue);
 }

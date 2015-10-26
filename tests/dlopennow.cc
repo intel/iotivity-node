@@ -8,16 +8,15 @@ extern "C" {
 using namespace v8;
 
 NAN_METHOD( bind_dlopennow ) {
-	NanScope();
 	void *theLibrary = 0;
 	dlerror();
 
-	if ( !args[ 0 ]->IsString() ) {
-		NanThrowTypeError( "Argument must be a string" );
-		NanReturnUndefined();
+	if ( !info[ 0 ]->IsString() ) {
+		Nan::ThrowTypeError( "Argument must be a string" );
+		return;
 	}
 
-	theLibrary = dlopen( (const char *)*String::Utf8Value(args[0]), RTLD_NOW );
+	theLibrary = dlopen( (const char *)*String::Utf8Value(info[0]), RTLD_NOW );
 
 	char *theError = dlerror();
 
@@ -25,18 +24,18 @@ NAN_METHOD( bind_dlopennow ) {
 		if ( theLibrary ) {
 			dlclose( theLibrary );
 		}
-		NanReturnValue( NanNew<String>( theError ) );
+		info.GetReturnValue().Set( Nan::New( theError ).ToLocalChecked() );
+		return;
 	}
 
 	if ( theLibrary ) {
 		dlclose( theLibrary );
 	}
-	NanReturnUndefined();
 }
 
-void Init(Handle<Object> exports, Handle<Object> module) {
-	exports->Set( NanNew<String>( "dlopennow" ),
-		NanNew<FunctionTemplate>( bind_dlopennow )->GetFunction() );
+NAN_MODULE_INIT(Init) {
+	Nan::Set( target, Nan::New( "dlopennow" ).ToLocalChecked(),
+		Nan::GetFunction( Nan::New<FunctionTemplate>( bind_dlopennow ) ).ToLocalChecked() );
 }
 
 NODE_MODULE( dlopennow, Init )

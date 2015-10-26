@@ -15,30 +15,32 @@ using namespace v8;
 using namespace node;
 
 Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
-  Local<Object> jsRequest = NanNew<Object>();
+  Local<Object> jsRequest = Nan::New<Object>();
 
-  jsRequest->Set(NanNew<String>("resource"),
-                 js_OCResourceHandle(request->resource));
+  Nan::Set(jsRequest, Nan::New("resource").ToLocalChecked(),
+           js_OCResourceHandle(request->resource));
 
-  jsRequest->Set(NanNew<String>("requestHandle"),
-                 js_OCRequestHandle(request->requestHandle));
+  Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
+           js_OCRequestHandle(request->requestHandle));
 
   SET_VALUE_ON_OBJECT(jsRequest, Number, request, method);
   SET_STRING_IF_NOT_NULL(jsRequest, request, query);
 
-  Local<Object> obsInfo = NanNew<Object>();
+  Local<Object> obsInfo = Nan::New<Object>();
   SET_VALUE_ON_OBJECT(obsInfo, Number, &(request->obsInfo), action);
   SET_VALUE_ON_OBJECT(obsInfo, Number, &(request->obsInfo), obsId);
-  jsRequest->Set(NanNew<String>("obsInfo"), obsInfo);
+  Nan::Set(jsRequest, Nan::New("obsInfo").ToLocalChecked(), obsInfo);
 
-  jsRequest->Set(
-      NanNew<String>("rcvdVendorSpecificHeaderOptions"),
-      js_OCHeaderOption(request->rcvdVendorSpecificHeaderOptions,
-                        request->numRcvdVendorSpecificHeaderOptions));
+  Nan::Set(jsRequest,
+           Nan::New("rcvdVendorSpecificHeaderOptions").ToLocalChecked(),
+           js_OCHeaderOption(request->rcvdVendorSpecificHeaderOptions,
+                             request->numRcvdVendorSpecificHeaderOptions));
 
-  jsRequest->Set(NanNew<String>("devAddr"), js_OCDevAddr(&(request->devAddr)));
+  Nan::Set(jsRequest, Nan::New("devAddr").ToLocalChecked(),
+           js_OCDevAddr(&(request->devAddr)));
   if (request->payload) {
-    jsRequest->Set(NanNew<String>("payload"), js_OCPayload(request->payload));
+    Nan::Set(jsRequest, Nan::New("payload").ToLocalChecked(),
+             js_OCPayload(request->payload));
   }
 
   return jsRequest;

@@ -12,21 +12,19 @@ using namespace v8;
 using namespace node;
 
 NAN_METHOD(bind_OCDoResponse) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
 
   OCEntityHandlerResponse response;
   OCStackResult result;
 
-  VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
-
-  if (!c_OCEntityHandlerResponse(args[0]->ToObject(), &response)) {
-    NanReturnUndefined();
+  if (!c_OCEntityHandlerResponse(info[0]->ToObject(), &response)) {
+    return;
   }
 
   result = OCDoResponse(&response);
   if (response.payload) {
     OCPayloadDestroy(response.payload);
   }
-  NanReturnValue(NanNew<Number>(result));
+  info.GetReturnValue().Set(Nan::New(result));
 }

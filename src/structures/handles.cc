@@ -6,10 +6,10 @@ using namespace v8;
 
 static Local<Array> jsArrayFromBytes(unsigned char *bytes, size_t length) {
   size_t index;
-  Local<Array> returnValue = NanNew<Array>(length);
+  Local<Array> returnValue = Nan::New<Array>(length);
 
   for (index = 0; index < length; index++) {
-    returnValue->Set(index, NanNew<Number>(bytes[index]));
+    Nan::Set(returnValue, index, Nan::New(bytes[index]));
   }
   return returnValue;
 }
@@ -20,12 +20,12 @@ static bool fillCArrayFromJSArray(unsigned char *bytes, size_t length,
 
   arrayLength = array->Length();
   if (arrayLength != length) {
-    NanThrowError("byte array has the wrong length");
+    Nan::ThrowError("byte array has the wrong length");
     return false;
   }
 
   for (index = 0; index < length; index++) {
-    Local<Value> byte = array->Get(index);
+    Local<Value> byte = Nan::Get(array, index).ToLocalChecked();
     VALIDATE_VALUE_TYPE(byte, IsUint32, "byte array item", false);
     bytes[index] = (unsigned char)(byte->Uint32Value());
   }

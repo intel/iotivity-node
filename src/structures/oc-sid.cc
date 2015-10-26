@@ -12,12 +12,12 @@ using namespace v8;
 void fillJSSid(Local<Array> jsSid, uint8_t *sid) {
   int index;
   for (index = 0; index < UUID_SIZE; index++) {
-    jsSid->Set(index, NanNew<Number>(sid[index]));
+    jsSid->Set(index, Nan::New(sid[index]));
   }
 }
 
 Local<Array> js_SID(uint8_t *sid) {
-  Local<Array> returnValue = NanNew<Array>(UUID_SIZE);
+  Local<Array> returnValue = Nan::New<Array>(UUID_SIZE);
 
   fillJSSid(returnValue, sid);
 
@@ -29,12 +29,12 @@ bool c_SID(Local<Array> jsSid, uint8_t *sid) {
   uint8_t result[UUID_SIZE];
 
   if (jsSid->Length() > UUID_SIZE) {
-    NanThrowRangeError("SID length must be UUID_SIZE");
+    Nan::ThrowRangeError("SID length must be UUID_SIZE");
     return false;
   }
 
   for (index = 0; index < UUID_SIZE; index++) {
-    Local<Value> oneByte = jsSid->Get(index);
+    Local<Value> oneByte = Nan::Get(jsSid, index).ToLocalChecked();
     VALIDATE_VALUE_TYPE(oneByte, IsUint32, "SID byte", false);
     result[index] = oneByte->Uint32Value();
   }

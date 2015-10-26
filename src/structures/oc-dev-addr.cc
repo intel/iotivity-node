@@ -10,7 +10,7 @@ using namespace v8;
 
 Local<Object> js_OCDevAddr(OCDevAddr *address) {
   uint32_t index;
-  Local<Object> returnValue = NanNew<Object>();
+  Local<Object> returnValue = Nan::New<Object>();
 
   SET_VALUE_ON_OBJECT(returnValue, Number, address, adapter);
   SET_VALUE_ON_OBJECT(returnValue, Number, address, flags);
@@ -18,11 +18,11 @@ Local<Object> js_OCDevAddr(OCDevAddr *address) {
   SET_VALUE_ON_OBJECT(returnValue, Number, address, port);
 
   // addr.addr
-  Local<Array> addr = NanNew<Array>(MAX_ADDR_STR_SIZE);
+  Local<Array> addr = Nan::New<Array>(MAX_ADDR_STR_SIZE);
   for (index = 0; index < MAX_ADDR_STR_SIZE; index++) {
-    addr->Set(index, NanNew<Number>(address->addr[index]));
+    Nan::Set(addr, index, Nan::New(address->addr[index]));
   }
-  returnValue->Set(NanNew<String>("addr"), addr);
+  Nan::Set(returnValue, Nan::New("addr").ToLocalChecked(), addr);
 
   return returnValue;
 }
@@ -41,19 +41,20 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
                       Uint32Value);
 
   // addr.addr
-  Local<Value> addr = jsDevAddr->Get(NanNew<String>("addr"));
+  Local<Value> addr =
+      Nan::Get(jsDevAddr, Nan::New("addr").ToLocalChecked()).ToLocalChecked();
   VALIDATE_VALUE_TYPE(addr, IsArray, "addr.addr", false);
   Local<Array> addrArray = Local<Array>::Cast(addr);
   length = addrArray->Length();
   if (length > MAX_ADDR_STR_SIZE) {
-    NanThrowRangeError(
+    Nan::ThrowRangeError(
         "OCDevAddr: Number of JS structure address bytes exceeds "
         "MAX_ADDR_STR_SIZE");
     return false;
   }
   for (index = 0; index < MAX_ADDR_STR_SIZE; index++) {
     if (index < length) {
-      Local<Value> addressItem = addrArray->Get(index);
+      Local<Value> addressItem = Nan::Get(addrArray, index).ToLocalChecked();
       VALIDATE_VALUE_TYPE(addressItem, IsUint32, "addr.addr item", false);
       local.addr[index] = (char)addressItem->Uint32Value();
     } else {

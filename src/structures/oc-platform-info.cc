@@ -10,7 +10,7 @@ extern "C" {
 using namespace v8;
 
 v8::Local<v8::Object> js_OCPlatformInfo(OCPlatformInfo *info) {
-  Local<Object> returnValue = NanNew<Object>();
+  Local<Object> returnValue = Nan::New<Object>();
 
   SET_STRING_IF_NOT_NULL(returnValue, info, platformID);
   SET_STRING_IF_NOT_NULL(returnValue, info, manufacturerName);
@@ -42,16 +42,19 @@ void c_OCPlatformInfoFreeMembers(OCPlatformInfo *info) {
 }
 
 // The macro below makes use of variables defined inside c_OCPlatformInfo
-#define C_PLATFORM_INFO_MEMBER(platformInfo, memberName)                      \
-  if (keepGoing && (platformInfo)->Has(NanNew<String>(#memberName))) {        \
-    Local<Value> memberName = platformInfo->Get(NanNew<String>(#memberName)); \
-    if (!memberName->IsString()) {                                            \
-      NanThrowTypeError("platformInfo." #memberName                           \
-                        " must be a string if it is present");                \
-      keepGoing = false;                                                      \
-    } else if (!c_StringNew(memberName->ToString(), &(local.memberName))) {   \
-      keepGoing = false;                                                      \
-    }                                                                         \
+#define C_PLATFORM_INFO_MEMBER(platformInfo, memberName)                    \
+  if (keepGoing &&                                                          \
+      (platformInfo)->Has(Nan::New(#memberName).ToLocalChecked())) {        \
+    Local<Value> memberName =                                               \
+        Nan::Get(platformInfo, Nan::New(#memberName).ToLocalChecked())      \
+            .ToLocalChecked();                                              \
+    if (!memberName->IsString()) {                                          \
+      Nan::ThrowTypeError("platformInfo." #memberName                       \
+                          " must be a string if it is present");            \
+      keepGoing = false;                                                    \
+    } else if (!c_StringNew(memberName->ToString(), &(local.memberName))) { \
+      keepGoing = false;                                                    \
+    }                                                                       \
   }
 
 bool c_OCPlatformInfo(Local<Object> platformInfo, OCPlatformInfo *info) {

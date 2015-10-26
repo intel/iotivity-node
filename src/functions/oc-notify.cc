@@ -14,37 +14,33 @@ using namespace v8;
 using namespace node;
 
 NAN_METHOD(bind_OCNotifyAllObservers) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
 
   OCResourceHandle handle;
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
-  NanReturnValue(NanNew<Number>(OCNotifyAllObservers(
-      handle, (OCQualityOfService)args[1]->Uint32Value())));
+  info.GetReturnValue().Set(Nan::New(OCNotifyAllObservers(
+      handle, (OCQualityOfService)info[1]->Uint32Value())));
 }
 
 NAN_METHOD(bind_OCNotifyListOfObservers) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 4);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 2, IsObject);
-  VALIDATE_ARGUMENT_TYPE(args, 3, IsUint32);
+  VALIDATE_ARGUMENT_COUNT(info, 4);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 2, IsObject);
+  VALIDATE_ARGUMENT_TYPE(info, 3, IsUint32);
 
   OCResourceHandle handle;
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
   // Construct the C array of observation IDs.
-  Local<Array> obsIds = Local<Array>::Cast(args[1]);
+  Local<Array> obsIds = Local<Array>::Cast(info[1]);
   uint8_t arrayLength = (uint8_t)obsIds->Length();
 
   OCObservationId *c_observations = 0;
@@ -53,36 +49,36 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
     c_observations =
         (OCObservationId *)malloc(arrayLength * sizeof(OCObservationId));
     if (!c_observations && arrayLength > 0) {
-      NanThrowError(
+      Nan::ThrowError(
           "OCNotifyListOfObservers: Failed to allocate list of observers");
-      NanReturnUndefined();
+      return;
     }
   }
 
   // Populate a C-like array from the V8 array
   int index;
   for (index = 0; index < arrayLength; index++) {
-    Local<Value> oneObservationId = obsIds->Get(index);
+    Local<Value> oneObservationId = Nan::Get(obsIds, index).ToLocalChecked();
     if (!(oneObservationId->IsUint32())) {
       free(c_observations);
-      NanThrowTypeError("OCObservationID must satisfy IsUint32()");
-      NanReturnUndefined();
+      Nan::ThrowTypeError("OCObservationID must satisfy IsUint32()");
+      return;
     }
     c_observations[index] = (OCObservationId)oneObservationId->Uint32Value();
   }
 
   OCRepPayload *payload = 0;
-  if (!c_OCPayload(args[2]->ToObject(), (OCPayload **)&payload)) {
+  if (!c_OCPayload(info[2]->ToObject(), (OCPayload **)&payload)) {
     free(c_observations);
-    NanReturnUndefined();
+    return;
   }
 
-  Local<Number> returnValue = NanNew<Number>(
+  Local<Number> returnValue = Nan::New(
       OCNotifyListOfObservers(handle, c_observations, arrayLength, payload,
-                              (OCQualityOfService)args[3]->Uint32Value()));
+                              (OCQualityOfService)info[3]->Uint32Value()));
 
   free(c_observations);
   OCRepPayloadDestroy(payload);
 
-  NanReturnValue(returnValue);
+  info.GetReturnValue().Set(returnValue);
 }

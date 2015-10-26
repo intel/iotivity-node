@@ -12,21 +12,22 @@ extern "C" {
 using namespace v8;
 
 Local<Object> js_OCClientResponse(OCClientResponse *response) {
-  Local<Object> returnValue = NanNew<Object>();
+  Local<Object> returnValue = Nan::New<Object>();
 
   // response.devAddr
-  returnValue->Set(NanNew<String>("devAddr"),
-                   js_OCDevAddr(&(response->devAddr)));
+  Nan::Set(returnValue, Nan::New("devAddr").ToLocalChecked(),
+           js_OCDevAddr(&(response->devAddr)));
 
   // response.addr
   if (response->addr) {
-    returnValue->Set(NanNew<String>("addr"), js_OCDevAddr(response->addr));
+    Nan::Set(returnValue, Nan::New("addr").ToLocalChecked(),
+             js_OCDevAddr(response->addr));
   }
 
   // response.payload
   if (response->payload) {
-    returnValue->Set(NanNew<String>("payload"),
-                     js_OCPayload(response->payload));
+    Nan::Set(returnValue, Nan::New("payload").ToLocalChecked(),
+             js_OCPayload(response->payload));
   }
 
   SET_VALUE_ON_OBJECT(returnValue, Number, response, connType);
@@ -40,10 +41,10 @@ Local<Object> js_OCClientResponse(OCClientResponse *response) {
     SET_STRING_IF_NOT_NULL(returnValue, response, resourceUri);
 
     // response.rcvdVendorSpecificHeaderOptions
-    returnValue->Set(
-        NanNew<String>("rcvdVendorSpecificHeaderOptions"),
-        js_OCHeaderOption(response->rcvdVendorSpecificHeaderOptions,
-                          response->numRcvdVendorSpecificHeaderOptions));
+    Nan::Set(returnValue,
+             Nan::New("rcvdVendorSpecificHeaderOptions").ToLocalChecked(),
+             js_OCHeaderOption(response->rcvdVendorSpecificHeaderOptions,
+                               response->numRcvdVendorSpecificHeaderOptions));
   }
 
   return returnValue;

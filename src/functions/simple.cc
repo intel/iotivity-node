@@ -11,48 +11,36 @@ extern "C" {
 using namespace v8;
 
 NAN_METHOD(bind_OCInit) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 3);
+  VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 0, IsString);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
+  VALIDATE_ARGUMENT_TYPE(info, 2, IsUint32);
 
-  VALIDATE_ARGUMENT_COUNT(args, 3);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 0, IsString);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);
-  VALIDATE_ARGUMENT_TYPE(args, 2, IsUint32);
-
-  NanReturnValue(NanNew<Number>(OCInit(
-      (const char *)(args[0]->IsString() ? (*String::Utf8Value(args[0])) : 0),
-      (uint16_t)args[1]->Uint32Value(), (OCMode)args[2]->Uint32Value())));
+  info.GetReturnValue().Set(Nan::New(OCInit(
+      (const char *)(info[0]->IsString() ? (*String::Utf8Value(info[0])) : 0),
+      (uint16_t)info[1]->Uint32Value(), (OCMode)info[2]->Uint32Value())));
 }
 
-NAN_METHOD(bind_OCStop) {
-  NanScope();
+NAN_METHOD(bind_OCStop) { info.GetReturnValue().Set(Nan::New(OCStop())); }
 
-  NanReturnValue(NanNew<Number>(OCStop()));
-}
-
-NAN_METHOD(bind_OCProcess) {
-  NanScope();
-
-  NanReturnValue(NanNew<Number>(OCProcess()));
-}
+NAN_METHOD(bind_OCProcess) { info.GetReturnValue().Set(Nan::New(OCProcess())); }
 
 NAN_METHOD(bind_OCStartPresence) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
 
-  VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsUint32);
-
-  NanReturnValue(
-      NanNew<Number>(OCStartPresence((uint32_t)args[0]->Uint32Value())));
+  info.GetReturnValue().Set(
+      Nan::New(OCStartPresence((uint32_t)info[0]->Uint32Value())));
 }
 
 NAN_METHOD(bind_OCStopPresence) {
-  NanScope();
-
-  NanReturnValue(NanNew<Number>(OCStopPresence()));
+  info.GetReturnValue().Set(Nan::New(OCStopPresence()));
 }
 
 static bool c_OCDeviceInfo(Local<Object> devInfo, OCDeviceInfo *info) {
-  Local<Value> deviceName = devInfo->Get(NanNew<String>("deviceName"));
+  Local<Value> deviceName =
+      Nan::Get(devInfo, Nan::New("deviceName").ToLocalChecked())
+          .ToLocalChecked();
   VALIDATE_VALUE_TYPE(deviceName, IsString, "deviceInfo.deviceName", false);
   char *devName;
   if (!c_StringNew(deviceName->ToString(), &devName)) {
@@ -63,153 +51,142 @@ static bool c_OCDeviceInfo(Local<Object> devInfo, OCDeviceInfo *info) {
 }
 
 NAN_METHOD(bind_OCSetDeviceInfo) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
 
-  VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  OCDeviceInfo deviceInfo;
 
-  OCDeviceInfo info;
-
-  if (!c_OCDeviceInfo(args[0]->ToObject(), &info)) {
-    NanReturnUndefined();
+  if (!c_OCDeviceInfo(info[0]->ToObject(), &deviceInfo)) {
+    return;
   }
 
-  OCStackResult result = OCSetDeviceInfo(info);
+  OCStackResult result = OCSetDeviceInfo(deviceInfo);
 
-  free(info.deviceName);
+  free(deviceInfo.deviceName);
 
-  NanReturnValue(NanNew<Number>(result));
+  info.GetReturnValue().Set(Nan::New(result));
 }
 
 NAN_METHOD(bind_OCSetPlatformInfo) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
 
-  VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  OCPlatformInfo platformInfo;
 
-  OCPlatformInfo info;
-
-  if (!c_OCPlatformInfo(args[0]->ToObject(), &info)) {
-    NanReturnUndefined();
+  if (!c_OCPlatformInfo(info[0]->ToObject(), &platformInfo)) {
+    return;
   }
 
-  OCStackResult result = OCSetPlatformInfo(info);
+  OCStackResult result = OCSetPlatformInfo(platformInfo);
 
-  c_OCPlatformInfoFreeMembers(&info);
+  c_OCPlatformInfoFreeMembers(&platformInfo);
 
-  NanReturnValue(NanNew<Number>(result));
+  info.GetReturnValue().Set(Nan::New(result));
 }
 
 NAN_METHOD(bind_OCGetNumberOfResourceInterfaces) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsObject);
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
 
   OCResourceHandle handle = 0;
   uint8_t interfaceCount = 0;
   OCStackResult result;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
   result = OCGetNumberOfResourceInterfaces(handle, &interfaceCount);
 
-  args[1]->ToObject()->Set(NanNew<String>("count"),
-                           NanNew<Number>(interfaceCount));
+  Nan::Set(info[1]->ToObject(), Nan::New("count").ToLocalChecked(),
+           Nan::New(interfaceCount));
 
-  NanReturnValue(NanNew<Number>(result));
+  info.GetReturnValue().Set(Nan::New(result));
 }
 
 NAN_METHOD(bind_OCGetNumberOfResourceTypes) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsObject);
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
 
   OCResourceHandle handle = 0;
   uint8_t typeCount = 0;
   OCStackResult result;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
   result = OCGetNumberOfResourceInterfaces(handle, &typeCount);
 
-  args[1]->ToObject()->Set(NanNew<String>("count"), NanNew<Number>(typeCount));
+  Nan::Set(info[1]->ToObject(), Nan::New("count").ToLocalChecked(),
+           Nan::New(typeCount));
 
-  NanReturnValue(NanNew<Number>(result));
+  info.GetReturnValue().Set(Nan::New(result));
 }
 
 NAN_METHOD(bind_OCGetNumberOfResources) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
 
   OCStackResult result;
   uint8_t resourceCount = 0;
 
   result = OCGetNumberOfResources(&resourceCount);
 
-  args[0]->ToObject()->Set(NanNew<String>("count"),
-                           NanNew<Number>(resourceCount));
+  Nan::Set(info[0]->ToObject(), Nan::New("count").ToLocalChecked(),
+           Nan::New(resourceCount));
 
-  NanReturnValue(NanNew<Number>(result));
+  info.GetReturnValue().Set(Nan::New(result));
 }
 
 NAN_METHOD(bind_OCGetResourceHandle) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsUint32);
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
 
   OCResourceHandle handle = 0;
 
-  handle = OCGetResourceHandle((uint8_t)(args[0]->Uint32Value()));
+  handle = OCGetResourceHandle((uint8_t)(info[0]->Uint32Value()));
 
   if (handle) {
-    NanReturnValue(js_OCResourceHandle(handle));
+    info.GetReturnValue().Set(js_OCResourceHandle(handle));
   } else {
-    NanReturnNull();
+    info.GetReturnValue().Set(Nan::Null());
   }
 }
 
 #define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()                   \
-  NanScope();                                                      \
   OCResourceHandle handle = 0;                                     \
-  VALIDATE_ARGUMENT_COUNT(args, 2);                                \
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);                        \
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);                       \
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) { \
-    NanReturnUndefined();                                          \
+  VALIDATE_ARGUMENT_COUNT(info, 2);                                \
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);                        \
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);                       \
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) { \
+    return;                                                        \
   }
 
 NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();
 
   OCResourceHandle resourceHandle =
-      OCGetResourceHandleFromCollection(handle, args[1]->Uint32Value());
+      OCGetResourceHandleFromCollection(handle, info[1]->Uint32Value());
 
   if (resourceHandle) {
-    NanReturnValue(js_OCResourceHandle(resourceHandle));
+    info.GetReturnValue().Set(js_OCResourceHandle(resourceHandle));
   } else {
-    NanReturnNull();
+    info.GetReturnValue().Set(Nan::Null());
   }
 }
 
 #define GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(apiFunction) \
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();                        \
   const char *resultOf##apiFunction =                              \
-      apiFunction(handle, args[1]->Uint32Value());                 \
+      apiFunction(handle, info[1]->Uint32Value());                 \
   if (resultOf##apiFunction) {                                     \
-    NanReturnValue(NanNew<String>(resultOf##apiFunction));         \
+    info.GetReturnValue().Set(                                     \
+        Nan::New(resultOf##apiFunction).ToLocalChecked());         \
   } else {                                                         \
-    NanReturnNull();                                               \
+    info.GetReturnValue().Set(Nan::Null());                        \
   }
 
 NAN_METHOD(bind_OCGetResourceInterfaceName) {
@@ -221,18 +198,17 @@ NAN_METHOD(bind_OCGetResourceTypeName) {
 }
 
 #define LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE()             \
-  NanScope();                                                      \
-  VALIDATE_ARGUMENT_COUNT(args, 1);                                \
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);                        \
+  VALIDATE_ARGUMENT_COUNT(info, 1);                                \
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);                        \
   OCResourceHandle handle = 0;                                     \
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) { \
-    NanReturnUndefined();                                          \
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) { \
+    return;                                                        \
   }
 
 NAN_METHOD(bind_OCGetResourceProperties) {
   LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE();
 
-  NanReturnValue(NanNew<Number>(OCGetResourceProperties(handle)));
+  info.GetReturnValue().Set(Nan::New(OCGetResourceProperties(handle)));
 }
 
 NAN_METHOD(bind_OCGetResourceUri) {
@@ -241,55 +217,51 @@ NAN_METHOD(bind_OCGetResourceUri) {
   const char *uri = OCGetResourceUri(handle);
 
   if (uri) {
-    NanReturnValue(NanNew<String>(uri));
+    info.GetReturnValue().Set(Nan::New(uri).ToLocalChecked());
   } else {
-    NanReturnNull();
+    info.GetReturnValue().Set(Nan::Null());
   }
 }
 
 NAN_METHOD(bind_OCUnBindResource) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsArray);
 
   OCResourceHandle collectionHandle = 0, resourceHandle = 0;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &collectionHandle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &collectionHandle)) {
+    return;
   }
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[1]), &resourceHandle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[1]), &resourceHandle)) {
+    return;
   }
 
-  NanReturnValue(
-      NanNew<Number>(OCUnBindResource(collectionHandle, resourceHandle)));
+  info.GetReturnValue().Set(
+      Nan::New(OCUnBindResource(collectionHandle, resourceHandle)));
 }
 
 #ifdef TESTING
 NAN_METHOD(bind___compareResourceHandles) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsArray);
 
   OCResourceHandle lhs = 0, rhs = 0;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &lhs)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &lhs)) {
+    return;
   }
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[1]), &rhs)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[1]), &rhs)) {
+    return;
   }
 
   if (lhs == rhs) {
-    NanReturnValue(NanTrue());
+    info.GetReturnValue().Set(Nan::True());
   } else {
-    NanReturnValue(NanFalse());
+    info.GetReturnValue().Set(Nan::False());
   }
 }
 #endif /* def TESTING */

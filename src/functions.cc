@@ -12,10 +12,10 @@
 
 using namespace v8;
 
-#define SET_FUNCTION(destination, functionName) \
-  (destination)                                 \
-      ->Set(NanNew<String>(#functionName),      \
-            NanNew<FunctionTemplate>(bind_##functionName)->GetFunction())
+#define SET_FUNCTION(destination, functionName)                              \
+  Nan::Set((destination), Nan::New(#functionName).ToLocalChecked(),          \
+           Nan::GetFunction(Nan::New<FunctionTemplate>(bind_##functionName)) \
+               .ToLocalChecked())
 
 void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   SET_FUNCTION(exports, OCBindResource);
