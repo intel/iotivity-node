@@ -32,7 +32,7 @@ sensor.on( "change", function( newData ) {
 		}
 	}
 	if ( updates.length > 0 ) {
-		device._server.notify( lightResource.id, "update", updates );
+		device.server.notify( lightResource.id, "update", updates );
 	}
 } );
 
@@ -42,11 +42,11 @@ function lightResourceOnRequest( request ) {
 	}
 }
 
-if ( device._settings.info.uuid ) {
-	device._server.registerResource( {
+if ( device.settings.info.uuid ) {
+	device.server.registerResource( {
 		url: "/a/high-level-example",
-		deviceId: device._settings.info.uuid,
-		connectionMode: device._settings.connectionMode,
+		deviceId: device.settings.info.uuid,
+		connectionMode: device.settings.connectionMode,
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],
 		discoverable: true,
