@@ -55,7 +55,7 @@ if ( device.settings.info.uuid ) {
 	} ).then(
 		function( resource ) {
 			lightResource = resource;
-			resource._server.addEventListener( "request", lightResourceOnRequest );
+			device.server.addEventListener( "request", lightResourceOnRequest );
 		},
 		function( error ) {
 			throw error;

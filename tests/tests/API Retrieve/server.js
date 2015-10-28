@@ -47,7 +47,7 @@ device.configure( {
 			function( resource ) {
 				theResource = resource;
 				utils.assert( "ok", true, "Server: device.server.registerResource() successful" );
-				resource._server.addEventListener( "request", resourceOnRequest );
+				device.server.addEventListener( "request", resourceOnRequest );
 
 				// Signal to the test suite that we're ready for the client
 				console.log( JSON.stringify( { ready: true } ) );
