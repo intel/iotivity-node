@@ -8,7 +8,7 @@ console.log( JSON.stringify( { assertionCount: 6 } ) );
 
 function resourceOnRequest( request ) {
 	totalRequests++;
-	utils.assert( "strictEqual", request.type, "retrieve", "Request is of type retrieve" );
+	utils.assert( "strictEqual", request.type, "retrieve", "Server: Request is of type retrieve" );
 	if ( request.type === "retrieve" ) {
 		request.sendResponse( request.source ).then(
 			function() {
