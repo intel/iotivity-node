@@ -1,4 +1,4 @@
-var _ = require( "underscore" ),
+var _ = require( "lodash" ),
 	commonJSHintOptions = require( "../../jshint-options.json" );
 
 module.exports = {

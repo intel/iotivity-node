@@ -6,7 +6,7 @@ var intervalId,
 			returnValue = {
 
 				// By default we discover resources
-				discoveryUri: iotivity.OC_RSRVD_WELL_KNOWN_URI
+				discoveryUri: iotivity.OC_MULTICAST_DISCOVERY_URI
 			};
 
 		for ( index in process.argv ) {

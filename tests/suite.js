@@ -1,7 +1,7 @@
 var QUnit,
 	async = require( "async" ),
 	glob = require( "glob" ),
-	_ = require( "underscore" ),
+	_ = require( "lodash" ),
 	childProcess = require( "child_process" ),
 	fs = require( "fs" ),
 	path = require( "path" ),

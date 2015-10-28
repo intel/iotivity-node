@@ -10,7 +10,11 @@ grunt.task.registerTask( "testdist", "Test the distributed version", function() 
 		[
 			"-c",
 			"./dist.sh -i " + ( grunt.option( "ci" ) ? "-n" : "" ) +
-			"&& cd dist/" + packageName + " && node ./index.js && node ./lowlevel.js"
+			"&& cd dist/" + packageName +
+			"&& echo '*** Loading high-level API ***'" +
+			"&& node ./index.js" +
+			"&& echo '*** Loading low-level API ***'" +
+			"&& node ./lowlevel.js"
 		],
 		{ stdio: "inherit" } )
 		.on( "exit", function( code ) {

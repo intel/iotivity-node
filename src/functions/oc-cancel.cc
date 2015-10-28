@@ -14,29 +14,28 @@ using namespace v8;
 using namespace node;
 
 NAN_METHOD(bind_OCCancel) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 3);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsUint32);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(args, 2, IsArray);
+  VALIDATE_ARGUMENT_COUNT(info, 3);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
+  VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 2, IsArray);
 
   OCDoHandle handle;
-  OCHeaderOption headerOptions[MAX_HEADER_OPTIONS];
+  OCHeaderOption headerOptions[MAX_HEADER_OPTIONS] = {
+      {OC_INVALID_ID, 0, 0, {0}}};
   uint8_t numberOfOptions = 0;
 
-  if (!c_OCDoHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCDoHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
-  if (args[2]->IsArray()) {
-    if (!c_OCHeaderOption(Local<Array>::Cast(args[2]), headerOptions,
+  if (info[2]->IsArray()) {
+    if (!c_OCHeaderOption(Local<Array>::Cast(info[2]), headerOptions,
                           &numberOfOptions)) {
-      NanReturnUndefined();
+      return;
     }
   }
 
-  NanReturnValue(NanNew<Number>(
-      OCCancel(handle, (OCQualityOfService)args[1]->Uint32Value(),
-               headerOptions, numberOfOptions)));
+  info.GetReturnValue().Set(
+      Nan::New(OCCancel(handle, (OCQualityOfService)info[1]->Uint32Value(),
+                        headerOptions, numberOfOptions)));
 }

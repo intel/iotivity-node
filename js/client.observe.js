@@ -23,7 +23,7 @@ iotivity.OCDoResource(
 	iotivity.OCMethod.OC_REST_DISCOVER,
 
 	// Standard path for discovering resources
-	iotivity.OC_RSRVD_WELL_KNOWN_URI,
+	iotivity.OC_MULTICAST_DISCOVERY_URI,
 
 	// There is no destination
 	null,

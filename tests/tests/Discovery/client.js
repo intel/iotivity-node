@@ -47,7 +47,7 @@ processLoop = setInterval( function() {
 result = iotivity.OCDoResource(
 	discoverHandleReceptacle,
 	iotivity.OCMethod.OC_REST_DISCOVER,
-	iotivity.OC_RSRVD_WELL_KNOWN_URI,
+	iotivity.OC_MULTICAST_DISCOVERY_URI,
 	null,
 	null,
 	iotivity.OCConnectivityType.CT_DEFAULT,

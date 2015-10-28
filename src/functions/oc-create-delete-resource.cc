@@ -14,16 +14,16 @@ using namespace v8;
 using namespace node;
 
 // Associate the callback info with a resource handle
-static std::map<OCResourceHandle, NanCallback *> annotation;
+static std::map<OCResourceHandle, Nan::Callback *> annotation;
 
 static OCEntityHandlerResult defaultEntityHandler(
     OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *context) {
   // Construct arguments to the JS callback and then call it, recording its
   // return value
-  Local<Value> jsCallbackArguments[2] = {NanNew<Number>(flag),
+  Local<Value> jsCallbackArguments[2] = {Nan::New(flag),
                                          js_OCEntityHandlerRequest(request)};
-  Local<Value> returnValue = ((NanCallback *)context)->Call(
-      NanGetCurrentContext()->Global(), 2, jsCallbackArguments);
+  Local<Value> returnValue =
+      ((Nan::Callback *)context)->Call(2, jsCallbackArguments);
 
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32, "OCEntityHandler");
 
@@ -31,44 +31,40 @@ static OCEntityHandlerResult defaultEntityHandler(
 }
 
 NAN_METHOD(bind_OCCreateResource) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 6);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
-  VALIDATE_ARGUMENT_TYPE(args, 2, IsString);
-  VALIDATE_ARGUMENT_TYPE(args, 3, IsString);
-  VALIDATE_ARGUMENT_TYPE(args, 4, IsFunction);
-  VALIDATE_ARGUMENT_TYPE(args, 5, IsUint32);
+  VALIDATE_ARGUMENT_COUNT(info, 6);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
+  VALIDATE_ARGUMENT_TYPE(info, 2, IsString);
+  VALIDATE_ARGUMENT_TYPE(info, 3, IsString);
+  VALIDATE_ARGUMENT_TYPE(info, 4, IsFunction);
+  VALIDATE_ARGUMENT_TYPE(info, 5, IsUint32);
 
   OCResourceHandle handle = 0;
-  NanCallback *callback = new NanCallback(Local<Function>::Cast(args[4]));
+  Nan::Callback *callback = new Nan::Callback(Local<Function>::Cast(info[4]));
 
-  Local<Number> returnValue = NanNew<Number>(OCCreateResource(
-      &handle, (const char *)*String::Utf8Value(args[1]),
-      (const char *)*String::Utf8Value(args[2]),
-      (const char *)*String::Utf8Value(args[3]), defaultEntityHandler,
-      (void *)callback, (uint8_t)args[5]->Uint32Value()));
+  Local<Number> returnValue = Nan::New(OCCreateResource(
+      &handle, (const char *)*String::Utf8Value(info[1]),
+      (const char *)*String::Utf8Value(info[2]),
+      (const char *)*String::Utf8Value(info[3]), defaultEntityHandler,
+      (void *)callback, (uint8_t)info[5]->Uint32Value()));
 
   // Save info to the handle
   annotation[handle] = callback;
-  args[0]->ToObject()->Set(NanNew<String>("handle"),
+  info[0]->ToObject()->Set(Nan::New("handle").ToLocalChecked(),
                            js_OCResourceHandle(handle));
-  NanReturnValue(returnValue);
+  info.GetReturnValue().Set(returnValue);
 }
 
 NAN_METHOD(bind_OCDeleteResource) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
 
   OCStackResult returnValue;
   OCResourceHandle handle = 0;
 
   // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
   // Delete the resource identified by the handle
@@ -76,31 +72,29 @@ NAN_METHOD(bind_OCDeleteResource) {
 
   if (returnValue == OC_STACK_OK) {
     // If deleting the resource worked, get rid of the entity handler
-    NanCallback *callback = annotation[handle];
+    Nan::Callback *callback = annotation[handle];
     annotation.erase(handle);
     if (callback) {
       delete callback;
     }
   }
 
-  NanReturnValue(NanNew<Number>(returnValue));
+  info.GetReturnValue().Set(Nan::New(returnValue));
 }
 
 NAN_METHOD(bind_OCBindResourceHandler) {
-  NanScope();
-
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsFunction);
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsFunction);
 
   OCResourceHandle handle = 0;
 
   // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
-  NanCallback *callback = new NanCallback(Local<Function>::Cast(args[1]));
+  Nan::Callback *callback = new Nan::Callback(Local<Function>::Cast(info[1]));
 
   // Replace the existing entity handler with the new callback
   OCStackResult returnValue =
@@ -109,7 +103,7 @@ NAN_METHOD(bind_OCBindResourceHandler) {
   if (returnValue == OC_STACK_OK) {
     // If setting the new entity handler worked, get rid of the original entity
     // handler and associate the new one with the handle.
-    NanCallback *oldCallback = annotation[handle];
+    Nan::Callback *oldCallback = annotation[handle];
     if (oldCallback) {
       delete oldCallback;
     }
@@ -120,76 +114,68 @@ NAN_METHOD(bind_OCBindResourceHandler) {
     delete callback;
   }
 
-  NanReturnValue(NanNew<Number>(returnValue));
+  info.GetReturnValue().Set(Nan::New(returnValue));
 }
 
 NAN_METHOD(bind_OCBindResource) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsArray);
 
   OCResourceHandle collectionHandle = 0, resourceHandle = 0;
 
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsArray);
-
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &collectionHandle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &collectionHandle)) {
+    return;
   }
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[1]), &resourceHandle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[1]), &resourceHandle)) {
+    return;
   }
 
-  NanReturnValue(
-      NanNew<Number>(OCBindResource(collectionHandle, resourceHandle)));
+  info.GetReturnValue().Set(
+      Nan::New(OCBindResource(collectionHandle, resourceHandle)));
 }
 
 NAN_METHOD(bind_OCBindResourceInterfaceToResource) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
 
   OCResourceHandle handle = 0;
 
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
-
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
-  NanReturnValue(NanNew<Number>(OCBindResourceInterfaceToResource(
-      handle, (const char *)*String::Utf8Value(args[1]))));
+  info.GetReturnValue().Set(Nan::New(OCBindResourceInterfaceToResource(
+      handle, (const char *)*String::Utf8Value(info[1]))));
 }
 
 NAN_METHOD(bind_OCBindResourceTypeToResource) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
 
   OCResourceHandle handle = 0;
 
-  VALIDATE_ARGUMENT_COUNT(args, 2);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(args, 1, IsString);
-
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
-  NanReturnValue(NanNew<Number>(OCBindResourceTypeToResource(
-      handle, (const char *)*String::Utf8Value(args[1]))));
+  info.GetReturnValue().Set(Nan::New(OCBindResourceTypeToResource(
+      handle, (const char *)*String::Utf8Value(info[1]))));
 }
 
 // This is not actually a binding. We get the resource handler from the
 // annotation.
 NAN_METHOD(bind_OCGetResourceHandler) {
-  NanScope();
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
 
   OCResourceHandle handle = 0;
 
-  VALIDATE_ARGUMENT_COUNT(args, 1);
-  VALIDATE_ARGUMENT_TYPE(args, 0, IsArray);
-
-  if (!c_OCResourceHandle(Local<Array>::Cast(args[0]), &handle)) {
-    NanReturnUndefined();
+  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+    return;
   }
 
-  NanReturnValue((*(*annotation[handle])));
+  info.GetReturnValue().Set((*(*annotation[handle])));
 }

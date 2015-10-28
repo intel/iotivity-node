@@ -70,14 +70,14 @@ cat ${OCTYPES_H} ${OCRANDOM_H} ${OCPRESENCE_H} | \
     if ( PRINT == 1 ) {
       if ( !( $1 ~ /^[{}]/ ) && $1 != "typedef" ) {
 	    if ( $1 ~ /^[A-Z]/ ) {
-          OUTPUT = OUTPUT "  SET_CONSTANT_MEMBER(returnValue, Number, " $1 ");\n";
+          OUTPUT = OUTPUT "  SET_CONSTANT_NUMBER(returnValue, " $1 ");\n";
         }
       } else if ( $1 ~ /^}/ ) {
 	    ENUM_NAME = $0;
 	    gsub( /^} */, "", ENUM_NAME );
 	    gsub( / *;.*$/, "", ENUM_NAME );
         ENUM_LIST = ENUM_LIST "  SET_ENUM(exports, " ENUM_NAME ");\n";
-        print("static Local<Object> bind_" ENUM_NAME "() {\n  Local<Object> returnValue = NanNew<Object>();\n" );
+        print("static Local<Object> bind_" ENUM_NAME "() {\n  Local<Object> returnValue = Nan::New<Object>();\n" );
       }
       else if ( $1 != "typedef" && $1 != "{" ) {
         print;
@@ -105,9 +105,9 @@ parseFileForConstants() { # $1: filename
 		grep '^#define' | \
 		awk '{
 			if ( NF > 2 ) {
-				printf("  SET_CONSTANT_MEMBER(exports, " );
-				printf( ( substr($3, 1, 1) == "\"" ) ? "String": "Number" );
-				print( ", " $2 ");" );
+				printf("  SET_CONSTANT_" );
+				printf( ( substr($3, 1, 1) == "\"" ) ? "STRING": "NUMBER" );
+				print( "(exports, " $2 ");" );
 			}
 		}' | \
 		sort -u

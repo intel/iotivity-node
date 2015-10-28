@@ -13,11 +13,11 @@ v8::Local<v8::Array> js_OCHeaderOption(OCHeaderOption *options,
                                        uint8_t optionCount) {
   uint8_t index;
   uint16_t dataIndex;
-  Local<Array> returnValue = NanNew<Array>(optionCount);
+  Local<Array> returnValue = Nan::New<Array>(optionCount);
 
   for (index = 0; index < optionCount; index++) {
     // options[ index ]
-    Local<Object> item = NanNew<Object>();
+    Local<Object> item = Nan::New<Object>();
 
     SET_VALUE_ON_OBJECT(item, Number, &options[index], protocolID);
     SET_VALUE_ON_OBJECT(item, Number, &options[index], optionID);
@@ -27,13 +27,13 @@ v8::Local<v8::Array> js_OCHeaderOption(OCHeaderOption *options,
         (options[index].optionLength > MAX_HEADER_OPTION_DATA_LENGTH
              ? MAX_HEADER_OPTION_DATA_LENGTH
              : options[index].optionLength);
-    Local<Array> optionData = NanNew<Array>(optionLength);
+    Local<Array> optionData = Nan::New<Array>(optionLength);
     for (dataIndex = 0; dataIndex < optionLength; dataIndex++) {
-      optionData->Set(dataIndex,
-                      NanNew<Number>(options[index].optionData[dataIndex]));
+      Nan::Set(optionData, dataIndex,
+               Nan::New(options[index].optionData[dataIndex]));
     }
 
-    returnValue->Set(index, item);
+    Nan::Set(returnValue, index, item);
   }
 
   return returnValue;
@@ -47,14 +47,14 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
   OCHeaderOption options[MAX_HEADER_OPTIONS];
 
   if (length > MAX_HEADER_OPTIONS) {
-    NanThrowRangeError("Too many header options");
+    Nan::ThrowRangeError("Too many header options");
     return false;
   }
 
   if (length > 0) {
     for (index = 0; index < length; index++) {
       // option[ index ]
-      Local<Value> item = jsOptions->Get(index);
+      Local<Value> item = Nan::Get(jsOptions, index).ToLocalChecked();
       VALIDATE_VALUE_TYPE(item, IsObject, "OCHeaderOption array item", false);
       Local<Object> itemObject = Local<Object>::Cast(item);
 
@@ -66,13 +66,15 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
                           Uint32Value);
 
       // option[ index ].optionData
-      Local<Value> optionData = itemObject->Get(NanNew<String>("optionData"));
+      Local<Value> optionData =
+          Nan::Get(itemObject, Nan::New("optionData").ToLocalChecked())
+              .ToLocalChecked();
       VALIDATE_VALUE_TYPE(optionData, IsArray,
                           "(OCHeaderOption array item).optionData", false);
       Local<Array> optionDataArray = Local<Array>::Cast(optionData);
       dataLength = optionDataArray->Length();
       if (dataLength > MAX_HEADER_OPTION_DATA_LENGTH) {
-        NanThrowRangeError(
+        Nan::ThrowRangeError(
             "(OCHeaderOption array item).optionData: Number of JS structure "
             "data bytes exceeds "
             "MAX_HEADER_OPTION_DATA_LENGTH");
@@ -81,7 +83,8 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
       for (dataIndex = 0; dataIndex < MAX_HEADER_OPTION_DATA_LENGTH;
            dataIndex++) {
         if (dataIndex < dataLength) {
-          Local<Value> optionDataItem = optionDataArray->Get(dataIndex);
+          Local<Value> optionDataItem =
+              Nan::Get(optionDataArray, dataIndex).ToLocalChecked();
           VALIDATE_VALUE_TYPE(optionDataItem, IsUint32,
                               "(OCHeaderOption array item).optionData item",
                               false);

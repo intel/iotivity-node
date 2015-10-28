@@ -1,4 +1,4 @@
-var _ = require( "underscore" ),
+var _ = require( "lodash" ),
 	testUtils = function( iotivity ) {
 		if ( !this._isTestUtils ) {
 			return new testUtils( iotivity );

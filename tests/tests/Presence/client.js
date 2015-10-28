@@ -158,7 +158,7 @@ function doDiscovery() {
 		result = iotivity.OCDoResource(
 			handleReceptacle,
 			iotivity.OCMethod.OC_REST_DISCOVER,
-			iotivity.OC_RSRVD_WELL_KNOWN_URI,
+			iotivity.OC_MULTICAST_DISCOVERY_URI,
 			null,
 			null,
 			iotivity.OCConnectivityType.CT_DEFAULT,
