@@ -33,7 +33,7 @@ device.configure( settings ).then(
 			function( resource ) {
 				utils.assert( "ok", true, "registerResource() successful" );
 				lightResource = resource;
-				resource.server.addEventListener( "request", lightResourceOnRequest );
+				resource._server.addEventListener( "request", lightResourceOnRequest );
 				console.log( JSON.stringify( { ready: true } ) );
 			},
 			function( error ) {
