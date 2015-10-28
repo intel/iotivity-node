@@ -22,7 +22,7 @@ device.configure( {
 	function() {
 		utils.assert( "ok", true, "Client: device.configure() successful" );
 
-		device._client.addEventListener( "resourcefound", function( event ) {
+		device.client.addEventListener( "resourcefound", function( event ) {
 
 			if ( !resourceFound && event.resource.uri === "/a/" + uuid ) {
 				resourceFound = true;
@@ -33,7 +33,7 @@ device.configure( {
 			}
 		} );
 
-		device._client.findResources().then(
+		device.client.findResources().then(
 			function() {
 				utils.assert( "ok", true, "Client: findResources() successful" );
 				maybeQuit();

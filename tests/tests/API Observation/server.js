@@ -20,10 +20,10 @@ device.configure( settings ).then(
 	function() {
 		utils.assert( "ok", true, "device.configure() successful" );
 
-		device._server.registerResource( {
+		device.server.registerResource( {
 			url: "/a/" + uuid,
 			deviceId: uuid,
-			connectionMode: device._settings.connectionMode,
+			connectionMode: device.settings.connectionMode,
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],
 			discoverable: true,
@@ -33,7 +33,7 @@ device.configure( settings ).then(
 			function( resource ) {
 				utils.assert( "ok", true, "registerResource() successful" );
 				lightResource = resource;
-				resource._server.addEventListener( "request", lightResourceOnRequest );
+				resource.server.addEventListener( "request", lightResourceOnRequest );
 				console.log( JSON.stringify( { ready: true } ) );
 			},
 			function( error ) {
@@ -61,7 +61,7 @@ sensor.on( "change", function( newData ) {
 		}
 	}
 	if ( updates.length > 0 ) {
-		device._server.notify( lightResource.id, "update", updates ).then(
+		device.server.notify( lightResource.id, "update", updates ).then(
 			function() {},
 			function( error ) {
 				utils.die( "notify() failed with " + error + " and result " + error.result );
