@@ -2,58 +2,44 @@ var _ = require( "lodash" ),
 	async = require( "async" ),
 	utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )(),
+	iotivity = require( "bindings" )( "iotivity" ),
 	uuid = process.argv[ 2 ];
 
-console.log( JSON.stringify( { assertionCount: 6 } ) );
+console.log( JSON.stringify( { assertionCount: 9 } ) );
 
-function discoverTheResource( callback ) {
-	var eventHandler = function( event ) {
-			var index,
-				count = 0,
-				url = "/a/" + uuid;
+function discoverTheResource() {
 
-			if ( event.resource.url === url ) {
-				utils.assert( "ok", true, "Client: Resource found" );
+	return Promise.all( [
+		new Promise( function( fulfill ) {
+			var eventHandler = function( event ) {
+				var index,
+					count = 0,
+					url = "/a/" + uuid;
 
-				for ( index in device.client._resources ) {
-					if ( device.client._resources[ index ].url === url ) {
-						count++;
+				if ( event.resource.url === url ) {
+					utils.assert( "ok", true, "Client: Resource found" );
+
+					for ( index in device.client._resources ) {
+						if ( device.client._resources[ index ].url === url ) {
+							count++;
+						}
 					}
+
+					utils.assert( "strictEqual", count, 1,
+						"Client: Resource present exactly once among resources" );
+
+					device.client.removeEventListener( "resourcefound", eventHandler );
+					fulfill();
 				}
+			};
 
-				utils.assert( "strictEqual", count, 1,
-					"Client: Resource present exactly once among resources" );
-
-				maybeDone();
-			}
-		},
-		maybeDoneCount = 0,
-		maybeDone = function( error ) {
-			var doCallback = false;
-			if ( error ) {
-				doCallback = true;
-			} else {
-				maybeDoneCount++;
-				if ( maybeDoneCount >= 2 ) {
-					doCallback = true;
-				}
-			}
-			if ( doCallback ) {
-				device.client.removeEventListener( "resourcefound", eventHandler );
-				callback( error );
-			}
-		};
-
-		device.client.addEventListener( "resourcefound", eventHandler );
-
+			device.client.addEventListener( "resourcefound", eventHandler );
+		} ),
 		device.client.findResources().then(
 			function() {
 				utils.assert( "ok", true, "Client: device.client.findResources() successful" );
-				maybeDone();
-			},
-			function( error ) {
-				maybeDone( _.extend( error, { step: "device.client.findResources()" } ) );
-			} );
+			} )
+	] );
 }
 
 async.series( [
@@ -72,9 +58,57 @@ async.series( [
 			} );
 	},
 
-	// Discover the resource twice
-	discoverTheResource,
-	discoverTheResource
+	// Discover the resource once
+	function( callback ) {
+		utils.assert( "strictEqual", device.client.findResources._handle, undefined,
+			"Client: open-ended resource discovery handle is initially undefined" );
+		discoverTheResource().then(
+			function() {
+				callback( null );
+			},
+			function( error ) {
+				callback( _.extend( error, { step: "first discovery" } ) );
+			} );
+	},
+
+	// Discover the resource again
+	function( callback ) {
+
+		// We move on when discovery has completed and when OCCancel() was called
+		Promise.all( [
+			new Promise( function( fulfill ) {
+				var OCCancel = iotivity.OCCancel,
+					discoveryHandle = device.client.findResources._handle;
+
+				utils.assert( "strictEqual", !!device.client.findResources._handle, true,
+					"Client: open-ended resource discovery handle is set after one discovery" );
+
+				// Overwrite iotivity.OCCancel() to make sure it gets called during the next
+				// discovery, and that it gets called with the existing open-ended resource
+				// discovery handle.
+				iotivity.OCCancel = function( handle ) {
+					utils.assert( "strictEqual",
+						iotivity.__compareDoHandles( handle, discoveryHandle ),
+						true, "Client: OCCancel() called with open-ended resource discovery " +
+							"handle before next discovery request" );
+					fulfill();
+
+					// We expect only one call to OCCancel() so restore the original
+					iotivity.OCCancel = OCCancel;
+
+					// Chain back to the original
+					return OCCancel.apply( this, arguments );
+				};
+			} ),
+			discoverTheResource()
+			] ).then(
+			function() {
+				callback( null );
+			},
+			function( error ) {
+				callback( _.extend( error, { step: "second discovery" } ) );
+			} );
+	}
 
 ], function( error ) {
 	if ( error ) {
