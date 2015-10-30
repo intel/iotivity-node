@@ -8,10 +8,16 @@ var _ = require( "lodash" ),
 console.log( JSON.stringify( { assertionCount: 9 } ) );
 
 function discoverTheResource() {
+	var eventHandler,
+		removeListener = function() {
+			if ( eventHandler ) {
+				device.client.removeEventListener( "resourcefound", eventHandler );
+			}
+		};
 
 	return Promise.all( [
 		new Promise( function( fulfill ) {
-			var eventHandler = function( event ) {
+			eventHandler = function( event ) {
 				var index,
 					count = 0,
 					url = "/a/" + uuid;
@@ -27,8 +33,6 @@ function discoverTheResource() {
 
 					utils.assert( "strictEqual", count, 1,
 						"Client: Resource present exactly once among resources" );
-
-					device.client.removeEventListener( "resourcefound", eventHandler );
 					fulfill();
 				}
 			};
@@ -39,7 +43,7 @@ function discoverTheResource() {
 			function() {
 				utils.assert( "ok", true, "Client: device.client.findResources() successful" );
 			} )
-	] );
+	] ).then( removeListener, removeListener );
 }
 
 async.series( [
