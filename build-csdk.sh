@@ -3,11 +3,13 @@
 # Use node to parse package.json and extract the upstream version from the package version. This
 # assumes the package version is of the form major.minor.patch[-dev-commitid]. It grabs whatever
 # follows a zero-or-more-length-series of tokens that end in a dash.
-CSDK_REVISION="$(node -e '
-	console.log( require( "./package.json" ).version
-		.replace( /-[0-9]*$/, "" )
-		.replace( /^([^-]*-)*/, "" ) );
-')"
+if test "x${CSDK_REVISION}x" = "xx"; then
+	CSDK_REVISION="$(node -e '
+		console.log( require( "./package.json" ).version
+			.replace( /-[0-9]*$/, "" )
+			.replace( /^([^-]*-)*/, "" ) );
+	')"
+fi
 
 DO_DEBUG=false
 DO_CLEANUP=true
