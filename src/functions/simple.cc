@@ -264,4 +264,26 @@ NAN_METHOD(bind___compareResourceHandles) {
     info.GetReturnValue().Set(Nan::False());
   }
 }
+
+NAN_METHOD(bind___compareDoHandles) {
+  VALIDATE_ARGUMENT_COUNT(info, 2);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsArray);
+
+  OCDoHandle lhs = 0, rhs = 0;
+
+  if (!c_OCDoHandle(Local<Array>::Cast(info[0]), &lhs)) {
+    return;
+  }
+
+  if (!c_OCDoHandle(Local<Array>::Cast(info[1]), &rhs)) {
+    return;
+  }
+
+  if (lhs == rhs) {
+    info.GetReturnValue().Set(Nan::True());
+  } else {
+    info.GetReturnValue().Set(Nan::False());
+  }
+}
 #endif /* def TESTING */

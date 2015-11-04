@@ -8,7 +8,7 @@ console.log( JSON.stringify( { assertionCount: 6 } ) );
 
 function resourceOnRequest( request ) {
 	totalRequests++;
-	utils.assert( "strictEqual", request.type, "retrieve", "Request is of type retrieve" );
+	utils.assert( "strictEqual", request.type, "retrieve", "Server: Request is of type retrieve" );
 	if ( request.type === "retrieve" ) {
 		request.sendResponse( request.source ).then(
 			function() {
@@ -33,7 +33,7 @@ device.configure( {
 	function() {
 		utils.assert( "ok", true, "Server: device.configure() successful" );
 
-		device._server.registerResource( {
+		device.server.registerResource( {
 			url: "/a/" + uuid,
 			deviceId: uuid,
 			connectionMode: "acked",
@@ -46,14 +46,14 @@ device.configure( {
 		} ).then(
 			function( resource ) {
 				theResource = resource;
-				utils.assert( "ok", true, "Server: device._server.registerResource() successful" );
-				resource._server.addEventListener( "request", resourceOnRequest );
+				utils.assert( "ok", true, "Server: device.server.registerResource() successful" );
+				device.server.addEventListener( "request", resourceOnRequest );
 
 				// Signal to the test suite that we're ready for the client
 				console.log( JSON.stringify( { ready: true } ) );
 			},
 			function( error ) {
-				utils.die( "Server: device._server.registerResource() failed with: " + error +
+				utils.die( "Server: device.server.registerResource() failed with: " + error +
 					" and result " + error.result );
 			} );
 	},
@@ -65,13 +65,13 @@ device.configure( {
 // Cleanup on SIGINT
 process.on( "SIGINT", function() {
 	utils.assert( "strictEqual", totalRequests, 1, "There has been exactly one request" );
-	device._server.unregisterResource( theResource.id ).then(
+	device.server.unregisterResource( theResource.id ).then(
 		function() {
-			utils.assert( "ok", true, "Server: device._server.unregisterResource() successful" );
+			utils.assert( "ok", true, "Server: device.server.unregisterResource() successful" );
 			process.exit( 0 );
 		},
 		function( error ) {
-			utils.die( "Server: device._server.unregisterResource() failed with: " + error +
+			utils.die( "Server: device.server.unregisterResource() failed with: " + error +
 				" and result " + error.result );
 			process.exit( 0 );
 		} );

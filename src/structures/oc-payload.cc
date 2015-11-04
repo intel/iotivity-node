@@ -355,18 +355,16 @@ static bool jsTypeToOCRepPayloadPropTypeValidForArray(
 // Validate a multidimensional array of items of a given type
 //
 // If the array passed in contains arrays, their validity is checked
-// recursively, and it is
-// asserted that they all have the same length as the first one encountered.
-// Recursions are limited
-// to MAX_REP_ARRAY_DEPTH.
+// recursively, and it is asserted that they all have the same length as the
+// first one encountered. Recursions are limited to MAX_REP_ARRAY_DEPTH.
 //
 // If the array passed in contains primitive types, the type of the array is
-// established from the
-// first item, and it is asserted that subsequent items have the same type.
+// established from the first item, and it is asserted that subsequent items
+// have the same type.
 //
 // If the array is valid, p_typeEstablished, p_arrayType, and dimensions are set
-// and the function
-// returns true. Otherwise, it throws an exception and returns false.
+// and the function returns true. Otherwise, it throws an exception and returns
+// false.
 static bool validateRepPayloadArray(Local<Array> array, bool *p_typeEstablished,
                                     OCRepPayloadPropType *p_arrayType,
                                     size_t dimensions[MAX_REP_ARRAY_DEPTH],
@@ -389,7 +387,7 @@ static bool validateRepPayloadArray(Local<Array> array, bool *p_typeEstablished,
           return false;
         }
 
-        bool child_established;
+        bool child_established = false;
         OCRepPayloadPropType child_type;
         Local<Array> child_array = Local<Array>::Cast(member);
         if (child_array->Length() != child_length) {
@@ -459,60 +457,61 @@ static bool fillArray(void *flatArray, int *p_index, Local<Array> array,
   for (size_t localIndex = 0; localIndex < length; localIndex++) {
     Local<Value> member = Nan::Get(array, localIndex).ToLocalChecked();
     if (member->IsArray()) {
-      if (!fillArray(flatArray, p_index, array, arrayType)) {
+      if (!fillArray(flatArray, p_index, Local<Array>::Cast(member),
+                     arrayType)) {
         return false;
-      } else {
-        switch (arrayType) {
-          case OCREP_PROP_INT:
-            ((uint64_t *)flatArray)[(*p_index)++] =
-                (uint64_t)member->Uint32Value();
-            break;
+      }
+    } else {
+      switch (arrayType) {
+        case OCREP_PROP_INT:
+          ((uint64_t *)flatArray)[(*p_index)++] =
+              (uint64_t)member->Uint32Value();
+          break;
 
-          case OCREP_PROP_DOUBLE:
-            ((double *)flatArray)[(*p_index)++] = member->NumberValue();
-            break;
+        case OCREP_PROP_DOUBLE:
+          ((double *)flatArray)[(*p_index)++] = member->NumberValue();
+          break;
 
-          case OCREP_PROP_BOOL:
-            ((bool *)flatArray)[(*p_index)++] = member->BooleanValue();
-            break;
+        case OCREP_PROP_BOOL:
+          ((bool *)flatArray)[(*p_index)++] = member->BooleanValue();
+          break;
 
-          case OCREP_PROP_STRING: {
-            char *theString;
+        case OCREP_PROP_STRING: {
+          char *theString;
 
-            if (c_StringNew(member->ToString(), &theString)) {
-              ((char **)flatArray)[(*p_index)++] = theString;
-            } else {
-              // If we fail to copy the string, we free all strings allocated so
-              // far and we quit.
-              for (int freeIndex = 0; freeIndex < (*p_index); freeIndex++) {
-                free(((char **)flatArray)[freeIndex]);
-              }
-              return false;
+          if (c_StringNew(member->ToString(), &theString)) {
+            ((char **)flatArray)[(*p_index)++] = theString;
+          } else {
+            // If we fail to copy the string, we free all strings allocated so
+            // far and we quit.
+            for (int freeIndex = 0; freeIndex < (*p_index); freeIndex++) {
+              free(((char **)flatArray)[freeIndex]);
             }
-            break;
+            return false;
           }
-
-          case OCREP_PROP_OBJECT: {
-            OCRepPayload *theObject = 0;
-            if (c_OCRepPayload(member->ToObject(), &theObject)) {
-              ((OCRepPayload **)flatArray)[(*p_index)++] = theObject;
-            } else {
-              // If we fail to create the object, we free all objects allocated
-              // so far and we quit.
-              for (int freeIndex = 0; freeIndex < (*p_index); freeIndex++) {
-                OCRepPayloadDestroy(((OCRepPayload **)flatArray)[freeIndex]);
-              }
-              return false;
-            }
-            break;
-          }
-
-          // The validation should prevent these from occurring
-          case OCREP_PROP_NULL:
-          case OCREP_PROP_ARRAY:
-          default:
-            break;
+          break;
         }
+
+        case OCREP_PROP_OBJECT: {
+          OCRepPayload *theObject = 0;
+          if (c_OCRepPayload(member->ToObject(), &theObject)) {
+            ((OCRepPayload **)flatArray)[(*p_index)++] = theObject;
+          } else {
+            // If we fail to create the object, we free all objects allocated
+            // so far and we quit.
+            for (int freeIndex = 0; freeIndex < (*p_index); freeIndex++) {
+              OCRepPayloadDestroy(((OCRepPayload **)flatArray)[freeIndex]);
+            }
+            return false;
+          }
+          break;
+        }
+
+        // The validation should prevent these from occurring
+        case OCREP_PROP_NULL:
+        case OCREP_PROP_ARRAY:
+        default:
+          break;
       }
     }
   }
@@ -575,7 +574,9 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
         Nan::Get(jsPayload, Nan::New("uri").ToLocalChecked()).ToLocalChecked();
     VALIDATE_VALUE_TYPE_OR_FREE(uri, IsString, "reppayload.uri", false, payload,
                                 OCRepPayloadDestroy);
-    OCRepPayloadSetUri(payload, (const char *)*String::Utf8Value(uri));
+    if (!OCRepPayloadSetUri(payload, (const char *)*String::Utf8Value(uri))) {
+      goto fail;
+    }
   }
 
   // reppayload.types
@@ -590,8 +591,10 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
       Local<Value> singleType = Nan::Get(typesArray, index).ToLocalChecked();
       VALIDATE_VALUE_TYPE_OR_FREE(singleType, IsString, "reppayload.types item",
                                   false, payload, OCRepPayloadDestroy);
-      OCRepPayloadAddResourceType(payload,
-                                  (const char *)*String::Utf8Value(singleType));
+      if (!OCRepPayloadAddResourceType(
+              payload, (const char *)*String::Utf8Value(singleType))) {
+        goto fail;
+      }
     }
   }
 
@@ -610,8 +613,10 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
       VALIDATE_VALUE_TYPE_OR_FREE(singleInterface, IsString,
                                   "reppayload.interfaces item", false, payload,
                                   OCRepPayloadDestroy);
-      OCRepPayloadAddInterface(
-          payload, (const char *)*String::Utf8Value(singleInterface));
+      if (!OCRepPayloadAddInterface(
+              payload, (const char *)*String::Utf8Value(singleInterface))) {
+        goto fail;
+      }
     }
   }
 
@@ -634,32 +639,28 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
         String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
         if (!OCRepPayloadSetNull(payload, (const char *)*name)) {
           Nan::ThrowError("reppayload: Failed to set null property");
-          OCRepPayloadDestroy(payload);
-          return false;
+          goto fail;
         }
       } else if (value->IsUint32()) {
         String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
         if (!OCRepPayloadSetPropInt(payload, (const char *)*name,
                                     (int64_t)value->Uint32Value())) {
-          OCRepPayloadDestroy(payload);
           Nan::ThrowError("reppayload: Failed to set integer property");
-          return false;
+          goto fail;
         }
       } else if (value->IsNumber()) {
         String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
         if (!OCRepPayloadSetPropDouble(payload, (const char *)*name,
                                        value->NumberValue())) {
-          OCRepPayloadDestroy(payload);
           Nan::ThrowError("reppayload: Failed to set floating point property");
-          return false;
+          goto fail;
         }
       } else if (value->IsBoolean()) {
         String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
         if (!OCRepPayloadSetPropBool(payload, (const char *)*name,
                                      value->BooleanValue())) {
           Nan::ThrowError("reppayload: Failed to set boolean property");
-          OCRepPayloadDestroy(payload);
-          return false;
+          goto fail;
         }
       } else if (value->IsString()) {
         String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
@@ -667,8 +668,80 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
         if (!OCRepPayloadSetPropString(payload, (const char *)*name,
                                        (const char *)*stringValue)) {
           Nan::ThrowError("reppayload: Failed to set string property");
-          OCRepPayloadDestroy(payload);
-          return false;
+          goto fail;
+        }
+      } else if (value->IsArray()) {
+        size_t dimensions[MAX_REP_ARRAY_DEPTH] = {0};
+        bool typeEstablished = false;
+        OCRepPayloadPropType arrayType;
+        Local<Array> array = Local<Array>::Cast(value);
+        if (!validateRepPayloadArray(array, &typeEstablished, &arrayType,
+                                     dimensions, 0)) {
+          goto fail;
+        }
+
+        if (dimensions[0] > 0) {
+          void *flatArray;
+
+          if (!flattenArray(array, &flatArray, dimensions, arrayType)) {
+            goto fail;
+          }
+
+          String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
+          switch (arrayType) {
+            case OCREP_PROP_INT:
+              if (!OCRepPayloadSetIntArray(payload, (const char *)*name,
+                                           (const int64_t *)flatArray,
+                                           dimensions)) {
+                Nan::ThrowError(
+                    "reppayload: Failed to set integer array property");
+                goto fail;
+              }
+              break;
+
+            case OCREP_PROP_DOUBLE:
+              if (!OCRepPayloadSetDoubleArray(payload, (const char *)*name,
+                                              (const double *)flatArray,
+                                              dimensions)) {
+                Nan::ThrowError(
+                    "reppayload: Failed to set double array property");
+                goto fail;
+              }
+              break;
+
+            case OCREP_PROP_BOOL:
+              if (!OCRepPayloadSetBoolArray(payload, (const char *)*name,
+                                            (const bool *)flatArray,
+                                            dimensions)) {
+                Nan::ThrowError(
+                    "reppayload: Failed to set boolean array property");
+                goto fail;
+              }
+              break;
+
+            case OCREP_PROP_STRING:
+              if (!OCRepPayloadSetStringArray(payload, (const char *)*name,
+                                              (const char **)flatArray,
+                                              dimensions)) {
+                Nan::ThrowError(
+                    "reppayload: Failed to set string array property");
+                goto fail;
+              }
+              break;
+
+            case OCREP_PROP_OBJECT:
+              if (!OCRepPayloadSetPropObjectArray(
+                      payload, (const char *)*name,
+                      (const OCRepPayload **)flatArray, dimensions)) {
+                Nan::ThrowError(
+                    "reppayload: Failed to set object array property");
+                goto fail;
+              }
+              break;
+
+            default:
+              break;
+          }
         }
       } else if (value->IsObject()) {
         OCRepPayload *child_payload = 0;
@@ -678,31 +751,10 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
           if (!OCRepPayloadSetPropObjectAsOwner(payload, (const char *)*name,
                                                 child_payload)) {
             Nan::ThrowError("reppayload: Failed to set object property");
-            OCRepPayloadDestroy(payload);
-            return false;
+            goto fail;
           }
         } else {
-          OCRepPayloadDestroy(payload);
-          return false;
-        }
-      } else if (value->IsArray()) {
-        size_t dimensions[MAX_REP_ARRAY_DEPTH] = {0};
-        bool typeEstablished = false;
-        OCRepPayloadPropType arrayType;
-        Local<Array> array = Local<Array>::Cast(value);
-        if (!validateRepPayloadArray(array, &typeEstablished, &arrayType,
-                                     dimensions, 0)) {
-          OCRepPayloadDestroy(payload);
-          return false;
-        }
-
-        if (dimensions[0] > 0) {
-          void *flatArray;
-
-          if (!flattenArray(array, &flatArray, dimensions, arrayType)) {
-            OCRepPayloadDestroy(payload);
-            return false;
-          }
+          goto fail;
         }
       }
     }
@@ -715,14 +767,17 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
                                 payload, OCRepPayloadDestroy);
     OCRepPayload *next_payload = 0;
     if (!c_OCRepPayload(next->ToObject(), &next_payload)) {
-      OCRepPayloadDestroy(payload);
-      return false;
+      goto fail;
     }
     OCRepPayloadAppend(payload, next_payload);
   }
 
   (*p_payload) = payload;
   return true;
+
+fail:
+  OCRepPayloadDestroy(payload);
+  return false;
 }
 
 bool c_OCPayload(Local<Object> jsPayload, OCPayload **p_payload) {

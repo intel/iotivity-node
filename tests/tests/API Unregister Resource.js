@@ -13,11 +13,11 @@ var settings = {
 
 device.configure( settings );
 
-if ( device._settings.info.uuid ) {
-	var deviceId = device._settings.info.uuid;
-	var connMode = device._settings.connectionMode;
+if ( device.settings.info.uuid ) {
+	var deviceId = device.settings.info.uuid;
+	var connMode = device.settings.connectionMode;
 
-	device._server.registerResource( {
+	device.server.registerResource( {
 		url: "/light/ambience/blue",
 		deviceId: deviceId,
 		connectionMode: connMode,
@@ -28,7 +28,7 @@ if ( device._settings.info.uuid ) {
 		properties: { color: "light-blue", dimmer: 0.2 }
 	} ).then(
 		function( resource ) {
-			device._server.unregisterResource( resource.id ).then(
+			device.server.unregisterResource( resource.id ).then(
 				function() {
 					testUtils.assert( "ok", true, "Resource unregistered successfully" );
 					process.exit( 0 );

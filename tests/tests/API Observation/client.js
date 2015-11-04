@@ -7,16 +7,12 @@ var resourceFound = false,
 console.log( JSON.stringify( { assertionCount: 3 } ) );
 
 function discoverResources() {
-	device._client.addEventListener( "resourcefound", function( event ) {
+	device.client.addEventListener( "resourcefound", function( event ) {
 		if ( !resourceFound && event.resource.uri === "/a/" + uuid ) {
 			resourceFound = true;
-			device._client.addEventListener( "resourcechange", function( event ) {
+			device.client.addEventListener( "resourcechange", function( event ) {
 				if ( ++observationCount >= 10 ) {
-					device._client.cancelObserving( event.resource.id ).then(
-						function() {
-							console.log( JSON.stringify( { killPeer: true } ) );
-							process.exit( 0 );
-						},
+					device.client.cancelObserving( event.resource.id ).catch(
 						function( error ) {
 							utils.die( "Client: cancelObserving() failed with " +
 								error + " and result " + error.result );
@@ -24,7 +20,7 @@ function discoverResources() {
 					);
 				}
 			} );
-			device._client.startObserving( event.resource.id ).then(
+			device.client.startObserving( event.resource.id ).then(
 				function( observedResource ) {
 					utils.assert( "strictEqual", observedResource.id, event.resource.id,
 						"Client: resource returned by startObserving() has the same ID as the " +
@@ -36,7 +32,7 @@ function discoverResources() {
 				} );
 		}
 	} );
-	device._client.findResources().then(
+	device.client.findResources().then(
 		function() {
 			utils.assert( "ok", true, "Client: findResources() successful" );
 		},

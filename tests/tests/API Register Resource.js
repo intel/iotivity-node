@@ -13,11 +13,11 @@ var settings = {
 
 device.configure( settings );
 
-if ( device._settings.info.uuid ) {
-	var deviceId = device._settings.info.uuid;
-	var connMode = device._settings.connectionMode;
+if ( device.settings.info.uuid ) {
+	var deviceId = device.settings.info.uuid;
+	var connMode = device.settings.connectionMode;
 
-	device._server.registerResource( {
+	device.server.registerResource( {
 		url: "/light/ambience/blue",
 		deviceId: deviceId,
 		connectionMode: connMode,

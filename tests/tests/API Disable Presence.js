@@ -8,8 +8,8 @@ var settings = {
 };
 
 device.configure( settings );
-device._server.enablePresence( 1000 );
-device._server.disablePresence().then(
+device.server.enablePresence( 1000 );
+device.server.disablePresence().then(
 	function() {
 		testUtils.assert( "ok", true, "Presence disabled successfully" );
 		process.exit( 0 );
