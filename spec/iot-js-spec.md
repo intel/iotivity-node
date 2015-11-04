@@ -87,9 +87,6 @@ interface OicDevice {
       // equivalent to ‘onboard+configure’ in Core spec
       // maps to IoTivity Configure (C++ API), configure (Java API), OCInit (C API)
 
-  Promise<void> factoryReset();  // return to factory configuration and reboot
-  Promise<void> reboot();  // keep configuration and reboot
-
   OicClient client;
   OicServer server;
 };
@@ -98,11 +95,9 @@ dictionary OicDeviceSettings {
   USVString url;  // host:port
   OicDeviceInfo info;
   OicDeviceRole role;
-  OicConnectionMode connectionMode;  // mapping to “Quality of Service” in IoTivity
 };
 
 enum OicDeviceRole { "client", "server", "intermediary" };
-enum OicConnectionMode { "acked", "non-acked", “default” };  // default is either of the former
 
 // the following info is exposed on /oic/p (platform) and /oic/d (device)
 dictionary OicDeviceInfo {
@@ -123,31 +118,29 @@ dictionary OicDeviceInfo {
 interface OicClient: EventTarget {
   // client API: discovery; Promise succeeds when request is successfully sent
   Promise<void> findResources(OicDiscoveryOptions options);  // GET oic/res
-  Promise<void> findDevices(OicDiscoveryOptions options);  // GET /oic/d
+  Promise<void> findDevices();  // GET /oic/d
 
   // client API: CRUDN
-  Promise<OicResource> createResource(OicResourceInit resource);  // create remote res
-  Promise<OicResource> retrieveResource(USVString resourceId);  // get remote res
-  Promise<void> updateResource(USVString resourceId, OicResourceInit resource);  // post or put remote res
-  Promise<void> deleteResource(USVString resourceId);  // delete remote res
-  Promise<OicResource> startObserving(USVString resourceId);  // retrieve + observe flag
-  Promise<void> cancelObserving(USVString id);
+  Promise<OicResource> createResource(OicResource resource);  // create remote res
+  Promise<OicResource> retrieveResource(OicResource resource);  // get remote res
+  Promise<void> updateResource(OicResource resource);  // post or put remote res
+  Promise<void> deleteResource(OicResource resource);  // delete remote res
+  Promise<void> startObserving(OicResource resource);  // retrieve + observe flag
+  Promise<void> cancelObserving(OicResource resource);
 
-  attribute EventHandler<OicResourceChangeEvent> onresourcechange;  // observe
   attribute EventHandler<OicResourceFoundEvent> onresourcefound;  // discovery
   attribute EventHandler<OicDeviceFoundEvent> ondevicefound;  // discovery
 };
 
 interface OicServer: EventTarget {
   // register/unregister locally constructed resource objects with OIC
-  Promise<OicResource> registerResource(OicResourceInit init);  // gets an id
-  Promise<void> unregisterResource(USVString resourceId);  // purge resource, then notify all
+  Promise<OicResource> registerResource(OicResource init);  // gets an id
+  Promise<void> unregisterResource(OicResource resource);  // purge resource, then notify all
 
   // enable/disable presence (discovery, state changes) for this device and its resources
   Promise<void> enablePresence(optional unsigned long ttl);  // in seconds
   Promise<void> disablePresence();
-  Promise<void> notify(USVString resourceId, OicMethod method, // mostly “update”
-                       optional sequence<DOMString> updatedPropertyNames);  // only for updates
+  Promise<void> notify(OicResource resource, OicMethod method); // mostly “update”
   // handle CRUDN requests from clients
   attribute EventHandler<OicRequestEvent> onrequest;
 };
@@ -160,7 +153,6 @@ interface OicRequestEvent : Event {
   readonly attribute USVString source;  // device uuid of the OIC client making the request
   readonly attribute USVString target;  // id of the target resource
   readonly attribute OicResourceRepresentation? res;  // for “create” and “update” only
-  readonly attribute sequence<DOMString> updatedPropertyNames;  // for “update” only
   readonly attribute HeaderOption[] headerOptions;  // a hook for flags
   readonly attribute QueryOption[] queryOptions;  // a hook for extra functionality
   Promise<void> sendResponse(optional OicResource? resource);  // for create, observe, retrieve
@@ -171,10 +163,8 @@ interface OicRequestEvent : Event {
       // sends an Error, where error.message maps to OIC errors, see later
 };
 
-interface OicResourceChangedEvent : Event {
-  enum { “add”, “update”, “remove” } type;
+interface OicResourceUpdateEvent : Event {
   OicResource resource;
-  DOMString[] updatedPropertyNames; // only for updates, for the rest empty
 };
 
 interface OicResourceFoundEvent : Event {
@@ -183,23 +173,21 @@ interface OicResourceFoundEvent : Event {
 
 interface OicDeviceFoundEvent : Event {
   OicDeviceInfo device;
+  sequence<OicResource> resources;  // url, resourceType, interfaces
 };
 
 dictionary OicDiscoveryOptions {  // all properties are null by default, meaning “find all”
   USVString? deviceId;
-  USVString? resourceId;
+  USVString? resourceURL;
   DOMString? resourceType;
 };
-// if resourceId is specified in full form, a direct retrieve is made
-// if resourceType is specified, a retrieve on /oic/res is made
-// if resourceId is null, and deviceId not, then only resources from that device are returned
 
 // a snapshot of the custom properties of a Resource, together with the linked resources
 dictionary OicResourceRepresentation {
   // any non-function properties that are JSON-serializable, e.g. string, number, boolean, URI
 };
 
-dictionary OicResourceInit {
+dictionary OicResource {
   USVString url;  // can be short form
   USVString deviceId;
   ConnectionMode connectionMode;
@@ -212,12 +200,6 @@ dictionary OicResourceInit {
   readonly attribute USVString[] children;
   // additional, resource type specific properties are allowed as “mixin”
   OicResourceRepresentation properties;
-};
-
-[Constructor(OicResourceInit init)]
-interface OicResource {
-  readonly attribute USVString id;  // obtained when registered, empty at construction
-  // properties of OicResourceInit are exposed as readonly attributes
 };
 
 dictionary HeaderOption { // see also https://fetch.spec.whatwg.org/#headers
@@ -249,12 +231,10 @@ if (device.settings.info.uuid) {  // configuration is valid
 var lightResource = null;
 function startServer() {
   var deviceId = device.settings.info.uuid;
-  var connMode = device.settings.connectionMode;
   // register all resources handled by this device
-  device.registerResource({
+  device.server.registerResource({
     url: "/light/ambience/blue",
     deviceId: deviceId,
-    connectionMode: connMode,
     resourceTypes: [ "Light" ],
     interfaces: [ "/oic/if/rw" ],
     discoverable: true,
@@ -273,7 +253,7 @@ function startServer() {
 function requestHandler(request) {
   if (request.type == "update" && lightResource && request.target == lightResource.id) {
     var updates = [];
-    foreach (name in request.updatedPropertyNames) {  // e.g. "color"
+    foreach (name in request.properties) {  // e.g. "color"
       if (request.properties[name] != lightResource.properties[name]) {
         lightResource.properties[name] = request.properties[name];  // save the change
         request.sendResponse();  // sends back OK
@@ -281,7 +261,7 @@ function requestHandler(request) {
       }
     }
     if (updates.length) {
-      device.notify(lightResource.id, "update", updates);  // tell observers
+      device.notify(lightResource, "update");  // tell observers
     }
     request.sendError(new Error(“Failed to handle update request”));
   }
@@ -309,11 +289,11 @@ function startClient() {
 };
 
 function observe(device, res) {
-    device.client.startObserving(res.id)
+    device.client.startObserving(res)
         .then((red) => {
             console.log("Observing " + res.url);
             red.properties.dimmer = 0.5;
-            device.updateResource(red.id, red)
+            device.client.updateResource(red.id, red)
               .then(() => { console.log("Changed red light dimmer"); })
               .catch(() => { console.log("Error changing red light"); });
          }).catch((error) => { console.log("Cannot observe " + res.url); };
