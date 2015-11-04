@@ -12,11 +12,7 @@ function discoverResources() {
 			resourceFound = true;
 			device.client.addEventListener( "resourcechange", function( event ) {
 				if ( ++observationCount >= 10 ) {
-					device.client.cancelObserving( event.resource.id ).then(
-						function() {
-							console.log( JSON.stringify( { killPeer: true } ) );
-							process.exit( 0 );
-						},
+					device.client.cancelObserving( event.resource.id ).catch(
 						function( error ) {
 							utils.die( "Client: cancelObserving() failed with " +
 								error + " and result " + error.result );
