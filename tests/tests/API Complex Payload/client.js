@@ -60,7 +60,10 @@ async.series( [
 					putChildArray: [ [ 2, 3, 5 ], [ 9, 11, 17 ] ]
 				}
 			}
-		} ) ).then( callback, callback );
+		} ) ).then( function() {
+			console.log( JSON.stringify( { killPeer: true } ) );
+			process.exit( 0 );
+		}, callback );
 	}
 ], function( error ) {
 	if ( error ) {

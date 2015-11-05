@@ -107,7 +107,7 @@ async.series( [
 						}
 					}, "Server: update event payload is correct" );
 
-					cleanup();
+					request.sendResponse( null ).then( cleanup, cleanup );
 				} );
 			device.server.addEventListener( "request", handler );
 			requestPromise = handler.promise;
@@ -124,8 +124,5 @@ async.series( [
 ], function( error ) {
 	if ( error ) {
 		testUtils.die( "Client: " + error.message + ", result: " + error.result );
-	} else {
-		console.log( JSON.stringify( { killPeer: true } ) );
-		process.exit( 0 );
 	}
 } );
