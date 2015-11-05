@@ -152,9 +152,7 @@ interface OicRequestEvent : Event {
   readonly attribute unsigned long requestId;
   readonly attribute USVString source;  // device uuid of the OIC client making the request
   readonly attribute USVString target;  // id of the target resource
-  readonly attribute OicResourceRepresentation? res;  // for “create” and “update” only
-  readonly attribute HeaderOption[] headerOptions;  // a hook for flags
-  readonly attribute QueryOption[] queryOptions;  // a hook for extra functionality
+  readonly attribute OicResource? res;  // for “create” and “update” only
   Promise<void> sendResponse(optional OicResource? resource);  // for create, observe, retrieve
       // reuses request info (type, requestId, source, target) to construct response,
       // sends back “ok”, plus the resource object if applicable
@@ -202,12 +200,6 @@ dictionary OicResource {
   OicResourceRepresentation properties;
 };
 
-dictionary HeaderOption { // see also https://fetch.spec.whatwg.org/#headers
-  ByteString name;
-  ByteString value;
-};
-
-dictionary QueryOption {  DOMString key;  DOMString value; };
 ```
 
 Code Examples
