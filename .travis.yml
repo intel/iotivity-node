@@ -3,6 +3,7 @@ sudo: false
 language: cpp
 
 matrix:
+  fast_finish: true
   include:
     - env: NODE_VERSION=0.10 TEST_SCRIPT=ci
       os: linux
@@ -70,3 +71,8 @@ install:
 - npm install -g grunt-cli
 
 script: npm run-script "${TEST_SCRIPT}"
+
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#iotivity-node"

@@ -56,7 +56,7 @@ diff -u \
 0. Modify the value of the variable ```version``` in ```octbstack.pc.in```.
 0. Build and optionally install the new version of iotivity.
 0. If you haven't installed iotivity in the previous step, you must now export environment variables ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the next step needs them.
-0. Run ```./update-enums-and-constants.sh``` to update ```src/constants.cc``` and ```src/enums.cc``` followed by ```grunt format``` to re-format the source.
+0. Run ```./update-enums.sh``` to update ```src/enums.cc``` followed by ```grunt format``` to re-format the source.
 0. If the ```CFLAGS``` and/or ```LIBS``` have changed, modify ```install.sh``` and/or ```octbstack.pc.in``` and make the same modifications in ```binding.gyp```.
 0. Test the build with both built-in iotivity and with iotivity via pkgconfig:
 
@@ -67,8 +67,8 @@ diff -u \
 	nvm use 0.10 && git clean -x -d -f -f && ./dist.sh --testonly
 	```
 
-    The build may fail in ```src/constants.cc``` or ```src/enums.cc```, complaining about undefined constants. That's because ```update-constants-and-enums.sh``` is unaware of C precompiler definitions and so it may harvest constants which are not actually defined under the set of precompiler flags used for building. Thus, you may need to edit ```src/constants.cc``` and ```src/enums.cc``` by hand **after** having run ```update-constants-and-enums.sh```.
+    The build may fail in ```src/constants.cc``` or ```src/enums.cc```, complaining about undefined constants. That's because ```update-enums.sh``` is unaware of C precompiler definitions and so it may harvest enum values which are not actually defined under the set of precompiler flags used for building. Thus, you may need to edit ```src/enums.cc``` by hand **after** having run ```update-enums.sh```.
 
-The script ```./update-constants-and-enums.sh``` reads the C SDK header files and generates the contents of ```src/constants.cc``` and ```src/enums.cc```. Read the comments in the script before you modify either ```src/constants.cc``` or ```src/enums.cc```.
+The script ```./update-enums.sh``` reads the C SDK header files and generates the contents of ```src/enums.cc```. Read the comments in the script before you modify ```src/enums.cc```.
 
 [jQuery]: http://contribute.jquery.org/style-guide/js/
