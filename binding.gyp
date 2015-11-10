@@ -99,16 +99,17 @@
 			"actions": [ {
 				"action_name": "generateconstants",
 				"message": "Generating constants",
-				"inputs": ["deps/iotivity"],
 				"outputs": ["generated/constants.cc"],
 				"conditions": [
 					[ "'<(externalOCTBStack)'=='false'", {
+						"inputs": ["deps/iotivity"],
 						"action": [
 							"sh",
 							"./generate-constants.sh",
 							'<(internal_octbstack_cflags)'
 						]
 					}, {
+						"inputs": [""],
 						"action": [
 							"sh",
 							"./generate-constants.sh",
@@ -125,16 +126,17 @@
 			"actions": [ {
 				"action_name": "generateenums",
 				"message": "Generating enums",
-				"inputs": ["deps/iotivity"],
 				"outputs": ["generated/enums.cc"],
 				"conditions": [
 					[ "'<(externalOCTBStack)'=='false'", {
+						"inputs": ["deps/iotivity"],
 						"action": [
 							"sh",
 							"./generate-enums.sh",
 							'<(internal_octbstack_cflags)'
 						]
 					}, {
+						"inputs": [""],
 						"action": [
 							"sh",
 							"./generate-enums.sh",
