@@ -83,6 +83,7 @@ Web IDL of the JavaScript API
 [Constructor(optional OicDeviceSettings settings)]  // if not given, defaults are used
 interface OicDevice : EventTarget {
   readonly attribute OicDeviceSettings settings;
+  readonly attribute OicDeviceInfo info;
   Promise<void> configure(OicDeviceSettings settings); // partial dictionary is ok
       // equivalent to ‘onboard+configure’ in Core spec
       // maps to IoTivity Configure (C++ API), configure (Java API), OCInit (C API)
@@ -90,13 +91,14 @@ interface OicDevice : EventTarget {
 OicDevice implements OicServer;
 OicDevice implements OicClient;
 
+enum OicDeviceRole { "client", "server", "intermediary" };
+enum OicConnectionMode { "confirmed", "best-effort", “default” };
+
 dictionary OicDeviceSettings {
   USVString url;  // host:port
-  OicDeviceInfo info;
-  OicDeviceRole role;
+  OicDeviceRole role = "intermediary";  // both client and server
+  OicConnectionMode connectionMode = "default";  // mapping to QoS in IoTivity
 };
-
-enum OicDeviceRole { "client", "server", "intermediary" };
 
 // the following info is exposed on /oic/p (platform) and /oic/d (device)
 dictionary OicDeviceInfo {

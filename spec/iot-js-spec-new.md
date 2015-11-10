@@ -107,12 +107,14 @@ interface OicDevice: EventTarget {
 OicDevice implements OicDiscovery;
 OicDevice implements OicServer;
 
+enum OicDeviceRole { "client", "server", "intermediary" };
+enum OicConnectionMode { "confirmed", "best-effort", “default” };
+
 dictionary OicDeviceSettings {
   USVString url;  // host:port
-  OicDeviceRole role;
+  OicDeviceRole role = "intermediary";  // both client and server
+  OicConnectionMode connectionMode = "default";  // mapping to QoS in IoTivity
 };
-
-enum OicDeviceRole { "client", "server", "intermediary" };
 
 // the following info is exposed on /oic/p (platform) and /oic/d (device)
 dictionary OicDeviceInfo {
