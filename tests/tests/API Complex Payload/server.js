@@ -123,6 +123,6 @@ async.series( [
 	}
 ], function( error ) {
 	if ( error ) {
-		testUtils.die( "Client: " + error.message + ", result: " + error.result );
+		testUtils.die( "Server: " + error.message + ", result: " + error.result );
 	}
 } );
