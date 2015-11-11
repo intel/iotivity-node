@@ -37,7 +37,7 @@ iotivity.OCDoResource(
 			destination = response.addr,
 			presenceHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
-			resourceCount = resources.length ? resources.length : 0,
+			resourceCount = resources ? resources.length : 0,
 			presenceResponseHandler = function( handle, response ) {
 				console.log( "Received response to PRESENCE request:" );
 				console.log( JSON.stringify( response, null, 4 ) );

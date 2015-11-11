@@ -2,7 +2,7 @@ var intervalId,
 	handleReceptacle = {},
 
 	// This is the same value as server.get.js
-	sampleUri = "/a/iotivity-node-get-sample",
+	sampleUri = "/a/light",
 	iotivity = require( "iotivity-node/lowlevel" );
 
 // Start iotivity and set up the processing loop
@@ -37,7 +37,7 @@ iotivity.OCDoResource(
 			destination = response.addr,
 			getHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
-			resourceCount = resources.length ? resources.length : 0,
+			resourceCount = resources ? resources.length : 0,
 			getResponseHandler = function( handle, response ) {
 				console.log( "Received response to GET request:" );
 				console.log( JSON.stringify( response, null, 4 ) );
