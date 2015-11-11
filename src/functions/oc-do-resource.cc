@@ -15,7 +15,26 @@ extern "C" {
 using namespace v8;
 using namespace node;
 
-static void deleteNanCallback(Nan::Callback *callback) { delete callback; }
+typedef struct CallbackInfo {
+  Nan::Callback *callback;
+  Nan::Persistent<Array> *handle;
+} CallbackInfo;
+
+static void deleteNanCallback(CallbackInfo *callback) {
+  Nan::HandleScope scope;
+
+  delete callback->callback;
+
+  if (callback->handle) {
+    // Mark the handle as stale
+    Local<Array> handle = Nan::New(*(callback->handle));
+    Nan::Set(handle, Nan::New("stale").ToLocalChecked(), Nan::True());
+
+    delete callback->handle;
+  }
+
+  free(callback);
+}
 
 // Create an object containing the information from an OCClientResponse
 // structure
@@ -26,7 +45,7 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
                                          js_OCClientResponse(clientResponse)};
 
   Local<Value> returnValue =
-      ((Nan::Callback *)context)->Call(2, jsCallbackArguments);
+      (((CallbackInfo *)context)->callback)->Call(2, jsCallbackArguments);
 
   // Validate value we got back from it
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
@@ -55,7 +74,11 @@ NAN_METHOD(bind_OCDoResource) {
   OCDoHandle handle;
   OCCallbackData data;
 
-  data.context = (void *)(new Nan::Callback(Local<Function>::Cast(info[7])));
+  CallbackInfo *callbackInfo = (CallbackInfo *)malloc(sizeof(CallbackInfo));
+  callbackInfo->callback = (new Nan::Callback(Local<Function>::Cast(info[7])));
+  callbackInfo->handle = 0;
+
+  data.context = (void *)callbackInfo;
   data.cb = defaultOCClientResponseHandler;
   data.cd = (OCClientContextDeleter)deleteNanCallback;
 
@@ -108,8 +131,14 @@ NAN_METHOD(bind_OCDoResource) {
 
   // We need not free the payload because it seems iotivity takes ownership.
 
-  info[0]->ToObject()->Set(Nan::New("handle").ToLocalChecked(),
-                           js_OCDoHandle(handle));
+  if (handle) {
+    Local<Array> handleArray = js_OCDoHandle(handle);
+
+    callbackInfo->handle = new Nan::Persistent<Array>(handleArray);
+    info[0]->ToObject()->Set(Nan::New("handle").ToLocalChecked(), handleArray);
+  } else {
+    deleteNanCallback(callbackInfo);
+  }
 
   info.GetReturnValue().Set(returnValue);
 }
