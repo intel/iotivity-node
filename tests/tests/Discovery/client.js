@@ -2,6 +2,7 @@ var result,
 	uuid = process.argv[ 2 ],
 	processCallCount = 0,
 	processLoop = null,
+	staleHandleCheckLoop = null,
 	discoverHandleReceptacle = {},
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
@@ -14,6 +15,11 @@ function cleanup() {
 		processLoop = null;
 	}
 
+	if ( staleHandleCheckLoop ) {
+		clearInterval( staleHandleCheckLoop );
+		staleHandleCheckLoop = null;
+	}
+
 	testUtils.assert( "ok", true, "Client: OCProcess succeeded " + processCallCount + " times" );
 
 	cleanupResult = iotivity.OCStop();
@@ -23,7 +29,7 @@ function cleanup() {
 	}
 }
 
-console.log( JSON.stringify( { assertionCount: 5 } ) );
+console.log( JSON.stringify( { assertionCount: 6 } ) );
 
 // Initialize
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
@@ -42,6 +48,13 @@ processLoop = setInterval( function() {
 			processResult );
 	}
 }, 100 );
+
+staleHandleCheckLoop = setInterval( function() {
+	if ( discoverHandleReceptacle.handle.stale ) {
+		testUtils.assert( "ok", true, "Client: Handle found stale after deleting transaction" );
+		cleanup();
+	}
+}, 500 );
 
 // Discover
 result = iotivity.OCDoResource(
@@ -62,7 +75,6 @@ result = iotivity.OCDoResource(
 			// We've successfully completed the test so let's kill the server and test the cleanup.
 			testUtils.assert( "ok", true, "Client: Resource found" );
 			returnValue = iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
-			cleanup();
 
 		}
 

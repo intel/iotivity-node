@@ -1,14 +1,12 @@
-var discoveredResource,
-	_ = require( "lodash" ),
+var _ = require( "lodash" ),
 	async = require( "async" ),
 	utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )(),
 	iotivity = require( "bindings" )( "iotivity" ),
 	uuid = process.argv[ 2 ];
 
-console.log( JSON.stringify( { assertionCount: 11 } ) );
+console.log( JSON.stringify( { assertionCount: 9 } ) );
 
-// Return a promise that contains the resource with the uuid URL
 function discoverTheResource() {
 	var eventHandler,
 		removeListener = function() {
@@ -18,8 +16,6 @@ function discoverTheResource() {
 		};
 
 	return Promise.all( [
-
-		// Promise is fulfilled when the "resourcefound" handler is called with the right resource
 		new Promise( function( fulfill ) {
 			eventHandler = function( event ) {
 				var index,
@@ -37,8 +33,7 @@ function discoverTheResource() {
 
 					utils.assert( "strictEqual", count, 1,
 						"Client: Resource present exactly once among resources" );
-					device.client.removeEventListener( "resourcefound", eventHandler );
-					fulfill( event.resource );
+					fulfill();
 				}
 			};
 
@@ -48,15 +43,13 @@ function discoverTheResource() {
 			function() {
 				utils.assert( "ok", true, "Client: device.client.findResources() successful" );
 			} )
-	] ).then( function( results ) {
-		removeListener();
-		return results[ 0 ];
-	}, removeListener );
+	] ).then( removeListener, removeListener );
 }
 
 async.series( [
 
-	function configureDevice( callback ) {
+	// Configure the device
+	function( callback ) {
 		device.configure( {
 			role: "client",
 			connectionMode: "acked"
@@ -69,12 +62,12 @@ async.series( [
 			} );
 	},
 
-	function firstDiscovery( callback ) {
+	// Discover the resource once
+	function( callback ) {
 		utils.assert( "strictEqual", device.client.findResources._handle, undefined,
 			"Client: open-ended resource discovery handle is initially undefined" );
 		discoverTheResource().then(
-			function( resource ) {
-				discoveredResource = resource;
+			function() {
 				callback( null );
 			},
 			function( error ) {
@@ -82,12 +75,11 @@ async.series( [
 			} );
 	},
 
-	function secondDiscovery( callback ) {
+	// Discover the resource again
+	function( callback ) {
 
 		// We move on when discovery has completed and when OCCancel() was called
 		Promise.all( [
-
-			// Create a promise that is fulfilled when OCCancel is called once
 			new Promise( function( fulfill ) {
 				var OCCancel = iotivity.OCCancel,
 					discoveryHandle = device.client.findResources._handle;
@@ -120,56 +112,6 @@ async.series( [
 			function( error ) {
 				callback( _.extend( error, { step: "second discovery" } ) );
 			} );
-	},
-
-	// Delete the resource so we can perform two empty discoveries. This lets us test stale
-	// discovery handle management.
-	function deleteTheResource( callback ) {
-		device.client.deleteResource( discoveredResource.id ).then( callback, callback );
-	},
-
-	function emptyDiscovery( callback ) {
-		Promise.all( [
-			new Promise( function( fulfill ) {
-				device.client._doDiscovery = ( function( original ) {
-					return function() {
-						utils.assert( "ok",
-							device.client.findResources._handle &&
-							!device.client.findResources._handle.stale,
-							"Client: First empty discovery: findResources() handle is not stale" );
-						device.client._doDiscovery = original;
-						setTimeout( fulfill, 1000 );
-						return original.apply( this, arguments );
-					};
-				} )( device.client._doDiscovery );
-			} ),
-			device.client.findResources()
-		] ).then(
-			function() {
-				callback();
-			}, callback );
-	},
-
-	function secondEmptyDiscovery( callback ) {
-		Promise.all( [
-			new Promise( function( fulfill ) {
-				device.client._doDiscovery = ( function( original ) {
-					return function() {
-						utils.assert( "ok",
-							device.client.findResources._handle &&
-							device.client.findResources._handle.stale,
-							"Client: Second empty discovery: findResources() handle is stale" );
-						device.client._doDiscovery = original;
-						setTimeout( fulfill, 1000 );
-						return original.apply( this, arguments );
-					};
-				} )( device.client._doDiscovery );
-			} ),
-			device.client.findResources()
-		] ).then(
-			function() {
-				callback();
-			}, callback );
 	}
 
 ], function( error ) {
