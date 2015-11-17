@@ -12,6 +12,7 @@ NAN_METHOD(bind_OCGetResourceInterfaceName);
 NAN_METHOD(bind_OCGetResourceProperties);
 NAN_METHOD(bind_OCGetResourceTypeName);
 NAN_METHOD(bind_OCGetResourceUri);
+NAN_METHOD(bind_OCGetServerInstanceIDString);
 NAN_METHOD(bind_OCInit);
 NAN_METHOD(bind_OCProcess);
 NAN_METHOD(bind_OCSetDeviceInfo);

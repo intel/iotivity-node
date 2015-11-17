@@ -45,6 +45,7 @@ void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   SET_FUNCTION(exports, OCGetResourceProperties);
   SET_FUNCTION(exports, OCGetResourceTypeName);
   SET_FUNCTION(exports, OCGetResourceUri);
+  SET_FUNCTION(exports, OCGetServerInstanceIDString);
   SET_FUNCTION(exports, OCInit);
   SET_FUNCTION(exports, OCNotifyAllObservers);
   SET_FUNCTION(exports, OCNotifyListOfObservers);

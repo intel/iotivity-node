@@ -242,6 +242,15 @@ NAN_METHOD(bind_OCUnBindResource) {
       Nan::New(OCUnBindResource(collectionHandle, resourceHandle)));
 }
 
+NAN_METHOD(bind_OCGetServerInstanceIDString) {
+  VALIDATE_ARGUMENT_COUNT(info, 0);
+
+  const char *idString = OCGetServerInstanceIDString();
+
+  info.GetReturnValue().Set(idString ? (Nan::New(idString).ToLocalChecked())
+                                     : Nan::EmptyString());
+}
+
 #ifdef TESTING
 NAN_METHOD(bind___compareResourceHandles) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
