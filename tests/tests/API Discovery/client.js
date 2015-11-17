@@ -51,8 +51,7 @@ async.series( [
 	// Configure the device
 	function( callback ) {
 		device.configure( {
-			role: "client",
-			connectionMode: "acked"
+			role: "client"
 		} ).then(
 			function() {
 				callback( null );

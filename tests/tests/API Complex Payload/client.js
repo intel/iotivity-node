@@ -11,8 +11,7 @@ async.series( [
 
 	function initStack( callback ) {
 		device.configure( {
-			role: "client",
-			connectionMode: "acked"
+			role: "client"
 		} ).then( callback, callback );
 	},
 

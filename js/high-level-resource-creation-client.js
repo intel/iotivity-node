@@ -6,8 +6,7 @@ function throwError( error ) {
 }
 
 device.configure( {
-	role: "client",
-	connectionMode: "acked"
+	role: "client"
 } ).then(
 	function() {
 

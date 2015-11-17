@@ -3,7 +3,6 @@ var lightResource,
 	device = require( "iotivity-node" )(),
 	settings = {
 		role: "server",
-		connectionMode: "acked",
 		info: {
 			uuid: "INTEL-server",
 			name: "api-server-example",
@@ -46,7 +45,6 @@ if ( device.settings.info.uuid ) {
 	device.server.registerResource( {
 		url: "/a/high-level-example",
 		deviceId: device.settings.info.uuid,
-		connectionMode: device.settings.connectionMode,
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],
 		discoverable: true,

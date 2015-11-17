@@ -5,7 +5,6 @@ console.log( JSON.stringify( { assertionCount: 1 } ) );
 var device = require( "../../index" )();
 var settings = {
 	role: "server",
-	connectionMode: "acked",
 	info: {
 		uuid: "INTEL"
 	}
@@ -15,12 +14,10 @@ device.configure( settings );
 
 if ( device.settings.info.uuid ) {
 	var deviceId = device.settings.info.uuid;
-	var connMode = device.settings.connectionMode;
 
 	device.server.registerResource( {
 		url: "/light/ambience/blue",
 		deviceId: deviceId,
-		connectionMode: connMode,
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],
 		discoverable: true,

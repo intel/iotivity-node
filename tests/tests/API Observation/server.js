@@ -4,8 +4,7 @@ var lightResource,
 	utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )(),
 	settings = {
-		role: "server",
-		connectionMode: "acked"
+		role: "server"
 	};
 
 console.log( JSON.stringify( { assertionCount: 5 } ) );
@@ -53,7 +52,6 @@ device.configure( settings ).then(
 		device.server.registerResource( {
 			url: "/a/" + uuid,
 			deviceId: uuid,
-			connectionMode: device.settings.connectionMode,
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],
 			discoverable: true,

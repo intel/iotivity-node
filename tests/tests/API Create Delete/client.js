@@ -27,8 +27,7 @@ function findResourceByUrl( url, deviceId ) {
 async.series( [
 	function initDevice( callback ) {
 		device.configure( {
-			role: "client",
-			connectionMode: "acked"
+			role: "client"
 		} ).then( callback, callback );
 	},
 

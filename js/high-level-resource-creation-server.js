@@ -3,7 +3,6 @@ var resourceCreatedByRemote,
 	_ = require( "lodash" ),
 	settings = {
 		role: "server",
-		connectionMode: "acked",
 		info: {
 			uuid: "INTEL-server",
 			name: "api-server-example",
@@ -51,7 +50,6 @@ device.configure( settings ).then(
 			device.server.registerResource( {
 				url: "/a/high-level-resource-creation-example",
 				deviceId: device.settings.info.uuid,
-				connectionMode: device.settings.connectionMode,
 				resourceTypes: [ "core.light" ],
 				interfaces: [ "oic.if.baseline" ],
 				discoverable: true,

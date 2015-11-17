@@ -7,7 +7,6 @@ console.log( JSON.stringify( { assertionCount: 3 } ) );
 
 device.configure( {
 	role: "server",
-	connectionMode: "acked",
 	info: {
 		uuid: uuid,
 		name: "api-discovery-" + uuid,
@@ -20,7 +19,6 @@ device.configure( {
 		device.server.registerResource( {
 			url: "/a/" + uuid,
 			deviceId: uuid,
-			connectionMode: "acked",
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],
 			discoverable: true,

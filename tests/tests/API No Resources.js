@@ -5,8 +5,7 @@ var device = require( "../../index" )(),
 console.log( JSON.stringify( { assertionCount: 2 } ) );
 
 device.configure( {
-	role: "client",
-	connectionMode: "acked"
+	role: "client"
 } ).then(
 	function() {
 		utils.assert( "strictEqual",

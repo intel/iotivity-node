@@ -9,8 +9,7 @@ console.log( JSON.stringify( { assertionCount: 5 } ) );
 async.series( [
 	function initDevice( callback ) {
 		device.configure( {
-			role: "server",
-			connectionMode: "acked"
+			role: "server"
 		} ).then( callback, callback );
 	},
 

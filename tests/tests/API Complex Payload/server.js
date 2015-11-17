@@ -25,7 +25,6 @@ async.series( [
 	function( callback ) {
 		device.configure( {
 			role: "server",
-			connectionMode: "acked",
 			info: {
 				uuid: uuid,
 				name: "api-complex-payload-" + uuid,

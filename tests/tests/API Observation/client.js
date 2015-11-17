@@ -43,8 +43,7 @@ function discoverResources() {
 }
 
 device.configure( {
-	role: "client",
-	connectionMode: "acked"
+	role: "client"
 } ).then(
 	function() {
 		utils.assert( "ok", true, "Client: device.configure() successful" );

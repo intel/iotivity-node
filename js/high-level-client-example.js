@@ -2,8 +2,7 @@ var observationCount = 0,
 	device = require( "iotivity-node" )();
 
 device.configure( {
-	role: "client",
-	connectionMode: "acked"
+	role: "client"
 } );
 
 // Add a listener that will receive the results of the discovery
