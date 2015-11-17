@@ -17,7 +17,7 @@ device.configure( {
 		utils.assert( "ok", true, "Server: device.configure() successful" );
 
 		device.server.registerResource( {
-			url: "/a/" + uuid,
+			id: { path: "/a/" + uuid },
 			deviceId: uuid,
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],

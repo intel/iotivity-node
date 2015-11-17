@@ -22,7 +22,7 @@ function discoverResources() {
 			} );
 			device.client.startObserving( event.resource.id ).then(
 				function( observedResource ) {
-					utils.assert( "strictEqual", observedResource.id, event.resource.id,
+					utils.assert( "deepEqual", observedResource.id, event.resource.id,
 						"Client: resource returned by startObserving() has the same ID as the " +
 						"resource for whose ID observation was requested" );
 				},

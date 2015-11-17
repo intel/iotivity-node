@@ -36,7 +36,7 @@ async.series( [
 	// Create resource and attach retrieve handler
 	function( callback ) {
 		device.server.registerResource( {
-			url: "/a/" + uuid,
+			id: { path: "/a/" + uuid },
 			discoverable: true,
 			observable: true,
 			resourceTypes: [ "core.light" ],

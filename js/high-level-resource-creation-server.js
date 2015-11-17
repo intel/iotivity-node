@@ -4,7 +4,6 @@ var resourceCreatedByRemote,
 	settings = {
 		role: "server",
 		info: {
-			uuid: "INTEL-server",
 			name: "api-server-example",
 			manufacturerName: "Intel",
 			manufactureDate: "Wed Sep 23 10:04:17 EEST 2015",
@@ -22,7 +21,7 @@ function throwError( error ) {
 device.configure( settings ).then(
 	function() {
 		device.server.addEventListener( "request", function( request ) {
-			console.log( JSON.stringify( request ), null, 4 );
+			console.log( JSON.stringify( request, null, 4 ) );
 			if ( request.type === "create" ) {
 				console.log( "create request" );
 				device.server.registerResource( _.extend( request.res, {
@@ -35,7 +34,8 @@ device.configure( settings ).then(
 				return;
 			} else if ( request.type === "delete" ) {
 				console.log( "delete request" );
-				if ( request.target === resourceCreatedByRemote.id ) {
+				if ( request.target.id.path === resourceCreatedByRemote.id.path &&
+						request.target.id.deviceId === resourceCreatedByRemote.id.deviceId ) {
 					device.server.unregisterResource( resourceCreatedByRemote ).then(
 						function() {
 							console.log( "resource successfully deleted" );
@@ -46,17 +46,16 @@ device.configure( settings ).then(
 			}
 		} );
 
-		if ( device.settings.info.uuid ) {
-			device.server.registerResource( {
-				url: "/a/high-level-resource-creation-example",
-				deviceId: device.settings.info.uuid,
-				resourceTypes: [ "core.light" ],
-				interfaces: [ "oic.if.baseline" ],
-				discoverable: true,
-				observable: true,
-				properties: { someValue: 0, someOtherValue: "Helsinki" }
-			} ).then( function() {
-				console.log( "initial resource successfully registered" );
-			}, throwError );
-		}
+		device.server.registerResource( {
+			id: {
+				path: "/a/high-level-resource-creation-example"
+			},
+			resourceTypes: [ "core.light" ],
+			interfaces: [ "oic.if.baseline" ],
+			discoverable: true,
+			observable: true,
+			properties: { someValue: 0, someOtherValue: "Helsinki" }
+		} ).then( function() {
+			console.log( "initial resource successfully registered" );
+		}, throwError );
 	}, throwError );

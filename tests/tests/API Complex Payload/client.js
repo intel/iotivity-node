@@ -19,7 +19,7 @@ async.series( [
 		Promise.all( [
 			new Promise( function( fulfill ) {
 				var resourceFound = function( event ) {
-					if ( event.resource.url === "/a/" + uuid ) {
+					if ( event.resource.id.path === "/a/" + uuid ) {
 						resource = event.resource;
 						fulfill();
 						device.client.removeEventListener( "resourcefound", resourceFound );

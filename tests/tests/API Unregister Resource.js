@@ -16,7 +16,7 @@ if ( device.settings.info.uuid ) {
 	var deviceId = device.settings.info.uuid;
 
 	device.server.registerResource( {
-		url: "/light/ambience/blue",
+		id: { path: "/light/ambience/blue" },
 		deviceId: deviceId,
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],

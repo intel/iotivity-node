@@ -20,7 +20,7 @@ device.configure( {
 				if ( event.resource.uri === "/a/high-level-resource-creation-example" ) {
 					console.log( "Found the test server" );
 					device.client.removeEventListener( "resourcefound", resourceFoundHandler );
-					fulfill( event.resource.deviceId );
+					fulfill( event.resource.id.deviceId );
 				}
 			};
 
@@ -35,8 +35,10 @@ device.configure( {
 			function( deviceId ) {
 				console.log( "deviceId discovered" );
 				device.client.createResource( {
-					deviceId: deviceId,
-					url: "/a/new-resource",
+					id: {
+						deviceId: deviceId,
+						path: "/a/new-resource"
+					},
 					resourceTypes: [ "core.light" ],
 					interfaces: [ "oic.if.baseline" ],
 					properties: {
@@ -45,7 +47,7 @@ device.configure( {
 				} ).then(
 					function( resource ) {
 						console.log( "remote resource successfully created with id " +
-							resource.id );
+							JSON.stringify( resource.id ) );
 						device.client.deleteResource( resource.id ).then( function() {
 							console.log( "remote resource successfully deleted" );
 						}, throwError );

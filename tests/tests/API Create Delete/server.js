@@ -15,7 +15,9 @@ async.series( [
 
 	function registerResource( callback ) {
 		device.server.registerResource( {
-			url: "/a/" + uuid,
+			id: {
+				path: "/a/" + uuid
+			},
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],
 			discoverable: true,
@@ -47,7 +49,10 @@ async.series( [
 						" request is 'create'" );
 					utils.assert( "deepEqual", request.res, {
 						discoverable: true,
-						url: "/a/new-resource",
+						id: {
+							deviceId: device.settings.info.uuid,
+							path: "/a/new-resource"
+						},
 						resourceTypes: [ "core.light" ],
 						interfaces: [ "oic.if.baseline" ],
 						properties: {

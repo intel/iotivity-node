@@ -10,7 +10,7 @@ function resourceOnRequest( request ) {
 	totalRequests++;
 	utils.assert( "strictEqual", request.type, "retrieve", "Server: Request is of type retrieve" );
 	if ( request.type === "retrieve" ) {
-		request.sendResponse( request.source ).then(
+		request.sendResponse( request.target ).then(
 			function() {
 				utils.assert( "ok", true, "Server: Successfully responded to retrieve request" );
 			},
@@ -33,7 +33,7 @@ device.configure( {
 		utils.assert( "ok", true, "Server: device.configure() successful" );
 
 		device.server.registerResource( {
-			url: "/a/" + uuid,
+			id: { path: "/a/" + uuid },
 			deviceId: uuid,
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],

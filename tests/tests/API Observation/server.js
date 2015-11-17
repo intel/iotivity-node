@@ -34,7 +34,7 @@ function assertNotifyFailure() {
 		if ( device.server._interestedObservers.length === 0 ) {
 			clearInterval( waitForObserverListToEmpty );
 			lightResource.properties.increment++;
-			device.server.notify( lightResource.id, "update", [ "increment" ] ).catch(
+			device.server.notify( lightResource ).catch(
 				function( error ) {
 					utils.assert( "strictEqual", error.noObservers, true,
 						"Server: device.server.notify() fails with noObservers when there are " +
@@ -50,7 +50,7 @@ device.configure( settings ).then(
 		utils.assert( "ok", true, "device.configure() successful" );
 
 		device.server.registerResource( {
-			url: "/a/" + uuid,
+			id: { path: "/a/" + uuid },
 			deviceId: uuid,
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],
@@ -83,7 +83,7 @@ var notifyIntervalId = setInterval( function() {
 		return;
 	}
 
-	device.server.notify( lightResource.id, "update", [ "increment" ] ).then(
+	device.server.notify( lightResource, "update", [ "increment" ] ).then(
 		function() {
 
 			haveObservers = true;

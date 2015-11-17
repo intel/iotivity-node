@@ -22,11 +22,11 @@ function discoverTheResource() {
 					count = 0,
 					url = "/a/" + uuid;
 
-				if ( event.resource.url === url ) {
+				if ( event.resource.id.path === url ) {
 					utils.assert( "ok", true, "Client: Resource found" );
 
 					for ( index in device.client._resources ) {
-						if ( device.client._resources[ index ].url === url ) {
+						if ( device.client._resources[ index ].id.path === url ) {
 							count++;
 						}
 					}

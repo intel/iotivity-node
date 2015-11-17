@@ -4,7 +4,6 @@ var lightResource,
 	settings = {
 		role: "server",
 		info: {
-			uuid: "INTEL-server",
 			name: "api-server-example",
 			manufacturerName: "Intel",
 			manufactureDate: "Wed Sep 23 10:04:17 EEST 2015",
@@ -14,48 +13,44 @@ var lightResource,
 		}
 	};
 
-device.configure( settings );
+device.configure( settings ).then( function() {
 
-sensor.on( "change", function( newData ) {
-	var index,
-		updates = [];
+	sensor.on( "change", function( newData ) {
+		var index;
 
-	if ( !lightResource ) {
-		return;
-	}
+		if ( !lightResource ) {
+			return;
+		}
 
-	for ( index in newData ) {
-		if ( newData[ index ] !== lightResource.properties[ index ] ) {
+		// Grab the updated data from the sensor and store it in the properties of the resource
+		for ( index in newData ) {
 			lightResource.properties[ index ] = newData[ index ];
-			updates.push( index );
+		}
+
+		device.server.notify( lightResource );
+	} );
+
+	function lightResourceOnRequest( request ) {
+		if ( request.type === "retrieve" || request.type === "observe" ) {
+			request.sendResponse( null );
 		}
 	}
-	if ( updates.length > 0 ) {
-		device.server.notify( lightResource.id, "update", updates );
+
+	if ( device.settings.info.uuid ) {
+		device.server.registerResource( {
+			id: { path: "/a/high-level-example" },
+			resourceTypes: [ "core.light" ],
+			interfaces: [ "oic.if.baseline" ],
+			discoverable: true,
+			observable: true,
+			properties: { someValue: 0, someOtherValue: "Helsinki" }
+		} ).then(
+			function( resource ) {
+				lightResource = resource;
+				device.server.addEventListener( "request", lightResourceOnRequest );
+			},
+			function( error ) {
+				throw error;
+			} );
 	}
 } );
-
-function lightResourceOnRequest( request ) {
-	if ( request.type === "retrieve" || request.type === "observe" ) {
-		request.sendResponse( null );
-	}
-}
-
-if ( device.settings.info.uuid ) {
-	device.server.registerResource( {
-		url: "/a/high-level-example",
-		deviceId: device.settings.info.uuid,
-		resourceTypes: [ "core.light" ],
-		interfaces: [ "oic.if.baseline" ],
-		discoverable: true,
-		observable: true,
-		properties: { someValue: 0, someOtherValue: "Helsinki" }
-	} ).then(
-		function( resource ) {
-			lightResource = resource;
-			device.server.addEventListener( "request", lightResourceOnRequest );
-		},
-		function( error ) {
-			throw error;
-		} );
-}
