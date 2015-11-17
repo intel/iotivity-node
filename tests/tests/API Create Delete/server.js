@@ -67,7 +67,7 @@ async.series( [
 				case 2:
 					utils.assert( "strictEqual", request.type, "delete",
 						"Server: Third request is 'delete'" );
-					device.server.unregisterResource( resource.id ).then(
+					device.server.unregisterResource( resource ).then(
 						function() {
 							request.sendResponse( null ).then( done, done );
 						},

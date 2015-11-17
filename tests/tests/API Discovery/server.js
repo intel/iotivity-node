@@ -42,7 +42,7 @@ device.configure( {
 
 // Cleanup on SIGINT
 process.on( "SIGINT", function() {
-	device.server.unregisterResource( theResource.id ).then(
+	device.server.unregisterResource( theResource ).then(
 		function() {
 			utils.assert( "ok", true, "Server: device.server.unregisterResource() successful" );
 			process.exit( 0 );

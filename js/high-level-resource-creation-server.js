@@ -36,7 +36,7 @@ device.configure( settings ).then(
 			} else if ( request.type === "delete" ) {
 				console.log( "delete request" );
 				if ( request.target === resourceCreatedByRemote.id ) {
-					device.server.unregisterResource( resourceCreatedByRemote.id ).then(
+					device.server.unregisterResource( resourceCreatedByRemote ).then(
 						function() {
 							console.log( "resource successfully deleted" );
 							request.sendResponse( null );

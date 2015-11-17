@@ -63,7 +63,7 @@ device.configure( {
 // Cleanup on SIGINT
 process.on( "SIGINT", function() {
 	utils.assert( "strictEqual", totalRequests, 1, "There has been exactly one request" );
-	device.server.unregisterResource( theResource.id ).then(
+	device.server.unregisterResource( theResource ).then(
 		function() {
 			utils.assert( "ok", true, "Server: device.server.unregisterResource() successful" );
 			process.exit( 0 );

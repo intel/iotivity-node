@@ -25,7 +25,7 @@ if ( device.settings.info.uuid ) {
 		properties: { color: "light-blue", dimmer: 0.2 }
 	} ).then(
 		function( resource ) {
-			device.server.unregisterResource( resource.id ).then(
+			device.server.unregisterResource( resource ).then(
 				function() {
 					testUtils.assert( "ok", true, "Resource unregistered successfully" );
 					process.exit( 0 );
