@@ -50,7 +50,7 @@ async.series( [
 	},
 
 	function performUpdate( callback ) {
-		device.updateResource( resource.id, _.extend( resource, {
+		device.updateResource( _.extend( resource, {
 			properties: {
 				putValue: "A string",
 				anotherPutValue: 23.7,
