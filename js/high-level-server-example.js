@@ -27,7 +27,7 @@ device.configure( settings ).then( function() {
 			lightResource.properties[ index ] = newData[ index ];
 		}
 
-		device.server.notify( lightResource );
+		device.notify( lightResource );
 	} );
 
 	function lightResourceOnRequest( request ) {
@@ -37,7 +37,7 @@ device.configure( settings ).then( function() {
 	}
 
 	if ( device.settings.info.uuid ) {
-		device.server.registerResource( {
+		device.registerResource( {
 			id: { path: "/a/high-level-example" },
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],
@@ -47,7 +47,7 @@ device.configure( settings ).then( function() {
 		} ).then(
 			function( resource ) {
 				lightResource = resource;
-				device.server.addEventListener( "request", lightResourceOnRequest );
+				device.addEventListener( "request", lightResourceOnRequest );
 			},
 			function( error ) {
 				throw error;

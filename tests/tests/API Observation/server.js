@@ -10,7 +10,7 @@ var lightResource,
 console.log( JSON.stringify( { assertionCount: 5 } ) );
 
 function cleanup() {
-	utils.assert( "ok", onRequestCalls > 0, "Server: device.server.onrequest has been called" );
+	utils.assert( "ok", onRequestCalls > 0, "Server: device.onrequest has been called" );
 	utils.assert( "strictEqual", lightResource.properties.increment, 11,
 		"Exactly 11 notifications were delivered (the last one with noObservers)" );
 	console.log( JSON.stringify( { killPeer: true } ) );
@@ -31,13 +31,13 @@ function testOnRequest() {
 // observers, and then we send out a final notification which we expect to fail in a certain way.
 function assertNotifyFailure() {
 	var waitForObserverListToEmpty = setInterval( function() {
-		if ( device.server._interestedObservers.length === 0 ) {
+		if ( device._interestedObservers.length === 0 ) {
 			clearInterval( waitForObserverListToEmpty );
 			lightResource.properties.increment++;
-			device.server.notify( lightResource ).catch(
+			device.notify( lightResource ).catch(
 				function( error ) {
 					utils.assert( "strictEqual", error.noObservers, true,
-						"Server: device.server.notify() fails with noObservers when there are " +
+						"Server: device.notify() fails with noObservers when there are " +
 						"no observers" );
 					cleanup();
 				} );
@@ -49,7 +49,7 @@ device.configure( settings ).then(
 	function() {
 		utils.assert( "ok", true, "device.configure() successful" );
 
-		device.server.registerResource( {
+		device.registerResource( {
 			id: { path: "/a/" + uuid },
 			deviceId: uuid,
 			resourceTypes: [ "core.light" ],
@@ -61,8 +61,8 @@ device.configure( settings ).then(
 			function( resource ) {
 				utils.assert( "ok", true, "registerResource() successful" );
 				lightResource = resource;
-				device.server.addEventListener( "request", lightResourceOnRequest );
-				device.server.onrequest = testOnRequest;
+				device.addEventListener( "request", lightResourceOnRequest );
+				device.onrequest = testOnRequest;
 				console.log( JSON.stringify( { ready: true } ) );
 			},
 			function( error ) {
@@ -83,7 +83,7 @@ var notifyIntervalId = setInterval( function() {
 		return;
 	}
 
-	device.server.notify( lightResource, "update", [ "increment" ] ).then(
+	device.notify( lightResource, "update", [ "increment" ] ).then(
 		function() {
 
 			haveObservers = true;

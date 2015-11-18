@@ -14,7 +14,7 @@ async.series( [
 	},
 
 	function registerResource( callback ) {
-		device.server.registerResource( {
+		device.registerResource( {
 			id: {
 				path: "/a/" + uuid
 			},
@@ -32,7 +32,7 @@ async.series( [
 
 	function processRequests( callback ) {
 		var done = function( error ) {
-				device.server.removeEventListener( "request", requestHandler );
+				device.removeEventListener( "request", requestHandler );
 				callback( error );
 			},
 			requestIndex = 0,
@@ -59,7 +59,7 @@ async.series( [
 							someKey: "someValue"
 						}
 					}, "Server: Resource signature is as expected" );
-					device.server.registerResource( request.res ).then(
+					device.registerResource( request.res ).then(
 						function( theResource ) {
 							resource = theResource;
 							request.sendResponse( null ).catch( done );
@@ -72,7 +72,7 @@ async.series( [
 				case 2:
 					utils.assert( "strictEqual", request.type, "delete",
 						"Server: Third request is 'delete'" );
-					device.server.unregisterResource( resource ).then(
+					device.unregisterResource( resource ).then(
 						function() {
 							request.sendResponse( null ).then( done, done );
 						},
@@ -87,7 +87,7 @@ async.series( [
 				}
 				requestIndex++;
 			};
-		device.server.addEventListener( "request", requestHandler );
+		device.addEventListener( "request", requestHandler );
 		console.log( JSON.stringify( { ready: true } ) );
 	}
 

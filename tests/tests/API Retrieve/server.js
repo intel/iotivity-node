@@ -32,7 +32,7 @@ device.configure( {
 	function() {
 		utils.assert( "ok", true, "Server: device.configure() successful" );
 
-		device.server.registerResource( {
+		device.registerResource( {
 			id: { path: "/a/" + uuid },
 			deviceId: uuid,
 			resourceTypes: [ "core.light" ],
@@ -44,14 +44,14 @@ device.configure( {
 		} ).then(
 			function( resource ) {
 				theResource = resource;
-				utils.assert( "ok", true, "Server: device.server.registerResource() successful" );
-				device.server.addEventListener( "request", resourceOnRequest );
+				utils.assert( "ok", true, "Server: device.registerResource() successful" );
+				device.addEventListener( "request", resourceOnRequest );
 
 				// Signal to the test suite that we're ready for the client
 				console.log( JSON.stringify( { ready: true } ) );
 			},
 			function( error ) {
-				utils.die( "Server: device.server.registerResource() failed with: " + error +
+				utils.die( "Server: device.registerResource() failed with: " + error +
 					" and result " + error.result );
 			} );
 	},
@@ -63,13 +63,13 @@ device.configure( {
 // Cleanup on SIGINT
 process.on( "SIGINT", function() {
 	utils.assert( "strictEqual", totalRequests, 1, "There has been exactly one request" );
-	device.server.unregisterResource( theResource ).then(
+	device.unregisterResource( theResource ).then(
 		function() {
-			utils.assert( "ok", true, "Server: device.server.unregisterResource() successful" );
+			utils.assert( "ok", true, "Server: device.unregisterResource() successful" );
 			process.exit( 0 );
 		},
 		function( error ) {
-			utils.die( "Server: device.server.unregisterResource() failed with: " + error +
+			utils.die( "Server: device.unregisterResource() failed with: " + error +
 				" and result " + error.result );
 			process.exit( 0 );
 		} );

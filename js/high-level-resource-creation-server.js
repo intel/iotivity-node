@@ -20,11 +20,11 @@ function throwError( error ) {
 
 device.configure( settings ).then(
 	function() {
-		device.server.addEventListener( "request", function( request ) {
+		device.addEventListener( "request", function( request ) {
 			console.log( JSON.stringify( request, null, 4 ) );
 			if ( request.type === "create" ) {
 				console.log( "create request" );
-				device.server.registerResource( _.extend( request.res, {
+				device.registerResource( _.extend( request.res, {
 					discoverable: true
 				} ) ).then( function( resource ) {
 					console.log( "resource successfully registered" );
@@ -36,7 +36,7 @@ device.configure( settings ).then(
 				console.log( "delete request" );
 				if ( request.target.id.path === resourceCreatedByRemote.id.path &&
 						request.target.id.deviceId === resourceCreatedByRemote.id.deviceId ) {
-					device.server.unregisterResource( resourceCreatedByRemote ).then(
+					device.unregisterResource( resourceCreatedByRemote ).then(
 						function() {
 							console.log( "resource successfully deleted" );
 							request.sendResponse( null );
@@ -46,7 +46,7 @@ device.configure( settings ).then(
 			}
 		} );
 
-		device.server.registerResource( {
+		device.registerResource( {
 			id: {
 				path: "/a/high-level-resource-creation-example"
 			},

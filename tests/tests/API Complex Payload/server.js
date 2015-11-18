@@ -35,7 +35,7 @@ async.series( [
 
 	// Create resource and attach retrieve handler
 	function( callback ) {
-		device.server.registerResource( {
+		device.registerResource( {
 			id: { path: "/a/" + uuid },
 			discoverable: true,
 			observable: true,
@@ -48,7 +48,7 @@ async.series( [
 				var handler = handlerWithPromise(
 					function retrieveHandler( request, fulfill, reject ) {
 						var cleanup = function( error ) {
-							device.server.removeEventListener( "request", handler );
+							device.removeEventListener( "request", handler );
 							if ( error ) {
 								reject( error );
 							} else {
@@ -69,7 +69,7 @@ async.series( [
 					} );
 
 				resource = theResource;
-				device.server.addEventListener( "request", handler );
+				device.addEventListener( "request", handler );
 				requestPromise = handler.promise;
 
 				callback();
@@ -86,7 +86,7 @@ async.series( [
 			var handler = handlerWithPromise(
 				function updateHandler( request, fulfill, reject ) {
 					var cleanup = function( error ) {
-						device.server.removeEventListener( "request", handler );
+						device.removeEventListener( "request", handler );
 						if ( error ) {
 							reject( error );
 						} else {
@@ -108,7 +108,7 @@ async.series( [
 
 					request.sendResponse( null ).then( cleanup, cleanup );
 				} );
-			device.server.addEventListener( "request", handler );
+			device.addEventListener( "request", handler );
 			requestPromise = handler.promise;
 			callback();
 		}, callback );

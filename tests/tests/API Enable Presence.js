@@ -9,7 +9,7 @@ var settings = {
 
 device.configure( settings );
 
-device.server.enablePresence( 1000 ).then(
+device.enablePresence( 1000 ).then(
 	function() {
 		testUtils.assert( "ok", true, "Presence enabled successfully" );
 		process.exit( 0 );
