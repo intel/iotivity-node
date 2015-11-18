@@ -19,22 +19,22 @@ device.configure( {
 				// We've discovered the resource we were seeking.
 				if ( event.resource.uri === "/a/high-level-resource-creation-example" ) {
 					console.log( "Found the test server" );
-					device.client.removeEventListener( "resourcefound", resourceFoundHandler );
+					device.removeEventListener( "resourcefound", resourceFoundHandler );
 					fulfill( event.resource.id.deviceId );
 				}
 			};
 
 			// Add a listener that will receive the results of the discovery
-			device.client.addEventListener( "resourcefound", resourceFoundHandler );
+			device.addEventListener( "resourcefound", resourceFoundHandler );
 
-			device.client.findResources().catch( function( error ) {
-				device.client.removeEventListener( "resourcefound", resourceFoundHandler );
+			device.findResources().catch( function( error ) {
+				device.removeEventListener( "resourcefound", resourceFoundHandler );
 				reject( "findResource() failed: " + error );
 			} );
 		} ).then(
 			function( deviceId ) {
 				console.log( "deviceId discovered" );
-				device.client.createResource( {
+				device.createResource( {
 					id: {
 						deviceId: deviceId,
 						path: "/a/new-resource"
@@ -48,7 +48,7 @@ device.configure( {
 					function( resource ) {
 						console.log( "remote resource successfully created with id " +
 							JSON.stringify( resource.id ) );
-						device.client.deleteResource( resource.id ).then( function() {
+						device.deleteResource( resource.id ).then( function() {
 							console.log( "remote resource successfully deleted" );
 						}, throwError );
 					},

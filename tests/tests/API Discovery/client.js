@@ -11,7 +11,7 @@ function discoverTheResource() {
 	var eventHandler,
 		removeListener = function() {
 			if ( eventHandler ) {
-				device.client.removeEventListener( "resourcefound", eventHandler );
+				device.removeEventListener( "resourcefound", eventHandler );
 			}
 		};
 
@@ -25,8 +25,8 @@ function discoverTheResource() {
 				if ( event.resource.id.path === url ) {
 					utils.assert( "ok", true, "Client: Resource found" );
 
-					for ( index in device.client._resources ) {
-						if ( device.client._resources[ index ].id.path === url ) {
+					for ( index in device._resources ) {
+						if ( device._resources[ index ].id.path === url ) {
 							count++;
 						}
 					}
@@ -37,11 +37,11 @@ function discoverTheResource() {
 				}
 			};
 
-			device.client.addEventListener( "resourcefound", eventHandler );
+			device.addEventListener( "resourcefound", eventHandler );
 		} ),
-		device.client.findResources().then(
+		device.findResources().then(
 			function() {
-				utils.assert( "ok", true, "Client: device.client.findResources() successful" );
+				utils.assert( "ok", true, "Client: device.findResources() successful" );
 			} )
 	] ).then( removeListener, removeListener );
 }
@@ -63,7 +63,7 @@ async.series( [
 
 	// Discover the resource once
 	function( callback ) {
-		utils.assert( "strictEqual", device.client.findResources._handle, undefined,
+		utils.assert( "strictEqual", device.findResources._handle, undefined,
 			"Client: open-ended resource discovery handle is initially undefined" );
 		discoverTheResource().then(
 			function() {
@@ -81,9 +81,9 @@ async.series( [
 		Promise.all( [
 			new Promise( function( fulfill ) {
 				var OCCancel = iotivity.OCCancel,
-					discoveryHandle = device.client.findResources._handle;
+					discoveryHandle = device.findResources._handle;
 
-				utils.assert( "strictEqual", !!device.client.findResources._handle, true,
+				utils.assert( "strictEqual", !!device.findResources._handle, true,
 					"Client: open-ended resource discovery handle is set after one discovery" );
 
 				// Overwrite iotivity.OCCancel() to make sure it gets called during the next

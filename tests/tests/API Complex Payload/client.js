@@ -22,12 +22,12 @@ async.series( [
 					if ( event.resource.id.path === "/a/" + uuid ) {
 						resource = event.resource;
 						fulfill();
-						device.client.removeEventListener( "resourcefound", resourceFound );
+						device.removeEventListener( "resourcefound", resourceFound );
 					}
 				};
-				device.client.addEventListener( "resourcefound", resourceFound );
+				device.addEventListener( "resourcefound", resourceFound );
 			} ),
-			device.client.findResources()
+			device.findResources()
 		] ).then(
 			function() {
 				callback();
@@ -35,7 +35,7 @@ async.series( [
 	},
 
 	function performRetrieve( callback ) {
-		device.client.retrieveResource( resource.id ).then(
+		device.retrieveResource( resource.id ).then(
 			function( resource ) {
 				testUtils.assert( "deepEqual", resource.properties, {
 					primitiveValue: 42,
@@ -50,7 +50,7 @@ async.series( [
 	},
 
 	function performUpdate( callback ) {
-		device.client.updateResource( resource.id, _.extend( resource, {
+		device.updateResource( resource.id, _.extend( resource, {
 			properties: {
 				putValue: "A string",
 				anotherPutValue: 23.7,

@@ -25,13 +25,13 @@ function findResourceByUrl( url, deviceId ) {
 		new Promise( function( fulfill ) {
 			var resourceFound = function( event ) {
 				if ( event.resource.id.path === url ) {
-					device.client.removeEventListener( "resourcefound", resourceFound );
+					device.removeEventListener( "resourcefound", resourceFound );
 					fulfill( event.resource );
 				}
 			};
-			device.client.addEventListener( "resourcefound", resourceFound );
+			device.addEventListener( "resourcefound", resourceFound );
 		} ),
-		device.client.findResources( _.extend( {}, deviceId ? { deviceId: deviceId } : {} ) )
+		device.findResources( _.extend( {}, deviceId ? { deviceId: deviceId } : {} ) )
 	] ).then( function( results ) {
 		return results[ 0 ];
 	} );
@@ -56,7 +56,7 @@ async.series( [
 	},
 
 	function createRemoteResource( callback ) {
-		device.client.createResource( newRemoteResourceTemplate ).then(
+		device.createResource( newRemoteResourceTemplate ).then(
 			function( resource ) {
 
 				// Use the newly created remote resource instead of the initial resource that we
@@ -78,7 +78,7 @@ async.series( [
 	},
 
 	function createDuplicateRemoteResource( callback ) {
-		device.client.createResource( newRemoteResourceTemplate ).then(
+		device.createResource( newRemoteResourceTemplate ).then(
 			function() {
 				callback( new Error( "Server created duplicate resource" ) );
 			}, function() {
@@ -89,7 +89,7 @@ async.series( [
 	},
 
 	function deleteRemoteResource( callback ) {
-		device.client.deleteResource( remoteResource.id ).then(
+		device.deleteResource( remoteResource.id ).then(
 			function() {
 				utils.assert( "ok", true, "Client: Deleting the remote resource has succeeded" );
 				console.log( JSON.stringify( { killPeer: true } ) );

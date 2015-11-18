@@ -21,13 +21,13 @@ device.configure( {
 	function() {
 		utils.assert( "ok", true, "Client: device.configure() successful" );
 
-		device.client.addEventListener( "resourcefound", function( event ) {
+		device.addEventListener( "resourcefound", function( event ) {
 
 			if ( !resourceFound && event.resource.uri === "/a/" + uuid ) {
 				resourceFound = true;
 				utils.assert( "ok", true, "Client: Resource found" );
 
-				device.client.retrieveResource( event.resource.id ).then(
+				device.retrieveResource( event.resource.id ).then(
 					function( resource ) {
 						utils.assert( "deepEqual", resource.properties, {
 							"How many angels can dance on the head of a pin?": "As many as wanting."
@@ -47,7 +47,7 @@ device.configure( {
 			}
 		} );
 
-		device.client.findResources().then(
+		device.findResources().then(
 			function() {
 				utils.assert( "ok", true, "Client: findResources() successful" );
 

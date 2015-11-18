@@ -9,7 +9,7 @@ device.configure( {
 } ).then(
 	function() {
 		utils.assert( "strictEqual",
-			device.client._processResources( null,
+			device._processResources( null,
 				{ result: iotivity.OCStackResult.OC_STACK_NO_RESOURCE },
 				function() {
 					utils.assert( "ok", true, "_processResources() fulfills promise" );
