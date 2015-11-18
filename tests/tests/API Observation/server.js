@@ -12,7 +12,7 @@ console.log( JSON.stringify( { assertionCount: 5 } ) );
 function cleanup() {
 	utils.assert( "ok", onRequestCalls > 0, "Server: device.onrequest has been called" );
 	utils.assert( "strictEqual", lightResource.properties.increment, 11,
-		"Exactly 11 notifications were delivered (the last one with noObservers)" );
+		"Server: Exactly 11 notifications were delivered (the last one with noObservers)" );
 	console.log( JSON.stringify( { killPeer: true } ) );
 	process.exit( 0 );
 }
@@ -31,7 +31,7 @@ function testOnRequest() {
 // observers, and then we send out a final notification which we expect to fail in a certain way.
 function assertNotifyFailure() {
 	var waitForObserverListToEmpty = setInterval( function() {
-		if ( device._interestedObservers.length === 0 ) {
+		if ( !lightResource._observationHandle ) {
 			clearInterval( waitForObserverListToEmpty );
 			lightResource.properties.increment++;
 			device.notify( lightResource ).catch(
@@ -83,7 +83,7 @@ var notifyIntervalId = setInterval( function() {
 		return;
 	}
 
-	device.notify( lightResource, "update", [ "increment" ] ).then(
+	device.notify( lightResource ).then(
 		function() {
 
 			haveObservers = true;

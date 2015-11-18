@@ -17,7 +17,7 @@ device.configure( {
 					JSON.stringify( event, null, 4 ) );
 
 				// We've discovered the resource we were seeking.
-				if ( event.resource.uri === "/a/high-level-resource-creation-example" ) {
+				if ( event.resource.id.path === "/a/high-level-resource-creation-example" ) {
 					console.log( "Found the test server" );
 					device.removeEventListener( "resourcefound", resourceFoundHandler );
 					fulfill( event.resource.id.deviceId );

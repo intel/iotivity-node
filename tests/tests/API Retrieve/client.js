@@ -23,7 +23,7 @@ device.configure( {
 
 		device.addEventListener( "resourcefound", function( event ) {
 
-			if ( !resourceFound && event.resource.uri === "/a/" + uuid ) {
+			if ( !resourceFound && event.resource.id.path === "/a/" + uuid ) {
 				resourceFound = true;
 				utils.assert( "ok", true, "Client: Resource found" );
 

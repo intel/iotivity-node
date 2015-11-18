@@ -12,19 +12,20 @@ device.configure( {
 
 		// We've discovered the resource we were seeking.
 		if ( event.resource.id.path === "/a/high-level-example" ) {
-			console.log( "This is the resource we want to observe" );
-
-			// Let's start observing the resource.
-			device.on( "resourcechange", function( event ) {
-				console.log( "Received resource change event:\n" +
+			var resourceUpdate = function( event ) {
+				console.log( "Received resource update event:\n" +
 					JSON.stringify( event, null, 4 ) );
 
 				// Stop observing after having made 10 observations
 				if ( ++observationCount >= 10 ) {
-					device.cancelObserving( event.resource.id );
+					event.resource.removeEventListener( "update", resourceUpdate );
 				}
-			} );
-			device.startObserving( event.resource.id );
+			};
+
+			console.log( "This is the resource we want to observe" );
+
+			// Let's start observing the resource.
+			event.resource.addEventListener( "update", resourceUpdate );
 		}
 	} );
 	device.findResources();

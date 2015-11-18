@@ -1,35 +1,38 @@
 var resourceFound = false,
-	observationCount = 0,
 	uuid = process.argv[ 2 ],
 	utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )();
 
-console.log( JSON.stringify( { assertionCount: 3 } ) );
+console.log( JSON.stringify( { assertionCount: 6 } ) );
 
 function discoverResources() {
 	device.addEventListener( "resourcefound", function( event ) {
-		if ( !resourceFound && event.resource.uri === "/a/" + uuid ) {
-			resourceFound = true;
-			device.addEventListener( "resourcechange", function( event ) {
-				if ( ++observationCount >= 10 ) {
-					device.cancelObserving( event.resource.id ).catch(
-						function( error ) {
-							utils.die( "Client: cancelObserving() failed with " +
-								error + " and result " + error.result );
-						}
-					);
+		var observationHandle,
+			dummyHandler = function() {},
+			resourceUpdate = function( event ) {
+				if ( event.resource.properties.increment >= 9 ) {
+					event.resource.removeEventListener( "update", resourceUpdate );
+					utils.assert( "deepEqual", event.resource._observationHandle,
+						observationHandle,
+						"Client: Private resource observation handle is unchanged after " +
+						"removing a handler" );
+					event.resource.removeEventListener( "update", dummyHandler );
+					utils.assert( "ok", !event.resource._observationHandle,
+						"Client: Private resource observation handle is absent after " +
+						"removing the last handler" );
 				}
-			} );
-			device.startObserving( event.resource.id ).then(
-				function( observedResource ) {
-					utils.assert( "deepEqual", observedResource.id, event.resource.id,
-						"Client: resource returned by startObserving() has the same ID as the " +
-						"resource for whose ID observation was requested" );
-				},
-				function( error ) {
-					utils.die( "Client: startObserving() failed with " + error + " and result " +
-						error.result );
-				} );
+			};
+
+		if ( !resourceFound && event.resource.id.path === "/a/" + uuid ) {
+			resourceFound = true;
+			utils.assert( "ok", !event.resource._observationHandle,
+				"Client: Private resource observation handle is initially absent" );
+			event.resource.addEventListener( "update", resourceUpdate );
+			observationHandle = event.resource._observationHandle;
+			event.resource.addEventListener( "update", dummyHandler );
+			utils.assert( "deepEqual", event.resource._observationHandle, observationHandle,
+				"Client: Private resource observation handle is unchanged after adding a second " +
+				"handler" );
 		}
 	} );
 	device.findResources().then(
