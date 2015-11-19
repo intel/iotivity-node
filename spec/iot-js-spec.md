@@ -73,13 +73,13 @@ Presence handling is encapsulated and exposed as ‘observe’ methods and event
 
 Subscribing to event handlers means observe/notifications/presence are turned on; notifications are automatic for JS API, so notifyAll() and notify() are not exposed, but the user agent should encapsulate the observe/notify mechanism and expose only events.
 
+In general, Promises may fail with Error, including: "NotSupportedError", "SecurityError", "TimeoutError", "NetworkError", "NotFoundError", "DataError".
 
 Web IDL of the JavaScript API
 -----------------------------
 ```javascript
 
 // The API entry point is constructed. There could be more devices sharing a hardware.
-
 [Constructor(optional OicDeviceSettings settings)]  // if not given, defaults are used
 interface OicDevice : EventTarget {
   readonly attribute OicDeviceSettings settings;
@@ -151,13 +151,25 @@ interface OicDiscovery : EventTarget {
 
   attribute EventHandler<OicResourceFoundEvent> onresourcefound;  // discovery
   attribute EventHandler<OicDeviceFoundEvent> ondevicefound;  // discovery
+  attribute EventHandler<OicDiscoveryErrorEvent> ondiscoveryerror;  // discovery
 };
 
 dictionary OicDiscoveryOptions {  // by default, find all
   USVString deviceId = "";
   USVString resourceURL = "";
   DOMString resourceType = "";
+  // timeout could be included later, if needed
+  // unsigned long long timeout = Infinity;  // in ms
 };
+
+// Errors reported from OIC stack are mapped to DOMError and exposed as Error:
+// https://heycam.github.io/webidl/#idl-DOMException-error-names
+// The following are mapped: "NetworkError", "TimeoutError", "DataError"
+// OIC protocol errors may be included in the error message as text.
+interface OicDiscoveryErrorEvent: Event {
+  Error error;
+  USVString? deviceId;
+}
 
 [NoInterfaceObject]
 interface OicClient: EventTarget {

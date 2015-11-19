@@ -73,6 +73,8 @@ Implementations should support automatic notifications for changed resources tha
 Web IDL of the JavaScript API
 -----------------------------
 The API entry point is the local device where the code is run.
+In general, Promises may fail with Error, including: "NotSupportedError", "SecurityError", "TimeoutError", "NetworkError", "NotFoundError", "DataError".
+
 When the constructor is invoked without parameters, the device gets the default configuration.
 ```javascript
 var device = require('oic')();
@@ -188,12 +190,15 @@ interface OicDiscovery: EventTarget {
 
   attribute EventHandler<OicResourceFoundEvent> onresourcefound;  // discovery
   attribute EventHandler<OicDeviceFoundEvent> ondevicefound;  // discovery+presence
+  attribute EventHandler<OicDiscoveryErrorEvent> ondiscoveryerror;  // discovery
 }
 
 dictionary OicDiscoveryOptions {
   USVString deviceId;
   USVString resourcePath;
   DOMString resourceType;
+  // timeout could be included later, if needed
+  // unsigned long long timeout = Infinity;  // in ms
 };
 
 interface OicResourceFoundEvent : Event {
@@ -206,6 +211,16 @@ interface OicDeviceFoundEvent : Event {
   // Only resource path, resource type and interfaces may be supported, therefore
   // retrieveResource needs to be called for getting full resource (given deviceId and url).
 };
+
+// Errors reported from OIC stack are mapped to DOMError and exposed as Error:
+// https://heycam.github.io/webidl/#idl-DOMException-error-names
+// The following are mapped: "NetworkError", "TimeoutError", "DataError"
+// OIC protocol errors may be included in the error message as text.
+interface OicDiscoveryErrorEvent: Event {
+  Error error;
+  USVString? deviceId;
+}
+
 ```
 
 The server API provides functionality for handling requests (and eventually notifications).
