@@ -109,12 +109,12 @@ interface OicDevice: EventTarget {
 OicDevice implements OicDiscovery;
 OicDevice implements OicServer;
 
-enum OicDeviceRole { "client", "server", "intermediary" };
+enum OicDeviceRole { "client", "server" };  // server includes client interface
 enum OicConnectionMode { "confirmed", "best-effort", “default” };
 
 dictionary OicDeviceSettings {
   USVString url;  // host:port
-  OicDeviceRole role = "intermediary";  // both client and server
+  OicDeviceRole role = "server";  // both client and server
   OicConnectionMode connectionMode = "default";  // mapping to QoS in IoTivity
 };
 
@@ -393,9 +393,9 @@ Steps:
 - Returns a Promise object and continue asynhronously.
 - Issue an endpoint discovery request on devices: a multicast request "GET /oic/res" to "All CoAP nodes" (224.0.1.187 for IPv4 and FF0X::FD for IPv6, port 5683).
 - As devices are discovered one by one, fire an ```ondevicefound``` event with an ```OicDeviceFoundEvent``` structure, containing an ```OicDeviceInfo``` object and a sequence of OicResource objects, which should contain the information specified by discovery (usually URI, resource type, interfaces, and media types).
-- When the discovery process is finished, resolve the Promise.
-- If there is an error during discovery, reject Promise with the error.
-(The devices found so far have been delivered via the ```ondevicefound``` event.)
+- If the sending the request fails, reject the Promise, otherwise resolve the Promise.
+- If there is an error during discovery, fire a ```discoveryerror``` event on the device.
+- For each found device fire the ```devicefound``` event.
 
 ### OicResource.findResources
 Signature:
@@ -407,10 +407,9 @@ Steps:
   - if ```options.deviceId``` is specified, make a direct discovery request to that device
   - if ```options.resourcePath``` is specified, filter results based on it
   - if ```options.resourceType``` is specified, filter results based on it.
-- As resources are discovered one by one, fire an ```onresourcefound``` event with an ```OicResourceFoundEvent``` structure, containing an ```OicResource``` object.
-- When the discovery process is finished, resolve the Promise with a sequence of all ```OicResourceInfo``` objects discovered.
-- If there is an error during discovery, reject Promise with the error.
-(The resources found so far have been delivered via the ```onresourcefound``` event.)
+- If the sending the request fails, reject the Promise, otherwise resolve the Promise.
+- If there is an error during discovery, fire a ```discoveryerror``` event on the device.
+- For each discovered resource fire a ```resourcefound``` event.
 
 
 ### TODO list:

@@ -91,12 +91,12 @@ interface OicDevice : EventTarget {
 OicDevice implements OicServer;
 OicDevice implements OicClient;
 
-enum OicDeviceRole { "client", "server", "intermediary" };
+enum OicDeviceRole { "client", "server" };
 enum OicConnectionMode { "confirmed", "best-effort", “default” };
 
 dictionary OicDeviceSettings {
   USVString url;  // host:port
-  OicDeviceRole role = "intermediary";  // both client and server
+  OicDeviceRole role = "server";  // both client and server
   OicConnectionMode connectionMode = "default";  // mapping to QoS in IoTivity
 };
 
