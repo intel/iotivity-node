@@ -39,7 +39,7 @@ iotivity.OCDoResource(
 			destination = response.addr,
 			observeHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
-			resourceCount = resources.length ? resources.length : 0,
+			resourceCount = resources ? resources.length : 0,
 			observeResponseHandler = function( handle, response ) {
 				console.log( "Received response to OBSERVE request:" );
 				console.log( JSON.stringify( response, null, 4 ) );

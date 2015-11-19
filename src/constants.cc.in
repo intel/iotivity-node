@@ -1,0 +1,13 @@
+#include <node.h>
+#include <nan.h>
+
+#include "enums.h"
+
+extern "C" {
+#include <ocstack.h>
+#include <ocrandom.h>
+}
+
+using namespace v8;
+
+// The rest of this file is generated

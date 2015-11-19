@@ -20,6 +20,18 @@ This project provides [iotivity][] node.js bindings.
     0. A C compiler and a C++ compiler
 0. Run ```npm install```
 
+iotivity-node provides two interfaces: The low-level interface is a close mapping of the iotivity C API.
+```JS
+var iotivity = require( "iotivity-node/lowlevel" );
+```
+will give you access to the low-level interface.
+
+There is also a high-level interface which implements the [JS API spec](./spec/iot-js-spec.md). This interface requires the ```Promise``` object which is only available starting node.js 4.0.
+```JS
+var device = require( "iotivity-node" )();
+```
+will give you an instance of OicDevice as described in the JS API spec.
+
 ### In more detail:
 iotivity-node depends on [iotivity][] proper. It has been tested against [1.0.0][] on Linux. iotivity depends on development headers for libuuid and boost.
 
