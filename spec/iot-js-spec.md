@@ -125,22 +125,42 @@ typedef dictionary {
   // query is omitted until proven needed
 } OicResourceId;
 
+dictionary OicResourceInit {
+  ResourceId id;
+  sequence<DOMString> resourceTypes;
+  sequence<DOMString> interfaces;
+  sequence<DOMString> mediaTypes;
+  boolean discoverable;
+  boolean observable;
+  OicResourceRepresentation properties;
+};
+
 // a snapshot of the custom properties of a Resource, together with the linked resources
 dictionary OicResourceRepresentation {
   // any non-function properties that are JSON-serializable, e.g. string, number, boolean, URI
 };
 
-dictionary OicResource {
-  OicResourceId id;
-  DOMString[] resourceTypes;
-  DOMString[] interfaces;
-  boolean discoverable;
-  boolean observable;
+[NoInterfaceObject]
+interface OicResource: EventTarget {
+  // also gets all properties of OicResourceInit, all read-only
+  readonly attribute ResourceId id;
+  readonly attribute sequence<DOMString> resourceTypes;
+  readonly attribute sequence<DOMString> interfaces;
+  readonly attribute sequence<DOMString> mediaTypes;
+  readonly attribute boolean discoverable;
+  readonly attribute boolean observable;
+
+  OicResourceRepresentation properties;
+
   // resource hierarchies, perhaps not needed in the first version
   readonly attribute OicResourceId? parent;  // id of parent
   readonly attribute sequence<OicResourceId> children;
-  // additional, resource type specific properties are allowed as “mixin”
-  OicResourceRepresentation properties;
+
+  attribute EventHandler<OicResourceUpdateEvent> onupdate;  // observe + notify
+    // adding the first event listener to resourceupdate will send an observe request
+    // removing the last event listener will cancel observing
+
+  attribute EventHandler ondelete;  // simple event
 };
 
 [NoInterfaceObject]
@@ -172,26 +192,23 @@ interface OicDiscoveryErrorEvent: Event {
 }
 
 [NoInterfaceObject]
-interface OicClient: EventTarget {
+interface OicClient {
   // client API: CRUDN
-  Promise<OicResource> createResource(OicResource resource);  // create remote res
+  Promise<OicResource> createResource(OicResourceInit resource);  // create remote res
   Promise<OicResource> retrieveResource(OicResourceId id);  // get remote res
-  Promise<void> updateResource(OicResource resource);  // post or put remote res
+  Promise<void> updateResource(OicResourceInit resource);  // post or put remote res
   Promise<void> deleteResource(OicResourceId id);  // delete remote res
   Promise<void> observeResource(OicResourceId id);  // retrieve + observe flag
   Promise<void> unobserveResource(OicResourceId id);
-
-  attribute EventHandler<OicResourceUpdateEvent> onresourceupdate;  // observe + notify
-    // adding the first event listener to resourceupdate will send an observe request
-    // removing the last event listener will cancel observing
 };
+
 OicClient implements OicDiscovery;
 
 [NoInterfaceObject]
 interface OicServer: EventTarget {
   // register/unregister locally constructed resource objects with OIC
-  Promise<OicResource> registerResource(OicResource init);  // gets an id
-  Promise<void> unregisterResource(OicResource resource);  // purge resource, then notify all
+  Promise<OicResource> registerResource(OicResourceInit init);  // gets an id
+  Promise<void> unregisterResource(OicResourceId id);  // purge resource, then notify all
 
   // enable/disable presence (discovery, state changes) for this device and its resources
   Promise<void> enablePresence(optional unsigned long ttl);  // in seconds
@@ -256,23 +273,22 @@ if (device.settings.info.uuid) {  // configuration is valid
 ```javascript
 var lightResource = null;
 function startServer() {
-  var deviceId = device.settings.info.uuid;
+  var deviceId = device.info.uuid;
   // register all resources handled by this device
   device.registerResource({
-    url: "/light/ambience/blue",
-    deviceId: deviceId,
+    id: { deviceId: deviceId; path: "/light/ambience/blue" },
     resourceTypes: [ "Light" ],
     interfaces: [ "/oic/if/rw" ],
     discoverable: true,
     observable: true,
     properties: { color: "light-blue", dimmer: 0.2 }
   }).then((res) => {
-    console.log("Resource " + res.id + " has been created.");
+    console.log("Resource " + res.id.path + " has been created.");
     lightResource = res;
     device.onrequest = requestHandler;
     device.enablePresence();
   }).catch((error) => {
-    console.log("Error creating resource " + res.url + " : " + error.message);
+    console.log("Error creating resource " + res.id.path + " : " + error.message);
   });
 };
 
@@ -317,12 +333,12 @@ function startClient() {
 function observe(device, res) {
     device.observeResource(res)
         .then((red) => {
-            console.log("Observing " + res.url);
+            console.log("Observing " + res.id.path);
             red.properties.dimmer = 0.5;
-            device.updateResource(red.id, red)
+            device.updateResource(red);
               .then(() => { console.log("Changed red light dimmer"); })
               .catch(() => { console.log("Error changing red light"); });
-         }).catch((error) => { console.log("Cannot observe " + res.url); };
+         }).catch((error) => { console.log("Cannot observe " + res.id.path); };
 };
 ```
 
