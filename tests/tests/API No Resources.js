@@ -2,19 +2,17 @@ var device = require( "../../index" )(),
 	utils = require( "../assert-to-console" ),
 	iotivity = require( "../../lowlevel" );
 
-console.log( JSON.stringify( { assertionCount: 2 } ) );
+console.log( JSON.stringify( { assertionCount: 1 } ) );
 
 device.configure( {
 	role: "client"
 } ).then(
 	function() {
 		utils.assert( "strictEqual",
-			device._processResources( null,
-				{ result: iotivity.OCStackResult.OC_STACK_NO_RESOURCE },
-				function() {
-					utils.assert( "ok", true, "_processResources() fulfills promise" );
-				}, function() {} ),
-			iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION,
+			device._processResources( {
+				result: iotivity.OCStackResult.OC_STACK_NO_RESOURCE
+			} ),
+			undefined,
 			"_processResources() handles OC_STACK_NO_RESOURCE" );
 		process.exit( 0 );
 	},
