@@ -3,7 +3,6 @@ var intervalId,
 
 	// This is the same value as client.presence.js
 	sampleUri = "/a/iotivity-node-presence-sample",
-	interruptSequence = 0,
 	iotivity = require( "iotivity-node/lowlevel" );
 
 // Start iotivity and set up the processing loop
@@ -18,9 +17,6 @@ iotivity.OCSetPlatformInfo( {
 	platformID: "server.discoverable.sample",
 	manufacturerName: "iotivity-node"
 } );
-
-console.log( "The first SIGINT will start presence.\nThe second SIGINT will stop presence.\n" +
-	"The third SIGINT will quit the server." );
 
 // Create a new resource
 iotivity.OCCreateResource(
@@ -38,18 +34,29 @@ iotivity.OCCreateResource(
 	},
 	iotivity.OCResourceProperty.OC_DISCOVERABLE );
 
-// Exit gracefully when interrupted
-process.on( "SIGINT", function() {
-	if ( interruptSequence === 0 ) {
-		console.log( "\nSIGINT: Starting presence..." );
+// Read keystrokes from stdin
+var stdin = process.stdin;
 
-		iotivity.OCStartPresence( 0 );
-	} else if ( interruptSequence === 1 ) {
-		console.log( "\nSIGINT: Stopping presence..." );
+stdin.setRawMode( true );
+stdin.resume();
+stdin.setEncoding( "utf8" );
+stdin.on( "data", function( key ) {
+	var result;
 
-		iotivity.OCStopPresence();
-	} else {
-		console.log( "\nSIGINT: Quitting..." );
+	switch ( key ) {
+
+	case "p":
+		result = iotivity.OCStartPresence( 0 );
+		console.log( "OCStartPresence: " + result );
+		break;
+
+	case "s":
+		result = iotivity.OCStopPresence();
+		console.log( "OCStopPresence: " + result );
+		break;
+
+	// ^C
+	case "\u0003":
 
 		// Tear down the processing loop and stop iotivity
 		clearInterval( intervalId );
@@ -59,6 +66,15 @@ process.on( "SIGINT", function() {
 
 		// Exit
 		process.exit( 0 );
+		break;
+
+	default:
+		return;
 	}
-	interruptSequence++;
+
+	console.log( "Press 'p' to turn on presence\nPress 's' to turn off presence\n" +
+		"Press Ctrl+C to exit" );
 } );
+
+console.log( "Press 'p' to turn on presence\nPress 's' to turn off presence\n" +
+	"Press Ctrl+C to exit" );
