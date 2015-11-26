@@ -63,7 +63,7 @@ async.series( [
 
 	// Discover the resource once
 	function( callback ) {
-		utils.assert( "strictEqual", device.findResources._handle, undefined,
+		utils.assert( "strictEqual", device._handles.findResources, undefined,
 			"Client: open-ended resource discovery handle is initially undefined" );
 		discoverTheResource().then(
 			function() {
@@ -81,9 +81,9 @@ async.series( [
 		Promise.all( [
 			new Promise( function( fulfill ) {
 				var OCCancel = iotivity.OCCancel,
-					discoveryHandle = device.findResources._handle;
+					discoveryHandle = device._handles.findResources;
 
-				utils.assert( "strictEqual", !!device.findResources._handle, true,
+				utils.assert( "strictEqual", !!device._handles.findResources, true,
 					"Client: open-ended resource discovery handle is set after one discovery" );
 
 				// Overwrite iotivity.OCCancel() to make sure it gets called during the next
