@@ -131,7 +131,7 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 	cp "build/${MODULE_LOCATION}/iotivity.node" "dist/${PACKAGE_NAME}/build/${MODULE_LOCATION}" &&
 	if test -d deps; then
 		mkdir -p "dist/${PACKAGE_NAME}/deps/iotivity/lib"
-		cp "deps/iotivity/lib/liboctbstack.so dist/${PACKAGE_NAME}/deps/iotivity/lib"
+		cp "deps/iotivity/lib/liboctbstack.so" "dist/${PACKAGE_NAME}/deps/iotivity/lib"
 	fi
 	cd dist &&
 	tar cvjf iotivity.tar.bz2 "${PACKAGE_NAME}" &&
