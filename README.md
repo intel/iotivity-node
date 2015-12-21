@@ -91,5 +91,5 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 [1.0.0]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=1.0.0
 [snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=1.0.0;sf=tgz
 [scons]: http://www.scons.org/
-[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.0-0/install.sh
-[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.0-0/octbstack.pc.in
+[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.0-2/install.sh
+[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.0-2/octbstack.pc.in

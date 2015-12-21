@@ -1,10 +1,11 @@
 {
   "name": "iotivity-node",
-  "version": "1.0.0-0",
+  "version": "1.0.0-2",
   "description": "IoTivity bindings",
   "repository": "https://github.com/otcshare/iotivity-node/",
   "license": "MIT",
   "main": "index.js",
+  "keywords": [ "oic", "iotivity", "iot" ],
   "scripts": {
     "ci": "TESTING=true npm install && grunt testsuite testdist --ci",
     "ci-basic": "TESTING=true npm install && grunt testsuite testdist --suites='Load Library.js' --ci",
