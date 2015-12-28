@@ -7,6 +7,7 @@
 #include "functions/oc-do-response.h"
 #include "functions/oc-notify.h"
 #include "functions/oc-random.h"
+#include "functions/oc-register-persistent-storage-handler.h"
 #include "functions/oc-set-default-device-entity-handler.h"
 #include "functions/simple.h"
 
@@ -50,6 +51,7 @@ void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   SET_FUNCTION(exports, OCNotifyAllObservers);
   SET_FUNCTION(exports, OCNotifyListOfObservers);
   SET_FUNCTION(exports, OCProcess);
+  SET_FUNCTION(exports, OCRegisterPersistentStorageHandler);
   SET_FUNCTION(exports, OCSeedRandom);
   SET_FUNCTION(exports, OCSetDefaultDeviceEntityHandler);
   SET_FUNCTION(exports, OCSetDeviceInfo);
