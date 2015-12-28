@@ -152,19 +152,6 @@ function runTestSuites( files ) {
 				// Track the child processes involved in this test in this array
 				children = [],
 
-				// When killing child processes in a loop we have to copy the array because it may
-				// become modified by the incoming notifications that a process has exited.
-				copyChildren = function() {
-					var index,
-						theCopy = [];
-
-					for ( index in children ) {
-						theCopy.push( children[ index ] );
-					}
-
-					return theCopy;
-				},
-
 				// Turn this test async
 				done = assert.async(),
 
@@ -178,7 +165,11 @@ function runTestSuites( files ) {
 					teardown: function( error, sourceProcess ) {
 						var index,
 							signal = error ? "SIGTERM" : "SIGINT",
-							copyOfChildren = copyChildren();
+
+							// When killing child processes in a loop we have to copy the array
+							// because it may become modified by the incoming notifications that a
+							// process has exited.
+							copyOfChildren = children.slice();
 
 						for ( index in copyOfChildren ) {
 							if ( sourceProcess && sourceProcess === copyOfChildren[ index ] ) {
