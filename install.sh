@@ -32,6 +32,7 @@ CONFIGURATION="$(ls "${SOURCE}/out/${PLATFORM}/${ARCH}" | grep -E "release|debug
 
 LIBDIR="${PREFIX}/lib"
 INCLUDEDIR="${PREFIX}/include"
+SHAREDIR="${PREFIX}/share/iotivity"
 
 OCTB_STACK_DIR=resource/csdk/stack
 OCTB_RANDOM_DIR=resource/csdk/ocrandom
@@ -45,8 +46,12 @@ OCTB_CCOMMON_INCLUDEDIR=iotivity/${OCTB_CCOMMON_DIR}
 
 ACTUAL_LIBDIR="${DESTDIR}/${LIBDIR##/}"
 ACTUAL_INCLUDEDIR="${DESTDIR}/${INCLUDEDIR##/}"
+ACTUAL_SHAREDIR="${DESTDIR}/${SHAREDIR##/}"
 
 # Paths have been established above. Copy the files and fill out the .pc file.
+
+mkdir -p "${ACTUAL_SHAREDIR}" || exit 1
+cp "${SOURCE}/resource/csdk/security/provisioning/sample/oic_svr_db_server_justworks.json" ${ACTUAL_SHAREDIR}
 
 mkdir -p "${ACTUAL_LIBDIR}" || exit 1
 if test "x${PLATFORM}x" = "xdarwinx"; then
