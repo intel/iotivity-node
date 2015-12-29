@@ -80,6 +80,14 @@ The distribution scripts ```dist.sh``` and ```install.sh``` when used together m
 
 You can now transfer iotivity.bin.tar.bz2 to the device and then unpack it into the root directory.
 
+## Persistence
+
+The high-level JS API provides a means for persisting the device ID across instantiations of a process according to the [iotivity wiki][]. It does so by creating a directory ```${HOME}/.iotivity-node```. Thereunder, it creates directories whose name is the sha256 checksum of the absolute path of the given script. Thus, if you write a script located in ```/home/user/myscript.js``` that uses the high-level JS API, its persistent state will be stored in the directory
+```
+/home/user/.iotivity-node/1abfb1b70eaa1ccc17a42990723b153a0d4b913a8b15161f8043411fc7f24fb1
+```
+in a file named ```oic_svr_db.json```. The file initially contains enough information to persist the device ID used whenever you run ```/home/user/myscript.js```. You can add more information to the file in accordance with the [iotivity wiki][].
+
 ## Examples
 
 The JavaScript examples are located in [js/](./js/) and come in pairs of one client and one server, each illustrating a basic aspect of iotivity. To run them, open two terminals and change directory to the root of the iotivity-node repository in both. Always launch the server before the client. For example, in one terminal you can run ```node js/server.discoverable.js``` and in the other terminal you can run ```node js/client.discovery.js```.
@@ -93,3 +101,4 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 [scons]: http://www.scons.org/
 [install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.0-2/install.sh
 [octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.0-2/octbstack.pc.in
+[iotivity wiki]: https://wiki.iotivity.org/faq_s
