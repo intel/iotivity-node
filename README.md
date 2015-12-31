@@ -20,6 +20,8 @@ This project provides [iotivity][] node.js bindings.
     0. A C compiler and a C++ compiler
 0. Run ```npm install```
 
+Alternatively, there's a [video][] showing how to prepare a pristine Fedora 23 Cloud image for iotivity-node.
+
 iotivity-node provides two interfaces: The low-level interface is a close mapping of the iotivity C API.
 ```JS
 var iotivity = require( "iotivity-node/lowlevel" );
@@ -102,3 +104,4 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 [install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.0-2/install.sh
 [octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.0-2/octbstack.pc.in
 [iotivity wiki]: https://wiki.iotivity.org/faq_s
+[video]: https://www.youtube.com/watch?v=S3vcm-ox4Z4
