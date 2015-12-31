@@ -14,7 +14,7 @@ This project provides [iotivity][] node.js bindings.
 0. Make sure [node][] is up and running
 0. Install the following packages, which your distribution should provide:
     0. unzip, scons, and make
-    0. Development headers for boost, libuuid, and libcurl
+    0. Development headers for boost, libuuid, glib2, and libcurl
 
         boost and libcurl are needed during the build process, but iotivity-node does not ultimately depend on either.
     0. A C compiler and a C++ compiler
