@@ -167,9 +167,7 @@ function runAsServer() {
 
 		function registerResource( callback ) {
 			device.registerResource( {
-				id: {
-					path: "/a/" + process.argv[ 3 ]
-				},
+				id: { path: "/a/" + process.argv[ 3 ] },
 				interfaces: [ "oic.if.baseline" ],
 				resourceTypes: [ "core.light" ],
 				discoverable: true

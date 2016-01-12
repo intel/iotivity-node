@@ -18,12 +18,12 @@ This signature allows us to throw an exception and return false if any part of `
 
 As a general principle, if a Javascript value fails validation, throw an exception immediately. Do not return false and expect the caller to throw the exception. Call it exception-at-the-point-of-failure.
 
-Pointers to structures received from the C API may always be null. The functions converting those pointers to Javascript objects (js_CStructureName()) assume that they are not null. So, wrap the call to such a function in a null-check.
+Pointers to structures received from the C API may always be null. The functions converting those pointers to Javascript objects (```js_CStructureName()```) assume that they are not null. So, wrap the call to such a function in a null-check.
 
-When filling out a C structure in a function c_CStructureName, create a local structure first, and only if all validations pass, memcpy() the local structure into the structure passed in.
+When filling out a C structure in a function ```c_CStructureName()```, create a local structure first, and only if all validations pass, ```memcpy()``` the local structure into the structure passed in.
 
 ### Additional dependencies
-```clang-format``` is required for formatting the C++ source code and, since the test suite ensures that the code is properly formatted by comparing the code as present to the code after an application of ```grunt format```, ```clang-format``` is also required for running the tests. Your distribution should provide this utility.
+```clang-format``` is required for formatting the C++ source code. Your distribution should provide this utility.
 
 ### Tests
 
