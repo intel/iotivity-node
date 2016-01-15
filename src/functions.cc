@@ -60,8 +60,4 @@ void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   SET_FUNCTION(exports, OCStop);
   SET_FUNCTION(exports, OCStopPresence);
   SET_FUNCTION(exports, OCUnBindResource);
-#ifdef TESTING
-  SET_FUNCTION(exports, __compareResourceHandles);
-  SET_FUNCTION(exports, __compareDoHandles);
-#endif /* def TESTING */
 }

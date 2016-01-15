@@ -21,9 +21,5 @@ NAN_METHOD(bind_OCStartPresence);
 NAN_METHOD(bind_OCStop);
 NAN_METHOD(bind_OCStopPresence);
 NAN_METHOD(bind_OCUnBindResource);
-#ifdef TESTING
-NAN_METHOD(bind___compareResourceHandles);
-NAN_METHOD(bind___compareDoHandles);
-#endif /* def TESTING */
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_SIMPLE_H__ */

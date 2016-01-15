@@ -174,11 +174,6 @@
 				"src/structures/oc-sid.cc",
 				"src/structures/string-primitive.cc"
 			],
-			"conditions": [
-				[ "'<!(echo $TESTING)'=='true'", {
-					"defines": [ "TESTING" ]
-				} ]
-			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums" ]
 		}
 	]

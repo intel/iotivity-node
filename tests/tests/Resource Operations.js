@@ -139,9 +139,8 @@ testUtils.assert( "deepEqual",
 	{ OC_SLOW: true, OC_ACTIVE: true },
 	"OCGetResourceProperties correctly returns properties set on resource" );
 
-testUtils.assert( "ok",
-	iotivity.__compareResourceHandles( resourceHandleReceptacle.handle,
-		iotivity.OCGetResourceHandle( initialResourceCount ) ),
+testUtils.assert( "deepEqual", resourceHandleReceptacle.handle,
+	iotivity.OCGetResourceHandle( initialResourceCount ),
 	"OCGetResourceHandle for the index of the new resource returns the original handle" );
 
 // Create a child resource to test the collection APIs
@@ -167,10 +166,9 @@ testUtils.stackOKOrDie( "OCBindResource", result );
 
 // After having attached the child resource to the parent resource, it should be returned as the
 // first child handle in the collection
-testUtils.assert( "ok",
-	iotivity.__compareResourceHandles(
-		iotivity.OCGetResourceHandleFromCollection( resourceHandleReceptacle.handle, 0 ),
-		childResourceHandleReceptacle.handle ),
+testUtils.assert( "deepEqual",
+	iotivity.OCGetResourceHandleFromCollection( resourceHandleReceptacle.handle, 0 ),
+	childResourceHandleReceptacle.handle,
 	"Retrieving the child resource handle from the collection returns the child resource handle" );
 
 result = iotivity.OCUnBindResource(

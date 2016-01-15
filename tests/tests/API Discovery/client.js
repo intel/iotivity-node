@@ -90,10 +90,9 @@ async.series( [
 				// discovery, and that it gets called with the existing open-ended resource
 				// discovery handle.
 				iotivity.OCCancel = function( handle ) {
-					utils.assert( "strictEqual",
-						iotivity.__compareDoHandles( handle, discoveryHandle ),
-						true, "Client: OCCancel() called with open-ended resource discovery " +
-						"handle before next discovery request" );
+					utils.assert( "deepEqual", handle, discoveryHandle,
+						"Client: OCCancel() called with open-ended resource discovery handle " +
+						"before next discovery request" );
 					fulfill();
 
 					// We expect only one call to OCCancel() so restore the original
