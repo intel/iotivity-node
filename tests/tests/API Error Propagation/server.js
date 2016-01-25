@@ -28,10 +28,7 @@ async.series( [
 	function handleRequests( callback ) {
 		var requestCount = 0,
 			requestSequence = [],
-			teardown = function( error ) {
-				device.removeEventListener( "request", requestHandler );
-				callback( error );
-			},
+			teardown,
 			requestHandler = function( request ) {
 				requestSequence.push( requestCount );
 				if ( requestCount === 0 ) {
@@ -49,6 +46,10 @@ async.series( [
 					}, teardown );
 				}
 			};
+		teardown = function( error ) {
+			device.removeEventListener( "request", requestHandler );
+			callback( error );
+		};
 
 		device.addEventListener( "request", requestHandler );
 

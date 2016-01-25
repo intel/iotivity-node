@@ -14,16 +14,17 @@ async.series( [
 	},
 
 	function discoverTheResource( callback ) {
-		var teardown = function( error ) {
-				device.removeEventListener( "resourcefound", handler );
-				callback( error );
-			},
+		var teardown,
 			handler = function( event ) {
 				if ( event.resource.id.path === "/a/" + uuid ) {
 					id = event.resource.id;
 					teardown();
 				}
 			};
+		teardown = function( error ) {
+			device.removeEventListener( "resourcefound", handler );
+			callback( error );
+		};
 		device.addEventListener( "resourcefound", handler );
 		device.findResources().catch( teardown );
 	},

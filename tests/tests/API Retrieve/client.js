@@ -28,16 +28,17 @@ async.series( [
 			} );
 	},
 	function discoverTheResource( callback ) {
-		var teardown = function( error ) {
-			device.removeEventListener( "resourcefound", handleResourcefound );
-			callback( error );
-		};
+		var teardown;
 		var handleResourcefound = function( event ) {
 			if ( event.resource.id.path === "/a/" + uuid ) {
 				utils.assert( "ok", true, "Client: Resource found" );
 				theResource = event.resource;
 				teardown();
 			}
+		};
+		teardown = function( error ) {
+			device.removeEventListener( "resourcefound", handleResourcefound );
+			callback( error );
 		};
 		device.addEventListener( "resourcefound", handleResourcefound );
 		device.findResources().then( function() {

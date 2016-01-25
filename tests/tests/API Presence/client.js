@@ -78,20 +78,7 @@ async.series( [
 
 	function checkPresenceResponse( callback ) {
 		var sequence = [],
-			handler = function( event ) {
-				if ( event.type === "resourcefound" ) {
-					if ( event.resource.id.deviceId === theResource.id.deviceId &&
-							event.resource.id.path === theResource.id.path ) {
-						sequence.push( event.type + ":" + theResource.id.deviceId + ":" +
-							theResource.id.path );
-					}
-				} else {
-					sequence.push( event.type );
-				}
-				if ( sequence.length >= 2 ) {
-					cleanup();
-				}
-			},
+			handler,
 			cleanup = function( error ) {
 				theResource.removeEventListener( "delete", handler );
 				device.addEventListener( "resourcefound", handler );
@@ -101,6 +88,21 @@ async.series( [
 				], "Client: presence response sequence is as expected" );
 				callback( error );
 			};
+
+		handler = function( event ) {
+			if ( event.type === "resourcefound" ) {
+				if ( event.resource.id.deviceId === theResource.id.deviceId &&
+						event.resource.id.path === theResource.id.path ) {
+					sequence.push( event.type + ":" + theResource.id.deviceId + ":" +
+						theResource.id.path );
+				}
+			} else {
+				sequence.push( event.type );
+			}
+			if ( sequence.length >= 2 ) {
+				cleanup();
+			}
+		};
 
 		theResource.addEventListener( "delete", handler );
 		device.addEventListener( "resourcefound", handler );

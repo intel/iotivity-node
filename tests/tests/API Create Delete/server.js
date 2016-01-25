@@ -31,10 +31,7 @@ async.series( [
 	},
 
 	function processRequests( callback ) {
-		var done = function( error ) {
-				device.removeEventListener( "request", requestHandler );
-				callback( error );
-			},
+		var done,
 			requestIndex = 0,
 			requestHandler = function( request ) {
 				switch ( requestIndex ) {
@@ -87,6 +84,10 @@ async.series( [
 				}
 				requestIndex++;
 			};
+		done = function( error ) {
+			device.removeEventListener( "request", requestHandler );
+			callback( error );
+		};
 		device.addEventListener( "request", requestHandler );
 		console.log( JSON.stringify( { ready: true } ) );
 	}

@@ -1,13 +1,13 @@
 var _ = require( "lodash" ),
-	testUtils = function( iotivity ) {
+	TestUtils = function( iotivity ) {
 		if ( !this._isTestUtils ) {
-			return new testUtils( iotivity );
+			return new TestUtils( iotivity );
 		}
 
 		this._iotivity = iotivity;
 	};
 
-_.extend( testUtils.prototype, require( "./assert-to-console" ), {
+_.extend( TestUtils.prototype, require( "./assert-to-console" ), {
 	_isTestUtils: true,
 
 	lookupEnumValueName: function( enumName, value ) {
@@ -80,4 +80,4 @@ _.extend( testUtils.prototype, require( "./assert-to-console" ), {
 	}
 } );
 
-module.exports = testUtils;
+module.exports = TestUtils;

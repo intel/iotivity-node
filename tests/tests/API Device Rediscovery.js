@@ -52,16 +52,17 @@ function runAsClient() {
 		} );
 	};
 	var discoverResource = function( callback ) {
-		var teardown = function( error ) {
-			device.removeEventListener( "resourcefound", resourcefoundHandler );
-			callback( error );
-		};
+		var teardown;
 		var resourcefoundHandler = function( event ) {
 			if ( event.resource.id.path === "/a/" + uuid ) {
 				testUtils.assert( "ok", true, "Client: Resource found" );
 				theResource = event.resource;
 				teardown();
 			}
+		};
+		teardown = function( error ) {
+			device.removeEventListener( "resourcefound", resourcefoundHandler );
+			callback( error );
 		};
 		device.addEventListener( "resourcefound", resourcefoundHandler );
 		device.findResources().catch( teardown );

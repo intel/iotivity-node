@@ -70,10 +70,7 @@ function runAsClient() {
 		} );
 	};
 	var retrieveServerIdAndKillServer = function( callback ) {
-		var teardown = function( error ) {
-				device.removeEventListener( "resourcefound", resourceFoundHandler );
-				callback( error );
-			},
+		var teardown,
 			resourceFoundHandler = function( event ) {
 				if ( event.resource.id.path === "/a/" + uuid ) {
 					testUtils.assert( "ok", true, "Resource found" );
@@ -94,6 +91,10 @@ function runAsClient() {
 					currentServer.kill( "SIGINT" );
 				}
 			};
+		teardown = function( error ) {
+			device.removeEventListener( "resourcefound", resourceFoundHandler );
+			callback( error );
+		};
 		device.addEventListener( "resourcefound", resourceFoundHandler );
 		device.findResources().then(
 			function() {
