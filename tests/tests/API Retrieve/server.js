@@ -4,20 +4,44 @@ var theResource,
 	device = require( "../../../index" )(),
 	uuid = process.argv[ 2 ];
 
-console.log( JSON.stringify( { assertionCount: 6 } ) );
+console.log( JSON.stringify( { assertionCount: 8 } ) );
 
 function resourceOnRequest( request ) {
 	totalRequests++;
 	utils.assert( "strictEqual", request.type, "retrieve", "Server: Request is of type retrieve" );
 	if ( request.type === "retrieve" ) {
-		request.sendResponse( request.target ).then(
-			function() {
-				utils.assert( "ok", true, "Server: Successfully responded to retrieve request" );
-			},
-			function( error ) {
-				utils.die( "Server: Failed to send response with error " + error + " and result " +
-					error.result );
-			} );
+		if ( totalRequests === 1 ) {
+			request.sendResponse( request.target ).then(
+				function() {
+					utils.assert( "ok", true,
+						"Server: Successfully responded to retrieve request" );
+					device.unregisterResource( theResource ).then(
+						function() {
+							utils.assert( "ok", true,
+								"Server: device.unregisterResource() successful" );
+							theResource = null;
+						},
+						function( error ) {
+							utils.die(
+								"Server: device.unregisterResource() failed with: " + error +
+								" and result " + error.result );
+						} );
+				},
+				function( error ) {
+					utils.die( "Server: Failed to send response with error " + error +
+						" and result " + error.result );
+				} );
+		} else {
+			request.sendError( new Error( "resource not found" ) ).then(
+				function() {
+					utils.assert( "ok", true,
+						"Server: Successfully reported error to client" );
+				},
+				function( error ) {
+					utils.die( "Server: Failed to report error to client: " + error +
+						" and result " + error.result );
+				} );
+		}
 	}
 }
 
@@ -34,7 +58,6 @@ device.configure( {
 
 		device.registerResource( {
 			id: { path: "/a/" + uuid },
-			deviceId: uuid,
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],
 			discoverable: true,
@@ -62,15 +85,7 @@ device.configure( {
 
 // Cleanup on SIGINT
 process.on( "SIGINT", function() {
-	utils.assert( "strictEqual", totalRequests, 1, "There has been exactly one request" );
-	device.unregisterResource( theResource ).then(
-		function() {
-			utils.assert( "ok", true, "Server: device.unregisterResource() successful" );
-			process.exit( 0 );
-		},
-		function( error ) {
-			utils.die( "Server: device.unregisterResource() failed with: " + error +
-				" and result " + error.result );
-			process.exit( 0 );
-		} );
+	utils.assert( "strictEqual", totalRequests, 2,
+		"Server: There have been exactly two requests" );
+	process.exit( 0 );
 } );
