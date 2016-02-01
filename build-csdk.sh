@@ -11,6 +11,7 @@ if test "x${CSDK_REVISION}x" = "xx"; then
 	')"
 fi
 
+DO_BUILD=true
 DO_DEBUG=false
 DO_CLEANUP=true
 DO_PC=false
@@ -23,14 +24,17 @@ while test $# -gt 0; do
 		DO_CLEANUP=false
 	elif test "x$1x" = "x--installpc" -o "x$1x" = "x-px"; then
 		DO_PC=true
+	elif test "x$1x" = "x--install-only" -o "x$1x" = "x-ix"; then
+		DO_BUILD=false
 	elif test "x$1x" = "x--helpx" -o "x$1x" = "x-hx"; then
 		echo "$( basename "$0" ) [options...]"
 		echo ""
 		echo "Possible options:"
-		echo "--debug or -d     : Build in debug mode"
-		echo "--nocleanup or -n : Do not clean up sources after building"
-		echo "--installpc or -p : Install .pc file"
-		echo "--help or -h      : Print this message and exit"
+		echo "--debug or -d        : Build in debug mode"
+		echo "--help or -h         : Print this message and exit"
+		echo "--install-only or -i : Do not build, just install"
+		echo "--installpc or -p    : Install .pc file"
+		echo "--nocleanup or -n    : Do not clean up sources after building"
 		exit 0
 	fi
 	shift
@@ -43,24 +47,29 @@ fi
 
 set -x
 
-mkdir -p ./depbuild || exit 1
+if test "x${DO_BUILD}x" = "xtruex"; then
+	mkdir -p ./depbuild || exit 1
 
-# Download and build iotivity from tarball
-cd ./depbuild || exit 1
-	wget -qO iotivity.tar.gz 'https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h='"${CSDK_REVISION}"';sf=tgz' || exit 1
-	tar xzf iotivity.tar.gz || exit 1
-	rm -f iotivity.tar.gz || exit 1
+	# Download and build iotivity from tarball
+	cd ./depbuild || exit 1
+		wget -qO iotivity.tar.gz 'https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h='"${CSDK_REVISION}"';sf=tgz' || exit 1
+		tar xzf iotivity.tar.gz || exit 1
+		rm -f iotivity.tar.gz || exit 1
 
-	# There should only be one directory inside this directory, so using the wildcard evaluates
-	# exactly to it
-	cd iotivity* || exit 1
-		SOURCE="$(pwd)"
+		# There should only be one directory inside this directory, so using the wildcard evaluates
+		# exactly to it
+		cd iotivity* || exit 1
+			SOURCE="$(pwd)"
 
-		# iotivity wants us to clone this before it'll do anything
-		git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor
-		scons $SCONS_FLAGS liboctbstack libconnectivity_abstraction libcoap c_common libocsrm routingmanager || { cat config.log; exit 1; }
+			# iotivity wants us to clone this before it'll do anything
+			git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor
+			scons $SCONS_FLAGS liboctbstack libconnectivity_abstraction libcoap c_common libocsrm routingmanager || { cat config.log; exit 1; }
 
-cd ../../ || exit 1
+	cd ../../ || exit 1
+else
+	SOURCE=$(ls -d ./depbuild/iotivity*)
+fi
+
 SOURCE="${SOURCE}" PREFIX="$(pwd)/deps/iotivity" INSTALL_PC="${DO_PC}" "$(pwd)/install.sh" || exit 1
 
 if test "x${DO_CLEANUP}x" = "xtruex"; then
