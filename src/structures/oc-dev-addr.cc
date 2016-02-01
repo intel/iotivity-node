@@ -31,6 +31,8 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
   uint32_t index, length;
   OCDevAddr local;
 
+  memset(&local, 0, sizeof(OCDevAddr));
+
   VALIDATE_AND_ASSIGN(local, adapter, OCTransportAdapter, IsUint32, "addr",
                       false, jsDevAddr, Uint32Value);
   VALIDATE_AND_ASSIGN(local, flags, OCTransportFlags, IsUint32, "addr", false,

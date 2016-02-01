@@ -531,8 +531,7 @@ static bool flattenArray(Local<Array> array, void **flatArray,
     totalElements *= dimensions[dimensionIndex];
   }
 
-  returnValue =
-      malloc((arrayType == OCREP_PROP_INT
+  int neededAmount = (arrayType == OCREP_PROP_INT
                   ? sizeof(uint64_t)
                   : arrayType == OCREP_PROP_DOUBLE
                         ? sizeof(double)
@@ -547,12 +546,16 @@ static bool flattenArray(Local<Array> array, void **flatArray,
                                           // The validation ensures that the
                                           // array type is always valid
                                           0) *
-             totalElements);
+             totalElements;
+
+  returnValue = malloc(neededAmount);
 
   if (!returnValue) {
     Nan::ThrowError("Not enough memory for flattening rep payload array");
     return false;
   }
+
+  memset(returnValue, 0, neededAmount);
 
   int index = 0;
   if (!fillArray(returnValue, &index, array, arrayType)) {
