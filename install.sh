@@ -35,7 +35,7 @@ INCLUDEDIR="${PREFIX}/include"
 SHAREDIR="${PREFIX}/share/iotivity"
 
 OCTB_STACK_DIR=resource/csdk/stack
-OCTB_RANDOM_DIR=resource/csdk/ocrandom
+OCTB_RANDOM_DIR=resource/c_common/ocrandom
 OCTB_CCOMMON_DIR=resource/c_common
 OCTB_STACK_INCLUDEDIR=iotivity/${OCTB_STACK_DIR}/include
 OCTB_RANDOM_INCLUDEDIR=iotivity/${OCTB_RANDOM_DIR}/include

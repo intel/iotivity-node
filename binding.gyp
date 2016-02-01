@@ -5,7 +5,7 @@
 		# Used when externalOCTBStack is false
 		"internal_octbstack_cflags": [
 			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")',
-			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/ocrandom/include")',
+			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/c_common/ocrandom/include")',
 			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/c_common")',
 			'-DROUTING_EP',
 			'-DTCP_ADAPTER'

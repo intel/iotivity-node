@@ -89,22 +89,13 @@ function trackPresence( destination ) {
 			function( handle, response ) {
 				var returnValue = iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
 
-				if ( presenceSequence === 0 ) {
-
-					testUtils.assert( "strictEqual",
-						testUtils.lookupEnumValueName( "OCStackResult", response.result ),
-						"OC_STACK_INVALID_QUERY",
-						"Client: Initial PRESENCE response is that the query is invalid" );
-					requestServerPresence( destination, true );
-
-					presenceSequence++;
-				} else if ( response && response.payload ) {
+				if ( response && response.payload ) {
 					testUtils.assert( "strictEqual",
 						testUtils.lookupEnumValueName( "OCPayloadType",
 							response.payload.type ),
 						"PAYLOAD_TYPE_PRESENCE",
 						"Client: Response to PRESENCE request has payload of type PRESENCE" );
-					if ( presenceSequence === 1 ) {
+					if ( presenceSequence === 0 ) {
 						testUtils.assert( "strictEqual",
 							testUtils.lookupEnumValueName( "OCPresenceTrigger",
 								response.payload.trigger ),
@@ -112,7 +103,7 @@ function trackPresence( destination ) {
 							"Client: Response to PRESENCE request has trigger of type CREATE" );
 						requestServerPresence( destination, false );
 						presenceSequence++;
-					} else if ( presenceSequence === 2 ) {
+					} else if ( presenceSequence === 1 ) {
 						testUtils.assert( "strictEqual",
 							testUtils.lookupEnumValueName( "OCPresenceTrigger",
 								response.payload.trigger ),
@@ -131,9 +122,10 @@ function trackPresence( destination ) {
 			},
 			null );
 	testUtils.stackOKOrDie( "Client", "OCDoResource(presence tracking)", presenceResult );
+	requestServerPresence( destination, true );
 }
 
-console.log( JSON.stringify( { assertionCount: 15 } ) );
+console.log( JSON.stringify( { assertionCount: 14 } ) );
 
 // Initialize
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );

@@ -8,7 +8,7 @@ var lightResource,
 			name: "api-server-example",
 			manufacturerName: "Intel",
 			manufactureDate: "Wed Sep 23 10:04:17 EEST 2015",
-			platformVersion: "1.0.0",
+			platformVersion: "1.0.1",
 			firmwareVersion: "0.0.1",
 			supportUrl: "http://example.com/"
 		}

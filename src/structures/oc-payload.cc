@@ -184,9 +184,6 @@ static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
   // payload.uri
   SET_STRING_IF_NOT_NULL(returnValue, payload, uri);
 
-  // payload.sid
-  Nan::Set(returnValue, Nan::New("sid").ToLocalChecked(), js_SID(payload->sid));
-
   // payload.types
   for (item = payload->types, length = 0; item; item = item->next, length++)
     ;
@@ -222,6 +219,11 @@ static Local<Object> js_OCDiscoveryPayload(OCDiscoveryPayload *payload) {
   Nan::Set(returnValue, Nan::New("type").ToLocalChecked(),
            Nan::New(payload->base.type));
 
+  if (payload->sid) {
+    Nan::Set(returnValue, Nan::New("sid").ToLocalChecked(),
+             js_SID(payload->sid));
+  }
+
   // Count the resources
   while (resource) {
     counter++;
@@ -245,8 +247,6 @@ static Local<Object> js_OCDevicePayload(OCDevicePayload *payload) {
 
   Nan::Set(returnValue, Nan::New("type").ToLocalChecked(),
            Nan::New(payload->base.type));
-
-  SET_STRING_IF_NOT_NULL(returnValue, payload, uri);
 
   if (payload->sid) {
     Nan::Set(returnValue, Nan::New("sid").ToLocalChecked(),

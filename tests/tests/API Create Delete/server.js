@@ -53,7 +53,9 @@ async.series( [
 						resourceTypes: [ "core.light" ],
 						interfaces: [ "oic.if.baseline" ],
 						properties: {
-							someKey: "someValue"
+							someKey: "someValue",
+							"if": "oic.if.baseline",
+							"rt": "core.light"
 						}
 					}, "Server: Resource signature is as expected" );
 					device.registerResource( request.res ).then(
