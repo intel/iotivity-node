@@ -1,4 +1,5 @@
 var lightResource,
+	haveObservers = false,
 	sensor = require( "./mock-sensor" )(),
 	device = require( "iotivity-node" )(),
 	settings = {
@@ -27,12 +28,29 @@ device.configure( settings ).then( function() {
 			lightResource.properties[ index ] = newData[ index ];
 		}
 
-		device.notify( lightResource );
+		if ( haveObservers ) {
+			device.notify( lightResource ).catch( function( error )  {
+				if ( error.message === "notify: There are no observers" ) {
+					haveObservers = false;
+				}
+			} );
+		}
 	} );
 
 	function lightResourceOnRequest( request ) {
-		if ( request.type === "retrieve" || request.type === "observe" ) {
-			request.sendResponse( null );
+		function handleError( theError ) {
+			console.error( theError );
+			throw theError;
+		}
+		console.error( "received request: " + JSON.stringify( request, null, 4 ) );
+		if ( request.type === "observe" ) {
+			request.sendResponse( null ).then( function() {
+				haveObservers = true;
+			}, handleError );
+		} else if ( request.type === "retrieve" ) {
+			request.sendResponse( lightResource ).catch( handleError );
+		} else {
+			request.sendError( null ).catch( handleError );
 		}
 	}
 
@@ -53,4 +71,7 @@ device.configure( settings ).then( function() {
 				throw error;
 			} );
 	}
+} ).catch( function( theError ) {
+	console.error( theError );
+	throw theError;
 } );
