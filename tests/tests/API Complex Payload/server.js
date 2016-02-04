@@ -60,6 +60,7 @@ async.series( [
 						request.sendResponse( _.extend( theResource, {
 							properties: {
 								primitiveValue: 42,
+								nullValue: null,
 								objectValue: {
 									childValue: 91
 								},
@@ -101,6 +102,7 @@ async.series( [
 						putValue: "A string",
 						anotherPutValue: 23.7,
 						childValues: {
+							putChildNull: null,
 							putChildValue: false,
 							putChildArray: [ [ 2, 3, 5 ], [ 9, 11, 17 ] ]
 						}
