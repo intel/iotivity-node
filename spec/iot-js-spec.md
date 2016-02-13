@@ -97,7 +97,6 @@ The following information is exposed on the local ```/oic/d``` (device) resource
 [NoInterfaceObject]
 interface OicDevice {
   readonly attribute USVString uuid;
-  readonly attribute USVString url;  // host:port
   readonly attribute DOMString name;
   readonly attribute sequence<DOMString> dataModels;
     // list of <vertical>.major.minor, e.g. vertical = “Smart Home”
@@ -263,8 +262,8 @@ The client API for accessing OIC Presence functionality.
 ```javascript
 [NoInterfaceObject]
 interface OicPresence: EventTarget {
-  Promise<void> subscribe(optional USVString url);
-  Promise<void> unsubscribe(optional USVString url);
+  Promise<void> subscribe(optional USVString deviceId);
+  Promise<void> unsubscribe(optional USVString deviceId);
   attribute EventHandler<OicDeviceChangeEvent> ondevicechange;
 };
 
