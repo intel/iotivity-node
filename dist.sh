@@ -140,7 +140,7 @@ if test "x${DO_DIST}x" = "xTRUEx"; then
 	# https://github.com/npm/npm/issues/5590 is why prune needs to run twice
 	npm prune --production &&
 	npm prune --production &&
-	cp -a AUTHORS.txt index.js lowlevel.js lib MIT-LICENSE.txt node_modules README.md "dist/${PACKAGE_NAME}" &&
+	cp -a AUTHORS.txt index.js lowlevel.js lib node_modules README.md "dist/${PACKAGE_NAME}" &&
 	mkdir -p "dist/${PACKAGE_NAME}/build/${MODULE_LOCATION}" &&
 	cp "build/${MODULE_LOCATION}/iotivity.node" "dist/${PACKAGE_NAME}/build/${MODULE_LOCATION}" &&
 	if test -d deps; then
