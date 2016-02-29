@@ -1,1 +1,6 @@
 Gabriel Schulhof <gabriel.schulhof@intel.com>
+Sakari Poussa <sakari.poussa@intel.com>
+Srinivasa Ragavan <srinivasa.ragavan.venkateswaran@intel.com>
+Sudarsana Nagineni <sudarsana.nagineni@intel.com>
+Zhiqiang Zhang <zhiqiang.zhang@intel.com>
+Zoltan Kis <zoltan.kis@intel.com>
