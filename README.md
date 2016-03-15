@@ -57,10 +57,15 @@ During compilation, iotivity-node downloads iotivity from its git repository, bu
 	* ```OCTBSTACK_LIBS``` - this should contain the linker flags necessary for locating ```liboctbstack.so``` both at compile time and at runtime. Its value can be as simple as ```-loctbstack``` if liboctbstack is in /usr/lib, but may need to be as complex as ```-L/home/nix/iot/iotivity/out/linux/x86/release -loctbstack -Wl,-rpath=/home/nix/iot/iotivity/out/linux/x86/release``` if liboctbstack.so is located on an unusual path.
 0. Run ```npm install``` with these environment variables set.
 
-Alternatively, you can use some rudimentary install scripts for both iotivity and this repository. Using them will help you avoid having to set the environment variables ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the scripts will supply them to the build process.
+<a name="install-scripts"></a>Alternatively, you can use some rudimentary install scripts for both iotivity and this repository. Using them will help you avoid having to set the environment variables ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the scripts will supply them to the build process.
 
 0. Grab [install.sh][] and [octbstack.pc.in][] and place them in the root of the iotivity repository.
-0. As root, change directory to the iotivity repository and run ```./install.sh```. The script recognizes two environment variables: ```PREFIX``` is set to ```/usr``` by default, and ```DESTDIR``` is unset. Use ```PREFIX``` to install to a location other than ```/usr``` and use ```DESTDIR``` to set an additional prefix where to put the files. This latter option is especially useful for packaging. Examples:
+0. As root, change directory to the iotivity repository and run ```./install.sh```. The script recognizes the following environment variables:
+    0. ```PREFIX``` is set to ```/usr``` by default
+    0. ```DESTDIR``` is unset.
+    0. ```INSTALL_PC``` is unset. Setting it to ```true``` will cause ```install.sh``` to also copy the file ```octbstack.pc``` into ```${DESTDIR}/${PREFIX}/lib/pkgconfig```.
+
+    Use ```PREFIX``` to install to a location other than ```/usr``` and use ```DESTDIR``` to set an additional prefix where to put the files. This latter option is especially useful for packaging. Examples:
 
     ```PREFIX=/usr/local ./install.sh``` will install the files into ```/usr/local``` instead.
 
