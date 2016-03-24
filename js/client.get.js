@@ -16,7 +16,7 @@ var intervalId,
 	handleReceptacle = {},
 
 	// This is the same value as server.get.js
-	sampleUri = "/a/light",
+	sampleUri = "/a/iotivity-node-get-sample",
 	iotivity = require( "iotivity-node/lowlevel" );
 
 // Start iotivity and set up the processing loop
