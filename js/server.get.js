@@ -55,7 +55,7 @@ iotivity.OCCreateResource(
 				resourceHandle: request.resource,
 				ehResult: iotivity.OCEntityHandlerResult.OC_EH_OK,
 				payload: {
-					type: 4,
+					type: iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION,
 					values: {
 						"answer": "As many as wanting."
 					}
