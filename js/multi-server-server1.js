@@ -14,7 +14,6 @@
 
 var intervalId,
 	handleReceptacle = {},
-	observerIds = [],
 
 	// This is the same value as server.get.js
 	sampleUri = "/a/iotivity-multi-server-server1",
