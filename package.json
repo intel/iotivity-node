@@ -1,0 +1,41 @@
+{
+  "name": "iotivity-node",
+  "version": "1.0.1-1",
+  "description": "IoTivity bindings",
+  "repository": "https://github.com/otcshare/iotivity-node/",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "keywords": [
+    "oic",
+    "iotivity",
+    "iot"
+  ],
+  "scripts": {
+    "ci": "TESTING=true npm install && grunt testsuite testdist --ci",
+    "ci-basic": "TESTING=true npm install && grunt testsuite testdist --suites='Load Library.js' --ci",
+    "ci-lint": "./dist.sh -r && grunt lint",
+    "test": "grunt test"
+  },
+  "gypfile": true,
+  "dependencies": {
+    "bindings": "~1.2.1",
+    "lodash": "^3.10.1",
+    "nan": "^2.1.0",
+    "sha.js": "^2.4.4"
+  },
+  "devDependencies": {
+    "async": "^0.9.0",
+    "commitplease": "^2.2.1",
+    "esformatter-jquery-chain": "^1.1.0",
+    "glob": "^5.0.14",
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-esformatter": "^1.0.1",
+    "grunt-jscs": "^2.1.0",
+    "load-grunt-config": "^0.17.2",
+    "load-grunt-tasks": "^3.2.0",
+    "qunitjs": "^1.18.0",
+    "shelljs": "^0.5.3",
+    "uuid": "^2.0.1"
+  }
+}

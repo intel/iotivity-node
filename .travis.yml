@@ -1,0 +1,82 @@
+sudo: false
+
+language: cpp
+
+matrix:
+  fast_finish: true
+  include:
+    - env: NODE_VERSION=0.10 TEST_SCRIPT=ci
+      os: linux
+      addons: &buildpackages
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - libboost-all-dev
+          - libcurl4-openssl-dev
+          - uuid-dev
+          - g++-4.8
+
+    - env: NODE_VERSION=0.12 TEST_SCRIPT=ci
+      os: linux
+      addons: *buildpackages
+
+    - env: NODE_VERSION=4.0 TEST_SCRIPT=ci
+      os: linux
+      addons: *buildpackages
+
+    - env: NODE_VERSION=4.4 TEST_SCRIPT=ci
+      os: linux
+      addons: *buildpackages
+
+    - env: NODE_VERSION=4.0 TEST_SCRIPT=ci-lint
+      os: linux
+
+    - env: NODE_VERSION=0.12 TEST_SCRIPT=ci-basic
+      os: osx
+
+    # Allowed failures must be specified twice - once in "include" to have them
+    # run, and again in "allowed_failures" to not have them break the build.
+    # Below are the allowed failures:
+
+    - env: NODE_VERSION=0.10 TEST_SCRIPT=ci
+      os: osx
+
+    - env: NODE_VERSION=0.12 TEST_SCRIPT=ci
+      os: osx
+
+    - env: NODE_VERSION=4.0 TEST_SCRIPT=ci
+      os: osx
+
+  allow_failures:
+    - env: NODE_VERSION=0.10 TEST_SCRIPT=ci
+      os: osx
+
+    - env: NODE_VERSION=0.12 TEST_SCRIPT=ci
+      os: osx
+
+    - env: NODE_VERSION=4.0 TEST_SCRIPT=ci
+      os: osx
+
+install:
+- >
+  if test "x${TRAVIS_OS_NAME}x" = "xlinuxx"; then
+    export CXX="g++-4.8" CC="gcc-4.8"
+  fi
+- rm -rf ~/.nvm
+- wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash
+- source ~/.nvm/nvm.sh
+- nvm install "${NODE_VERSION}"
+- npm install -g npm@^2.14.2
+- >
+  if test "x${TRAVIS_OS_NAME}x" = "xosxx"; then
+    brew install scons
+  fi
+- npm install -g grunt-cli
+
+script: npm run-script "${TEST_SCRIPT}"
+
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#iotivity-node"
