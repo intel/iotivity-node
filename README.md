@@ -109,4 +109,4 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 [install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.1-1/install.sh
 [octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.0.1-1/octbstack.pc.in
 [iotivity wiki]: https://wiki.iotivity.org/faq_s
-[video]: https://www.youtube.com/watch?v=S3vcm-ox4Z4
+[video]: https://www.youtube.com/watch?v=95VTB_qgYfw
