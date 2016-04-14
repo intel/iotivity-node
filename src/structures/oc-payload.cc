@@ -20,6 +20,7 @@
 #include "oc-sid.h"
 #include "string-primitive.h"
 #include "oc-platform-info.h"
+#include "oc-device-info.h"
 
 extern "C" {
 #include <string.h>
@@ -156,22 +157,23 @@ static Local<Object> js_OCRepPayload(OCRepPayload *payload) {
                                 ? (value->str
                                        ? Nan::New<Value>(
                                              (Handle<String>)Nan::New(
-                                                 value->str).ToLocalChecked())
+                                                 value->str)
+                                                 .ToLocalChecked())
                                        : Nan::New<Value>((Handle<Primitive>)
-                                                         Nan::Undefined()))
+                                                             Nan::Undefined()))
                                 : OCREP_PROP_OBJECT == value->type
-                                      ? (value->obj
-                                             ? Nan::New<Value>(
-                                                   (Handle<Object>)
-                                                   js_OCRepPayload(value->obj))
-                                             : Nan::New<Value>(
-                                                   (Handle<Primitive>)
-                                                   Nan::Undefined()))
+                                      ? (value->obj ? Nan::New<Value>(
+                                                          (Handle<Object>)
+                                                              js_OCRepPayload(
+                                                                  value->obj))
+                                                    : Nan::New<Value>(
+                                                          (Handle<Primitive>)
+                                                              Nan::Undefined()))
                                       : OCREP_PROP_ARRAY == value->type
                                             ? Nan::New<Value>(
                                                   (Handle<Object>)
-                                                  js_OCRepPayloadValueArray(
-                                                      &(value->arr)))
+                                                      js_OCRepPayloadValueArray(
+                                                          &(value->arr)))
                                             :
 
                                             // If value->type is not any of the
@@ -192,33 +194,32 @@ static Local<Object> js_OCRepPayload(OCRepPayload *payload) {
   return returnValue;
 }
 
+#define ADD_STRING_ARRAY(returnValue, payload, memberName)                    \
+  do {                                                                        \
+    int counter;                                                              \
+    OCStringLL *item;                                                         \
+    for (item = (payload)->memberName, counter = 0; item;                     \
+         item = item->next, counter++)                                        \
+      ;                                                                       \
+    Local<Array> jsArray = Nan::New<Array>(counter);                          \
+    for (item = (payload)->memberName, counter = 0; item;                     \
+         item = item->next, counter++) {                                      \
+      Nan::Set(jsArray, counter, Nan::New(item->value).ToLocalChecked());     \
+    }                                                                         \
+    Nan::Set((returnValue), Nan::New(#memberName).ToLocalChecked(), jsArray); \
+  } while (0)
+
 static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
-  int index, length;
-  OCStringLL *item;
   Local<Object> returnValue = Nan::New<Object>();
 
   // payload.uri
   SET_STRING_IF_NOT_NULL(returnValue, payload, uri);
 
   // payload.types
-  for (item = payload->types, length = 0; item; item = item->next, length++)
-    ;
-  Local<Array> types = Nan::New<Array>(length);
-  for (item = payload->types, index = 0; item; item = item->next, index++) {
-    Nan::Set(types, index, Nan::New(item->value).ToLocalChecked());
-  }
-  Nan::Set(returnValue, Nan::New("types").ToLocalChecked(), types);
+  ADD_STRING_ARRAY(returnValue, payload, types);
 
   // payload.interfaces
-  for (item = payload->interfaces, length = 0; item;
-       item = item->next, length++)
-    ;
-  Local<Array> interfaces = Nan::New<Array>(length);
-  for (item = payload->interfaces, index = 0; item;
-       item = item->next, index++) {
-    Nan::Set(interfaces, index, Nan::New(item->value).ToLocalChecked());
-  }
-  Nan::Set(returnValue, Nan::New("interfaces").ToLocalChecked(), interfaces);
+  ADD_STRING_ARRAY(returnValue, payload, interfaces);
 
   SET_VALUE_ON_OBJECT(returnValue, Number, payload, bitmap);
   SET_VALUE_ON_OBJECT(returnValue, Boolean, payload, secure);
@@ -227,10 +228,59 @@ static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
   return returnValue;
 }
 
+#define ADD_STRUCTURE_ARRAY(returnValue, payload, memberName, memberType)     \
+  do {                                                                        \
+    memberType *oneItem = 0;                                                  \
+    int counter = 0;                                                          \
+    for (counter = 0, oneItem = (payload)->memberName; oneItem;               \
+         oneItem = oneItem->next, counter++)                                  \
+      ;                                                                       \
+    Local<Array> jsArray = Nan::New<Array>(counter);                          \
+    for (counter = 0, oneItem = (payload)->memberName; oneItem;               \
+         oneItem = oneItem->next, counter++) {                                \
+      Nan::Set(jsArray, counter, js_##memberType(oneItem));                   \
+    }                                                                         \
+    Nan::Set((returnValue), Nan::New(#memberName).ToLocalChecked(), jsArray); \
+  } while (0)
+
+static Local<Object> js_OCLinksPayload(OCLinksPayload *payload) {
+  Local<Object> returnValue = Nan::New<Object>();
+
+  SET_STRING_IF_NOT_NULL(returnValue, payload, href);
+  ADD_STRING_ARRAY(returnValue, payload, rt);
+  ADD_STRING_ARRAY(returnValue, payload, itf);
+  SET_STRING_IF_NOT_NULL(returnValue, payload, rel);
+  Nan::Set(returnValue, Nan::New("obs").ToLocalChecked(),
+           Nan::New(payload->obs));
+  SET_STRING_IF_NOT_NULL(returnValue, payload, title);
+  SET_STRING_IF_NOT_NULL(returnValue, payload, uri);
+  ADD_STRING_ARRAY(returnValue, payload, mt);
+
+  return returnValue;
+}
+
+static Local<Object> js_OCTagsPayload(OCTagsPayload *payload) {
+  Local<Object> returnValue = Nan::New<Object>();
+
+  Nan::Set(returnValue, Nan::New("n").ToLocalChecked(),
+           js_OCDeviceInfo(&(payload->n)));
+
+  return returnValue;
+}
+
+static Local<Object> js_OCResourceCollectionPayload(
+    OCResourceCollectionPayload *payload) {
+  Local<Object> returnValue = Nan::New<Object>();
+
+  Nan::Set(returnValue, Nan::New("tags").ToLocalChecked(),
+           js_OCTagsPayload(payload->tags));
+  ADD_STRUCTURE_ARRAY(returnValue, payload, setLinks, OCLinksPayload);
+
+  return returnValue;
+}
+
 static Local<Object> js_OCDiscoveryPayload(OCDiscoveryPayload *payload) {
   Local<Object> returnValue = Nan::New<Object>();
-  OCResourcePayload *resource = payload->resources;
-  int counter = 0;
 
   Nan::Set(returnValue, Nan::New("type").ToLocalChecked(),
            Nan::New(payload->base.type));
@@ -240,20 +290,9 @@ static Local<Object> js_OCDiscoveryPayload(OCDiscoveryPayload *payload) {
              js_SID(payload->sid));
   }
 
-  // Count the resources
-  while (resource) {
-    counter++;
-    resource = resource->next;
-  }
-
-  Local<Array> resources = Nan::New<Array>(counter);
-
-  for (resource = payload->resources, counter = 0; resource;
-       resource = resource->next, counter++) {
-    Nan::Set(resources, counter, js_OCResourcePayload(resource));
-  }
-
-  Nan::Set(returnValue, Nan::New("resources").ToLocalChecked(), resources);
+  ADD_STRUCTURE_ARRAY(returnValue, payload, resources, OCResourcePayload);
+  ADD_STRUCTURE_ARRAY(returnValue, payload, collectionResources,
+                      OCResourceCollectionPayload);
 
   return returnValue;
 }
@@ -547,22 +586,23 @@ static bool flattenArray(Local<Array> array, void **flatArray,
     totalElements *= dimensions[dimensionIndex];
   }
 
-  int neededAmount = (arrayType == OCREP_PROP_INT
-                  ? sizeof(uint64_t)
-                  : arrayType == OCREP_PROP_DOUBLE
-                        ? sizeof(double)
-                        : arrayType == OCREP_PROP_BOOL
-                              ? sizeof(bool)
-                              : arrayType == OCREP_PROP_STRING
-                                    ? sizeof(char *)
-                                    : arrayType == OCREP_PROP_OBJECT
-                                          ? sizeof(OCRepPayload *)
-                                          :
+  int neededAmount =
+      (arrayType == OCREP_PROP_INT
+           ? sizeof(uint64_t)
+           : arrayType == OCREP_PROP_DOUBLE
+                 ? sizeof(double)
+                 : arrayType == OCREP_PROP_BOOL
+                       ? sizeof(bool)
+                       : arrayType == OCREP_PROP_STRING
+                             ? sizeof(char *)
+                             : arrayType == OCREP_PROP_OBJECT
+                                   ? sizeof(OCRepPayload *)
+                                   :
 
-                                          // The validation ensures that the
-                                          // array type is always valid
-                                          0) *
-             totalElements;
+                                   // The validation ensures that the
+                                   // array type is always valid
+                                   0) *
+      totalElements;
 
   returnValue = malloc(neededAmount);
 

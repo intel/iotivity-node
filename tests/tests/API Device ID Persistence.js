@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var device = require( "../../index" )();
 var uuid = process.argv[ 2 ];
 
 function runAsServer() {
 	var resource;
+	var device = require( "../../index" )( "server" );
 
 	process.on( "SIGINT", function() {
 		device.unregisterResource( resource ).then(
@@ -28,22 +28,17 @@ function runAsServer() {
 			} );
 	} );
 
-	device.configure( { role: "server" } ).then(
+	device.registerResource( {
+		id: { path: "/a/" + process.argv[ 3 ] },
+		discoverable: true,
+		resourceTypes: [ "core.light" ],
+		interfaces: [ "oic.if.baseline" ]
+	} ).then(
+		function( theResource ) {
+			resource = theResource;
+			console.log( JSON.stringify( { ready: true } ) );
+		},
 		function() {
-			device.registerResource( {
-				id: { path: "/a/" + process.argv[ 3 ] },
-				discoverable: true,
-				resourceTypes: [ "core.light" ],
-				interfaces: [ "oic.if.baseline" ]
-			} ).then(
-				function( theResource ) {
-					resource = theResource;
-					console.log( JSON.stringify( { ready: true } ) );
-				},
-				function() {
-					process.exit( 1 );
-				} );
-		}, function() {
 			process.exit( 1 );
 		} );
 }
@@ -53,6 +48,7 @@ function runAsClient() {
 	var _ = require( "lodash" );
 	var childProcess = require( "child_process" );
 	var testUtils = require( "../assert-to-console" );
+	var device = require( "../../index" )( "client" );
 	var launchServer = function( callback ) {
 		currentServer = childProcess.spawn( "node", [
 			process.argv[ 1 ], "server", uuid
@@ -120,9 +116,6 @@ function runAsClient() {
 	console.log( JSON.stringify( { assertionCount: 7 } ) );
 
 	require( "async" ).series( [
-		function configureAsClient( callback ) {
-			device.configure( { role: "client" } ).then( callback, callback );
-		},
 		launchServer,
 		retrieveServerIdAndKillServer,
 		launchServer,

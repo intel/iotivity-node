@@ -15,18 +15,12 @@
 var resource,
 	async = require( "async" ),
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
+	device = require( "../../../index" )( "server" ),
 	uuid = process.argv[ 2 ];
 
 console.log( JSON.stringify( { assertionCount: 5 } ) );
 
 async.series( [
-	function initDevice( callback ) {
-		device.configure( {
-			role: "server"
-		} ).then( callback, callback );
-	},
-
 	function registerResource( callback ) {
 		device.registerResource( {
 			id: {
@@ -61,7 +55,7 @@ async.series( [
 					utils.assert( "deepEqual", request.res, {
 						discoverable: true,
 						id: {
-							deviceId: device.settings.info.uuid,
+							deviceId: device.device.uuid,
 							path: "/a/new-resource"
 						},
 						resourceTypes: [ "core.light" ],
@@ -101,10 +95,12 @@ async.series( [
 				requestIndex++;
 			};
 		done = function( error ) {
-			device.removeEventListener( "request", requestHandler );
+			device.removeEventListener( "createrequest", requestHandler );
+			device.removeEventListener( "deleterequest", requestHandler );
 			callback( error );
 		};
-		device.addEventListener( "request", requestHandler );
+		device.addEventListener( "createrequest", requestHandler );
+		device.addEventListener( "deleterequest", requestHandler );
 		console.log( JSON.stringify( { ready: true } ) );
 	}
 

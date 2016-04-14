@@ -15,7 +15,7 @@
 var resourceFound = false,
 	uuid = process.argv[ 2 ],
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )();
+	device = require( "../../../index" )( "client" );
 
 console.log( JSON.stringify( { assertionCount: 9 } ) );
 
@@ -30,17 +30,17 @@ function discoverResources() {
 			},
 			resourceUpdate = function( event ) {
 				if ( event.resource.properties.increment >= 9 ) {
-					event.resource.onupdate = null;
+					event.resource.onchange = null;
 					utils.assert( "deepEqual", event.resource._observationHandle,
 						observationHandle,
 						"Client: Private resource observation handle is unchanged after " +
 						"removing handler via legacy interface" );
-					event.resource.removeEventListener( "update", dummyHandler );
+					event.resource.removeEventListener( "change", dummyHandler );
 					utils.assert( "deepEqual", event.resource._observationHandle,
 						observationHandle,
 						"Client: Private resource observation handle is unchanged after " +
 						"removing dummy handler" );
-					event.resource.removeEventListener( "update", resourceUpdate );
+					event.resource.removeEventListener( "change", resourceUpdate );
 					utils.assert( "ok", !event.resource._observationHandle,
 						"Client: Private resource observation handle is absent after " +
 						"removing the last handler" );
@@ -55,13 +55,13 @@ function discoverResources() {
 			resourceFound = true;
 			utils.assert( "ok", !event.resource._observationHandle,
 				"Client: Private resource observation handle is initially absent" );
-			event.resource.addEventListener( "update", resourceUpdate );
+			event.resource.addEventListener( "change", resourceUpdate );
 			observationHandle = event.resource._observationHandle;
-			event.resource.addEventListener( "update", dummyHandler );
+			event.resource.addEventListener( "change", dummyHandler );
 			utils.assert( "deepEqual", event.resource._observationHandle, observationHandle,
 				"Client: Private resource observation handle is unchanged after adding a second " +
 				"handler" );
-			event.resource.onupdate = legacyResourceUpdate;
+			event.resource.onchange = legacyResourceUpdate;
 			utils.assert( "deepEqual", event.resource._observationHandle, observationHandle,
 				"Client: Private resource observation handle is unchanged after adding a " +
 				"handler via the legacy interface" );
@@ -77,15 +77,6 @@ function discoverResources() {
 		} );
 }
 
-device.configure( {
-	role: "client"
-} ).then(
-	function() {
-		utils.assert( "ok", true, "Client: device.configure() successful" );
+utils.assert( "ok", true, "Client: device configured successfully" );
 
-		discoverResources();
-	},
-	function( error ) {
-		utils.assert( "ok", false, "Client: device.configure() failed with " + error );
-	} );
-
+discoverResources();

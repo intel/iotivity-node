@@ -17,16 +17,12 @@ var id,
 	async = require( "async" ),
 	util = require( "util" ),
 	myUtils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
+	device = require( "../../../index" )( "client" ),
 	uuid = process.argv[ 2 ];
 
 console.log( JSON.stringify( { assertionCount: 6 } ) );
 
 async.series( [
-	function configureTheDevice( callback ) {
-		device.configure( { role: "client" } ).then( callback, callback );
-	},
-
 	function discoverTheResource( callback ) {
 		var teardown,
 			handler = function( event ) {
@@ -44,7 +40,7 @@ async.series( [
 	},
 
 	function performFirstRetrieve( callback ) {
-		device.retrieveResource( id ).then(
+		device.retrieve( id ).then(
 			function() {
 				myUtils.die( "Client: First retrieve succeeded" );
 			},
@@ -52,7 +48,7 @@ async.series( [
 				myUtils.assert( "ok", util.isError( error ),
 					"Client: First retrieve failed with Error" );
 				myUtils.assert( "strictEqual", error.message,
-					"retrieveResource: OCDoResource response failed",
+					"retrieve: OCDoResource response failed",
 					"Client: First error message is correct" );
 				myUtils.assert( "deepEqual", _.extend( {}, error ), {
 					result: 21,
@@ -63,7 +59,7 @@ async.series( [
 	},
 
 	function performSecondRetrieve( callback ) {
-		device.retrieveResource( id ).then(
+		device.retrieve( id ).then(
 			function() {
 				myUtils.die( "Client: Second retrieve succeeded" );
 			},

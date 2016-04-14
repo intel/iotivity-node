@@ -90,14 +90,6 @@ NAN_METHOD(bind_OCDoResource) {
   OCDoHandle handle;
   OCCallbackData data;
 
-  CallbackInfo *callbackInfo = (CallbackInfo *)malloc(sizeof(CallbackInfo));
-  callbackInfo->callback = (new Nan::Callback(Local<Function>::Cast(info[7])));
-  callbackInfo->handle = 0;
-
-  data.context = (void *)callbackInfo;
-  data.cb = defaultOCClientResponseHandler;
-  data.cd = (OCClientContextDeleter)deleteNanCallback;
-
   if (info[8]->IsArray()) {
     Local<Array> optionArray = Local<Array>::Cast(info[8]);
     size_t length = optionArray->Length();
@@ -136,6 +128,19 @@ NAN_METHOD(bind_OCDoResource) {
     }
   }
 
+  CallbackInfo *callbackInfo = (CallbackInfo *)malloc(sizeof(CallbackInfo));
+  if (!callbackInfo) {
+    Nan::ThrowError("OCDoResource: Failed to allocate callback info");
+    free(options);
+    return;
+  }
+  callbackInfo->callback = (new Nan::Callback(Local<Function>::Cast(info[7])));
+  callbackInfo->handle = 0;
+
+  data.context = (void *)callbackInfo;
+  data.cb = defaultOCClientResponseHandler;
+  data.cd = (OCClientContextDeleter)deleteNanCallback;
+
   Local<Number> returnValue = Nan::New(
       OCDoResource(&handle, (OCMethod)info[1]->Uint32Value(),
                    (const char *)*String::Utf8Value(info[2]), destination,
@@ -146,14 +151,14 @@ NAN_METHOD(bind_OCDoResource) {
   free(options);
 
   // We need not free the payload because it seems iotivity takes ownership.
+  // Similarly, if OCDoResource() fails, iotivity calls the callback that frees
+  // the data on our behalf.
 
   if (handle) {
     Local<Array> handleArray = js_OCDoHandle(handle);
 
     callbackInfo->handle = new Nan::Persistent<Array>(handleArray);
     info[0]->ToObject()->Set(Nan::New("handle").ToLocalChecked(), handleArray);
-  } else {
-    deleteNanCallback(callbackInfo);
   }
 
   info.GetReturnValue().Set(returnValue);

@@ -80,8 +80,9 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
 
   // sendVendorSpecificHeaderOptions and numSendVendorSpecificHeaderOptions
   Local<Value> sendVendorSpecificHeaderOptions =
-      Nan::Get(jsResponse, Nan::New("sendVendorSpecificHeaderOptions")
-                               .ToLocalChecked()).ToLocalChecked();
+      Nan::Get(jsResponse,
+               Nan::New("sendVendorSpecificHeaderOptions").ToLocalChecked())
+          .ToLocalChecked();
   VALIDATE_VALUE_TYPE_OR_FREE(sendVendorSpecificHeaderOptions, IsArray,
                               "entity handler response header options", false,
                               response.payload, OCPayloadDestroy);

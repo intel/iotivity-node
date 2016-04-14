@@ -16,7 +16,7 @@ var remoteResource,
 	_ = require( "lodash" ),
 	async = require( "async" ),
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
+	device = require( "../../../index" )( "client" ),
 	uuid = process.argv[ 2 ],
 	newRemoteResourceTemplate = {
 		id: {
@@ -52,12 +52,6 @@ function findResourceByUrl( url, deviceId ) {
 }
 
 async.series( [
-	function initDevice( callback ) {
-		device.configure( {
-			role: "client"
-		} ).then( callback, callback );
-	},
-
 	function findTestServer( callback ) {
 		findResourceByUrl( "/a/" + uuid ).then(
 			function( resource ) {
@@ -70,7 +64,7 @@ async.series( [
 	},
 
 	function createRemoteResource( callback ) {
-		device.createResource( newRemoteResourceTemplate ).then(
+		device.create( newRemoteResourceTemplate ).then(
 			function( resource ) {
 
 				// Use the newly created remote resource instead of the initial resource that we
@@ -92,7 +86,7 @@ async.series( [
 	},
 
 	function createDuplicateRemoteResource( callback ) {
-		device.createResource( newRemoteResourceTemplate ).then(
+		device.create( newRemoteResourceTemplate ).then(
 			function() {
 				callback( new Error( "Server created duplicate resource" ) );
 			}, function() {
@@ -103,7 +97,7 @@ async.series( [
 	},
 
 	function deleteRemoteResource( callback ) {
-		device.deleteResource( remoteResource.id ).then(
+		device.delete( remoteResource.id ).then(
 			function() {
 				utils.assert( "ok", true, "Client: Deleting the remote resource has succeeded" );
 				console.log( JSON.stringify( { killPeer: true } ) );

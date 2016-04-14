@@ -32,4 +32,8 @@ bool c_OCRequestHandle(v8::Local<v8::Array> handle, OCRequestHandle *p_cHandle);
 v8::Local<v8::Array> js_OCDoHandle(OCDoHandle handle);
 bool c_OCDoHandle(v8::Local<v8::Array> handle, OCDoHandle *p_cHandle);
 
+v8::Local<v8::Array> jsArrayFromBytes(unsigned char *bytes, size_t length);
+
+bool fillCArrayFromJSArray(unsigned char *bytes, size_t length,
+                           v8::Local<v8::Array> array);
 #endif /* __IOTIVITY_NODE_HANDLES_H__ */

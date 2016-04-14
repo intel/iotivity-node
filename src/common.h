@@ -67,6 +67,26 @@
   Nan::Set((destination), Nan::New(#memberName).ToLocalChecked(),  \
            Nan::New<type>((source)->memberName));
 
+#define VALIDATE_AND_ASSIGN_STRING(destination, memberName, source,          \
+                                   free_function, failReturn)                \
+  do {                                                                       \
+    char *resultingValue = 0;                                                \
+    Local<String> jsMemberName = Nan::New(#memberName).ToLocalChecked();     \
+    if ((source)->Has(jsMemberName)) {                                       \
+      Local<Value> memberName =                                              \
+          Nan::Get((source), jsMemberName).ToLocalChecked();                 \
+      VALIDATE_VALUE_TYPE_OR_FREE(memberName, IsString, #memberName, false,  \
+                                  destination, free_function);               \
+      resultingValue = strdup((const char *)*String::Utf8Value(memberName)); \
+      if (!resultingValue) {                                                 \
+        Nan::ThrowError("Failed to allocate memory for " #memberName);       \
+        free_function((destination));                                        \
+        return failReturn;                                                   \
+      }                                                                      \
+      (destination)->memberName = resultingValue;                            \
+    }                                                                        \
+  } while (0)
+
 #define VALIDATE_AND_ASSIGN(destination, memberName, destinationType,         \
                             typecheck, message, failReturn, source, accessor) \
   Local<Value> memberName =                                                   \

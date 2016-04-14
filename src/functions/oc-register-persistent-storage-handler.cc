@@ -134,7 +134,8 @@ static OCPersistentStorage psCallbacks = {
 
 #define VALIDATE_MEMBER(jsObject, memberName)                                 \
   if (!((Nan::Get(jsCallbacks, Nan::New("open").ToLocalChecked())             \
-             .ToLocalChecked())->IsFunction())) {                             \
+             .ToLocalChecked())                                               \
+            ->IsFunction())) {                                                \
     return Nan::ThrowTypeError("Persistent storage callback for " #memberName \
                                " must be a function");                        \
   }

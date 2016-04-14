@@ -15,8 +15,8 @@
 var theResource,
 	totalRequests = 0,
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
-	uuid = process.argv[ 2 ];
+	uuid = process.argv[ 2 ],
+	device = require( "../../../index" )( "server" );
 
 console.log( JSON.stringify( { assertionCount: 8 } ) );
 
@@ -59,42 +59,28 @@ function resourceOnRequest( request ) {
 	}
 }
 
-device.configure( {
-	role: "server",
-	info: {
-		uuid: uuid,
-		name: "api-retrieval-" + uuid,
-		manufacturerName: "Intel"
+utils.assert( "ok", true, "Server: device.configure() successful" );
+
+device.registerResource( {
+	id: { path: "/a/" + uuid },
+	resourceTypes: [ "core.light" ],
+	interfaces: [ "oic.if.baseline" ],
+	discoverable: true,
+	properties: {
+		"How many angels can dance on the head of a pin?": "As many as wanting."
 	}
 } ).then(
-	function() {
-		utils.assert( "ok", true, "Server: device.configure() successful" );
+	function( resource ) {
+		theResource = resource;
+		utils.assert( "ok", true, "Server: device.registerResource() successful" );
+		device.addEventListener( "retrieverequest", resourceOnRequest );
 
-		device.registerResource( {
-			id: { path: "/a/" + uuid },
-			resourceTypes: [ "core.light" ],
-			interfaces: [ "oic.if.baseline" ],
-			discoverable: true,
-			properties: {
-				"How many angels can dance on the head of a pin?": "As many as wanting."
-			}
-		} ).then(
-			function( resource ) {
-				theResource = resource;
-				utils.assert( "ok", true, "Server: device.registerResource() successful" );
-				device.addEventListener( "request", resourceOnRequest );
-
-				// Signal to the test suite that we're ready for the client
-				console.log( JSON.stringify( { ready: true } ) );
-			},
-			function( error ) {
-				utils.die( "Server: device.registerResource() failed with: " + error +
-					" and result " + error.result );
-			} );
+		// Signal to the test suite that we're ready for the client
+		console.log( JSON.stringify( { ready: true } ) );
 	},
 	function( error ) {
-		utils.die( "Server: device.configure() failed with: " + error + " and result " +
-			error.result );
+		utils.die( "Server: device.registerResource() failed with: " + error +
+			" and result " + error.result );
 	} );
 
 // Cleanup on SIGINT

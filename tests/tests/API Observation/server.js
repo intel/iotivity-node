@@ -16,10 +16,7 @@ var lightResource,
 	onRequestCalls = 0,
 	uuid = process.argv[ 2 ],
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
-	settings = {
-		role: "server"
-	};
+	device = require( "../../../index" )( "server" );
 
 console.log( JSON.stringify( { assertionCount: 5 } ) );
 
@@ -59,34 +56,28 @@ function assertNotifyFailure() {
 	}, 500 );
 }
 
-device.configure( settings ).then(
-	function() {
-		utils.assert( "ok", true, "device.configure() successful" );
+utils.assert( "ok", true, "device configured successfully" );
 
-		device.registerResource( {
-			id: { path: "/a/" + uuid },
-			deviceId: uuid,
-			resourceTypes: [ "core.light" ],
-			interfaces: [ "oic.if.baseline" ],
-			discoverable: true,
-			observable: true,
-			properties: { increment: 0 }
-		} ).then(
-			function( resource ) {
-				utils.assert( "ok", true, "registerResource() successful" );
-				lightResource = resource;
-				device.addEventListener( "request", lightResourceOnRequest );
-				device.onrequest = testOnRequest;
-				console.log( JSON.stringify( { ready: true } ) );
-			},
-			function( error ) {
-				utils.die( "registerResource() failed with " + error +
-					" and result " + error.result );
-			} );
+device.registerResource( {
+	id: { path: "/a/" + uuid },
+	deviceId: uuid,
+	resourceTypes: [ "core.light" ],
+	interfaces: [ "oic.if.baseline" ],
+	discoverable: true,
+	observable: true,
+	properties: { increment: 0 }
+} ).then(
+	function( resource ) {
+		utils.assert( "ok", true, "registerResource() successful" );
+		lightResource = resource;
+		device.addEventListener( "retrieverequest", lightResourceOnRequest );
+		device.addEventListener( "observerequest", lightResourceOnRequest );
+		device.onobserverequest = testOnRequest;
+		console.log( JSON.stringify( { ready: true } ) );
 	},
 	function( error ) {
-		utils.assert( "ok", false,
-			"device.configure() failed with " + error + " and result " + error.result );
+		utils.die( "registerResource() failed with " + error +
+			" and result " + error.result );
 	} );
 
 // Notify ten times and then stop this interval

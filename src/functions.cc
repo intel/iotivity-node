@@ -29,11 +29,12 @@
 
 using namespace v8;
 
-#define SET_FUNCTION(destination, functionName)                              \
-  Nan::ForceSet((destination), Nan::New(#functionName).ToLocalChecked(),     \
-                Nan::GetFunction(Nan::New<FunctionTemplate>(                 \
-                                     bind_##functionName)).ToLocalChecked(), \
-                (v8::PropertyAttribute)(v8::DontDelete));
+#define SET_FUNCTION(destination, functionName)                         \
+  Nan::ForceSet(                                                        \
+      (destination), Nan::New(#functionName).ToLocalChecked(),          \
+      Nan::GetFunction(Nan::New<FunctionTemplate>(bind_##functionName)) \
+          .ToLocalChecked(),                                            \
+      (v8::PropertyAttribute)(v8::DontDelete));
 
 void InitFunctions(Handle<Object> exports, Handle<Object> module) {
   SET_FUNCTION(exports, OCBindResource);

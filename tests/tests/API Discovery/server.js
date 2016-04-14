@@ -14,44 +14,31 @@
 
 var theResource,
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
-	uuid = process.argv[ 2 ];
+	uuid = process.argv[ 2 ],
+	device = require( "../../../index" )( "server" );
 
 console.log( JSON.stringify( { assertionCount: 3 } ) );
 
-device.configure( {
-	role: "server",
-	info: {
-		uuid: uuid,
-		name: "api-discovery-" + uuid,
-		manufacturerName: "Intel"
-	}
+utils.assert( "ok", true, "Server: device configured successfully" );
+
+device.registerResource( {
+	id: { path: "/a/" + uuid },
+	deviceId: uuid,
+	resourceTypes: [ "core.light" ],
+	interfaces: [ "oic.if.baseline" ],
+	discoverable: true,
+	properties: { someValue: 0 }
 } ).then(
-	function() {
-		utils.assert( "ok", true, "Server: device.configure() successful" );
+	function( resource ) {
+		theResource = resource;
+		utils.assert( "ok", true, "Server: device.registerResource() successful" );
 
-		device.registerResource( {
-			id: { path: "/a/" + uuid },
-			deviceId: uuid,
-			resourceTypes: [ "core.light" ],
-			interfaces: [ "oic.if.baseline" ],
-			discoverable: true,
-			properties: { someValue: 0 }
-		} ).then(
-			function( resource ) {
-				theResource = resource;
-				utils.assert( "ok", true, "Server: device.registerResource() successful" );
-
-				// Signal to the test suite that we're ready for the client
-				console.log( JSON.stringify( { ready: true } ) );
-			},
-			function( error ) {
-				utils.assert( "ok", false,
-					"Server: device.registerResource() failed with: " + error );
-			} );
+		// Signal to the test suite that we're ready for the client
+		console.log( JSON.stringify( { ready: true } ) );
 	},
 	function( error ) {
-		utils.assert( "ok", false, "Server: device.configure() failed with: " + error );
+		utils.assert( "ok", false,
+			"Server: device.registerResource() failed with: " + error );
 	} );
 
 // Cleanup on SIGINT
