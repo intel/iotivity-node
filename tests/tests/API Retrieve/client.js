@@ -15,20 +15,14 @@
 var theResource,
 	async = require( "async" ),
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
+	device = require( "../../../index" )( "client" ),
 	uuid = process.argv[ 2 ];
 
-console.log( JSON.stringify( { assertionCount: 6 } ) );
+console.log( JSON.stringify( { assertionCount: 5 } ) );
 
 async.series( [
-	function configureTheDevice( callback ) {
-		device.configure( { role: "client" } ).then( function() {
-			utils.assert( "ok", true, "Client: device.configure() successful" );
-			callback();
-		}, callback );
-	},
 	function attemptFakeRetrieve( callback ) {
-		device.retrieveResource( { deviceId: "SomethingCrazy", path: "/going/nuts/here" } ).then(
+		device.retrieve( { deviceId: "SomethingCrazy", path: "/going/nuts/here" } ).then(
 			function( resource ) {
 				utils.assert( "ok", false, "Client: Retrieving fake resource succeeded: " +
 					JSON.stringify( resource ) );
@@ -36,7 +30,7 @@ async.series( [
 			},
 			function( error ) {
 				utils.assert( "strictEqual", "" + error,
-					"Error: retrieveResource: resource undefined",
+					"Error: retrieve: device not found",
 					"Client: Retrieving fake resource failed locally" );
 				callback();
 			} );
@@ -60,7 +54,7 @@ async.series( [
 		}, teardown );
 	},
 	function retrieveTheResource( callback ) {
-		device.retrieveResource( theResource.id ).then(
+		device.retrieve( theResource.id ).then(
 			function( resource ) {
 				utils.assert( "deepEqual", resource.properties, {
 					"How many angels can dance on the head of a pin?": "As many as wanting."
@@ -70,7 +64,7 @@ async.series( [
 			callback );
 	},
 	function retrieveTheResourceAgain( callback ) {
-		device.retrieveResource( theResource.id ).then(
+		device.retrieve( theResource.id ).then(
 			function() {
 				utils.assert( "ok", false,
 					"Client: Retrieving the resource a second time succeeded" );

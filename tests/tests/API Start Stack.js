@@ -13,15 +13,16 @@
 // limitations under the License.
 
 var testUtils = require( "../assert-to-console" );
+var theError = null;
 
 console.log( JSON.stringify( { assertionCount: 1 } ) );
 
-require( "../../index" )().configure().then(
-	function() {
-		testUtils.assert( "ok", true, "Stack started successfully" );
-		process.exit( 0 );
-	},
-	function( error ) {
-		testUtils.assert( "ok", false, "Stack failed to start with code: " + error.result );
-		process.exit( 0 );
-	} );
+try {
+	require( "../../index" )();
+} catch ( anError ) {
+	theError = anError;
+}
+
+testUtils.assert( "deepEqual", theError, null, "Stack started successfully" );
+
+process.exit( 0 );

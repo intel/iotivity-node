@@ -20,6 +20,7 @@
 #include "../common.h"
 #include "oc-header-option-array.h"
 #include "oc-payload.h"
+#include "oc-identity.h"
 
 extern "C" {
 #include <string.h>
@@ -47,6 +48,10 @@ Local<Object> js_OCClientResponse(OCClientResponse *response) {
   }
 
   SET_VALUE_ON_OBJECT(returnValue, Number, response, connType);
+
+  Nan::Set(returnValue, Nan::New("identity").ToLocalChecked(),
+           js_OCIdentity(&(response->identity)));
+
   SET_VALUE_ON_OBJECT(returnValue, Number, response, result);
   SET_VALUE_ON_OBJECT(returnValue, Number, response, sequenceNumber);
 

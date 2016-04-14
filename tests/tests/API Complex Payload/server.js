@@ -16,7 +16,7 @@ var requestPromise, resource,
 	_ = require( "lodash" ),
 	async = require( "async" ),
 	uuid = process.argv[ 2 ],
-	device = require( "../../../index" )(),
+	device = require( "../../../index" )( "server" ),
 	testUtils = require( "../../assert-to-console" );
 
 console.log( JSON.stringify( { assertionCount: 3 } ) );
@@ -35,18 +35,6 @@ function handlerWithPromise( handler ) {
 
 async.series( [
 
-	// Init
-	function( callback ) {
-		device.configure( {
-			role: "server",
-			info: {
-				uuid: uuid,
-				name: "api-complex-payload-" + uuid,
-				manufacturerName: "Intel"
-			}
-		} ).then( callback, callback );
-	},
-
 	// Create resource and attach retrieve handler
 	function( callback ) {
 		device.registerResource( {
@@ -62,7 +50,7 @@ async.series( [
 				var handler = handlerWithPromise(
 					function retrieveHandler( request, fulfill, reject ) {
 						var cleanup = function( error ) {
-							device.removeEventListener( "request", handler );
+							device.removeEventListener( "retrieverequest", handler );
 							if ( error ) {
 								reject( error );
 							} else {
@@ -84,7 +72,7 @@ async.series( [
 					} );
 
 				resource = theResource;
-				device.addEventListener( "request", handler );
+				device.addEventListener( "retrieverequest", handler );
 				requestPromise = handler.promise;
 
 				callback();
@@ -101,7 +89,7 @@ async.series( [
 			var handler = handlerWithPromise(
 				function updateHandler( request, fulfill, reject ) {
 					var cleanup = function( error ) {
-						device.removeEventListener( "request", handler );
+						device.removeEventListener( "updaterequest", handler );
 						if ( error ) {
 							reject( error );
 						} else {
@@ -124,7 +112,7 @@ async.series( [
 
 					request.sendResponse( null ).then( cleanup, cleanup );
 				} );
-			device.addEventListener( "request", handler );
+			device.addEventListener( "updaterequest", handler );
 			requestPromise = handler.promise;
 			callback();
 		}, callback );

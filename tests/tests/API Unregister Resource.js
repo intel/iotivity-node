@@ -16,18 +16,10 @@ var testUtils = require( "../assert-to-console" );
 
 console.log( JSON.stringify( { assertionCount: 1 } ) );
 
-var device = require( "../../index" )();
-var settings = {
-	role: "server",
-	info: {
-		uuid: "INTEL"
-	}
-};
+var device = require( "../../index" )( "server" );
 
-device.configure( settings );
-
-if ( device.settings.info.uuid ) {
-	var deviceId = device.settings.info.uuid;
+if ( device.device.uuid ) {
+	var deviceId = device.device.uuid;
 
 	device.registerResource( {
 		id: { path: "/light/ambience/blue" },

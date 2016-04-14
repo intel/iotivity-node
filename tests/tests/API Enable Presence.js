@@ -16,12 +16,7 @@ var testUtils = require( "../assert-to-console" );
 
 console.log( JSON.stringify( { assertionCount: 1 } ) );
 
-var device = require( "../../index" )();
-var settings = {
-	role: "server"
-};
-
-device.configure( settings );
+var device = require( "../../index" )( "server" );
 
 device.enablePresence( 1000 ).then(
 	function() {

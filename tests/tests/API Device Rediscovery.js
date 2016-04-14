@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var device = require( "../../index" )();
 var async = require( "async" );
 var testUtils = require( "../assert-to-console" );
 var uuid = process.argv[ 2 ];
 
+testUtils.assert( "ok", true, "Client: configured successfully" );
+
 function runAsClient() {
+	var device = require( "../../index" )( "client" );
 	var currentServer, theResource;
 	var _ = require( "lodash" );
 	var childProcess = require( "child_process" );
@@ -112,13 +114,6 @@ function runAsClient() {
 	console.log( JSON.stringify( { assertionCount: 9 } ) );
 
 	async.series( [
-		function configureAsClient( callback ) {
-			device.configure( { role: "client" } ).then(
-				function() {
-					testUtils.assert( "ok", true, "Client: configure() was successful" );
-					callback();
-				}, callback );
-		},
 		launchServer,
 		discoverResource,
 		waitForDelete,
@@ -141,8 +136,11 @@ function runAsClient() {
 }
 
 function runAsServer() {
+	var device = require( "../../index" )( "server" );
 	var theResource,
 		sigintCount = 0;
+
+	testUtils.assert( "ok", true, "Server: configured was successfully" );
 
 	// Two-level SIGINT: The first SIGINT causes the server to disable presence, whereas the second
 	// one causes the server to exit.
@@ -171,15 +169,6 @@ function runAsServer() {
 	} );
 
 	async.series( [
-
-		function configureServer( callback ) {
-			device.configure( { role: "server" } ).then(
-				function() {
-					testUtils.assert( "ok", true, "Server: configure() was successful" );
-					callback();
-				}, callback );
-		},
-
 		function registerResource( callback ) {
 			device.registerResource( {
 				id: { path: "/a/" + process.argv[ 3 ] },

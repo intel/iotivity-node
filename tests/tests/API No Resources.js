@@ -12,24 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var device = require( "../../index" )(),
+var device = require( "../../index" )( "client" ),
 	utils = require( "../assert-to-console" ),
 	iotivity = require( "../../lowlevel" );
 
 console.log( JSON.stringify( { assertionCount: 1 } ) );
 
-device.configure( {
-	role: "client"
-} ).then(
-	function() {
-		utils.assert( "strictEqual",
-			device._processResources( {
-				result: iotivity.OCStackResult.OC_STACK_NO_RESOURCE
-			} ),
-			undefined,
-			"_processResources() handles OC_STACK_NO_RESOURCE" );
-		process.exit( 0 );
-	},
-	function() {
-		utils.die( "device.configure() failed" );
-	} );
+utils.assert( "strictEqual",
+	device._processResources( {
+		result: iotivity.OCStackResult.OC_STACK_NO_RESOURCE
+	} ),
+	undefined,
+	"_processResources() handles OC_STACK_NO_RESOURCE" );
+process.exit( 0 );

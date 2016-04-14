@@ -15,7 +15,7 @@
 var _ = require( "lodash" ),
 	async = require( "async" ),
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
+	device = require( "../../../index" )( "client" ),
 	iotivity = require( "bindings" )( "iotivity" ),
 	uuid = process.argv[ 2 ];
 
@@ -61,19 +61,6 @@ function discoverTheResource() {
 }
 
 async.series( [
-
-	// Configure the device
-	function( callback ) {
-		device.configure( {
-			role: "client"
-		} ).then(
-			function() {
-				callback( null );
-			},
-			function( error ) {
-				callback( _.extend( error, { step: "device.configure()" } ) );
-			} );
-	},
 
 	// Discover the resource once
 	function( callback ) {

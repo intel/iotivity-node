@@ -20,7 +20,7 @@
 
 using namespace v8;
 
-static Local<Array> jsArrayFromBytes(unsigned char *bytes, size_t length) {
+Local<Array> jsArrayFromBytes(unsigned char *bytes, size_t length) {
   size_t index;
   Local<Array> returnValue = Nan::New<Array>(length);
 
@@ -30,8 +30,8 @@ static Local<Array> jsArrayFromBytes(unsigned char *bytes, size_t length) {
   return returnValue;
 }
 
-static bool fillCArrayFromJSArray(unsigned char *bytes, size_t length,
-                                  Local<Array> array) {
+bool fillCArrayFromJSArray(unsigned char *bytes, size_t length,
+                           Local<Array> array) {
   size_t index, arrayLength;
 
   arrayLength = array->Length();

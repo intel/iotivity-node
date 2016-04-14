@@ -18,6 +18,7 @@
 #include "../common.h"
 #include "../structures/handles.h"
 #include "../structures/oc-platform-info.h"
+#include "../structures/oc-device-info.h"
 #include "../structures/string-primitive.h"
 
 extern "C" {
@@ -51,19 +52,6 @@ NAN_METHOD(bind_OCStartPresence) {
 
 NAN_METHOD(bind_OCStopPresence) {
   info.GetReturnValue().Set(Nan::New(OCStopPresence()));
-}
-
-static bool c_OCDeviceInfo(Local<Object> devInfo, OCDeviceInfo *info) {
-  Local<Value> deviceName =
-      Nan::Get(devInfo, Nan::New("deviceName").ToLocalChecked())
-          .ToLocalChecked();
-  VALIDATE_VALUE_TYPE(deviceName, IsString, "deviceInfo.deviceName", false);
-  char *devName;
-  if (!c_StringNew(deviceName->ToString(), &devName)) {
-    return false;
-  }
-  info->deviceName = devName;
-  return true;
 }
 
 NAN_METHOD(bind_OCSetDeviceInfo) {

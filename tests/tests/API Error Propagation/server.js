@@ -16,16 +16,12 @@ var theResource,
 	_ = require( "lodash" ),
 	async = require( "async" ),
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
+	device = require( "../../../index" )( "server" ),
 	uuid = process.argv[ 2 ];
 
 console.log( JSON.stringify( { assertionCount: 2 } ) );
 
 async.series( [
-	function configureTheDevice( callback ) {
-		device.configure( { role: "server" } ).then( callback, callback );
-	},
-
 	function registerTheResource( callback ) {
 		device.registerResource( {
 			id: { path: "/a/" + uuid },
@@ -40,7 +36,8 @@ async.series( [
 	},
 
 	function handleRequests( callback ) {
-		var requestCount = 0,
+		var requestTypes = [ "create", "delete", "update", "retrieve", "observe", "unobserve" ],
+			requestCount = 0,
 			requestSequence = [],
 			teardown,
 			requestHandler = function( request ) {
@@ -61,11 +58,15 @@ async.series( [
 				}
 			};
 		teardown = function( error ) {
-			device.removeEventListener( "request", requestHandler );
+			_.each( requestTypes, function( requestType ) {
+				device.removeEventListener( requestType + "request", requestHandler );
+			} );
 			callback( error );
 		};
 
-		device.addEventListener( "request", requestHandler );
+		_.each( requestTypes, function( requestType ) {
+			device.addEventListener( requestType + "request", requestHandler );
+		} );
 
 		console.log( JSON.stringify( { ready: true } ) );
 	}

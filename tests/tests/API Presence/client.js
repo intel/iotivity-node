@@ -16,7 +16,7 @@ var theResource,
 	_ = require( "lodash" ),
 	async = require( "async" ),
 	utils = require( "../../assert-to-console" ),
-	device = require( "../../../index" )(),
+	device = require( "../../../index" )( "client" ),
 	uuid = process.argv[ 2 ];
 
 console.log( JSON.stringify( { assertionCount: 5 } ) );
@@ -64,19 +64,6 @@ function discoverTheResource() {
 }
 
 async.series( [
-
-	function configureTheDevice( callback ) {
-		device.configure( {
-			role: "client"
-		} ).then(
-			function() {
-				callback( null );
-			},
-			function( error ) {
-				callback( _.extend( error, { step: "device.configure()" } ) );
-			} );
-	},
-
 	function resourceDiscovery( callback ) {
 		discoverTheResource().then(
 			function( resource ) {
@@ -123,7 +110,7 @@ async.series( [
 
 		// Start the presence cycling
 		theResource.properties.op = "cyclePresence";
-		device.updateResource( theResource ).catch( cleanup );
+		device.update( theResource ).catch( cleanup );
 	}
 
 ], function( error ) {

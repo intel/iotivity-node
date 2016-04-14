@@ -57,42 +57,34 @@ void c_OCPlatformInfoFreeMembers(OCPlatformInfo *info) {
   free(info->systemTime);
 }
 
-// The macro below makes use of variables defined inside c_OCPlatformInfo
-#define C_PLATFORM_INFO_MEMBER(platformInfo, memberName)                    \
-  if (keepGoing &&                                                          \
-      (platformInfo)->Has(Nan::New(#memberName).ToLocalChecked())) {        \
-    Local<Value> memberName =                                               \
-        Nan::Get(platformInfo, Nan::New(#memberName).ToLocalChecked())      \
-            .ToLocalChecked();                                              \
-    if (!memberName->IsString()) {                                          \
-      Nan::ThrowTypeError("platformInfo." #memberName                       \
-                          " must be a string if it is present");            \
-      keepGoing = false;                                                    \
-    } else if (!c_StringNew(memberName->ToString(), &(local.memberName))) { \
-      keepGoing = false;                                                    \
-    }                                                                       \
-  }
-
 bool c_OCPlatformInfo(Local<Object> platformInfo, OCPlatformInfo *info) {
   OCPlatformInfo local = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  bool keepGoing = true;
 
-  C_PLATFORM_INFO_MEMBER(platformInfo, platformID);
-  C_PLATFORM_INFO_MEMBER(platformInfo, manufacturerName);
-  C_PLATFORM_INFO_MEMBER(platformInfo, manufacturerUrl);
-  C_PLATFORM_INFO_MEMBER(platformInfo, modelNumber);
-  C_PLATFORM_INFO_MEMBER(platformInfo, dateOfManufacture);
-  C_PLATFORM_INFO_MEMBER(platformInfo, platformVersion);
-  C_PLATFORM_INFO_MEMBER(platformInfo, operatingSystemVersion);
-  C_PLATFORM_INFO_MEMBER(platformInfo, hardwareVersion);
-  C_PLATFORM_INFO_MEMBER(platformInfo, firmwareVersion);
-  C_PLATFORM_INFO_MEMBER(platformInfo, supportUrl);
-  C_PLATFORM_INFO_MEMBER(platformInfo, systemTime);
+  VALIDATE_AND_ASSIGN_STRING(&local, platformID, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, platformID, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, manufacturerName, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, manufacturerUrl, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, modelNumber, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, dateOfManufacture, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, platformVersion, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, operatingSystemVersion, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, hardwareVersion, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, firmwareVersion, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, supportUrl, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, systemTime, platformInfo,
+                             c_OCPlatformInfoFreeMembers, false);
 
-  if (keepGoing) {
-    memcpy(info, &local, sizeof(OCPlatformInfo));
-  } else {
-    c_OCPlatformInfoFreeMembers(&local);
-  }
-  return keepGoing;
+  *info = local;
+  return true;
 }
