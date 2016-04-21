@@ -42,7 +42,7 @@ sensor.on( "change", function( newData ) {
 	}
 
 	if ( observerCount > 0 ) {
-		device.notify( lightResource ).catch( function( error )  {
+		device.notify( lightResource ).catch( function( error ) {
 			if ( error.message === "notify: There are no observers" ) {
 				observerCount = 0;
 			}

@@ -18,15 +18,16 @@ var oic = require( "../../../index" )( "server" );
 var uuid = process.argv[ 2 ];
 var theError = null;
 var defaultPlatformInfo = {
-		osVersion: "osVersion " + uuid,
-		model: "model " + uuid,
-		manufacturerName: "manufacturerName " + uuid,
-		manufacturerUrl: "manufacturerUrl:" + uuid + "/something/very/long/to/make/sure/it/breaks",
-		manufactureDate: new Date( 1299752880000 ),
-		platformVersion: "platformVersion " + uuid,
-		firmwareVersion: "firmwareVersion " + uuid,
-		supportUrl: "supportUrl:" + uuid
-	};
+	id: "platform " + uuid,
+	osVersion: "osVersion " + uuid,
+	model: "model " + uuid,
+	manufacturerName: "manufacturerName " + uuid,
+	manufacturerUrl: "manufacturerUrl:" + uuid + "/something/very/long/to/make/sure/it/breaks",
+	manufactureDate: new Date( 1299752880000 ),
+	platformVersion: "platformVersion " + uuid,
+	firmwareVersion: "firmwareVersion " + uuid,
+	supportUrl: "supportUrl:" + uuid
+};
 var theResource;
 
 console.log( JSON.stringify( { assertionCount: 4 } ) );
@@ -54,7 +55,7 @@ try {
 }
 utils.assert( "strictEqual", theError.message.substr( 0, 40 ),
 	"manufacturer name length must not exceed",
-		"Server: Setting the platform info failed because of the manufacturer name's length" );
+	"Server: Setting the platform info failed because of the manufacturer name's length" );
 
 defaultPlatformInfo.manufacturerName = "Random";
 
@@ -77,9 +78,9 @@ try {
 	theError = anError;
 }
 utils.assert( "strictEqual", theError ? {
-		message: theError.message,
-		result: theError.result
-	} : null,
+	message: theError.message,
+	result: theError.result
+} : null,
 	null,
 	"Server: Setting the platform info succeeded" );
 

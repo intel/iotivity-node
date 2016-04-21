@@ -48,15 +48,18 @@ new Promise( function findTheDeviceId( fulfill, reject ) {
 
 		// Convert the manufactureDate to a timestamp for unambiguous comparison
 		utils.assert( "deepEqual", _.extend( platformInfo, {
-				manufactureDate: new Date( platformInfo.manufactureDate ).getTime()
-			} ), {
-				id: deviceId,
-				manufacturerName: "Random",
-				manufactureDate: 1299752880000,
-				platformVersion: "platformVersion " + uuid,
-				firmwareVersion: "firmwareVersion " + uuid,
-				supportUrl: "supportUrl:" + uuid
-			}, "Client: The retrieved platform information is as expected" );
+			manufactureDate: new Date( platformInfo.manufactureDate ).getTime()
+		} ), {
+			id: "platform " + uuid,
+			manufacturerName: "Random",
+			manufactureDate: 1299752880000,
+			manufacturerUrl: "http://example.com/",
+			model: "model " + uuid,
+			osVersion: "osVersion " + uuid,
+			platformVersion: "platformVersion " + uuid,
+			firmwareVersion: "firmwareVersion " + uuid,
+			supportUrl: "supportUrl:" + uuid
+		}, "Client: The retrieved platform information is as expected" );
 	} );
 } ).then(
 	function testIsDone() {

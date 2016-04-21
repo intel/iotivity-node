@@ -30,14 +30,14 @@ NAN_METHOD(bind_OCConvertUuidToString) {
   VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
 
   OCRandomUuidResult result;
-  uint8_t sid[UUID_SIZE] = {0};
+  char sid[UUID_SIZE] = {0};
   char stringSid[UUID_STRING_SIZE] = "";
 
   if (!c_SID(Local<Array>::Cast(info[0]), sid)) {
     return;
   }
 
-  result = OCConvertUuidToString(sid, stringSid);
+  result = OCConvertUuidToString((const uint8_t *)sid, stringSid);
 
   Local<Object> receptacle = Local<Object>::Cast(info[1]);
 
@@ -73,8 +73,8 @@ NAN_METHOD(bind_OCGenerateUuid) {
     Nan::ThrowRangeError("Array is not of length UUID_SIZE");
     return;
   }
-  uint8_t cDestination[UUID_SIZE] = {0};
-  OCRandomUuidResult result = OCGenerateUuid(cDestination);
+  char cDestination[UUID_SIZE] = {0};
+  OCRandomUuidResult result = OCGenerateUuid((uint8_t *)cDestination);
   fillJSSid(destination, cDestination);
   info.GetReturnValue().Set(Nan::New(result));
 }

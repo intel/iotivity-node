@@ -19,8 +19,8 @@
 
 #include <v8.h>
 
-void fillJSSid(v8::Local<v8::Array> jsSid, uint8_t *sid);
-v8::Local<v8::Array> js_SID(uint8_t *sid);
-bool c_SID(v8::Local<v8::Array> jsSid, uint8_t *sid);
+void fillJSSid(v8::Local<v8::Array> jsSid, char *sid);
+v8::Local<v8::Array> js_SID(char *sid);
+bool c_SID(v8::Local<v8::Array> jsSid, char *sid);
 
 #endif /* __IOTIVITY_NODE_OCSID_H__ */

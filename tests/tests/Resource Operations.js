@@ -33,7 +33,7 @@ result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 testUtils.stackOKOrDie( "OCInit", result );
 
 // Set device info
-result = iotivity.OCSetDeviceInfo( { deviceName: "resource-operations-" + uuid } );
+result = iotivity.OCSetDeviceInfo( { deviceName: "resource-operations-" + uuid, types: [] } );
 testUtils.stackOKOrDie( "OCSetDeviceInfo", result );
 
 // Set platform info

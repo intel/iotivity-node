@@ -10,30 +10,30 @@ var date = new Date(),
 	test = {},
 	testInfo = {};
 
-exports.getTestResult = function( status, success, failure  ) {
+exports.getTestResult = function( status, success, failure ) {
 
-	if ( status.result ) {
-		success = "PASS";
-	} else if ( !status.result ) {
-		failure = "FAIL";
-	}
+if ( status.result ) {
+	success = "PASS";
+} else if ( !status.result ) {
+	failure = "FAIL";
+}
 
-	testInfo = {
-		"message": (  status.runtime  + ": " + status.message ),
-		"result": ( status.result ? success : failure ),
-		"runtime": ( date.toLocaleTimeString() )
-	};
+testInfo = {
+	"message": ( status.runtime + ": " + status.message ),
+	"result": ( status.result ? success : failure ),
+	"runtime": ( date.toLocaleTimeString() )
+};
 
-	if ( setList.indexOf( status.name ) > -1 && ( "results" in test ) ) {
-		test.results.push( testInfo );
-		caseList.push( test );
-	} else {
-		setList.push( status.name );
-		test = { "test": status.name, "results": [ testInfo ] };
-		caseList.push( test );
-		allList.push( test );
-	}
+if ( setList.indexOf( status.name ) > -1 && ( "results" in test ) ) {
+	test.results.push( testInfo );
+	caseList.push( test );
+} else {
+	setList.push( status.name );
+	test = { "test": status.name, "results": [ testInfo ] };
+	caseList.push( test );
+	allList.push( test );
+}
 
-	data = JSON.stringify( { "output": allList }, null, 4 );
-	fs.writeFileSync( jsonFilename, data );
+data = JSON.stringify( { "output": allList }, null, 4 );
+fs.writeFileSync( jsonFilename, data );
 };

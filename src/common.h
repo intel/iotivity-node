@@ -96,4 +96,19 @@
                       failReturn);                                            \
   destination.memberName = (destinationType)memberName->accessor();
 
+#define ADD_STRING_ARRAY(destination, source, memberName)                     \
+  do {                                                                        \
+    int counter;                                                              \
+    OCStringLL *item;                                                         \
+    for (item = (source)->memberName, counter = 0; item;                      \
+         item = item->next, counter++)                                        \
+      ;                                                                       \
+    Local<Array> jsArray = Nan::New<Array>(counter);                          \
+    for (item = (source)->memberName, counter = 0; item;                      \
+         item = item->next, counter++) {                                      \
+      Nan::Set(jsArray, counter, Nan::New(item->value).ToLocalChecked());     \
+    }                                                                         \
+    Nan::Set((destination), Nan::New(#memberName).ToLocalChecked(), jsArray); \
+  } while (0)
+
 #endif /* __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__ */

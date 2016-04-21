@@ -21,6 +21,7 @@
 #include "string-primitive.h"
 #include "oc-platform-info.h"
 #include "oc-device-info.h"
+#include "handles.h"
 
 extern "C" {
 #include <string.h>
@@ -194,21 +195,6 @@ static Local<Object> js_OCRepPayload(OCRepPayload *payload) {
   return returnValue;
 }
 
-#define ADD_STRING_ARRAY(returnValue, payload, memberName)                    \
-  do {                                                                        \
-    int counter;                                                              \
-    OCStringLL *item;                                                         \
-    for (item = (payload)->memberName, counter = 0; item;                     \
-         item = item->next, counter++)                                        \
-      ;                                                                       \
-    Local<Array> jsArray = Nan::New<Array>(counter);                          \
-    for (item = (payload)->memberName, counter = 0; item;                     \
-         item = item->next, counter++) {                                      \
-      Nan::Set(jsArray, counter, Nan::New(item->value).ToLocalChecked());     \
-    }                                                                         \
-    Nan::Set((returnValue), Nan::New(#memberName).ToLocalChecked(), jsArray); \
-  } while (0)
-
 static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
   Local<Object> returnValue = Nan::New<Object>();
 
@@ -291,8 +277,6 @@ static Local<Object> js_OCDiscoveryPayload(OCDiscoveryPayload *payload) {
   }
 
   ADD_STRUCTURE_ARRAY(returnValue, payload, resources, OCResourcePayload);
-  ADD_STRUCTURE_ARRAY(returnValue, payload, collectionResources,
-                      OCResourceCollectionPayload);
 
   return returnValue;
 }
@@ -348,7 +332,11 @@ static Local<Object> js_OCSecurityPayload(OCSecurityPayload *payload) {
   Nan::Set(returnValue, Nan::New("type").ToLocalChecked(),
            Nan::New(payload->base.type));
 
-  SET_STRING_IF_NOT_NULL(returnValue, payload, securityData);
+  if (payload->securityData) {
+    Nan::Set(returnValue, Nan::New("securityData").ToLocalChecked(),
+             jsArrayFromBytes((unsigned char *)(payload->securityData),
+                              payload->payloadSize));
+  }
 
   return returnValue;
 }
