@@ -64,12 +64,16 @@ During compilation, iotivity-node downloads iotivity from its git repository, bu
     0. ```PREFIX``` is set to ```/usr``` by default
     0. ```DESTDIR``` is unset.
     0. ```INSTALL_PC``` is unset. Setting it to ```true``` will cause ```install.sh``` to also copy the file ```octbstack.pc``` into ```${DESTDIR}/${PREFIX}/lib/pkgconfig```.
+    0. ```SOURCE``` is set to the present working directory by default.
 
     Use ```PREFIX``` to install to a location other than ```/usr``` and use ```DESTDIR``` to set an additional prefix where to put the files. This latter option is especially useful for packaging. Examples:
 
     ```PREFIX=/usr/local ./install.sh``` will install the files into ```/usr/local``` instead.
 
     ```PREFIX=/usr/local DESTDIR=/home/username/iotivity-installation ./install.sh``` will install the files into ```/home/username/iotivity-installation/usr/local```, but will configure liboctbstack to work when loaded from ```/usr/local```.
+
+    Use ```SOURCE``` if the ```install.sh``` script is not located in the root of the iotivity repository to indicate the absolute path to the root of the iotivity repository. Note that if you also wish to distribute the octbstack.pc file, you need to copy octbstack.pc.in from the root of this repository to the root of the iotivity repository first.
+
 0. After having installed iotivity using the above script, you can run ```./dist.sh``` from the root of this repository without first having to set any environment variables. The script will grab the environment via ```pkg-config``` from the file installed above, and will build, test, and create a directory structure under ```dist/``` which is suitable for deployment on a target device. See ```./dist.sh --help``` for more options.
 
 ## Placing the binaries onto a device
