@@ -21,6 +21,7 @@
 extern "C" {
 #include <string.h>
 #include <ocrandom.h>
+#include <limits.h>
 }
 
 using namespace v8;
@@ -42,6 +43,7 @@ Local<Array> js_SID(char *sid) {
 
 bool c_SID(Local<Array> jsSid, char *sid) {
   int index;
+  int32_t value;
   char result[UUID_SIZE];
 
   if (jsSid->Length() > UUID_SIZE) {
@@ -51,8 +53,13 @@ bool c_SID(Local<Array> jsSid, char *sid) {
 
   for (index = 0; index < UUID_SIZE; index++) {
     Local<Value> oneByte = Nan::Get(jsSid, index).ToLocalChecked();
-    VALIDATE_VALUE_TYPE(oneByte, IsUint32, "SID byte", false);
-    result[index] = oneByte->Uint32Value();
+    VALIDATE_VALUE_TYPE(oneByte, IsInt32, "SID byte", false);
+    value = oneByte->Int32Value();
+    if (value < CHAR_MIN || value > CHAR_MAX) {
+      Nan::ThrowRangeError("SID byte value outside its range");
+      return false;
+    }
+    result[index] = oneByte->Int32Value();
   }
 
   memcpy(sid, result, UUID_SIZE * sizeof(char));
