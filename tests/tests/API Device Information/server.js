@@ -84,7 +84,7 @@ utils.assert( "strictEqual", theError ? {
 	null,
 	"Server: Setting the platform info succeeded" );
 
-oic.registerResource( {
+oic.register( {
 	id: { path: "/a/" + uuid },
 	resourceTypes: [ "core.light" ],
 	interfaces: [ "oic.if.baseline" ],
@@ -100,7 +100,7 @@ oic.registerResource( {
 	} );
 
 process.on( "SIGINT", function() {
-	oic.unregisterResource( theResource ).then(
+	oic.unregister( theResource ).then(
 		function() {
 			process.exit( 0 );
 		},

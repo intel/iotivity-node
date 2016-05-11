@@ -31,8 +31,9 @@ function die( message ) {
 }
 
 function resourceOnRequest( request ) {
-	utils.assert( "strictEqual", request.type, "retrieve", "Server: Request is of type retrieve" );
-	if ( request.type === "retrieve" ) {
+	utils.assert( "strictEqual", request.type, "retrieverequest",
+		"Server: Request is of type retrieve" );
+	if ( request.type === "retrieverequest" ) {
 		request.sendResponse( _.extend( {}, request.target, {
 			properties: {
 				"How many angels can dance on the head of a pin?":
@@ -42,7 +43,7 @@ function resourceOnRequest( request ) {
 	}
 }
 
-device.registerResource( {
+device.register( {
 	id: { path: "/a/" + uuid },
 	resourceTypes: [ "core.light" ],
 	interfaces: [ "oic.if.baseline" ],
@@ -54,7 +55,7 @@ device.registerResource( {
 	function( resource ) {
 		device.addEventListener( "retrieverequest", resourceOnRequest );
 		process.on( "SIGINT", function() {
-			device.unregisterResource( resource ).catch( die( "Failed to unregister resource" ) );
+			device.unregister( resource ).catch( die( "Failed to unregister resource" ) );
 			process.exit( 0 );
 		} );
 		console.log( JSON.stringify( { ready: true } ) );

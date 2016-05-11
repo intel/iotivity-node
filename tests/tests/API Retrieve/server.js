@@ -22,22 +22,23 @@ console.log( JSON.stringify( { assertionCount: 8 } ) );
 
 function resourceOnRequest( request ) {
 	totalRequests++;
-	utils.assert( "strictEqual", request.type, "retrieve", "Server: Request is of type retrieve" );
-	if ( request.type === "retrieve" ) {
+	utils.assert( "strictEqual", request.type, "retrieverequest",
+		"Server: Request is of type retrieve" );
+	if ( request.type === "retrieverequest" ) {
 		if ( totalRequests === 1 ) {
 			request.sendResponse( request.target ).then(
 				function() {
 					utils.assert( "ok", true,
 						"Server: Successfully responded to retrieve request" );
-					device.unregisterResource( theResource ).then(
+					device.unregister( theResource ).then(
 						function() {
 							utils.assert( "ok", true,
-								"Server: device.unregisterResource() successful" );
+								"Server: device.unregister() successful" );
 							theResource = null;
 						},
 						function( error ) {
 							utils.die(
-								"Server: device.unregisterResource() failed with: " + error +
+								"Server: device.unregister() failed with: " + error +
 								" and result " + error.result );
 						} );
 				},
@@ -61,7 +62,7 @@ function resourceOnRequest( request ) {
 
 utils.assert( "ok", true, "Server: device.configure() successful" );
 
-device.registerResource( {
+device.register( {
 	id: { path: "/a/" + uuid },
 	resourceTypes: [ "core.light" ],
 	interfaces: [ "oic.if.baseline" ],
@@ -72,14 +73,14 @@ device.registerResource( {
 } ).then(
 	function( resource ) {
 		theResource = resource;
-		utils.assert( "ok", true, "Server: device.registerResource() successful" );
+		utils.assert( "ok", true, "Server: device.register() successful" );
 		device.addEventListener( "retrieverequest", resourceOnRequest );
 
 		// Signal to the test suite that we're ready for the client
 		console.log( JSON.stringify( { ready: true } ) );
 	},
 	function( error ) {
-		utils.die( "Server: device.registerResource() failed with: " + error +
+		utils.die( "Server: device.register() failed with: " + error +
 			" and result " + error.result );
 	} );
 

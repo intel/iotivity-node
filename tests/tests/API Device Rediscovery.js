@@ -156,21 +156,21 @@ function runAsServer() {
 						JSON.stringify( error ) );
 				} );
 		} else {
-			device.unregisterResource( theResource ).then(
+			device.unregister( theResource ).then(
 				function() {
-					testUtils.assert( "ok", true, "Server: unregisterResource() was successful" );
+					testUtils.assert( "ok", true, "Server: unregister() was successful" );
 					process.exit( 0 );
 				},
 				function( error ) {
-					testUtils.die( "Server: unregisterResource failed with error: " +
+					testUtils.die( "Server: unregister failed with error: " +
 						JSON.stringify( error ) );
 				} );
 		}
 	} );
 
 	async.series( [
-		function registerResource( callback ) {
-			device.registerResource( {
+		function register( callback ) {
+			device.register( {
 				id: { path: "/a/" + process.argv[ 3 ] },
 				interfaces: [ "oic.if.baseline" ],
 				resourceTypes: [ "core.light" ],
@@ -178,7 +178,7 @@ function runAsServer() {
 			} ).then(
 				function( resource ) {
 					theResource = resource;
-					testUtils.assert( "ok", true, "Server: registerResource() was successful" );
+					testUtils.assert( "ok", true, "Server: register() was successful" );
 					callback();
 				}, callback );
 		},

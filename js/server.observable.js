@@ -20,10 +20,12 @@ var intervalId,
 	sampleUri = "/a/iotivity-node-observe-sample",
 	iotivity = require( "iotivity-node/lowlevel" );
 
+console.log( "Starting OCF stack in server mode" );
+
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 
-iotivity.OCSetDeviceInfo( { deviceName: "server.observable" } );
+iotivity.OCSetDeviceInfo( { deviceName: "server.observable", types: [] } );
 iotivity.OCSetPlatformInfo( {
 	platformID: "server.observe.sample",
 	manufacturerName: "iotivity-node"
@@ -49,6 +51,8 @@ require( "./mock-sensor" )().on( "change", function( data ) {
 			iotivity.OCQualityOfService.OC_HIGH_QOS );
 	}
 } );
+
+console.log( "Registering resource" );
 
 // Create a new resource
 iotivity.OCCreateResource(
@@ -96,6 +100,8 @@ iotivity.OCCreateResource(
 	},
 	iotivity.OCResourceProperty.OC_DISCOVERABLE |
 	iotivity.OCResourceProperty.OC_OBSERVABLE );
+
+console.log( "Server ready" );
 
 // Exit gracefully when interrupted
 process.on( "SIGINT", function() {

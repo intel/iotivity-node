@@ -18,7 +18,7 @@ grunt.registerTask( "lint", [ "jshint", "jscs" ] );
 
 grunt.registerTask( "default", [ "test" ] );
 
-grunt.registerTask( "test", [ "lint", "testsuite", "testdist" ] );
+grunt.registerTask( "test", [ "lint", "testsuite", "ocf-suite", "testdist" ] );
 
 grunt.registerTask( "format", [ "esformatter", "clangformat" ] );
 

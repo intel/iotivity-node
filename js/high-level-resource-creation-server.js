@@ -35,7 +35,7 @@ function throwError( error ) {
 var requestHandlers = {
 	create: function( request ) {
 		console.log( "create request" );
-		device.registerResource( _.extend( request.res, {
+		device.register( _.extend( request.res, {
 			discoverable: true
 		} ) ).then( function( resource ) {
 			console.log( "resource successfully registered" );
@@ -47,7 +47,7 @@ var requestHandlers = {
 		console.log( "delete request" );
 		if ( request.target.id.path === resourceCreatedByRemote.id.path &&
 				request.target.id.deviceId === resourceCreatedByRemote.id.deviceId ) {
-			device.unregisterResource( resourceCreatedByRemote ).then(
+			device.unregister( resourceCreatedByRemote ).then(
 				function() {
 					console.log( "resource successfully deleted" );
 					request.sendResponse( null );
@@ -65,7 +65,7 @@ _.each( requestHandlers, function( handler, requestType ) {
 	} );
 } );
 
-device.registerResource( {
+device.register( {
 	id: {
 		path: "/a/high-level-resource-creation-example"
 	},

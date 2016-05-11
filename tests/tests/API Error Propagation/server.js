@@ -23,7 +23,7 @@ console.log( JSON.stringify( { assertionCount: 2 } ) );
 
 async.series( [
 	function registerTheResource( callback ) {
-		device.registerResource( {
+		device.register( {
 			id: { path: "/a/" + uuid },
 			resourceTypes: [ "core.light" ],
 			interfaces: [ "oic.if.baseline" ],
@@ -36,7 +36,10 @@ async.series( [
 	},
 
 	function handleRequests( callback ) {
-		var requestTypes = [ "create", "delete", "update", "retrieve", "observe", "unobserve" ],
+		var requestTypes = [
+				"create", "delete", "update",
+				"retrieve", "observe", "unobserve"
+			],
 			requestCount = 0,
 			requestSequence = [],
 			teardown,
@@ -78,13 +81,13 @@ async.series( [
 
 // Cleanup on SIGINT
 process.on( "SIGINT", function() {
-	device.unregisterResource( theResource ).then(
+	device.unregister( theResource ).then(
 		function() {
-			utils.assert( "ok", true, "Server: device.unregisterResource() successful" );
+			utils.assert( "ok", true, "Server: device.unregister() successful" );
 			process.exit( 0 );
 		},
 		function( error ) {
-			utils.die( "Server: device.unregisterResource() failed with: " + error +
+			utils.die( "Server: device.unregister() failed with: " + error +
 				" and result " + error.result );
 			process.exit( 0 );
 		} );

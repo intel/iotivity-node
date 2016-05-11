@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var lightResource,
+var lightResource, device,
 	_ = require( "lodash" ),
 	observerCount = 0,
-	sensor = require( "./mock-sensor" )(),
-	device = require( "iotivity-node" )( "server" );
+	sensor = require( "./mock-sensor" )();
 
+console.log( "Acquiring OCF device" );
+
+device = require( "iotivity-node" )( "server" );
 device.device = _.extend( device.device, {
 	name: "api-server-example"
 } );
@@ -72,7 +74,10 @@ var lightResourceRequestHandlers = {
 };
 
 if ( device.device.uuid ) {
-	device.registerResource( {
+
+	console.log( "Registering OCF resource" );
+
+	device.register( {
 		id: { path: "/a/high-level-example" },
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],

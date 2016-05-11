@@ -37,7 +37,7 @@ async.series( [
 
 	// Create resource and attach retrieve handler
 	function( callback ) {
-		device.registerResource( {
+		device.register( {
 			id: { path: "/a/" + uuid },
 			discoverable: true,
 			observable: true,
@@ -57,7 +57,7 @@ async.series( [
 								fulfill();
 							}
 						};
-						testUtils.assert( "strictEqual", request.type, "retrieve",
+						testUtils.assert( "strictEqual", request.type, "retrieverequest",
 							"Client: First event is 'retrieve'" );
 						request.sendResponse( _.extend( theResource, {
 							properties: {
@@ -97,7 +97,7 @@ async.series( [
 						}
 					};
 
-					testUtils.assert( "strictEqual", request.type, "update",
+					testUtils.assert( "strictEqual", request.type, "updaterequest",
 						"Client: Second event is 'update'" );
 
 					testUtils.assert( "deepEqual", request.res, {

@@ -34,12 +34,16 @@ var intervalId,
 		return returnValue;
 	} )();
 
+console.log( "Starting OCF stack in client mode" );
+
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
 
 intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
+
+console.log( "Issuing discovery request" );
 
 // Discover resources and list them
 iotivity.OCDoResource(
@@ -60,7 +64,7 @@ iotivity.OCDoResource(
 	iotivity.OCConnectivityType.CT_DEFAULT,
 	iotivity.OCQualityOfService.OC_HIGH_QOS,
 	function( handle, response ) {
-		console.log( JSON.stringify( response, null, 4 ) );
+		console.log( "Discovery response: " + JSON.stringify( response, null, 4 ) );
 		return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
 	},
 

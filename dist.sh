@@ -156,9 +156,7 @@ if test "x${DO_DEVREINST}x" = "xTRUEx"; then
 	echo "*** Re-installing dependencies ***"
 
 	# Restore devDependencies after having created the distribution package
-	node -e 'Object.keys( require( "./package.json" ).devDependencies )
-		.concat( Object.keys( require( "./package.json" ).dependencies ) )
-		.map( function( item ){ console.log( item ) } );' | xargs npm install
+	npm install --ignore-scripts
 fi
 
 if test "x${DO_BUILD}x" = "xTRUEx"; then

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+console.log( "Acquiring OCF device" );
+
 var device = require( "iotivity-node" )( "client" );
 
 function throwError( error ) {
@@ -19,7 +21,6 @@ function throwError( error ) {
 	process.exit( 1 );
 }
 
-// This
 new Promise( function( fulfill, reject ) {
 	var resourceFoundHandler = function( event ) {
 		console.log( "Discovered resource(s) via the following event:\n" +
@@ -36,6 +37,7 @@ new Promise( function( fulfill, reject ) {
 	// Add a listener that will receive the results of the discovery
 	device.addEventListener( "resourcefound", resourceFoundHandler );
 
+	console.log( "Issuing discovery request" );
 	device.findResources().catch( function( error ) {
 		device.removeEventListener( "resourcefound", resourceFoundHandler );
 		reject( "findResource() failed: " + error );

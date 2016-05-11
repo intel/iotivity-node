@@ -29,7 +29,7 @@ function cleanup() {
 }
 
 function lightResourceOnRequest( request ) {
-	if ( request.type === "retrieve" || request.type === "observe" ) {
+	if ( request.type === "retrieverequest" || request.type === "observerequest" ) {
 		request.sendResponse( null );
 	}
 }
@@ -58,7 +58,7 @@ function assertNotifyFailure() {
 
 utils.assert( "ok", true, "device configured successfully" );
 
-device.registerResource( {
+device.register( {
 	id: { path: "/a/" + uuid },
 	deviceId: uuid,
 	resourceTypes: [ "core.light" ],
@@ -68,7 +68,7 @@ device.registerResource( {
 	properties: { increment: 0 }
 } ).then(
 	function( resource ) {
-		utils.assert( "ok", true, "registerResource() successful" );
+		utils.assert( "ok", true, "register() successful" );
 		lightResource = resource;
 		device.addEventListener( "retrieverequest", lightResourceOnRequest );
 		device.addEventListener( "observerequest", lightResourceOnRequest );
@@ -76,7 +76,7 @@ device.registerResource( {
 		console.log( JSON.stringify( { ready: true } ) );
 	},
 	function( error ) {
-		utils.die( "registerResource() failed with " + error +
+		utils.die( "register() failed with " + error +
 			" and result " + error.result );
 	} );
 

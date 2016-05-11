@@ -1,6 +1,6 @@
 {
   "name": "iotivity-node",
-  "version": "1.1.0-2",
+  "version": "1.1.0-3",
   "description": "IoTivity bindings",
   "repository": "https://github.com/otcshare/iotivity-node/",
   "license": "Apache-2.0",
@@ -34,6 +34,7 @@
     "grunt-jscs": "^2.1.0",
     "load-grunt-config": "^0.17.2",
     "load-grunt-tasks": "^3.2.0",
+    "ocf-test-suite": "https://github.com/gabrielschulhof/ocf-test-suite.git",
     "qunitjs": "^1.18.0",
     "shelljs": "^0.5.3",
     "uuid": "^2.0.1"

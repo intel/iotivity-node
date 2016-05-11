@@ -19,6 +19,8 @@ var intervalId,
 	sampleUri = "/a/iotivity-node-presence-sample",
 	iotivity = require( "iotivity-node/lowlevel" );
 
+console.log( "Starting OCF stack in server mode" );
+
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 
@@ -26,11 +28,13 @@ intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
 
-iotivity.OCSetDeviceInfo( { deviceName: "server.discoverable" } );
+iotivity.OCSetDeviceInfo( { deviceName: "server.discoverable", types: [] } );
 iotivity.OCSetPlatformInfo( {
 	platformID: "server.discoverable.sample",
 	manufacturerName: "iotivity-node"
 } );
+
+console.log( "Registering resource" );
 
 // Create a new resource
 iotivity.OCCreateResource(

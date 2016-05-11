@@ -19,7 +19,7 @@ function runAsServer() {
 	var device = require( "../../index" )( "server" );
 
 	process.on( "SIGINT", function() {
-		device.unregisterResource( resource ).then(
+		device.unregister( resource ).then(
 			function() {
 				process.exit( 0 );
 			},
@@ -28,7 +28,7 @@ function runAsServer() {
 			} );
 	} );
 
-	device.registerResource( {
+	device.register( {
 		id: { path: "/a/" + process.argv[ 3 ] },
 		discoverable: true,
 		resourceTypes: [ "core.light" ],

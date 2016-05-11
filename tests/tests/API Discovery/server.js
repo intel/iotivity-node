@@ -21,7 +21,7 @@ console.log( JSON.stringify( { assertionCount: 3 } ) );
 
 utils.assert( "ok", true, "Server: device configured successfully" );
 
-device.registerResource( {
+device.register( {
 	id: { path: "/a/" + uuid },
 	deviceId: uuid,
 	resourceTypes: [ "core.light" ],
@@ -31,26 +31,26 @@ device.registerResource( {
 } ).then(
 	function( resource ) {
 		theResource = resource;
-		utils.assert( "ok", true, "Server: device.registerResource() successful" );
+		utils.assert( "ok", true, "Server: device.register() successful" );
 
 		// Signal to the test suite that we're ready for the client
 		console.log( JSON.stringify( { ready: true } ) );
 	},
 	function( error ) {
 		utils.assert( "ok", false,
-			"Server: device.registerResource() failed with: " + error );
+			"Server: device.register() failed with: " + error );
 	} );
 
 // Cleanup on SIGINT
 process.on( "SIGINT", function() {
-	device.unregisterResource( theResource ).then(
+	device.unregister( theResource ).then(
 		function() {
-			utils.assert( "ok", true, "Server: device.unregisterResource() successful" );
+			utils.assert( "ok", true, "Server: device.unregister() successful" );
 			process.exit( 0 );
 		},
 		function( error ) {
 			utils.assert( "ok", false,
-				"Server: device.unregisterResource() failed with: " + error );
+				"Server: device.unregister() failed with: " + error );
 			process.exit( 0 );
 		} );
 } );

@@ -19,10 +19,12 @@ var intervalId,
 	sampleUri = "/a/iotivity-multi-server-server1",
 	iotivity = require( "iotivity-node/lowlevel" );
 
+console.log( "Starting OCF stack in server mode" );
+
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 
-iotivity.OCSetDeviceInfo( { deviceName: "server.observable" } );
+iotivity.OCSetDeviceInfo( { deviceName: "server.observable", types: [] } );
 iotivity.OCSetPlatformInfo( {
 	platformID: "server.observe.sample",
 	manufacturerName: "iotivity-node"
@@ -31,6 +33,8 @@ iotivity.OCSetPlatformInfo( {
 intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
+
+console.log( "Registering resource" );
 
 iotivity.OCCreateResource(
 	handleReceptacle,
@@ -56,6 +60,8 @@ iotivity.OCCreateResource(
 		return iotivity.OCEntityHandlerResult.OC_EH_OK;
 	},
 	iotivity.OCResourceProperty.OC_DISCOVERABLE );
+
+console.log( "Server ready" );
 
 // Exit gracefully when interrupted
 process.on( "SIGINT", function() {
