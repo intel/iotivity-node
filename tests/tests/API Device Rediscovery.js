@@ -16,8 +16,6 @@ var async = require( "async" );
 var testUtils = require( "../assert-to-console" );
 var uuid = process.argv[ 2 ];
 
-testUtils.assert( "ok", true, "Client: configured successfully" );
-
 function runAsClient() {
 	var device = require( "../../index" )( "client" );
 	var currentServer, theResource;
@@ -60,8 +58,8 @@ function runAsClient() {
 					callback();
 				}
 
-				// Forward assertions and teardown requests from server
-				if ( jsonObject.assert || jsonObject.teardown ) {
+				// Forward assertions, teardown, and info requests from server
+				if ( jsonObject.assertion || jsonObject.teardown || jsonObject.info ) {
 					console.log( JSON.stringify( jsonObject ) );
 				}
 			} );
@@ -111,9 +109,14 @@ function runAsClient() {
 		currentServer.kill( "SIGINT" );
 	};
 
-	console.log( JSON.stringify( { assertionCount: 9 } ) );
+	console.log( JSON.stringify( { assertionCount: 19 } ) );
+
+	testUtils.assert( "ok", true, "Client: configured successfully" );
 
 	async.series( [
+		function( callback ) {
+			device.subscribe().then( callback, callback );
+		},
 		launchServer,
 		discoverResource,
 		waitForDelete,

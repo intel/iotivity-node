@@ -28,6 +28,13 @@ module.exports = {
 		} ) );
 	},
 
+	info: function( message ) {
+		console.log( JSON.stringify( {
+			info: true,
+			message: message
+		} ) );
+	},
+
 	die: function( message ) {
 		console.log( JSON.stringify( { teardown: true, message: message, isError: true } ) );
 		process.exit( 1 );

@@ -12,113 +12,238 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var theResource,
-	_ = require( "lodash" ),
-	async = require( "async" ),
-	utils = require( "../../assert-to-console" ),
+var utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )( "client" ),
 	uuid = process.argv[ 2 ];
 
-console.log( JSON.stringify( { assertionCount: 5 } ) );
+console.log( JSON.stringify( { assertionCount: 8 } ) );
 
-function discoverTheResource() {
-	var eventHandler,
-		removeListener = function() {
-			if ( eventHandler ) {
-				device.removeEventListener( "resourcefound", eventHandler );
+// Tell the resource's server to perform an operation (either disablePresence or enablePresence)
+// or, if op is undefined, then do not communicate with the server. Either way, wait five seconds
+// for the ensuing events (or lack thereof).
+function countEvents( resource, op ) {
+	return new Promise( function( fulfill, reject ) {
+		var events = [];
+
+		function devicefound( event ) {
+			if ( event.device.uuid === resource.id.deviceId ) {
+				events.push( JSON.stringify( {
+					event: event.type,
+					source: { deviceId: event.device.uuid }
+				} ) );
 			}
-		};
+		}
 
-	return Promise.all( [
-		new Promise( function( fulfill ) {
-			eventHandler = function( event ) {
-				var index,
-					count = 0,
-					url = "/a/" + uuid;
+		function resourcefound( event ) {
+			if ( event.resource.id.path === resource.id.path &&
+				event.resource.id.deviceId === resource.id.deviceId ) {
+				events.push( JSON.stringify( {
+					event: event.type,
+					source: event.resource.id
+				} ) );
+			}
+		}
 
-				if ( event.resource.id.path === url ) {
-					utils.assert( "ok", true, "Client: Resource found" );
+		function deleteListener( event ) {
+			events.push( JSON.stringify( {
+				event: event.type,
+				source: resource.id
+			} ) );
+		}
 
-					for ( index in device._resources ) {
-						if ( device._resources[ index ].id.path === url ) {
-							count++;
-						}
-					}
+		function devicechange( event ) {
+			if ( event.device.uuid === resource.id.deviceId ) {
+				events.push( JSON.stringify( {
+					event: event.type,
+					changeType: event.changeType,
+					source: { deviceId: event.device.uuid }
+				} ) );
+			}
+		}
 
-					utils.assert( "strictEqual", count, 1,
-						"Client: Resource present exactly once among resources" );
-					fulfill( event.resource );
-				}
-			};
+		function waitForEvents() {
 
-			device.addEventListener( "resourcefound", eventHandler );
-		} ),
-		device.findResources().then(
-			function() {
-				utils.assert( "ok", true, "Client: device.findResources() successful" );
-			} )
-	] ).then( function( results ) {
-		removeListener();
-		return results[ 0 ];
-	}, removeListener );
+			// Collect events for 5 more seconds before fulfilling the promise
+			setTimeout( function() {
+				doListeners( "remove" );
+				fulfill( { resource: resource, events: events.sort() } );
+			}, 2000 );
+		}
+
+		function doListeners( listenerOp ) {
+			if ( op === "enablePresence" ) {
+				device[ listenerOp + "EventListener" ]( "devicefound", devicefound );
+				device[ listenerOp + "EventListener" ]( "resourcefound", resourcefound );
+			} else {
+				resource[ listenerOp + "EventListener" ]( "delete", deleteListener );
+			}
+			device[ listenerOp + "EventListener" ]( "devicechange", devicechange );
+		}
+
+		doListeners( "add" );
+
+		if ( op ) {
+
+			// Issue an update() to trigger the desired presence op
+			resource.properties.op = op;
+			device.update( resource ).then( waitForEvents, reject );
+		} else {
+			waitForEvents();
+		}
+	} );
 }
 
-async.series( [
-	function resourceDiscovery( callback ) {
-		discoverTheResource().then(
-			function( resource ) {
-				theResource = resource;
-				utils.assert( "strictEqual", !!device._handles[ resource.id.deviceId ], true,
-					"Client: A presence handle is saved for the resource upon discovery" );
-				callback( null );
-			},
-			function( error ) {
-				callback( _.extend( error, { step: "first discovery" } ) );
-			} );
-	},
+function discoverResources() {
+	return new Promise( function( fulfill, reject ) {
+		var resourcefound,
+			resources = [],
+			teardown = function( error ) {
+				device.removeEventListener( "resourcefound", resourcefound );
+				if ( error ) {
+					reject( error );
+				} else {
 
-	function checkPresenceResponse( callback ) {
-		var sequence = [],
-			handler,
-			cleanup = function( error ) {
-				theResource.removeEventListener( "delete", handler );
-				device.addEventListener( "resourcefound", handler );
-				utils.assert( "deepEqual", sequence, [
-					"delete",
-					"resourcefound:" + theResource.id.deviceId + ":" + theResource.id.path
-				], "Client: presence response sequence is as expected" );
-				callback( error );
+					// Sort the resources to make sure they always appear in the same order
+					fulfill( resources.sort( function( leftResource, rightResource ) {
+						return leftResource.id.deviceId.localeCompare( rightResource.id.deviceId );
+					} ) );
+				}
+			};
+			resourcefound = function resourcefound( event ) {
+				if ( event.resource.id.path === "/a/" + uuid ) {
+					resources.push( event.resource );
+					if ( resources.length >= 2 ) {
+						teardown();
+					}
+				}
 			};
 
-		handler = function( event ) {
-			if ( event.type === "resourcefound" ) {
-				if ( event.resource.id.deviceId === theResource.id.deviceId &&
-						event.resource.id.path === theResource.id.path ) {
-					sequence.push( event.type + ":" + theResource.id.deviceId + ":" +
-						theResource.id.path );
-				}
-			} else {
-				sequence.push( event.type );
-			}
-			if ( sequence.length >= 2 ) {
-				cleanup();
-			}
-		};
+			device.addEventListener( "resourcefound", resourcefound );
+			device.findResources( { resourcePath: "/a/" + uuid } ).catch( teardown );
+	} );
+}
 
-		theResource.addEventListener( "delete", handler );
-		device.addEventListener( "resourcefound", handler );
+function performStep( resourceOp, expectation, message ) {
+	return function( resources ) {
 
-		// Start the presence cycling
-		theResource.properties.op = "cyclePresence";
-		device.update( theResource ).catch( cleanup );
-	}
+		return Promise.all( [
+			countEvents( resources[ 0 ], resourceOp ),
+			countEvents( resources[ 1 ], resourceOp )
+		] ).then( function( result ) {
+			utils.assert( "deepEqual",
+				[ result[ 0 ].events, result[ 1 ].events ], expectation( resources ), message );
 
-], function( error ) {
-	if ( error ) {
-		utils.die( "Client: " + error.step + " failed with " + error + " and result " +
-			error.result );
-	} else {
-		console.log( JSON.stringify( { killPeer: true } ) );
-		process.exit( 0 );
-	}
-} );
+			return discoverResources();
+		} );
+	};
+}
+
+function performSubscription( operation, resourceIndex ) {
+	return function issueSubscribeOperation( resources ) {
+		return Promise.all( [
+			Promise.resolve( resources ),
+			device[ operation ].apply( device,
+				( resourceIndex === undefined ? [] : [ resources[ resourceIndex ].id.deviceId ] ) )
+		] )
+		.then( function passOnResources( result ) {
+			return Promise.resolve( result[ 0 ] );
+		} );
+	};
+}
+
+discoverResources()
+	.then( performStep( "disablePresence",
+		function expectationForDisablePresenceWhileUnsubscribedFromAll() {
+			return [ [], [] ];
+		}, "Client: No events upon disablePresence() while not subscribed" ) )
+	.then( performStep( "enablePresence",
+		function expectationForEnablePresenceWhileUnsubscribedFromAll() {
+			return [ [], [] ];
+		}, "Client: No events upon enablePresence() while not subscribed" ) )
+	.then( performSubscription( "subscribe" ) )
+	.then( performStep( "disablePresence",
+		function expectationForDisablePresenceWhileSubscribedToAll( resources ) {
+			return [
+				[
+					JSON.stringify( { event: "devicechange", changeType: "changed",
+						source: { deviceId: resources[ 0 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "devicechange", changeType: "deleted",
+						source: { deviceId: resources[ 0 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "delete", source: resources[ 0 ].id } )
+				].sort(),
+				[
+					JSON.stringify( { event: "devicechange", changeType: "changed",
+						source: { deviceId: resources[ 1 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "devicechange", changeType: "deleted",
+						source: { deviceId: resources[ 1 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "delete", source: resources[ 1 ].id } )
+				].sort()
+			];
+		}, "Client: Events upon disablePresence() of both servers while subscribed are as " +
+			"expected" ) )
+	.then( performStep( "enablePresence",
+		function expectationForEnablePresenceWhileSubscribedToAll( resources ) {
+			return [
+				[
+					JSON.stringify( { event: "devicefound",
+						source: { deviceId: resources[ 0 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "devicechange", changeType: "added",
+						source: { deviceId: resources[ 0 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "resourcefound", source: resources[ 0 ].id } )
+				].sort(),
+				[
+					JSON.stringify( { event: "devicefound",
+						source: { deviceId: resources[ 1 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "devicechange", changeType: "added",
+						source: { deviceId: resources[ 1 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "resourcefound", source: resources[ 1 ].id } )
+				].sort()
+			];
+		}, "Client: Events upon enablePresence() of both servers while subscribed are as " +
+			"expected" ) )
+	.then( performSubscription( "unsubscribe", 0 ) )
+	.then( performStep( "disablePresence",
+		function expectationForDisablePresenceWithOneUnsubscribed( resources ) {
+			return [
+				[],
+				[
+					JSON.stringify( { event: "devicechange", changeType: "deleted",
+						source: { deviceId: resources[ 1 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "delete", source: resources[ 1 ].id } )
+				].sort()
+			];
+		}, "Client: Events upon disablePresence() with one server not subscribed are as " +
+			"expected" ) )
+	.then( performStep( "enablePresence",
+		function expectationForEnablePresenceWithOneUnsubscribed( resources ) {
+			return [
+				[],
+				[
+					JSON.stringify( { event: "devicefound",
+						source: { deviceId: resources[ 1 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "devicechange", changeType: "added",
+						source: { deviceId: resources[ 1 ].id.deviceId }
+					} ),
+					JSON.stringify( { event: "resourcefound", source: resources[ 1 ].id } )
+				].sort()
+			];
+		}, "Client: Events upon enablePresence() with one server not subscribed are as " +
+			"expected" ) )
+	.then(
+		function() {
+			console.log( JSON.stringify( { killPeer: true } ) );
+			process.exit( 0 );
+		},
+		function( error ) {
+		utils.die( ( "" + error ) );
+		} );
