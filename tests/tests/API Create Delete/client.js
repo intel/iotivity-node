@@ -14,7 +14,6 @@
 
 var remoteResource,
 	_ = require( "lodash" ),
-	async = require( "async" ),
 	utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )( "client" ),
 	uuid = process.argv[ 2 ],
@@ -22,7 +21,7 @@ var remoteResource,
 		id: {
 			path: "/a/new-resource"
 
-		// We will set deviceId once we know the id of the remote device
+			// We will set deviceId once we know the id of the remote device
 		},
 		discoverable: true,
 		properties: {
@@ -32,7 +31,7 @@ var remoteResource,
 		interfaces: [ "oic.if.baseline" ]
 	};
 
-console.log( JSON.stringify( { assertionCount: 5 } ) );
+console.log( JSON.stringify( { assertionCount: 7 } ) );
 
 function findResourceByUrl( url, deviceId ) {
 	return Promise.all( [
@@ -51,61 +50,65 @@ function findResourceByUrl( url, deviceId ) {
 	} );
 }
 
-async.series( [
-	function findTestServer( callback ) {
-		findResourceByUrl( "/a/" + uuid ).then(
-			function( resource ) {
-				remoteResource = resource;
+device.create( { id: {} } )
+	.then( function() {
+		utils.assert( "ok", false, "Client: Creating malformed resource has succeeded" );
+	}, function( error ) {
+		utils.assert( "strictEqual", ( "" + error ),
+			"Error: create: Invalid OicResourceInit",
+			"Client: Creating malformed resource has errored locally with the correct message" );
+		return findResourceByUrl( "/a/" + uuid );
+	} )
+	.then( function destinationDeviceFound( resource ) {
+		newRemoteResourceTemplate.id.deviceId = resource.id.deviceId;
+		return newRemoteResourceTemplate;
+	} )
+	.then( function createRemoteMalformedResource( template ) {
+		return new Promise( function( fulfill, reject ) {
+			var lowlevel = require( "bindings" )( "iotivity" );
+			var receptacle = {};
+			var result = lowlevel.OCDoResource( receptacle, lowlevel.OCMethod.OC_REST_POST,
+				"/a/crazy", device._devices[ template.id.deviceId ].address, null,
+				lowlevel.OCConnectivityType.CT_DEFAULT, lowlevel.OCQualityOfService.OC_HIGH_QOS,
+				function( handle, response ) {
+					utils.assert( "strictEqual", response.result,
+						lowlevel.OCStackResult.OC_STACK_ERROR,
+						"Client: Server sent OC_STACK_ERROR when creating invalid resource" );
+					fulfill( template );
+					return lowlevel.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
+				}, null, 0 );
 
-				// We know the id of the test server, so set it on the resource template
-				newRemoteResourceTemplate.id.deviceId = resource.id.deviceId;
-				callback();
-			}, callback );
+			if ( result !== lowlevel.OCStackResult.OC_STACK_OK ) {
+				reject( new Error( "Client: Request to create malformed resource failed" ) );
+			}
+		} );
+	} )
+	.then( function createRemoteResource( template ) {
+		return device.create( template );
+	} )
+	.then( function discoverNewlyCreatedResource( resource ) {
+		utils.assert( "ok", true, "Client: Creating remote resource has succeeded" );
+		remoteResource = resource;
+		return findResourceByUrl( "/a/new-resource", resource.deviceId );
+	} )
+	.then( function attemptToCreateDuplicateResource( resource ) {
+		utils.assert( "ok", true, "Client: Discovering remote resource has succeeded" );
+		utils.assert( "deepEqual", resource.id, remoteResource.id,
+			"Client: Discovered remote resource has the same id as the created resource" );
+		return device.create( newRemoteResourceTemplate );
+	} )
+	.then( function creatingDuplicateResourceHasSucceeded() {
+		return Promise.reject( new Error( "Server created duplicate resource" ) );
 	},
-
-	function createRemoteResource( callback ) {
-		device.create( newRemoteResourceTemplate ).then(
-			function( resource ) {
-
-				// Use the newly created remote resource instead of the initial resource that we
-				// used for locating the test server.
-				remoteResource = resource;
-				utils.assert( "ok", true, "Client: Creating remote resource has succeeded" );
-				callback();
-			}, callback );
-	},
-
-	function findRemoteResource( callback ) {
-		findResourceByUrl( "/a/new-resource", remoteResource.deviceId ).then(
-			function( resource ) {
-				utils.assert( "ok", true, "Client: Discovering remote resource has succeeded" );
-				utils.assert( "deepEqual", resource.id, remoteResource.id,
-					"Client: Discovered remote resource has the same id as the created resource" );
-				callback();
-			}, callback );
-	},
-
-	function createDuplicateRemoteResource( callback ) {
-		device.create( newRemoteResourceTemplate ).then(
-			function() {
-				callback( new Error( "Server created duplicate resource" ) );
-			}, function() {
-				utils.assert( "ok", true,
-					"Client: Creating a duplicate remote resource is not possible" );
-				callback();
-			} );
-	},
-
-	function deleteRemoteResource( callback ) {
-		device.delete( remoteResource.id ).then(
-			function() {
-				utils.assert( "ok", true, "Client: Deleting the remote resource has succeeded" );
-				console.log( JSON.stringify( { killPeer: true } ) );
-				process.exit( 0 );
-			}, callback );
-	}
-], function( error ) {
-	if ( error ) {
+	function deleteRemoteResource() {
+		utils.assert( "ok", true, "Client: Creating a duplicate remote resource is not possible" );
+		return device.delete( remoteResource.id );
+	} )
+	.then( function remoteResourceDeleted() {
+		utils.assert( "ok", true, "Client: Deleting the remote resource has succeeded" );
+		console.log( JSON.stringify( { killPeer: true } ) );
+		process.exit( 0 );
+	} )
+	.catch( function catchErrors( error ) {
 		utils.die( "Client: Error: " + error.message + " and result " + error.result );
-	}
-} );
+	} );

@@ -81,7 +81,7 @@ if test "x${DO_BUILD}x" = "xtruex"; then
 
 	cd ../../ || exit 1
 else
-	SOURCE=$(ls -d ./depbuild/iotivity*)
+	SOURCE=$(ls -d ./depbuild/iotivity* | while read; do if test -d "${REPLY}"; then echo "${REPLY}"; break; fi; done )
 fi
 
 SOURCE="${SOURCE}" PREFIX="$(pwd)/deps/iotivity" INSTALL_PC="${DO_PC}" "$(pwd)/install.sh" || exit 1

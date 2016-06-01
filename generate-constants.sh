@@ -32,7 +32,7 @@
 parseFileForConstants() { # $1: filename
 	grep '^#define' < "$1" | \
 	awk '{
-		if ( NF > 2 ) {
+		if ( NF > 2 && $2 !~ /[()]/ ) {
 			print( "SET_CONSTANT_" ( ( substr($3, 1, 1) == "\"" ) ? "STRING": "NUMBER" ) " " $2 );
 		}
 	}' | \

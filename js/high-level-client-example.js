@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var observationCount = 0,
-	device = require( "iotivity-node" )( "client" );
+var device,
+	observationCount = 0;
+
+console.log( "Acquiring OCF device" );
+device = require( "iotivity-node" )( "client" );
 
 // Add a listener that will receive the results of the discovery
 device.addEventListener( "resourcefound", function( event ) {
@@ -38,6 +41,8 @@ device.addEventListener( "resourcefound", function( event ) {
 		event.resource.addEventListener( "change", resourceUpdate );
 	}
 } );
+
+console.log( "Issuing discovery request" );
 device.findResources().catch( function( error ) {
 	console.error( error.stack ? error.stack : ( error.message ? error.message : error ) );
 	process.exit( 1 );

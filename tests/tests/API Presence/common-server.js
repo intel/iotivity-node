@@ -12,45 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+module.exports = function( serverIndex ) {
+
 var theResource,
 	requestCount = 0,
 	utils = require( "../../assert-to-console" ),
 	uuid = process.argv[ 2 ],
 	device = require( "../../../index" )( "server" );
 
-console.log( JSON.stringify( { assertionCount: 5 } ) );
+console.log( JSON.stringify( { assertionCount: 8 } ) );
 
-utils.assert( "ok", true, "Server: device configured successfully" );
+utils.assert( "ok", true, "Server " + serverIndex + ": device configured successfully" );
 
 device.addEventListener( "updaterequest", function( request ) {
 	requestCount++;
 
-	if ( request.res.op === "cyclePresence" ) {
-		setTimeout( function() {
-			device.disablePresence().then(
-				function() {
-					utils.assert( "ok", true,
-						"Server: device.disablePresence() successful" );
-				},
-				function( error ) {
-					utils.assert( "ok", false,
-						"Server: device.disablePresence() failed with: " + error );
-				} );
-			setTimeout( function() {
-				device.enablePresence().then(
-					function() {
-						utils.assert( "ok", true,
-							"Server: device.enablePresence() successful" );
-					},
-					function( error ) {
-						utils.assert( "ok", false,
-							"Server: device.enablePresence() failed with: " + error );
-					} );
-			}, 5000 );
-		}, 5000 );
+	function sendResponse( error ) {
+		utils.assert( "strictEqual", ( error ? ( "" + error ) : "" ), "", "Server " +
+			serverIndex + ": " + request.res.op + "()" );
+		request[ error ? "sendError" : "sendResponse" ]( error || null )
+			.catch( function( error ) {
+				utils.die( "Server " + serverIndex + ": Failed to deliver update response: " +
+				( "" + error ) + ", and result " + error.result );
+			} );
 	}
 
-	request.sendResponse( null );
+	device[ request.res.op ]().then( sendResponse, sendResponse );
 } );
 
 device.enablePresence().then(
@@ -65,30 +52,34 @@ device.enablePresence().then(
 		} ).then(
 			function( resource ) {
 				theResource = resource;
-				utils.assert( "ok", true, "Server: device.register() successful" );
+				utils.assert( "ok", true, "Server " + serverIndex +
+					": device.register() successful" );
 
 				// Signal to the test suite that we're ready for the client
 				console.log( JSON.stringify( { ready: true } ) );
 			},
 			function( error ) {
 				utils.assert( "ok", false,
-					"Server: device.register() failed with: " + error );
+					"Server " + serverIndex + ": device.register() failed with: " + error );
 			} );
 	}, function( error ) {
 		utils.assert( "ok", false,
-			"Server: device.enablePresence() failed with: " + error );
+			"Server " + serverIndex + ": device.enablePresence() failed with: " + error );
 	} );
 
 // Cleanup on SIGINT
 process.on( "SIGINT", function() {
 	device.unregister( theResource ).then(
 		function() {
-			utils.assert( "ok", true, "Server: device.unregister() successful" );
+			utils.assert( "ok", true, "Server " + serverIndex +
+				": device.unregister() successful" );
 			process.exit( 0 );
 		},
 		function( error ) {
 			utils.assert( "ok", false,
-				"Server: device.unregister() failed with: " + error );
+				"Server " + serverIndex + ": device.unregister() failed with: " + error );
 			process.exit( 0 );
 		} );
 } );
+
+};
