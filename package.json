@@ -11,7 +11,7 @@
     "iot"
   ],
   "scripts": {
-    "ci": "TESTING=true npm install && grunt ocf-suite testsuite testdist --ci",
+    "ci": "TESTING=true npm install && grunt testsuite ocf-suite testdist --ci",
     "ci-basic": "TESTING=true npm install && grunt testsuite testdist --suites='Load Library.js' --ci",
     "ci-lint": "./dist.sh -r && grunt lint",
     "test": "grunt test"

@@ -18,8 +18,14 @@ var _ = require( "lodash" ),
 	path = require( "path" );
 
 grunt.task.registerTask( "ocf-suite", "Run the OCF test suite", function() {
+	var testSuite;
 	var done = this.async();
-	var testSuite = require( "ocf-test-suite" );
+
+	if ( typeof Promise === "undefined" ) {
+		return done();
+	}
+
+	testSuite = require( "ocf-test-suite" );
 
 	_.extend( testSuite, {
 		defaultCallbacks: _.extend( testSuite.defaultCallbacks, {
