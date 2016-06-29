@@ -16,6 +16,7 @@ var _ = require( "lodash" );
 var utils = require( "../../assert-to-console" );
 var oic = require( "../../../index" )( "client" );
 var uuid = process.argv[ 2 ];
+
 var expectedDeviceInfo = {
 
 	// The uuid field will be set to the deviceId when we know the deviceId
@@ -34,7 +35,7 @@ var expectedPlatformInfo = {
 	supportUrl: "supportUrl:" + uuid
 };
 
-console.log( JSON.stringify( { assertionCount: 4 } ) );
+console.log( JSON.stringify( { assertionCount: 34 } ) );
 
 new Promise( function findTheDeviceId( fulfill, reject ) {
 	var teardown;
@@ -56,6 +57,14 @@ new Promise( function findTheDeviceId( fulfill, reject ) {
 	oic.findResources( { resourcePath: "/a/" + uuid } ).catch( teardown );
 } ).then( function getDeviceInfo( deviceId ) {
 	return oic.getDeviceInfo( deviceId ).then( function assertDeviceInfo( deviceInfo ) {
+		utils.assertProperties( "Client: retrieved OicDevice", deviceInfo, [
+			{ name: "uuid", type: "string" },
+			{ name: "url", type: "string" },
+			{ name: "name", type: "string" },
+			{ name: "dataModels", type: "string" },
+			{ name: "coreSpecVersion", type: "string" },
+			{ name: "role", type: "string" }
+		] );
 		utils.assert( "deepEqual", deviceInfo, expectedDeviceInfo,
 			"Client: The retrieved device information is as expected" );
 		return deviceId;
@@ -64,6 +73,17 @@ new Promise( function findTheDeviceId( fulfill, reject ) {
 	return oic.getPlatformInfo( deviceId ).then( function assertPlatformInfo( platformInfo ) {
 
 		// Convert the manufactureDate to a timestamp for unambiguous comparison
+		utils.assertProperties( "Client: retrieved OicPlatform", platformInfo, [
+			{ name: "id", type: "string" },
+			{ name: "osVersion", type: "string" },
+			{ name: "model", type: "string" },
+			{ name: "manufacturerName", type: "string" },
+			{ name: "manufacturerUrl", type: "string" },
+			{ name: "manufactureDate", type: "object" },
+			{ name: "platformVersion", type: "string" },
+			{ name: "firmwareVersion", type: "string" },
+			{ name: "supportUrl", type: "string" }
+		] );
 		utils.assert( "deepEqual", _.extend( platformInfo, {
 			manufactureDate: new Date( platformInfo.manufactureDate ).getTime()
 		} ), expectedPlatformInfo, "Client: The retrieved platform information is as expected" );

@@ -34,7 +34,10 @@ console.log( JSON.stringify( { assertionCount: 4 } ) );
 
 try {
 	oic.device = _.extend( {}, oic.device, {
-		name: "API Device Info Server " + uuid
+		name: "API Device Info Server " + uuid,
+		coreSpecVersion: "test.0.0.1",
+		dataModels: [ "blah.1.1.1" ],
+		url: "http://example.com/"
 	} );
 } catch ( anError ) {
 	theError = anError;

@@ -38,5 +38,31 @@ module.exports = {
 	die: function( message ) {
 		console.log( JSON.stringify( { teardown: true, message: message, isError: true } ) );
 		process.exit( 1 );
+	},
+
+	// ObjectName: A string describing the object - for example "OicDiscovery"
+	// Object: The object to be examined
+	// Properties: An array of objects containing two properties:
+	//	name: The name of the property which must be present on object
+	//	type: The name of the type the property must have
+	// For example:
+	//   assertProperties( "OicDevice", device, [
+	//	 { name: "name", type: "string" },
+	//	 { name: "uuid", type: "string" },
+	//	 ...
+	//   ] );
+	assertProperties: function( objectName, object, properties ) {
+		var index;
+		for ( index in properties ) {
+			this.assert( "ok", properties[ index ].name in object,
+				objectName + " has " + properties[ index ].name );
+			if ( properties[ index ].type ) {
+				this.assert( "strictEqual", typeof object[ properties[ index ].name ],
+					properties[ index ].type,
+					objectName + "." + properties[ index ].name + " is a " +
+						properties[ index ].type );
+			}
+
+		}
 	}
 };

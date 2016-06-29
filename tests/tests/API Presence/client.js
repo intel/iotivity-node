@@ -16,7 +16,13 @@ var utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )( "client" ),
 	uuid = process.argv[ 2 ];
 
-console.log( JSON.stringify( { assertionCount: 8 } ) );
+console.log( JSON.stringify( { assertionCount: 13 } ) );
+
+utils.assertProperties( "OicPresence", device, [
+	{ name: "subscribe", type: "function" },
+	{ name: "unsubscribe", type: "function" },
+	{ name: "ondevicechange" }
+] );
 
 // Tell the resource's server to perform an operation (either disablePresence or enablePresence)
 // or, if op is undefined, then do not communicate with the server. Either way, wait five seconds
@@ -36,7 +42,7 @@ function countEvents( resource, op ) {
 
 		function resourcefound( event ) {
 			if ( event.resource.id.path === resource.id.path &&
-				event.resource.id.deviceId === resource.id.deviceId ) {
+					event.resource.id.deviceId === resource.id.deviceId ) {
 				events.push( JSON.stringify( {
 					event: event.type,
 					source: event.resource.id
@@ -109,17 +115,17 @@ function discoverResources() {
 					} ) );
 				}
 			};
-			resourcefound = function resourcefound( event ) {
-				if ( event.resource.id.path === "/a/" + uuid ) {
-					resources.push( event.resource );
-					if ( resources.length >= 2 ) {
-						teardown();
-					}
+		resourcefound = function resourcefound( event ) {
+			if ( event.resource.id.path === "/a/" + uuid ) {
+				resources.push( event.resource );
+				if ( resources.length >= 2 ) {
+					teardown();
 				}
-			};
+			}
+		};
 
-			device.addEventListener( "resourcefound", resourcefound );
-			device.findResources( { resourcePath: "/a/" + uuid } ).catch( teardown );
+		device.addEventListener( "resourcefound", resourcefound );
+		device.findResources( { resourcePath: "/a/" + uuid } ).catch( teardown );
 	} );
 }
 
@@ -145,9 +151,9 @@ function performSubscription( operation, resourceIndex ) {
 			device[ operation ].apply( device,
 				( resourceIndex === undefined ? [] : [ resources[ resourceIndex ].id.deviceId ] ) )
 		] )
-		.then( function passOnResources( result ) {
-			return Promise.resolve( result[ 0 ] );
-		} );
+			.then( function passOnResources( result ) {
+				return Promise.resolve( result[ 0 ] );
+			} );
 	};
 }
 
@@ -184,7 +190,7 @@ discoverResources()
 				].sort()
 			];
 		}, "Client: Events upon disablePresence() of both servers while subscribed are as " +
-			"expected" ) )
+		"expected" ) )
 	.then( performStep( "enablePresence",
 		function expectationForEnablePresenceWhileSubscribedToAll( resources ) {
 			return [
@@ -208,7 +214,7 @@ discoverResources()
 				].sort()
 			];
 		}, "Client: Events upon enablePresence() of both servers while subscribed are as " +
-			"expected" ) )
+		"expected" ) )
 	.then( performSubscription( "unsubscribe", 0 ) )
 	.then( performStep( "disablePresence",
 		function expectationForDisablePresenceWithOneUnsubscribed( resources ) {
@@ -222,7 +228,7 @@ discoverResources()
 				].sort()
 			];
 		}, "Client: Events upon disablePresence() with one server not subscribed are as " +
-			"expected" ) )
+		"expected" ) )
 	.then( performStep( "enablePresence",
 		function expectationForEnablePresenceWithOneUnsubscribed( resources ) {
 			return [
@@ -238,12 +244,12 @@ discoverResources()
 				].sort()
 			];
 		}, "Client: Events upon enablePresence() with one server not subscribed are as " +
-			"expected" ) )
+		"expected" ) )
 	.then(
 		function() {
 			console.log( JSON.stringify( { killPeer: true } ) );
 			process.exit( 0 );
 		},
 		function( error ) {
-		utils.die( ( "" + error ) );
+			utils.die( ( "" + error ) );
 		} );
