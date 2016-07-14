@@ -77,6 +77,9 @@ if test "x${DO_BUILD}x" = "xtruex"; then
 
 			# iotivity wants us to clone this before it'll do anything
 			git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor
+			cd extlibs/tinycbor/tinycbor
+			git checkout dbc0129400f22087d4be3396cc44ea922d2f07f8
+			cd -
 			scons $SCONS_FLAGS liboctbstack libconnectivity_abstraction libcoap c_common libocsrm routingmanager || { cat config.log; exit 1; }
 
 	cd ../../ || exit 1
