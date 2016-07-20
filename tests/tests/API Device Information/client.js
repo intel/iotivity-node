@@ -21,7 +21,9 @@ var expectedDeviceInfo = {
 
 	// The uuid field will be set to the deviceId when we know the deviceId
 	name: "API Device Info Server " + uuid,
-	coreSpecVersion: "core.1.0.0"
+	coreSpecVersion: "test.0.0.1",
+	role: "server",
+	dataModels: [ "blah.1.1.1" ]
 };
 var expectedPlatformInfo = {
 	id: "platform " + uuid,
@@ -61,10 +63,14 @@ new Promise( function findTheDeviceId( fulfill, reject ) {
 			{ name: "uuid", type: "string" },
 			{ name: "url", type: "string" },
 			{ name: "name", type: "string" },
-			{ name: "dataModels", type: "string" },
+			{ name: "dataModels", type: "array" },
 			{ name: "coreSpecVersion", type: "string" },
 			{ name: "role", type: "string" }
 		] );
+
+		// deviceInfo.url contains the host/port of the server, which changes from instance to
+		// instance, so we can't really asser it. Thus, we must remove it from the expectation
+		delete deviceInfo.url;
 		utils.assert( "deepEqual", deviceInfo, expectedDeviceInfo,
 			"Client: The retrieved device information is as expected" );
 		return deviceId;
@@ -107,6 +113,10 @@ new Promise( function findTheDeviceId( fulfill, reject ) {
 		oic.addEventListener( "devicefound", devicefound );
 		oic.findDevices().catch( teardown );
 	} ).then( function assertDiscoveredDeviceInfo( deviceInfo ) {
+
+		// deviceInfo.url contains the host/port of the server, which changes from instance to
+		// instance, so we can't really asser it. Thus, we must remove it from the expectation
+		delete deviceInfo.url;
 		utils.assert( "deepEqual", deviceInfo, expectedDeviceInfo,
 			"Client: The discovered device information is as expected" );
 	} );

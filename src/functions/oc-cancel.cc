@@ -31,7 +31,7 @@ using namespace node;
 
 NAN_METHOD(bind_OCCancel) {
   VALIDATE_ARGUMENT_COUNT(info, 3);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
   VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 2, IsArray);
 
@@ -40,7 +40,7 @@ NAN_METHOD(bind_OCCancel) {
       {OC_INVALID_ID, 0, 0, {0}}};
   uint8_t numberOfOptions = 0;
 
-  if (!c_OCDoHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCDoHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 

@@ -17,13 +17,16 @@
 #ifndef __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 #define __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 
+#include <string>
 #include <v8.h>
 #include <nan.h>
 
-#define VALIDATE_CALLBACK_RETURN_VALUE_TYPE(value, typecheck, message)        \
-  if (!value->typecheck()) {                                                  \
-    Nan::ThrowTypeError(                                                      \
-        message " callback return value type must satisfy " #typecheck "()"); \
+#define VALIDATE_CALLBACK_RETURN_VALUE_TYPE(value, typecheck, message) \
+  if (!value->typecheck()) {                                           \
+    Nan::ThrowTypeError(                                               \
+        (std::string(message) +                                        \
+         " callback return value type must satisfy " #typecheck "()")  \
+            .c_str());                                                 \
   }
 
 #define VALIDATE_ARGUMENT_COUNT(args, length)                               \
@@ -37,18 +40,20 @@
                                "()");                                         \
   }
 
-#define VALIDATE_VALUE_TYPE(value, typecheck, message, failReturn) \
-  if (!(value)->typecheck()) {                                     \
-    Nan::ThrowTypeError(message " must satisfy " #typecheck "()"); \
-    return failReturn;                                             \
+#define VALIDATE_VALUE_TYPE(value, typecheck, message, failReturn)          \
+  if (!(value)->typecheck()) {                                              \
+    Nan::ThrowTypeError(                                                    \
+        (std::string(message) + " must satisfy " #typecheck "()").c_str()); \
+    return failReturn;                                                      \
   }
 
-#define VALIDATE_VALUE_TYPE_OR_FREE(value, typecheck, message, failReturn, \
-                                    pointer_to_free, free_function)        \
-  if (!(value)->typecheck()) {                                             \
-    Nan::ThrowTypeError(message " must satisfy " #typecheck "()");         \
-    free_function((pointer_to_free));                                      \
-    return failReturn;                                                     \
+#define VALIDATE_VALUE_TYPE_OR_FREE(value, typecheck, message, failReturn,  \
+                                    pointer_to_free, free_function)         \
+  if (!(value)->typecheck()) {                                              \
+    Nan::ThrowTypeError(                                                    \
+        (std::string(message) + " must satisfy " #typecheck "()").c_str()); \
+    free_function((pointer_to_free));                                       \
+    return failReturn;                                                      \
   }
 
 #define VALIDATE_ARGUMENT_TYPE_OR_NULL(args, index, typecheck)                \

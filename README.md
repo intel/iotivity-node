@@ -13,7 +13,7 @@ This project provides a Javascript API for [OCF][] functionality. The API follow
 ### For the impatient:
 0. Make sure [node][] is up and running
 0. Install the following packages, which your distribution should provide:
-    0. unzip, scons, wget, git, and make
+    0. unzip, scons, wget, git, patch, tar, and make
     0. Development headers for boost, libuuid, glib2, and libcurl
 
         boost and libcurl are needed during the build process, but iotivity-node does not ultimately depend on either.
@@ -35,7 +35,7 @@ var device = require( "iotivity-node" )();
 will give you an instance of OicDevice as described in the JS API spec.
 
 ### In more detail:
-iotivity-node depends on [iotivity][] proper. It has been tested against [1.1.0][] on Linux. iotivity depends on development headers for libuuid and boost.
+iotivity-node depends on [iotivity][] proper. It has been tested against [1.1.1][] on Linux. iotivity depends on development headers for libuuid and boost.
 
 iotivity-node requires a compiler that implements the C++11 standard.
 
@@ -107,11 +107,11 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 
 [iotivity]: http://iotivity.org/
 [node]: https://nodejs.org/
-[1.1.0]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=1.1.0
-[snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=1.1.0;sf=tgz
+[1.1.1]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=1.1.1
+[snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=1.1.1;sf=tgz
 [scons]: http://www.scons.org/
-[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.0-5/install.sh
-[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.0-5/octbstack.pc.in
+[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.1-0/install.sh
+[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.1-0/octbstack.pc.in
 [iotivity wiki]: https://wiki.iotivity.org/faq_s
 [video]: https://www.youtube.com/watch?v=95VTB_qgYfw
 [specification]: https://github.com/01org/iot-js-api-test-suite/blob/master/api/oic.md

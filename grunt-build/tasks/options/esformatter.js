@@ -17,5 +17,9 @@ module.exports = {
 		preset: "jquery",
 		plugins: [ "esformatter-jquery-chain" ]
 	},
-	src: require( "../../js-files" )
+	src: []
+		.concat( require( "../../js-build-files" ) )
+		.concat( require( "../../js-example-files" ) )
+		.concat( require( "../../js-lib-files" ) )
+		.concat( require( "../../js-test-files" ) )
 };

@@ -29,16 +29,16 @@ v8::Local<v8::Object> js_OCDeviceInfo(OCDeviceInfo *info) {
   Local<Object> returnValue = Nan::New<Object>();
 
   SET_STRING_IF_NOT_NULL(returnValue, info, deviceName);
+  SET_STRING_IF_NOT_NULL(returnValue, info, specVersion);
   ADD_STRING_ARRAY(returnValue, info, types);
+  ADD_STRING_ARRAY(returnValue, info, dataModelVersions);
 
   return returnValue;
 }
 
-void c_OCDeviceInfoFreeMembers(OCDeviceInfo *info) {
+void c_freeLinkedList(OCStringLL *list) {
   OCStringLL *item, *nextItem;
-
-  free(info->deviceName);
-  for (item = info->types; item;) {
+  for (item = list; item;) {
     nextItem = item->next;
     free(item->value);
     free(item);
@@ -46,42 +46,71 @@ void c_OCDeviceInfoFreeMembers(OCDeviceInfo *info) {
   }
 }
 
+void c_OCDeviceInfoFreeMembers(OCDeviceInfo *info) {
+  free(info->deviceName);
+  free(info->specVersion);
+  c_freeLinkedList(info->types);
+  c_freeLinkedList(info->dataModelVersions);
+}
+
+bool c_StringArrayFromProperty(Local<Object> source, const char *propertyName,
+                               OCStringLL **destination) {
+  Local<Value> sourceValue =
+      Nan::Get(source, Nan::New(propertyName).ToLocalChecked())
+          .ToLocalChecked();
+  VALIDATE_VALUE_TYPE(sourceValue, IsArray,
+                      (std::string("device info ") + propertyName).c_str(),
+                      false);
+  Local<Array> jsArray = Local<Array>::Cast(sourceValue);
+
+  size_t index, length = jsArray->Length();
+  OCStringLL *local = 0, **previous = &local;
+
+  for (index = 0; index < length; index++, previous = &((*previous)->next)) {
+    Local<Value> itemValue = Nan::Get(jsArray, index).ToLocalChecked();
+    VALIDATE_VALUE_TYPE_OR_FREE(
+        itemValue, IsString,
+        (std::string("device info ") + propertyName + " list item").c_str(),
+        false, local, c_freeLinkedList);
+
+    (*previous) = new OCStringLL;
+    if (!(*previous)) {
+      goto freeAndQuit;
+    }
+    (*previous)->next = 0;
+    (*previous)->value = strdup((const char *)*(String::Utf8Value(itemValue)));
+    if (!(*previous)->value) {
+      goto freeAndQuit;
+    }
+  }
+
+  *destination = local;
+  return true;
+freeAndQuit:
+  c_freeLinkedList(local);
+  return false;
+}
+
 bool c_OCDeviceInfo(Local<Object> deviceInfo, OCDeviceInfo *info) {
-  OCDeviceInfo local = {0, 0};
-  OCStringLL *newType = 0;
+  OCDeviceInfo local = {
+      .deviceName = 0, .types = 0, .specVersion = 0, .dataModelVersions = 0};
 
   VALIDATE_AND_ASSIGN_STRING(&local, deviceName, deviceInfo,
                              c_OCDeviceInfoFreeMembers, false);
 
-  // Make sure the "types" property is an array
-  Local<Value> typesValue =
-      Nan::Get(deviceInfo, Nan::New("types").ToLocalChecked()).ToLocalChecked();
-  VALIDATE_VALUE_TYPE_OR_FREE(typesValue, IsArray, "device info types list",
-                              false, &local, c_OCDeviceInfoFreeMembers);
-  Local<Array> jsTypes = Local<Array>::Cast(typesValue);
-  size_t index, length = jsTypes->Length();
+  VALIDATE_AND_ASSIGN_STRING(&local, specVersion, deviceInfo,
+                             c_OCDeviceInfoFreeMembers, false);
 
-  for (index = 0; index < length; index++) {
-    // Make sure an individual type is a string
-    Local<Value> itemValue = Nan::Get(jsTypes, index).ToLocalChecked();
-    VALIDATE_VALUE_TYPE_OR_FREE(itemValue, IsString,
-                                "device info types list item", false, &local,
-                                c_OCDeviceInfoFreeMembers);
+  // Make sure the "types" property is an array and copy it to the C structure
+  if (!c_StringArrayFromProperty(deviceInfo, "types", &(local.types))) {
+    c_OCDeviceInfoFreeMembers(&local);
+    return false;
+  }
 
-    // Copy the string to the C linked list
-    newType = new OCStringLL;
-    if (newType) {
-      newType->next = local.types;
-      local.types = newType;
-      newType->value = strdup((const char *)*(String::Utf8Value(itemValue)));
-      if (newType->value) {
-        // If copying succeeds we move on to the next type in the list
-        continue;
-      }
-    }
-
-    // If copying fails we bail
-    Nan::ThrowError("Failed to allocate device info types list item");
+  // Make sure the "dataModelVersion" property is an array and copy it to the C
+  // structure
+  if (!c_StringArrayFromProperty(deviceInfo, "dataModelVersions",
+                                 &(local.dataModelVersions))) {
     c_OCDeviceInfoFreeMembers(&local);
     return false;
   }

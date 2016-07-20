@@ -73,13 +73,13 @@ NAN_METHOD(bind_OCCreateResource) {
 
 NAN_METHOD(bind_OCDeleteResource) {
   VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
 
   OCStackResult returnValue;
   OCResourceHandle handle = 0;
 
   // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 
@@ -100,13 +100,13 @@ NAN_METHOD(bind_OCDeleteResource) {
 
 NAN_METHOD(bind_OCBindResourceHandler) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsFunction);
 
   OCResourceHandle handle = 0;
 
   // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 
@@ -135,15 +135,17 @@ NAN_METHOD(bind_OCBindResourceHandler) {
 
 NAN_METHOD(bind_OCBindResource) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
 
   OCResourceHandle collectionHandle = 0, resourceHandle = 0;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &collectionHandle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(),
+                          &collectionHandle)) {
     return;
   }
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[1]), &resourceHandle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[1]).ToLocalChecked(),
+                          &resourceHandle)) {
     return;
   }
 
@@ -153,12 +155,12 @@ NAN_METHOD(bind_OCBindResource) {
 
 NAN_METHOD(bind_OCBindResourceInterfaceToResource) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
 
   OCResourceHandle handle = 0;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 
@@ -168,12 +170,12 @@ NAN_METHOD(bind_OCBindResourceInterfaceToResource) {
 
 NAN_METHOD(bind_OCBindResourceTypeToResource) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
 
   OCResourceHandle handle = 0;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 
@@ -185,11 +187,11 @@ NAN_METHOD(bind_OCBindResourceTypeToResource) {
 // annotation.
 NAN_METHOD(bind_OCGetResourceHandler) {
   VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
 
   OCResourceHandle handle = 0;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 

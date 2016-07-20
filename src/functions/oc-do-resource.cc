@@ -33,7 +33,7 @@ using namespace node;
 
 typedef struct CallbackInfo {
   Nan::Callback *callback;
-  Nan::Persistent<Array> *handle;
+  Nan::Persistent<Object> *handle;
 } CallbackInfo;
 
 static void deleteNanCallback(CallbackInfo *callback) {
@@ -43,7 +43,7 @@ static void deleteNanCallback(CallbackInfo *callback) {
 
   if (callback->handle) {
     // Mark the handle as stale
-    Local<Array> handle = Nan::New(*(callback->handle));
+    Local<Object> handle = Nan::New(*(callback->handle));
     Nan::Set(handle, Nan::New("stale").ToLocalChecked(), Nan::True());
 
     delete callback->handle;
@@ -57,8 +57,9 @@ static void deleteNanCallback(CallbackInfo *callback) {
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
   // Call the JS Callback
-  Local<Value> jsCallbackArguments[2] = {js_OCDoHandle(handle),
-                                         js_OCClientResponse(clientResponse)};
+  Local<Value> jsCallbackArguments[2] = {
+      Nan::New<Object>(*((CallbackInfo *)context)->handle),
+      js_OCClientResponse(clientResponse)};
 
   Local<Value> returnValue =
       (((CallbackInfo *)context)->callback)->Call(2, jsCallbackArguments);
@@ -155,9 +156,9 @@ NAN_METHOD(bind_OCDoResource) {
   // the data on our behalf.
 
   if (handle) {
-    Local<Array> handleArray = js_OCDoHandle(handle);
+    Local<Object> handleArray = js_OCDoHandle(handle);
 
-    callbackInfo->handle = new Nan::Persistent<Array>(handleArray);
+    callbackInfo->handle = new Nan::Persistent<Object>(handleArray);
     info[0]->ToObject()->Set(Nan::New("handle").ToLocalChecked(), handleArray);
   }
 

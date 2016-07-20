@@ -22,7 +22,7 @@ device.device = _.extend( device.device, {
 device.platform = _.extend( device.platform, {
 	manufacturerName: "Intel",
 	manunfactureDate: new Date( "Wed Sep 23 10:04:17 EEST 2015" ),
-	platformVersion: "1.0.1",
+	platformVersion: "1.1.1",
 	firmwareVersion: "0.0.1",
 	supportUrl: "http://example.com/"
 } );

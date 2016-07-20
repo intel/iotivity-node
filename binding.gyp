@@ -63,6 +63,7 @@
 					"-lcoap",
 					"-lc_common",
 					"-lroutingmanager",
+					"-llogger",
 					"-locsrm"
 				]
 			} ],

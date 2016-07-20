@@ -18,11 +18,14 @@
 # assumes the package version is of the form major.minor.patch[-dev-commitid]. It grabs whatever
 # follows a zero-or-more-length-series of tokens that end in a dash.
 if test "x${CSDK_REVISION}x" = "xx"; then
-	CSDK_REVISION="$(node -e '
-		console.log( require( "./package.json" ).version
+	CSDK_REVISION="$(node -p '
+		require( "./package.json" ).version
 			.replace( /-[0-9]*$/, "" )
-			.replace( /^([^-]*-)*/, "" ) );
+			.replace(  /^([^-]*-)pre-(.*$)/, "$2" )
 	')"
+
+	# The second .replace() will not match anything if it's not a commitid-version, so we will be
+	# left with the exact upstream version
 fi
 
 DO_BUILD=true
@@ -80,7 +83,7 @@ if test "x${DO_BUILD}x" = "xtruex"; then
 			cd extlibs/tinycbor/tinycbor
 			git checkout dbc0129400f22087d4be3396cc44ea922d2f07f8
 			cd -
-			scons $SCONS_FLAGS liboctbstack libconnectivity_abstraction libcoap c_common libocsrm routingmanager || { cat config.log; exit 1; }
+			scons $SCONS_FLAGS logger liboctbstack libconnectivity_abstraction libcoap c_common libocsrm routingmanager || { cat config.log; exit 1; }
 
 	cd ../../ || exit 1
 else

@@ -1,0 +1,10 @@
+{
+	"extends": "eslint-config-jquery",
+	"root": true,
+	"globals": {
+		"Promise": false
+	},
+	"env": {
+		"node": true
+	}
+}

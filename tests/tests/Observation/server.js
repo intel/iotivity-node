@@ -41,10 +41,10 @@ function cleanup() {
 		"Server: OCNotifyAllObservers succeeded " + notificationCount + " times" );
 
 	cleanupResult = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
-	testUtils.stackOKOrDie( "Server", "OCDeleteResource", result );
+	testUtils.stackOKOrDie( "Server", "OCDeleteResource", cleanupResult );
 
 	cleanupResult = iotivity.OCStop();
-	if ( testUtils.stackOKOrDie( "Server", "OCStop", result ) ) {
+	if ( testUtils.stackOKOrDie( "Server", "OCStop", cleanupResult ) ) {
 		console.log( JSON.stringify( { killPeer: true } ) );
 		process.exit( 0 );
 	}

@@ -284,9 +284,6 @@ static Local<Object> js_OCDiscoveryPayload(OCDiscoveryPayload *payload) {
 static Local<Object> js_OCDevicePayload(OCDevicePayload *payload) {
   Local<Object> returnValue = Nan::New<Object>();
 
-  Nan::Set(returnValue, Nan::New("type").ToLocalChecked(),
-           Nan::New(payload->base.type));
-
   if (payload->sid) {
     Nan::Set(returnValue, Nan::New("sid").ToLocalChecked(),
              js_SID(payload->sid));
@@ -294,7 +291,10 @@ static Local<Object> js_OCDevicePayload(OCDevicePayload *payload) {
 
   SET_STRING_IF_NOT_NULL(returnValue, payload, deviceName);
   SET_STRING_IF_NOT_NULL(returnValue, payload, specVersion);
-  SET_STRING_IF_NOT_NULL(returnValue, payload, dataModelVersion);
+
+  ADD_STRING_ARRAY(returnValue, payload, dataModelVersions);
+  ADD_STRING_ARRAY(returnValue, payload, interfaces);
+  ADD_STRING_ARRAY(returnValue, payload, types);
 
   return returnValue;
 }

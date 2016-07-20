@@ -57,9 +57,13 @@ module.exports = {
 			this.assert( "ok", properties[ index ].name in object,
 				objectName + " has " + properties[ index ].name );
 			if ( properties[ index ].type ) {
-				this.assert( "strictEqual", typeof object[ properties[ index ].name ],
+				this.assert( "strictEqual",
+					properties[ index ].type === "array" ?
+						( Array.isArray( object[ properties[ index ].name ] ) ?
+							"array" : "non-array" ) :
+						typeof object[ properties[ index ].name ],
 					properties[ index ].type,
-					objectName + "." + properties[ index ].name + " is a " +
+					objectName + "." + properties[ index ].name + " is of type " +
 						properties[ index ].type );
 			}
 

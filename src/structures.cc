@@ -33,8 +33,12 @@ using namespace node;
 Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
   Local<Object> jsRequest = Nan::New<Object>();
 
-  Nan::Set(jsRequest, Nan::New("resource").ToLocalChecked(),
-           js_OCResourceHandle(request->resource));
+  // The resource may be null if the request refers to a non-existing resource
+  // and is being passed to the default device entity handler
+  if (request->resource) {
+    Nan::Set(jsRequest, Nan::New("resource").ToLocalChecked(),
+             js_OCResourceHandle(request->resource));
+  }
 
   Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
            js_OCRequestHandle(request->requestHandle));

@@ -12,22 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var _ = require( "lodash" ),
-	commonJSHintOptions = require( "../../jshint-options.json" );
-
 module.exports = {
-	nonlib: {
-		options: commonJSHintOptions,
-		files: {
-			src: []
-				.concat( require( "../../js-example-and-test-files" ) )
-				.concat( require( "../../js-build-files" ) )
-		}
-	},
+	examples: { src: require( "../../js-example-files" ) },
+	tests: { src: require( "../../js-test-files" ) },
+
+	// The library and the build files must not use the global "console"
 	lib: {
-		options: _.extend( {}, commonJSHintOptions, { predef: [ "-console" ] } ),
-		files: {
-			src: require( "../../js-lib-files" )
-		}
+		options: {
+			rules: {
+				"no-restricted-globals": [ 2, "console" ]
+			}
+		},
+		src: require( "../../js-lib-files" )
+	},
+	build: {
+		options: {
+			rules: {
+				"no-restricted-globals": [ 2, "console" ]
+			}
+		},
+		src: require( "../../js-build-files" )
 	}
 };

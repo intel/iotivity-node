@@ -90,14 +90,14 @@ NAN_METHOD(bind_OCSetPlatformInfo) {
 
 NAN_METHOD(bind_OCGetNumberOfResourceInterfaces) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
 
   OCResourceHandle handle = 0;
   uint8_t interfaceCount = 0;
   OCStackResult result;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 
@@ -111,14 +111,14 @@ NAN_METHOD(bind_OCGetNumberOfResourceInterfaces) {
 
 NAN_METHOD(bind_OCGetNumberOfResourceTypes) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
 
   OCResourceHandle handle = 0;
   uint8_t typeCount = 0;
   OCStackResult result;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 
@@ -160,13 +160,14 @@ NAN_METHOD(bind_OCGetResourceHandle) {
   }
 }
 
-#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()                   \
-  OCResourceHandle handle = 0;                                     \
-  VALIDATE_ARGUMENT_COUNT(info, 2);                                \
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);                        \
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);                       \
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) { \
-    return;                                                        \
+#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()                     \
+  OCResourceHandle handle = 0;                                       \
+  VALIDATE_ARGUMENT_COUNT(info, 2);                                  \
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                         \
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);                         \
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), \
+                          &handle)) {                                \
+    return;                                                          \
   }
 
 NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
@@ -201,12 +202,13 @@ NAN_METHOD(bind_OCGetResourceTypeName) {
   GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(OCGetResourceTypeName);
 }
 
-#define LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE()             \
-  VALIDATE_ARGUMENT_COUNT(info, 1);                                \
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);                        \
-  OCResourceHandle handle = 0;                                     \
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) { \
-    return;                                                        \
+#define LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE()               \
+  VALIDATE_ARGUMENT_COUNT(info, 1);                                  \
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                         \
+  OCResourceHandle handle = 0;                                       \
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), \
+                          &handle)) {                                \
+    return;                                                          \
   }
 
 NAN_METHOD(bind_OCGetResourceProperties) {
@@ -229,16 +231,18 @@ NAN_METHOD(bind_OCGetResourceUri) {
 
 NAN_METHOD(bind_OCUnBindResource) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
 
   OCResourceHandle collectionHandle = 0, resourceHandle = 0;
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &collectionHandle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(),
+                          &collectionHandle)) {
     return;
   }
 
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[1]), &resourceHandle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[1]).ToLocalChecked(),
+                          &resourceHandle)) {
     return;
   }
 

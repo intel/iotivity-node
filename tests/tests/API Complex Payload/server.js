@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var requestPromise, resource,
+var requestPromise,
 	_ = require( "lodash" ),
 	async = require( "async" ),
 	uuid = process.argv[ 2 ],
@@ -71,7 +71,6 @@ async.series( [
 						} ) ).then( cleanup, cleanup );
 					} );
 
-				resource = theResource;
 				device.addEventListener( "retrieverequest", handler );
 				requestPromise = handler.promise;
 

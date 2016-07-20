@@ -12,8 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module.exports = {
-	js: {
-		src: require( "../../js-files" )
-	}
-};
+module.exports = [ "js/*.js" ];

@@ -14,6 +14,9 @@
 
 var intervalId,
 	handleReceptacle = {},
+
+	// This is the same value as server.get.js
+	sampleUri = "/a/iotivity-node-delete-sample",
 	iotivity = require( "iotivity-node/lowlevel" );
 
 console.log( "Starting OCF stack in server mode" );
@@ -21,21 +24,17 @@ console.log( "Starting OCF stack in server mode" );
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 
+iotivity.OCSetDeviceInfo( { deviceName: "server.get", types: [] } );
+iotivity.OCSetPlatformInfo( {
+	platformID: "server.get.sample",
+	manufacturerName: "iotivity-node"
+} );
+
 intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
 
-iotivity.OCSetDeviceInfo( {
-	dataModelVersions: [ "test.0.0.1" ],
-	deviceName: "server.discoverable",
-	types: []
-} );
-iotivity.OCSetPlatformInfo( {
-	platformID: "server.discoverable.sample",
-	manufacturerName: "iotivity-node"
-} );
-
-console.log( "Registering resources" );
+console.log( "Registering resource" );
 
 // Create a new resource
 iotivity.OCCreateResource(
@@ -45,27 +44,34 @@ iotivity.OCCreateResource(
 
 	"core.fan",
 	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
-	"/a/fan",
+	sampleUri,
 	function( flag, request ) {
 		console.log( "Entity handler called with flag = " + flag + " and the following request:" );
 		console.log( JSON.stringify( request, null, 4 ) );
-		return iotivity.OCEntityHandlerResult.OC_EH_OK;
-	},
-	iotivity.OCResourceProperty.OC_DISCOVERABLE );
 
-// Create a new resource
-iotivity.OCCreateResource(
+		// If we find the magic question in the request, we return the magic answer
+		if ( request && request.method === iotivity.OCMethod.OC_REST_DELETE ) {
 
-	// The bindings fill in this object
-	handleReceptacle,
+			var result = iotivity.OCDeleteResource( handleReceptacle.handle );
 
-	"core.light",
-	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
-	"/a/light",
-	function( flag, request ) {
-		console.log( "Entity handler called with flag = " + flag + " and the following request:" );
-		console.log( JSON.stringify( request, null, 4 ) );
-		return iotivity.OCEntityHandlerResult.OC_EH_OK;
+			console.log( "OCDeleteResource() has resulted in " + result );
+
+			iotivity.OCDoResponse( {
+				requestHandle: request.requestHandle,
+				resourceHandle: request.resource,
+				ehResult: result ?
+					iotivity.OCEntityHandlerResult.OC_EH_ERROR :
+					iotivity.OCEntityHandlerResult.OC_EH_RESOURCE_DELETED,
+				payload: null,
+				resourceUri: sampleUri,
+				sendVendorSpecificHeaderOptions: []
+			} );
+
+			return iotivity.OCEntityHandlerResult.OC_EH_OK;
+		}
+
+		// By default we error out
+		return iotivity.OCEntityHandlerResult.OC_EH_ERROR;
 	},
 	iotivity.OCResourceProperty.OC_DISCOVERABLE );
 
