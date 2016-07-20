@@ -38,22 +38,25 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
   Local<Value> requestHandle =
       Nan::Get(jsResponse, Nan::New("requestHandle").ToLocalChecked())
           .ToLocalChecked();
-  VALIDATE_VALUE_TYPE(requestHandle, IsArray,
+  VALIDATE_VALUE_TYPE(requestHandle, IsObject,
                       "entitiy handler response request handle", false);
-  if (!c_OCRequestHandle(Local<Array>::Cast(requestHandle),
+  if (!c_OCRequestHandle(Nan::To<Object>(requestHandle).ToLocalChecked(),
                          &(response.requestHandle))) {
     return false;
   }
 
   // resourceHandle
+  response.resourceHandle = 0;
   Local<Value> resourceHandle =
       Nan::Get(jsResponse, Nan::New("resourceHandle").ToLocalChecked())
           .ToLocalChecked();
-  VALIDATE_VALUE_TYPE(requestHandle, IsArray,
-                      "entitiy handler response resource handle", false);
-  if (!c_OCRequestHandle(Local<Array>::Cast(resourceHandle),
-                         &(response.resourceHandle))) {
-    return false;
+  if (!(resourceHandle->IsUndefined() || resourceHandle->IsNull())) {
+    VALIDATE_VALUE_TYPE(resourceHandle, IsObject,
+                        "entitiy handler response resource handle", false);
+    if (!c_OCResourceHandle(Nan::To<Object>(resourceHandle).ToLocalChecked(),
+                            &(response.resourceHandle))) {
+      return false;
+    }
   }
 
   // ehResult

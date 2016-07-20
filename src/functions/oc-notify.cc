@@ -31,11 +31,11 @@ using namespace node;
 
 NAN_METHOD(bind_OCNotifyAllObservers) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
 
   OCResourceHandle handle;
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 
@@ -45,13 +45,13 @@ NAN_METHOD(bind_OCNotifyAllObservers) {
 
 NAN_METHOD(bind_OCNotifyListOfObservers) {
   VALIDATE_ARGUMENT_COUNT(info, 4);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsArray);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsArray);
   VALIDATE_ARGUMENT_TYPE(info, 2, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 3, IsUint32);
 
   OCResourceHandle handle;
-  if (!c_OCResourceHandle(Local<Array>::Cast(info[0]), &handle)) {
+  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
     return;
   }
 

@@ -72,8 +72,7 @@ _.extend( TestUtils.prototype, require( "./assert-to-console" ), {
 		}
 	},
 	findResource: function( response, uuid ) {
-		var index,
-			resources,
+		var index, resources,
 			returnValue = false;
 
 		if ( response &&
