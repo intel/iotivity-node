@@ -28,7 +28,7 @@ var iotivity = require( "iotivity-node/lowlevel" );
 ```
 will give you access to the low-level interface.
 
-There is also a high-level interface which implements the [JS API spec](./spec/iot-js-spec.md). This interface requires the ```Promise``` object which is only available starting node.js 4.0.
+There is also a high-level interface which implements the [JS API spec][specification]. This interface requires the ```Promise``` object which is only available starting node.js 4.0.
 ```JS
 var device = require( "iotivity-node" )();
 ```
