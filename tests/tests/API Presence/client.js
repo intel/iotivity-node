@@ -16,7 +16,13 @@ var utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )( "client" ),
 	uuid = process.argv[ 2 ];
 
-console.log( JSON.stringify( { assertionCount: 8 } ) );
+console.log( JSON.stringify( { assertionCount: 13 } ) );
+
+utils.assertProperties( "OicPresence", device, [
+	  { name: "subscribe", type: "function" },
+	  { name: "unsubscribe", type: "function" },
+	  { name: "ondevicechange" }
+	] );
 
 // Tell the resource's server to perform an operation (either disablePresence or enablePresence)
 // or, if op is undefined, then do not communicate with the server. Either way, wait five seconds
