@@ -17,7 +17,6 @@
 #include <v8.h>
 #include <nan.h>
 
-#include "oc-cancel.h"
 #include "../common.h"
 #include "../structures/handles.h"
 #include "../structures/oc-header-option-array.h"

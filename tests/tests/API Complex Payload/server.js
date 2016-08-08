@@ -78,7 +78,7 @@ async.series( [
 			}, callback );
 	},
 
-	// Wait for retrieve handler and attach update handler
+	// Wait for retrieve handler and attach change handler
 	function( callback ) {
 
 		// Signal that we're ready to go
@@ -86,9 +86,9 @@ async.series( [
 
 		requestPromise.then( function() {
 			var handler = handlerWithPromise(
-				function updateHandler( request, fulfill, reject ) {
+				function changeHandler( request, fulfill, reject ) {
 					var cleanup = function( error ) {
-						device.removeEventListener( "updaterequest", handler );
+						device.removeEventListener( "changerequest", handler );
 						if ( error ) {
 							reject( error );
 						} else {
@@ -96,8 +96,8 @@ async.series( [
 						}
 					};
 
-					testUtils.assert( "strictEqual", request.type, "updaterequest",
-						"Client: Second event is 'update'" );
+					testUtils.assert( "strictEqual", request.type, "changerequest",
+						"Client: Second event is 'change'" );
 
 					testUtils.assert( "deepEqual", request.res, {
 						putValue: "A string",
@@ -107,17 +107,17 @@ async.series( [
 							putChildValue: false,
 							putChildArray: [ [ 2, 3, 5 ], [ 9, 11, 17 ] ]
 						}
-					}, "Server: update event payload is correct" );
+					}, "Server: change event payload is correct" );
 
 					request.sendResponse( null ).then( cleanup, cleanup );
 				} );
-			device.addEventListener( "updaterequest", handler );
+			device.addEventListener( "changerequest", handler );
 			requestPromise = handler.promise;
 			callback();
 		}, callback );
 	},
 
-	// Wait for update handler
+	// Wait for change handler
 	function( callback ) {
 		requestPromise.then( function() {
 			callback();

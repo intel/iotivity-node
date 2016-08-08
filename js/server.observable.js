@@ -25,7 +25,12 @@ console.log( "Starting OCF stack in server mode" );
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 
-iotivity.OCSetDeviceInfo( { deviceName: "server.observable", types: [] } );
+iotivity.OCSetDeviceInfo( {
+	specVersion: "res.1.0.0",
+	dataModelVersions: [ "abc.0.0.1" ],
+	deviceName: "server.observable",
+	types: []
+} );
 iotivity.OCSetPlatformInfo( {
 	platformID: "server.observe.sample",
 	manufacturerName: "iotivity-node"

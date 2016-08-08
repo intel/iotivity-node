@@ -24,7 +24,7 @@ console.log( JSON.stringify( { assertionCount: 8 } ) );
 
 utils.assert( "ok", true, "Server " + serverIndex + ": device configured successfully" );
 
-device.addEventListener( "updaterequest", function( request ) {
+device.addEventListener( "changerequest", function( request ) {
 	requestCount++;
 
 	function sendResponse( error ) {

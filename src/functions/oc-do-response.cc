@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "oc-do-response.h"
 #include "../common.h"
 #include "../structures/oc-entity-handler-response.h"
 

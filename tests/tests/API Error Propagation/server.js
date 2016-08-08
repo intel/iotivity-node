@@ -37,7 +37,7 @@ async.series( [
 
 	function handleRequests( callback ) {
 		var requestTypes = [
-				"create", "delete", "update",
+				"create", "delete", "change",
 				"retrieve", "observe", "unobserve"
 			],
 			requestCount = 0,

@@ -28,7 +28,12 @@ intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
 
-iotivity.OCSetDeviceInfo( { deviceName: "server.discoverable", types: [] } );
+iotivity.OCSetDeviceInfo( {
+	specVersion: "res.1.0.0",
+	dataModelVersions: [ "abc.0.0.1" ],
+	deviceName: "server.discoverable",
+	types: []
+} );
 iotivity.OCSetPlatformInfo( {
 	platformID: "server.discoverable.sample",
 	manufacturerName: "iotivity-node"

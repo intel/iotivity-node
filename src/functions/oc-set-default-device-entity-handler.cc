@@ -16,7 +16,6 @@
 
 #include "../common.h"
 #include "../structures.h"
-#include "oc-set-default-device-entity-handler.h"
 
 extern "C" {
 #include <stdlib.h>

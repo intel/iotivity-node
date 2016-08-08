@@ -27,7 +27,7 @@ utils.assertProperties( "OicServer", device, [
 	{ name: "onunobserverequest" },
 	{ name: "onretrieverequest" },
 	{ name: "ondeleterequest" },
-	{ name: "onupdaterequest" },
+	{ name: "onchangerequest" },
 	{ name: "oncreaterequest" }
 ] );
 

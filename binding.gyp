@@ -149,11 +149,36 @@
 			"dependencies": [ "csdk" ]
 		},
 		{
+			"target_name": "generatefunctions",
+			"type": "none",
+			"actions": [ {
+				"action_name": "generatefunctions",
+				"message": "Generating functions",
+				"outputs": ["generated/functions.cc"],
+				"conditions": [
+					[ "'<(externalOCTBStack)'=='false'", {
+						"inputs": ["deps/iotivity"],
+						"action": [
+							"sh",
+							"./generate-functions.sh"
+						]
+					}, {
+						"inputs": [""],
+						"action": [
+							"sh",
+							"./generate-functions.sh"
+						]
+					} ]
+				]
+			} ],
+			"dependencies": [ "csdk" ]
+		},
+		{
 			"target_name": "iotivity",
 			"sources": [
 				"generated/constants.cc",
 				"generated/enums.cc",
-				"src/functions.cc",
+				"generated/functions.cc",
 				"src/functions/oc-cancel.cc",
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
@@ -177,7 +202,7 @@
 				"src/structures/oc-sid.cc",
 				"src/structures/string-primitive.cc"
 			],
-			"dependencies": [ "csdk", "generateconstants", "generateenums" ]
+			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
 		}
 	]
 }
