@@ -34,7 +34,7 @@ echo 'void InitFunctions(Handle<Object> exports, Handle<Object> module) {' >> ge
 find src -type f | while read filename; do
 	cat "${filename}" | grep NAN_METHOD;
 done | \
-	sed -r -e 's/^NAN_METHOD\s*\(\s*//' -e 's/\s*\).*$//' -e 's/^bind_//' | \
+	sed -e 's/^NAN_METHOD[[:space:]]*([[:space:]]*//' -e 's/[[:space:]]*).*$//' -e 's/^bind_//' | \
 	sort -u | \
 while read methodname; do
 	echo "NAN_METHOD(bind_${methodname});" >> generated/function-prototypes.h
