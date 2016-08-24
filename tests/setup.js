@@ -32,7 +32,7 @@ function formatRuntime( runtime ) {
 
 QUnit.load();
 QUnit.config.requireExpects = true;
-QUnit.config.testTimeout = 30000;
+QUnit.config.testTimeout = 90000;
 QUnit.config.callbacks.moduleStart.push( function( status ) {
 
 	// Parameters: status: { name, tests }
