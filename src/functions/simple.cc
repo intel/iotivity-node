@@ -66,7 +66,7 @@ NAN_METHOD(bind_OCSetDeviceInfo) {
 
   OCStackResult result = OCSetDeviceInfo(deviceInfo);
 
-  free(deviceInfo.deviceName);
+  c_OCDeviceInfoFreeMembers(&deviceInfo);
 
   info.GetReturnValue().Set(Nan::New(result));
 }

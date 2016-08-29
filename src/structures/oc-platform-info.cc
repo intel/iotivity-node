@@ -62,8 +62,6 @@ bool c_OCPlatformInfo(Local<Object> platformInfo, OCPlatformInfo *info) {
 
   VALIDATE_AND_ASSIGN_STRING(&local, platformID, platformInfo,
                              c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, platformID, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
   VALIDATE_AND_ASSIGN_STRING(&local, manufacturerName, platformInfo,
                              c_OCPlatformInfoFreeMembers, false);
   VALIDATE_AND_ASSIGN_STRING(&local, manufacturerUrl, platformInfo,
