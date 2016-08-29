@@ -110,8 +110,8 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 [1.1.1]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=1.1.1
 [snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=1.1.1;sf=tgz
 [scons]: http://www.scons.org/
-[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.1-2/install.sh
-[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.1-2/octbstack.pc.in
+[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.1-3/install.sh
+[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.1-3/octbstack.pc.in
 [iotivity wiki]: https://wiki.iotivity.org/faq_s
 [video]: https://www.youtube.com/watch?v=95VTB_qgYfw
 [specification]: https://github.com/01org/iot-js-api-test-suite/blob/master/api/oic.md
