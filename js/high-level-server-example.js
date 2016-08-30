@@ -19,13 +19,13 @@ var lightResource, device,
 
 console.log( "Acquiring OCF device" );
 
-device = require( "iotivity-node" )( "server" );
-device.device = _.extend( device.device, {
+device = require( "iotivity-node" );
+_.extend( device.device, {
 	coreSpecVersion: "res.1.0.0",
 	dataModels: [ "something.1.0.0" ],
 	name: "api-server-example"
 } );
-device.platform = _.extend( device.platform, {
+_.extend( device.platform, {
 	manufacturerName: "Intel",
 	manufactureDate: new Date( "Wed Sep 23 10:04:17 EEST 2015" ),
 	platformVersion: "1.1.1",
@@ -46,7 +46,7 @@ sensor.on( "change", function( newData ) {
 	}
 
 	if ( observerCount > 0 ) {
-		device.notify( lightResource ).catch( function( error ) {
+		device.server.notify( lightResource ).catch( function( error ) {
 			if ( error.message === "notify: There are no observers" ) {
 				observerCount = 0;
 			}
@@ -60,18 +60,11 @@ function handleError( theError ) {
 }
 
 var lightResourceRequestHandlers = {
-	observe: function( request ) {
-		request.sendResponse( null ).then( function() {
-			observerCount++;
-		}, handleError );
-	},
-	unobserve: function( request ) {
-		request.sendResponse( null ).then( function() {
-			observerCount--;
-		}, handleError );
-	},
 	retrieve: function( request ) {
-		request.sendResponse( lightResource ).catch( handleError );
+		request.respond( request.target ).catch( handleError );
+		if ( "observe" in request ) {
+			observerCount += Math.max( 0, request.observe ? 1 : -1 );
+		}
 	}
 };
 
@@ -79,8 +72,8 @@ if ( device.device.uuid ) {
 
 	console.log( "Registering OCF resource" );
 
-	device.register( {
-		id: { path: "/a/high-level-example" },
+	device.server.register( {
+		resourcePath: "/a/high-level-example",
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],
 		discoverable: true,
@@ -88,11 +81,12 @@ if ( device.device.uuid ) {
 		properties: { someValue: 0, someOtherValue: "Helsinki" }
 	} ).then(
 		function( resource ) {
+			console.log( "OCF resource successfully registered" );
 			lightResource = resource;
 
 			// Add event handlers for each supported request type
 			_.each( lightResourceRequestHandlers, function( callback, requestType ) {
-				device.addEventListener( requestType + "request", function( request ) {
+				device.server.on( requestType, function( request ) {
 					console.log( "Received request " + JSON.stringify( request, null, 4 ) );
 					callback( request );
 				} );
