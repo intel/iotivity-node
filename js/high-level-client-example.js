@@ -12,38 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var device,
-	observationCount = 0;
+var observationCount = 0;
 
 console.log( "Acquiring OCF device" );
-device = require( "iotivity-node" )( "client" );
+
+var client = require( "iotivity-node" ).client;
 
 // Add a listener that will receive the results of the discovery
-device.addEventListener( "resourcefound", function( event ) {
-	console.log( "Discovered resource(s) via the following event:\n" +
-		JSON.stringify( event, null, 4 ) );
+client.on( "resourcefound", function( resource ) {
+	console.log( "Discovered resource:\n" +
+		JSON.stringify( resource, null, 4 ) );
 
 	// We've discovered the resource we were seeking.
-	if ( event.resource.id.path === "/a/high-level-example" ) {
-		var resourceUpdate = function( event ) {
-			console.log( "Received resource update event:\n" +
-				JSON.stringify( event, null, 4 ) );
+	if ( resource.resourcePath === "/a/high-level-example" ) {
+		var resourceUpdate = function( resource ) {
+			console.log( "Received resource update:\n" +
+				JSON.stringify( resource, null, 4 ) );
 
 			// Stop observing after having made 10 observations
 			if ( ++observationCount >= 10 ) {
-				event.resource.removeEventListener( "change", resourceUpdate );
+				resource.removeListener( "update", resourceUpdate );
 			}
 		};
 
 		console.log( "This is the resource we want to observe" );
 
 		// Let's start observing the resource.
-		event.resource.addEventListener( "change", resourceUpdate );
+		resource.on( "update", resourceUpdate );
 	}
 } );
 
 console.log( "Issuing discovery request" );
-device.findResources().catch( function( error ) {
+client.findResources().catch( function( error ) {
 	console.error( error.stack ? error.stack : ( error.message ? error.message : error ) );
 	process.exit( 1 );
 } );
