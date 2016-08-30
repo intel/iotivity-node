@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var intervalId,
+var intervalId, sensor,
 	handleReceptacle = {},
 	observerIds = [],
 
@@ -40,22 +40,26 @@ intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
 
-require( "./mock-sensor" )().on( "change", function( data ) {
-	console.log( "Sensor data has changed. " +
-		( observerIds.length > 0 ?
-			"Notifying " + observerIds.length + " observers." :
-			"No observers in list." ) );
-	if ( observerIds.length > 0 ) {
-		iotivity.OCNotifyListOfObservers(
-			handleReceptacle.handle,
-			observerIds,
-			{
-				type: iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION,
-				values: data
-			},
-			iotivity.OCQualityOfService.OC_HIGH_QOS );
-	}
-} );
+console.log( "Local device ID: " + iotivity.OCGetServerInstanceIDString() );
+
+var sensor = require( "./mock-sensor" )()
+	.on( "change", function( data ) {
+
+		console.log( "Sensor data has changed. " +
+			( observerIds.length > 0 ?
+				"Notifying " + observerIds.length + " observers." :
+				"No observers in list." ) );
+		if ( observerIds.length > 0 ) {
+			iotivity.OCNotifyListOfObservers(
+				handleReceptacle.handle,
+				observerIds,
+				{
+					type: iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION,
+					values: data
+				},
+				iotivity.OCQualityOfService.OC_HIGH_QOS );
+		}
+	} );
 
 console.log( "Registering resource" );
 
@@ -90,12 +94,17 @@ iotivity.OCCreateResource(
 					}
 				}
 			}
+		}
 
+		if ( request.requestHandle ) {
 			iotivity.OCDoResponse( {
 				requestHandle: request.requestHandle,
 				resourceHandle: request.resource,
 				ehResult: iotivity.OCEntityHandlerResult.OC_EH_OK,
-				payload: null,
+				payload: {
+					type: iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION,
+					values: sensor.currentData()
+				},
 				resourceUri: sampleUri,
 				sendVendorSpecificHeaderOptions: []
 			} );

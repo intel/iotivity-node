@@ -12,8 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+require( "../tests/preamble" )( [
+	{
+		href: "/a/high-level-resource-creation-example",
+		rel: "",
+		rt: [ "core.light" ],
+		"if": [ "oic.if.baseline" ]
+	},
+
+	// The resource the remote end will ask us to create
+	{
+		href: "/a/new-resource",
+		rel: "",
+		rt: [ "core.light" ],
+		"if": [ "oic.if.baseline" ]
+	}
+] );
+
 var resourceCreatedByRemote,
-	device = require( "iotivity-node" )( "server" ),
+	device = require( "iotivity-node" ),
 	_ = require( "lodash" );
 
 device.device = _.extend( device.device, {
@@ -23,7 +40,7 @@ device.device = _.extend( device.device, {
 } );
 device.platform = _.extend( device.platform, {
 	manufacturerName: "Intel",
-	manunfactureDate: new Date( "Wed Sep 23 10:04:17 EEST 2015" ),
+	manufactureDate: new Date( "Wed Sep 23 10:04:17 EEST 2015" ),
 	platformVersion: "1.1.1",
 	firmwareVersion: "0.0.1",
 	supportUrl: "http://example.com/"
@@ -34,48 +51,40 @@ function throwError( error ) {
 	process.exit( 1 );
 }
 
-var requestHandlers = {
-	create: function( request ) {
+device.server
+	.oncreate( function( request ) {
 		console.log( "create request" );
-		device.register( _.extend( request.res, {
+		device.server.register( _.extend( request.data, {
 			discoverable: true
 		} ) ).then( function( resource ) {
 			console.log( "resource successfully registered" );
 			resourceCreatedByRemote = resource;
-			request.sendResponse( null );
-		}, _.bind( request.sendError, request ) );
-	},
-	delete: function( request ) {
-		console.log( "delete request" );
-		if ( request.target.id.path === resourceCreatedByRemote.id.path &&
-				request.target.id.deviceId === resourceCreatedByRemote.id.deviceId ) {
-			device.unregister( resourceCreatedByRemote ).then(
-				function() {
-					console.log( "resource successfully deleted" );
-					request.sendResponse( null );
-				},
-				_.bind( request.sendError, request ) );
-		}
-	}
-};
-
-// Add all the request handlers listed abovedd
-_.each( requestHandlers, function( handler, requestType ) {
-	device.addEventListener( requestType + "request", function( request ) {
-		console.log( JSON.stringify( request, null, 4 ) );
-		handler( request );
-	} );
-} );
-
-device.register( {
-	id: {
-		path: "/a/high-level-resource-creation-example"
-	},
-	resourceTypes: [ "core.light" ],
-	interfaces: [ "oic.if.baseline" ],
-	discoverable: true,
-	observable: true,
-	properties: { someValue: 0, someOtherValue: "Helsinki" }
-} ).then( function() {
-	console.log( "initial resource successfully registered" );
-}, throwError );
+			request.respond( resource );
+			resource.ondelete( function( request ) {
+				console.log( "delete request" );
+				resourceCreatedByRemote.unregister().then(
+					function() {
+						console.log( "resource successfully deleted" );
+						request.respond()
+							.then( function() {
+								console.log( "delete request successfully delivered" );
+							},
+							function( anError ) {
+								console.log( ( "" + anError.stack ) +
+									JSON.stringify( anError, null, 4 ) );
+							} );
+					},
+					_.bind( request.respondWithError, request ) );
+			} );
+		}, _.bind( request.respondWithError, request ) );
+	} )
+	.register( {
+		resourcePath: "/a/high-level-resource-creation-example",
+		resourceTypes: [ "core.light" ],
+		interfaces: [ "oic.if.baseline" ],
+		discoverable: true,
+		observable: true,
+		properties: { someValue: 0, someOtherValue: "Helsinki" }
+	} ).then( function() {
+		console.log( "initial resource successfully registered" );
+	}, throwError );

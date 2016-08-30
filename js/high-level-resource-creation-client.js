@@ -14,41 +14,40 @@
 
 console.log( "Acquiring OCF device" );
 
-var device = require( "iotivity-node" )( "client" );
+var device = require( "iotivity-node" );
 
 function throwError( error ) {
-	console.error( error.stack ? error.stack : ( error.message ? error.message : error ) );
+	console.error( error.stack ? error.stack : ( error.message ? error.message : error ) +
+		JSON.stringify( error, null, 4 ) );
 	process.exit( 1 );
 }
 
 new Promise( function( fulfill, reject ) {
-	var resourceFoundHandler = function( event ) {
-		console.log( "Discovered resource(s) via the following event:\n" +
-			JSON.stringify( event, null, 4 ) );
+	var resourceFoundHandler = function( resource ) {
+		console.log( "Discovered the following resource:\n" +
+			JSON.stringify( resource, null, 4 ) );
 
 		// We've discovered the resource we were seeking.
-		if ( event.resource.id.path === "/a/high-level-resource-creation-example" ) {
+		if ( resource.resourcePath === "/a/high-level-resource-creation-example" ) {
 			console.log( "Found the test server" );
-			device.removeEventListener( "resourcefound", resourceFoundHandler );
-			fulfill( event.resource.id.deviceId );
+			device.client.removeListener( "resourcefound", resourceFoundHandler );
+			fulfill( resource.deviceId );
 		}
 	};
 
 	// Add a listener that will receive the results of the discovery
-	device.addEventListener( "resourcefound", resourceFoundHandler );
+	device.client.on( "resourcefound", resourceFoundHandler );
 
 	console.log( "Issuing discovery request" );
-	device.findResources().catch( function( error ) {
-		device.removeEventListener( "resourcefound", resourceFoundHandler );
+	device.client.findResources().catch( function( error ) {
+		device.client.removeListener( "resourcefound", resourceFoundHandler );
 		reject( "findResource() failed: " + error );
 	} );
 } ).then( function( deviceId ) {
 	console.log( "deviceId discovered" );
-	return device.create( {
-		id: {
-			deviceId: deviceId,
-			path: "/a/new-resource"
-		},
+	return device.client.create( {
+		deviceId: deviceId,
+		resourcePath: "/a/new-resource",
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],
 		properties: {
@@ -56,9 +55,9 @@ new Promise( function( fulfill, reject ) {
 		}
 	} );
 } ).then( function( resource ) {
-	console.log( "remote resource successfully created with id " +
-		JSON.stringify( resource.id ) );
-	return device.delete( resource.id );
+	console.log( "remote resource successfully created: " +
+		JSON.stringify( resource, null, 4 ) );
+	return device.client.delete( resource );
 } ).then( function() {
 	console.log( "remote resource successfully deleted" );
 } ).catch( throwError );
