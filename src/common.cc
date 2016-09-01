@@ -1,3 +1,5 @@
+#include "common.h"
+
 /*
  * Copyright 2016 Intel Corporation
  *
@@ -14,25 +16,19 @@
  * limitations under the License.
  */
 
-#include "string-primitive.h"
-#include "../common.h"
-
-extern "C" {
-#include <string.h>
-}
-
 using namespace v8;
 
-bool c_StringNew(Local<String> jsString, char **p_string) {
-  size_t length = strlen((const char *)*(String::Utf8Value(jsString)));
-  char *string = (char *)malloc(length + 1);
-  if (!string) {
-    Nan::ThrowError("Failed to allocate memory for C string");
-    return false;
+void addStringArray(Local<Object> destination, OCStringLL *source,
+                    const char *name) {
+  if (source) {
+    int counter;
+    OCStringLL *item;
+    for (item = source, counter = 0; item; item = item->next, counter++)
+      ;
+    Local<Array> jsArray = Nan::New<Array>(counter);
+    for (item = source, counter = 0; item; item = item->next, counter++) {
+      Nan::Set(jsArray, counter, Nan::New(item->value).ToLocalChecked());
+    }
+    Nan::Set(destination, Nan::New(name).ToLocalChecked(), jsArray);
   }
-  string[length] = 0;
-  strcpy(string, (const char *)*(String::Utf8Value(jsString)));
-
-  *p_string = string;
-  return true;
 }

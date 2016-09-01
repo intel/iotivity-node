@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-#include <v8.h>
 #include <nan.h>
 #include <map>
 
 #include "../common.h"
-#include "../structures/handles.h"
 #include "../structures.h"
+#include "../structures/handles.h"
 
 extern "C" {
 #include <ocstack.h>
 }
 
 using namespace v8;
-using namespace node;
-
-// Associate the callback info with a resource handle
-static std::map<OCResourceHandle, Nan::Callback *> annotation;
 
 static OCEntityHandlerResult defaultEntityHandler(
     OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *context) {
@@ -38,12 +33,14 @@ static OCEntityHandlerResult defaultEntityHandler(
   // return value
   Local<Value> jsCallbackArguments[2] = {Nan::New(flag),
                                          js_OCEntityHandlerRequest(request)};
-  Local<Value> returnValue =
-      ((Nan::Callback *)context)->Call(2, jsCallbackArguments);
+  Local<Value> returnValue;
+  TRY_CALL(&(((CallbackInfo<OCResourceHandle> *)context)->callback),
+           Nan::GetCurrentContext()->Global(), 2, jsCallbackArguments,
+           returnValue, OC_EH_ERROR);
 
-  VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32, "OCEntityHandler");
+  VALIDATE_VALUE_TYPE(returnValue, IsUint32, "OCEntityHandler return value", );
 
-  return (OCEntityHandlerResult)(returnValue->Uint32Value());
+  return (OCEntityHandlerResult)(Nan::To<uint32_t>(returnValue).FromJust());
 }
 
 NAN_METHOD(bind_OCCreateResource) {
@@ -55,20 +52,31 @@ NAN_METHOD(bind_OCCreateResource) {
   VALIDATE_ARGUMENT_TYPE(info, 4, IsFunction);
   VALIDATE_ARGUMENT_TYPE(info, 5, IsUint32);
 
-  OCResourceHandle handle = 0;
-  Nan::Callback *callback = new Nan::Callback(Local<Function>::Cast(info[4]));
+  CallbackInfo<OCResourceHandle> *callbackInfo =
+      new CallbackInfo<OCResourceHandle>;
+  if (!callbackInfo) {
+    Nan::ThrowError("Failed to allocate memory for callback info");
+    return;
+  }
 
-  Local<Number> returnValue = Nan::New(OCCreateResource(
-      &handle, (const char *)*String::Utf8Value(info[1]),
+  OCStackResult returnValue = OCCreateResource(
+      &(callbackInfo->handle), (const char *)*String::Utf8Value(info[1]),
       (const char *)*String::Utf8Value(info[2]),
       (const char *)*String::Utf8Value(info[3]), defaultEntityHandler,
-      (void *)callback, (uint8_t)info[5]->Uint32Value()));
+      (void *)callbackInfo, (uint8_t)Nan::To<uint32_t>(info[5]).FromJust());
 
-  // Save info to the handle
-  annotation[handle] = callback;
-  info[0]->ToObject()->Set(Nan::New("handle").ToLocalChecked(),
-                           js_OCResourceHandle(handle));
-  info.GetReturnValue().Set(returnValue);
+  if (returnValue == OC_STACK_OK) {
+    Nan::Set(Nan::To<Object>(info[0]).ToLocalChecked(),
+             Nan::New("handle").ToLocalChecked(),
+             callbackInfo->Init(JSOCResourceHandle::New(callbackInfo),
+                                Local<Function>::Cast(info[4])));
+    JSOCResourceHandle::handles[callbackInfo->handle] =
+        &(callbackInfo->jsHandle);
+  } else {
+    delete callbackInfo;
+  }
+
+  info.GetReturnValue().Set(Nan::New(returnValue));
 }
 
 NAN_METHOD(bind_OCDeleteResource) {
@@ -76,124 +84,84 @@ NAN_METHOD(bind_OCDeleteResource) {
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
 
   OCStackResult returnValue;
-  OCResourceHandle handle = 0;
 
-  // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
 
   // Delete the resource identified by the handle
-  returnValue = OCDeleteResource(handle);
+  returnValue = OCDeleteResource(callbackInfo->handle);
 
   if (returnValue == OC_STACK_OK) {
-    // If deleting the resource worked, get rid of the entity handler
-    Nan::Callback *callback = annotation[handle];
-    annotation.erase(handle);
-    if (callback) {
-      delete callback;
-    }
+    JSOCResourceHandle::handles.erase(callbackInfo->handle);
+    delete callbackInfo;
   }
 
   info.GetReturnValue().Set(Nan::New(returnValue));
 }
 
+// This is not really a binding since it only replaces the JS entity handler
 NAN_METHOD(bind_OCBindResourceHandler) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsFunction);
 
-  OCResourceHandle handle = 0;
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
+  callbackInfo->callback.Reset(Local<Function>::Cast(info[1]));
 
-  // Retrieve OCResourceHandle from JS object
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
-
-  Nan::Callback *callback = new Nan::Callback(Local<Function>::Cast(info[1]));
-
-  // Replace the existing entity handler with the new callback
-  OCStackResult returnValue =
-      OCBindResourceHandler(handle, defaultEntityHandler, (void *)callback);
-
-  if (returnValue == OC_STACK_OK) {
-    // If setting the new entity handler worked, get rid of the original entity
-    // handler and associate the new one with the handle.
-    Nan::Callback *oldCallback = annotation[handle];
-    if (oldCallback) {
-      delete oldCallback;
-    }
-    annotation[handle] = callback;
-  } else {
-    // If the stack was not able to make use of the new entity handler, get rid
-    // of the reference we created above.
-    delete callback;
-  }
-
-  info.GetReturnValue().Set(Nan::New(returnValue));
+  info.GetReturnValue().Set(Nan::New(OC_STACK_OK));
 }
 
-NAN_METHOD(bind_OCBindResource) {
-  VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
+#define BIND_UNBIND_RESOURCE(api)                                        \
+  do {                                                                   \
+    VALIDATE_ARGUMENT_COUNT(info, 2);                                    \
+    VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                           \
+    VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);                           \
+    CallbackInfo<OCResourceHandle> *parentInfo;                          \
+    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, parentInfo,             \
+                             Nan::To<Object>(info[0]).ToLocalChecked()); \
+    CallbackInfo<OCResourceHandle> *childInfo;                           \
+    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, childInfo,              \
+                             Nan::To<Object>(info[1]).ToLocalChecked()); \
+    info.GetReturnValue().Set(                                           \
+        Nan::New(api(parentInfo->handle, childInfo->handle)));           \
+  } while (0)
 
-  OCResourceHandle collectionHandle = 0, resourceHandle = 0;
+NAN_METHOD(bind_OCBindResource) { BIND_UNBIND_RESOURCE(OCBindResource); }
 
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(),
-                          &collectionHandle)) {
-    return;
-  }
-  if (!c_OCResourceHandle(Nan::To<Object>(info[1]).ToLocalChecked(),
-                          &resourceHandle)) {
-    return;
-  }
+NAN_METHOD(bind_OCUnBindResource) { BIND_UNBIND_RESOURCE(OCUnBindResource); }
 
-  info.GetReturnValue().Set(
-      Nan::New(OCBindResource(collectionHandle, resourceHandle)));
-}
+#define BIND_STRING_TO_RESOURCE(api)                                        \
+  do {                                                                      \
+    VALIDATE_ARGUMENT_COUNT(info, 2);                                       \
+    VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                              \
+    VALIDATE_ARGUMENT_TYPE(info, 1, IsString);                              \
+    CallbackInfo<OCResourceHandle> *callbackInfo;                           \
+    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,              \
+                             Nan::To<Object>(info[0]).ToLocalChecked());    \
+    info.GetReturnValue().Set(Nan::New(api(                                 \
+        callbackInfo->handle, (const char *)*String::Utf8Value(info[1])))); \
+  } while (0)
 
 NAN_METHOD(bind_OCBindResourceInterfaceToResource) {
-  VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
-
-  OCResourceHandle handle = 0;
-
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
-
-  info.GetReturnValue().Set(Nan::New(OCBindResourceInterfaceToResource(
-      handle, (const char *)*String::Utf8Value(info[1]))));
+  BIND_STRING_TO_RESOURCE(OCBindResourceInterfaceToResource);
 }
 
 NAN_METHOD(bind_OCBindResourceTypeToResource) {
-  VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
-
-  OCResourceHandle handle = 0;
-
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
-
-  info.GetReturnValue().Set(Nan::New(OCBindResourceTypeToResource(
-      handle, (const char *)*String::Utf8Value(info[1]))));
+  BIND_STRING_TO_RESOURCE(OCBindResourceTypeToResource);
 }
 
 // This is not actually a binding. We get the resource handler from the
-// annotation.
+// JS handle.
 NAN_METHOD(bind_OCGetResourceHandler) {
   VALIDATE_ARGUMENT_COUNT(info, 1);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
 
-  OCResourceHandle handle = 0;
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
 
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
-
-  info.GetReturnValue().Set((*(*annotation[handle])));
+  info.GetReturnValue().Set(*(callbackInfo->callback));
 }

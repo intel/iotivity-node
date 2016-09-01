@@ -14,33 +14,51 @@
  * limitations under the License.
  */
 
-#include <v8.h>
 #include <nan.h>
 
 #include "../common.h"
 #include "../structures/handles.h"
+#include "../structures/oc-entity-handler-response.h"
 #include "../structures/oc-payload.h"
 
 extern "C" {
-#include <ocstack.h>
 #include <ocpayload.h>
+#include <ocstack.h>
 }
 
 using namespace v8;
-using namespace node;
+
+NAN_METHOD(bind_OCDoResponse) {
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+
+  OCEntityHandlerResponse response;
+  OCStackResult result;
+
+  if (!c_OCEntityHandlerResponse(Nan::To<Object>(info[0]).ToLocalChecked(),
+                                 &response)) {
+    return;
+  }
+
+  result = OCDoResponse(&response);
+  if (response.payload) {
+    OCPayloadDestroy(response.payload);
+  }
+  info.GetReturnValue().Set(Nan::New(result));
+}
 
 NAN_METHOD(bind_OCNotifyAllObservers) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
 
-  OCResourceHandle handle;
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
-
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
   info.GetReturnValue().Set(Nan::New(OCNotifyAllObservers(
-      handle, (OCQualityOfService)info[1]->Uint32Value())));
+
+      callbackInfo->handle,
+      (OCQualityOfService)Nan::To<uint32_t>(info[1]).FromJust())));
 }
 
 NAN_METHOD(bind_OCNotifyListOfObservers) {
@@ -50,16 +68,19 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   VALIDATE_ARGUMENT_TYPE(info, 2, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 3, IsUint32);
 
-  OCResourceHandle handle;
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
 
   // Construct the C array of observation IDs.
   Local<Array> obsIds = Local<Array>::Cast(info[1]);
   uint8_t arrayLength = (uint8_t)obsIds->Length();
 
   OCObservationId *c_observations = 0;
+  int index;
+  Local<Value> oneObservationId;
+  OCRepPayload *payload = 0;
+  Local<Number> returnValue;
 
   if (arrayLength > 0) {
     c_observations =
@@ -72,29 +93,24 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   }
 
   // Populate a C-like array from the V8 array
-  int index;
   for (index = 0; index < arrayLength; index++) {
-    Local<Value> oneObservationId = Nan::Get(obsIds, index).ToLocalChecked();
-    if (!(oneObservationId->IsUint32())) {
-      free(c_observations);
-      Nan::ThrowTypeError("OCObservationID must satisfy IsUint32()");
-      return;
-    }
-    c_observations[index] = (OCObservationId)oneObservationId->Uint32Value();
+    oneObservationId = Nan::Get(obsIds, index).ToLocalChecked();
+    VALIDATE_VALUE_TYPE(oneObservationId, IsUint32, "obsId", goto free);
+    c_observations[index] =
+        (OCObservationId)Nan::To<uint32_t>(oneObservationId).FromJust();
   }
 
-  OCRepPayload *payload = 0;
-  if (!c_OCPayload(info[2]->ToObject(), (OCPayload **)&payload)) {
-    free(c_observations);
-    return;
+  if (!c_OCPayload(Nan::To<Object>(info[2]).ToLocalChecked(),
+                   (OCPayload **)&payload)) {
+    goto free;
   }
 
-  Local<Number> returnValue = Nan::New(
-      OCNotifyListOfObservers(handle, c_observations, arrayLength, payload,
-                              (OCQualityOfService)info[3]->Uint32Value()));
+  returnValue = Nan::New(OCNotifyListOfObservers(
+      callbackInfo->handle, c_observations, arrayLength, payload,
+      (OCQualityOfService)Nan::To<uint32_t>(info[3]).FromJust()));
 
-  free(c_observations);
   OCRepPayloadDestroy(payload);
-
   info.GetReturnValue().Set(returnValue);
+free:
+  free(c_observations);
 }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include "oc-identity.h"
-#include "handles.h"
+#include <nan.h>
 #include "../common.h"
+#include "handles.h"
 
 extern "C" {
 #include <string.h>

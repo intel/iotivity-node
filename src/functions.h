@@ -19,15 +19,13 @@
 
 #include <nan.h>
 
-using namespace v8;
-
-#define SET_FUNCTION(destination, functionName)                         \
-  Nan::ForceSet(                                                        \
-      (destination), Nan::New(#functionName).ToLocalChecked(),          \
-      Nan::GetFunction(Nan::New<FunctionTemplate>(bind_##functionName)) \
-          .ToLocalChecked(),                                            \
+#define SET_FUNCTION(destination, functionName)                             \
+  Nan::ForceSet(                                                            \
+      (destination), Nan::New(#functionName).ToLocalChecked(),              \
+      Nan::GetFunction(Nan::New<v8::FunctionTemplate>(bind_##functionName)) \
+          .ToLocalChecked(),                                                \
       (v8::PropertyAttribute)(v8::DontDelete));
 
-void InitFunctions(Handle<Object> exports, Handle<Object> module);
+NAN_MODULE_INIT(InitFunctions);
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_H__ */

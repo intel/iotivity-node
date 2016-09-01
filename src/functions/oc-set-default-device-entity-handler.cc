@@ -18,12 +18,11 @@
 #include "../structures.h"
 
 extern "C" {
-#include <stdlib.h>
 #include <ocstack.h>
+#include <stdlib.h>
 }
 
 using namespace v8;
-using namespace node;
 
 Nan::Callback *g_currentCallback = 0;
 
@@ -38,10 +37,10 @@ static OCEntityHandlerResult defaultDeviceEntityHandler(
   Local<Value> returnValue =
       ((Nan::Callback *)context)->Call(3, jsCallbackArguments);
 
-  VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
-                                      "OCDeviceEntityHandler");
+  VALIDATE_VALUE_TYPE(returnValue, IsUint32,
+                      "OCDeviceEntityHandler return value", );
 
-  return (OCEntityHandlerResult)(returnValue->Uint32Value());
+  return (OCEntityHandlerResult)(Nan::To<uint32_t>(returnValue).FromJust());
 }
 
 NAN_METHOD(bind_OCSetDefaultDeviceEntityHandler) {

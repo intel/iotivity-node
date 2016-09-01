@@ -57,6 +57,10 @@ function doGetRequest( destination ) {
 		function( handle, response ) {
 			var returnValue = iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
 
+			testUtils.assert( "ok", getHandleReceptacle.handle === handle,
+				"Client: Handle received in OCDoResource() callback is the same as the original " +
+					"handle" );
+
 			if ( response &&
 					response.payload &&
 					response.payload.type === iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION &&
@@ -81,7 +85,7 @@ function doGetRequest( destination ) {
 	testUtils.stackOKOrDie( "Client", "OCDoResource(get)", getResult );
 }
 
-console.log( JSON.stringify( { assertionCount: 7 } ) );
+console.log( JSON.stringify( { assertionCount: 8 } ) );
 
 // Initialize
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
