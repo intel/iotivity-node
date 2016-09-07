@@ -21,7 +21,6 @@
 
 extern "C" {
 #include <ocstack.h>
-#include <ocrandom.h>
 }
 
 using namespace v8;

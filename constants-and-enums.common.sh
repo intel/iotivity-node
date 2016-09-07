@@ -44,7 +44,4 @@ for ONE_PATH in $INCLUDE_PATHS; do
 	if test -f "${ONE_PATH}/ocstackconfig.h"; then
 		OCSTACKCONFIG_H="${ONE_PATH}/ocstackconfig.h"
 	fi
-	if test -f "${ONE_PATH}/ocrandom.h"; then
-		OCRANDOM_H="${ONE_PATH}/ocrandom.h"
-	fi
 done

@@ -34,7 +34,7 @@ mkdir -p generated
 cat src/enums.cc.in > generated/enums.cc.new || ( rm -f generated/enums.cc.new && exit 1 )
 
 # Parse header for enums
-cat "${OCTYPES_H}" "${OCRANDOM_H}" "${OCPRESENCE_H}" | \
+cat "${OCTYPES_H}" "${OCPRESENCE_H}" | \
   grep -v '^$' | \
   awk -v PRINT=0 -v OUTPUT="" -v ENUM_LIST="" '{
     if ( $0 == "typedef enum" ) PRINT=1;
