@@ -17,7 +17,6 @@
 #include <nan.h>
 #include "../common.h"
 #include "oc-payload.h"
-#include "oc-sid.h"
 #include "string-primitive.h"
 #include "oc-platform-info.h"
 #include "oc-device-info.h"
@@ -273,7 +272,7 @@ static Local<Object> js_OCDiscoveryPayload(OCDiscoveryPayload *payload) {
 
   if (payload->sid) {
     Nan::Set(returnValue, Nan::New("sid").ToLocalChecked(),
-             js_SID(payload->sid));
+             Nan::New(payload->sid).ToLocalChecked());
   }
 
   ADD_STRUCTURE_ARRAY(returnValue, payload, resources, OCResourcePayload);
@@ -289,7 +288,7 @@ static Local<Object> js_OCDevicePayload(OCDevicePayload *payload) {
 
   if (payload->sid) {
     Nan::Set(returnValue, Nan::New("sid").ToLocalChecked(),
-             js_SID(payload->sid));
+             Nan::New(payload->sid).ToLocalChecked());
   }
 
   SET_STRING_IF_NOT_NULL(returnValue, payload, deviceName);
