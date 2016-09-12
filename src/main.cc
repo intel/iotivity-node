@@ -14,18 +14,73 @@
  * limitations under the License.
  */
 
-#include <node.h>
 #include <nan.h>
 
 extern "C" {
 #include <ocstack.h>
 }
 
-#include "functions.h"
-#include "enums.h"
 #include "constants.h"
+#include "enums.h"
+#include "functions.h"
 
 using namespace v8;
+
+#ifdef DEBUG
+#include <stdarg.h>
+Local<Value> json_stringify(Local<Object> jsObject) {
+  Local<Value> arguments[3] = {jsObject, Nan::Null(), Nan::New(4)};
+  return Nan::MakeCallback(
+      Nan::GetCurrentContext()->Global(),
+      Local<Function>::Cast(
+          Nan::Get(Nan::To<Object>(Nan::Get(Nan::GetCurrentContext()->Global(),
+                                            Nan::New("JSON").ToLocalChecked())
+                                       .ToLocalChecked())
+                       .ToLocalChecked(),
+                   Nan::New("stringify").ToLocalChecked())
+              .ToLocalChecked()),
+      3, arguments);
+}
+void console_log(Local<Value> argument) {
+  String::Utf8Value something(argument);
+  Nan::MakeCallback(
+      Nan::GetCurrentContext()->Global(),
+      Local<Function>::Cast(
+          Nan::Get(
+              Nan::To<Object>(Nan::Get(Nan::GetCurrentContext()->Global(),
+                                       Nan::New("console").ToLocalChecked())
+                                  .ToLocalChecked())
+                  .ToLocalChecked(),
+              Nan::New("log").ToLocalChecked())
+              .ToLocalChecked()),
+      1, &argument);
+}
+void debug_print(const char *message, ...) {
+  const char *format = "{\"info\":true,\"message\":\"** %s\"}";
+  char *buffer1 = 0, *buffer2 = 0;
+  size_t length;
+  va_list va;
+
+  va_start(va, message);
+  length = vsnprintf(0, 0, message, va);
+  va_end(va);
+
+  buffer1 = (char *)malloc(length + 1);
+
+  va_start(va, message);
+  vsnprintf(buffer1, length + 1, message, va);
+  va_end(va);
+
+  length = snprintf(0, 0, format, buffer1);
+  buffer2 = (char *)malloc(length + 1);
+  snprintf(buffer2, length + 1, format, buffer1);
+
+  free(buffer1);
+
+  console_log(Nan::New(buffer2).ToLocalChecked());
+  free(buffer2);
+}
+#endif /* def DEBUG */
 
 void Init(Handle<Object> exports, Handle<Object> module) {
   InitFunctions(exports, module);

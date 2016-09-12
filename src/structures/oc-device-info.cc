@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include "oc-device-info.h"
-#include "string-primitive.h"
+#include <nan.h>
 #include "../common.h"
+#include "string-primitive.h"
 
 extern "C" {
 #include <string.h>

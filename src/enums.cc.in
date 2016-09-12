@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <node.h>
 #include <nan.h>
 
 #include "enums.h"

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include "oc-entity-handler-response.h"
-#include "oc-dev-addr.h"
-#include "handles.h"
+#include <nan.h>
 #include "../common.h"
+#include "handles.h"
+#include "oc-dev-addr.h"
 #include "oc-header-option-array.h"
 #include "oc-payload.h"
 
 extern "C" {
-#include <string.h>
 #include <ocpayload.h>
+#include <string.h>
 }
 
 using namespace v8;
@@ -40,8 +40,9 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
           .ToLocalChecked();
   VALIDATE_VALUE_TYPE(requestHandle, IsObject,
                       "entitiy handler response request handle", false);
-  if (!c_OCRequestHandle(Nan::To<Object>(requestHandle).ToLocalChecked(),
-                         &(response.requestHandle))) {
+  response.requestHandle = JSOCRequestHandle::Resolve(
+      Nan::To<Object>(requestHandle).ToLocalChecked());
+  if (!response.requestHandle) {
     return false;
   }
 
@@ -53,10 +54,11 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
   if (!(resourceHandle->IsUndefined() || resourceHandle->IsNull())) {
     VALIDATE_VALUE_TYPE(resourceHandle, IsObject,
                         "entitiy handler response resource handle", false);
-    if (!c_OCResourceHandle(Nan::To<Object>(resourceHandle).ToLocalChecked(),
-                            &(response.resourceHandle))) {
-      return false;
-    }
+    response.resourceHandle =
+        JSCALLBACKHANDLE_RESOLVE(
+            JSOCResourceHandle, OCResourceHandle,
+            Nan::To<Object>(resourceHandle).ToLocalChecked(), false)
+            ->handle;
   }
 
   // ehResult

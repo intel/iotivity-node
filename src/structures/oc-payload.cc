@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+#include "oc-payload.h"
 #include <nan.h>
 #include "../common.h"
-#include "oc-payload.h"
-#include "string-primitive.h"
-#include "oc-platform-info.h"
-#include "oc-device-info.h"
 #include "handles.h"
+#include "oc-device-info.h"
+#include "oc-platform-info.h"
+#include "string-primitive.h"
 
 extern "C" {
-#include <string.h>
 #include <ocpayload.h>
+#include <string.h>
 }
 
 using namespace v8;
@@ -111,11 +111,12 @@ static Local<Object> js_OCRepPayload(OCRepPayload *payload) {
     Local<Array> types = Nan::New<Array>(count);
     for (current = payload->types, index = 0; current;
          current = current->next, index++) {
-      Nan::Set(types, index,
-               current->value
-                   ? Nan::New<Value>((Handle<String>)Nan::New(current->value)
-                                         .ToLocalChecked())
-                   : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
+      Nan::Set(
+          types, index,
+          current->value
+              ? Nan::New<Value>(
+                    (Handle<String>)Nan::New(current->value).ToLocalChecked())
+              : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
     }
 
     Nan::Set(returnValue, Nan::New("types").ToLocalChecked(), types);
@@ -131,11 +132,12 @@ static Local<Object> js_OCRepPayload(OCRepPayload *payload) {
     Local<Array> interfaces = Nan::New<Array>(count);
     for (current = payload->interfaces, index = 0; current;
          current = current->next, index++) {
-      Nan::Set(interfaces, index,
-               current->value
-                   ? Nan::New<Value>((Handle<String>)Nan::New(current->value)
-                                         .ToLocalChecked())
-                   : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
+      Nan::Set(
+          interfaces, index,
+          current->value
+              ? Nan::New<Value>(
+                    (Handle<String>)Nan::New(current->value).ToLocalChecked())
+              : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
     }
 
     Nan::Set(returnValue, Nan::New("interfaces").ToLocalChecked(), interfaces);
@@ -227,42 +229,6 @@ static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
     }                                                                         \
     Nan::Set((returnValue), Nan::New(#memberName).ToLocalChecked(), jsArray); \
   } while (0)
-
-static Local<Object> js_OCLinksPayload(OCLinksPayload *payload) {
-  Local<Object> returnValue = Nan::New<Object>();
-
-  SET_STRING_IF_NOT_NULL(returnValue, payload, href);
-  ADD_STRING_ARRAY(returnValue, payload, rt);
-  ADD_STRING_ARRAY(returnValue, payload, itf);
-  SET_STRING_IF_NOT_NULL(returnValue, payload, rel);
-  Nan::Set(returnValue, Nan::New("obs").ToLocalChecked(),
-           Nan::New(payload->obs));
-  SET_STRING_IF_NOT_NULL(returnValue, payload, title);
-  SET_STRING_IF_NOT_NULL(returnValue, payload, uri);
-  ADD_STRING_ARRAY(returnValue, payload, mt);
-
-  return returnValue;
-}
-
-static Local<Object> js_OCTagsPayload(OCTagsPayload *payload) {
-  Local<Object> returnValue = Nan::New<Object>();
-
-  Nan::Set(returnValue, Nan::New("n").ToLocalChecked(),
-           js_OCDeviceInfo(&(payload->n)));
-
-  return returnValue;
-}
-
-static Local<Object> js_OCResourceCollectionPayload(
-    OCResourceCollectionPayload *payload) {
-  Local<Object> returnValue = Nan::New<Object>();
-
-  Nan::Set(returnValue, Nan::New("tags").ToLocalChecked(),
-           js_OCTagsPayload(payload->tags));
-  ADD_STRUCTURE_ARRAY(returnValue, payload, setLinks, OCLinksPayload);
-
-  return returnValue;
-}
 
 static Local<Object> js_OCDiscoveryPayload(OCDiscoveryPayload *payload) {
   Local<Object> returnValue = Nan::New<Object>();

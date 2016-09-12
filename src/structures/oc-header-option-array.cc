@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include "oc-header-option-array.h"
+#include <nan.h>
 #include "../common.h"
 
 extern "C" {

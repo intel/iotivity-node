@@ -18,12 +18,11 @@
 #include "../structures.h"
 
 extern "C" {
-#include <stdlib.h>
 #include <ocstack.h>
+#include <stdlib.h>
 }
 
 using namespace v8;
-using namespace node;
 
 Nan::Callback *g_currentCallback = 0;
 

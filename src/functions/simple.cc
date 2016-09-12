@@ -17,8 +17,8 @@
 #include <nan.h>
 #include "../common.h"
 #include "../structures/handles.h"
-#include "../structures/oc-platform-info.h"
 #include "../structures/oc-device-info.h"
+#include "../structures/oc-platform-info.h"
 #include "../structures/string-primitive.h"
 
 extern "C" {
@@ -88,46 +88,35 @@ NAN_METHOD(bind_OCSetPlatformInfo) {
   info.GetReturnValue().Set(Nan::New(result));
 }
 
+#define GET_STRING_COUNT(api)                                                 \
+  do {                                                                        \
+    VALIDATE_ARGUMENT_COUNT(info, 2);                                         \
+    VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                                \
+    VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);                                \
+                                                                              \
+    uint8_t interfaceCount = 0;                                               \
+    OCStackResult result;                                                     \
+                                                                              \
+    result = OCGetNumberOfResourceInterfaces(                                 \
+        JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,        \
+                                 Nan::To<Object>(info[0]).ToLocalChecked())   \
+            ->handle,                                                         \
+        &interfaceCount);                                                     \
+                                                                              \
+    if (result == OC_STACK_OK) {                                              \
+      Nan::Set(Nan::To<Object>(info[1]).ToLocalChecked(),                     \
+               Nan::New("count").ToLocalChecked(), Nan::New(interfaceCount)); \
+    }                                                                         \
+                                                                              \
+    info.GetReturnValue().Set(Nan::New(result));                              \
+  } while (0)
+
 NAN_METHOD(bind_OCGetNumberOfResourceInterfaces) {
-  VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
-
-  OCResourceHandle handle = 0;
-  uint8_t interfaceCount = 0;
-  OCStackResult result;
-
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
-
-  result = OCGetNumberOfResourceInterfaces(handle, &interfaceCount);
-
-  Nan::Set(info[1]->ToObject(), Nan::New("count").ToLocalChecked(),
-           Nan::New(interfaceCount));
-
-  info.GetReturnValue().Set(Nan::New(result));
+  GET_STRING_COUNT(OCGetNumberOfResourceInterfaces);
 }
 
 NAN_METHOD(bind_OCGetNumberOfResourceTypes) {
-  VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
-
-  OCResourceHandle handle = 0;
-  uint8_t typeCount = 0;
-  OCStackResult result;
-
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
-
-  result = OCGetNumberOfResourceInterfaces(handle, &typeCount);
-
-  Nan::Set(info[1]->ToObject(), Nan::New("count").ToLocalChecked(),
-           Nan::New(typeCount));
-
-  info.GetReturnValue().Set(Nan::New(result));
+  GET_STRING_COUNT(OCGetNumberOfResourceTypes);
 }
 
 NAN_METHOD(bind_OCGetNumberOfResources) {
@@ -139,8 +128,10 @@ NAN_METHOD(bind_OCGetNumberOfResources) {
 
   result = OCGetNumberOfResources(&resourceCount);
 
-  Nan::Set(info[0]->ToObject(), Nan::New("count").ToLocalChecked(),
-           Nan::New(resourceCount));
+  if (result == OC_STACK_OK) {
+    Nan::Set(info[0]->ToObject(), Nan::New("count").ToLocalChecked(),
+             Nan::New(resourceCount));
+  }
 
   info.GetReturnValue().Set(Nan::New(result));
 }
@@ -154,21 +145,24 @@ NAN_METHOD(bind_OCGetResourceHandle) {
   handle = OCGetResourceHandle((uint8_t)(info[0]->Uint32Value()));
 
   if (handle) {
-    info.GetReturnValue().Set(js_OCResourceHandle(handle));
+    if (JSOCResourceHandle::handles[handle]->IsEmpty()) {
+      Nan::ThrowError("JS handle not found for native handle");
+      return;
+    }
+    info.GetReturnValue().Set(Nan::New(*(JSOCResourceHandle::handles[handle])));
   } else {
     info.GetReturnValue().Set(Nan::Null());
   }
 }
 
-#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()                     \
-  OCResourceHandle handle = 0;                                       \
-  VALIDATE_ARGUMENT_COUNT(info, 2);                                  \
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                         \
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);                         \
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), \
-                          &handle)) {                                \
-    return;                                                          \
-  }
+#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()                          \
+  VALIDATE_ARGUMENT_COUNT(info, 2);                                       \
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                              \
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);                              \
+  OCResourceHandle handle =                                               \
+      JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,      \
+                               Nan::To<Object>(info[0]).ToLocalChecked()) \
+          ->handle;
 
 NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();
@@ -177,7 +171,13 @@ NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
       OCGetResourceHandleFromCollection(handle, info[1]->Uint32Value());
 
   if (resourceHandle) {
-    info.GetReturnValue().Set(js_OCResourceHandle(resourceHandle));
+    if (JSOCResourceHandle::handles[resourceHandle]->IsEmpty()) {
+      Nan::ThrowError("Failed to find JS resource handle");
+      return;
+    } else {
+      info.GetReturnValue().Set(
+          Nan::New(*(JSOCResourceHandle::handles[resourceHandle])));
+    }
   } else {
     info.GetReturnValue().Set(Nan::Null());
   }
@@ -202,14 +202,13 @@ NAN_METHOD(bind_OCGetResourceTypeName) {
   GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(OCGetResourceTypeName);
 }
 
-#define LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE()               \
-  VALIDATE_ARGUMENT_COUNT(info, 1);                                  \
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                         \
-  OCResourceHandle handle = 0;                                       \
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), \
-                          &handle)) {                                \
-    return;                                                          \
-  }
+#define LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE()                    \
+  VALIDATE_ARGUMENT_COUNT(info, 1);                                       \
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                              \
+  OCResourceHandle handle =                                               \
+      JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,      \
+                               Nan::To<Object>(info[0]).ToLocalChecked()) \
+          ->handle;
 
 NAN_METHOD(bind_OCGetResourceProperties) {
   LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE();
@@ -227,27 +226,6 @@ NAN_METHOD(bind_OCGetResourceUri) {
   } else {
     info.GetReturnValue().Set(Nan::Null());
   }
-}
-
-NAN_METHOD(bind_OCUnBindResource) {
-  VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);
-
-  OCResourceHandle collectionHandle = 0, resourceHandle = 0;
-
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(),
-                          &collectionHandle)) {
-    return;
-  }
-
-  if (!c_OCResourceHandle(Nan::To<Object>(info[1]).ToLocalChecked(),
-                          &resourceHandle)) {
-    return;
-  }
-
-  info.GetReturnValue().Set(
-      Nan::New(OCUnBindResource(collectionHandle, resourceHandle)));
 }
 
 NAN_METHOD(bind_OCGetServerInstanceIDString) {

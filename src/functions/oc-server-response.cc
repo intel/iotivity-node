@@ -14,33 +14,48 @@
  * limitations under the License.
  */
 
-#include <v8.h>
 #include <nan.h>
 
 #include "../common.h"
 #include "../structures/handles.h"
+#include "../structures/oc-entity-handler-response.h"
 #include "../structures/oc-payload.h"
 
 extern "C" {
-#include <ocstack.h>
 #include <ocpayload.h>
+#include <ocstack.h>
 }
 
 using namespace v8;
-using namespace node;
+
+NAN_METHOD(bind_OCDoResponse) {
+  VALIDATE_ARGUMENT_COUNT(info, 1);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+
+  OCEntityHandlerResponse response;
+  OCStackResult result;
+
+  if (!c_OCEntityHandlerResponse(info[0]->ToObject(), &response)) {
+    return;
+  }
+
+  result = OCDoResponse(&response);
+  if (response.payload) {
+    OCPayloadDestroy(response.payload);
+  }
+  info.GetReturnValue().Set(Nan::New(result));
+}
 
 NAN_METHOD(bind_OCNotifyAllObservers) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
 
-  OCResourceHandle handle;
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
-
   info.GetReturnValue().Set(Nan::New(OCNotifyAllObservers(
-      handle, (OCQualityOfService)info[1]->Uint32Value())));
+      JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,
+                               Nan::To<Object>(info[0]).ToLocalChecked())
+          ->handle,
+      (OCQualityOfService)info[1]->Uint32Value())));
 }
 
 NAN_METHOD(bind_OCNotifyListOfObservers) {
@@ -50,10 +65,10 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   VALIDATE_ARGUMENT_TYPE(info, 2, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 3, IsUint32);
 
-  OCResourceHandle handle;
-  if (!c_OCResourceHandle(Nan::To<Object>(info[0]).ToLocalChecked(), &handle)) {
-    return;
-  }
+  OCResourceHandle handle =
+      JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,
+                               Nan::To<Object>(info[0]).ToLocalChecked())
+          ->handle;
 
   // Construct the C array of observation IDs.
   Local<Array> obsIds = Local<Array>::Cast(info[1]);

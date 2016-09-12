@@ -20,15 +20,14 @@ extern "C" {
 #include <string.h>
 }
 
-#include "structures.h"
-#include "structures/oc-header-option-array.h"
-#include "structures/oc-dev-addr.h"
-#include "structures/oc-payload.h"
-#include "structures/handles.h"
 #include "common.h"
+#include "structures.h"
+#include "structures/handles.h"
+#include "structures/oc-dev-addr.h"
+#include "structures/oc-header-option-array.h"
+#include "structures/oc-payload.h"
 
 using namespace v8;
-using namespace node;
 
 Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
   Local<Object> jsRequest = Nan::New<Object>();
@@ -36,12 +35,23 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
   // The resource may be null if the request refers to a non-existing resource
   // and is being passed to the default device entity handler
   if (request->resource) {
-    Nan::Set(jsRequest, Nan::New("resource").ToLocalChecked(),
-             js_OCResourceHandle(request->resource));
+    if (JSOCResourceHandle::handles[request->resource]->IsEmpty()) {
+      Nan::ThrowError(
+          "Conveying OCEntityHandlerRequest to JS: "
+          "Failed to find JS resource handle");
+    } else {
+      Nan::Set(jsRequest, Nan::New("resource").ToLocalChecked(),
+               Nan::New(*(JSOCResourceHandle::handles[request->resource])));
+    }
   }
 
-  Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
-           js_OCRequestHandle(request->requestHandle));
+  if (request->requestHandle) {
+    Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
+             JSOCRequestHandle::New(request->requestHandle));
+  } else {
+    Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
+             Nan::Null());
+  }
 
   SET_VALUE_ON_OBJECT(jsRequest, Number, request, method);
   SET_STRING_IF_NOT_NULL(jsRequest, request, query);

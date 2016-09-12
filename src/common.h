@@ -17,9 +17,8 @@
 #ifndef __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 #define __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 
-#include <string>
-#include <v8.h>
 #include <nan.h>
+#include <string>
 
 #define TRY_CALL(callback, context, argumentCount, arguments, exceptionReturn) \
   ({                                                                           \
@@ -127,5 +126,13 @@
     }                                                                         \
     Nan::Set((destination), Nan::New(#memberName).ToLocalChecked(), jsArray); \
   } while (0)
+
+#ifdef DEBUG
+void console_log(v8::Local<v8::Value> argument);
+v8::Local<v8::Value> json_stringify(v8::Local<v8::Object> jsObject);
+void debug_print(const char *message, ...);
+#else
+#define debug_print()
+#endif /* def DEBUG */
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__ */

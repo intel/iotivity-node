@@ -17,7 +17,6 @@
 // This file makes the assumption that a (Nan::Persistent<Value> *) pointer will
 // fit in a (FILE *) pointer
 
-#include <v8.h>
 #include <nan.h>
 
 #include "../common.h"
@@ -25,8 +24,8 @@
 #include "../structures/oc-payload.h"
 
 extern "C" {
-#include <ocstack.h>
 #include <ocpayload.h>
+#include <ocstack.h>
 }
 
 using namespace v8;

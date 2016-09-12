@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include "oc-client-response.h"
-#include "oc-dev-addr.h"
+#include <nan.h>
 #include "../common.h"
+#include "oc-dev-addr.h"
 #include "oc-header-option-array.h"
-#include "oc-payload.h"
 #include "oc-identity.h"
+#include "oc-payload.h"
 
 extern "C" {
 #include <string.h>
