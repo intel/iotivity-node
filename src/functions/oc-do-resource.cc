@@ -55,6 +55,9 @@ static void deleteNanCallback(CallbackInfo *callback) {
 // structure
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
+
+  Nan::HandleScope scope;
+
   // Call the JS Callback
   Local<Value> jsCallbackArguments[2] = {
       Nan::New<Object>(*((CallbackInfo *)context)->handle),
