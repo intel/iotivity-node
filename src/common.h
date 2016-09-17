@@ -21,6 +21,18 @@
 #include <v8.h>
 #include <nan.h>
 
+#define TRY_CALL(callback, context, argumentCount, arguments, exceptionReturn) \
+  ({                                                                           \
+    Nan::TryCatch tryCatch;                                                    \
+    Local<Value> returnValue =                                                 \
+        (callback)->Call((context), (argumentCount), (arguments));             \
+    if (tryCatch.HasCaught()) {                                                \
+      tryCatch.ReThrow();                                                      \
+      return (exceptionReturn);                                                \
+    }                                                                          \
+    returnValue;                                                               \
+  })
+
 #define VALIDATE_CALLBACK_RETURN_VALUE_TYPE(value, typecheck, message) \
   if (!value->typecheck()) {                                           \
     Nan::ThrowTypeError(                                               \

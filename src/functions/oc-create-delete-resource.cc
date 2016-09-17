@@ -39,7 +39,8 @@ static OCEntityHandlerResult defaultEntityHandler(
   Local<Value> jsCallbackArguments[2] = {Nan::New(flag),
                                          js_OCEntityHandlerRequest(request)};
   Local<Value> returnValue =
-      ((Nan::Callback *)context)->Call(2, jsCallbackArguments);
+      TRY_CALL((Nan::Callback *)context, Nan::GetCurrentContext()->Global(), 2,
+               jsCallbackArguments, OC_EH_ERROR);
 
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32, "OCEntityHandler");
 

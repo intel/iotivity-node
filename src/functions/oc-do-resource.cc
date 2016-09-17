@@ -60,8 +60,9 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
       Nan::New<Object>(*((CallbackInfo *)context)->handle),
       js_OCClientResponse(clientResponse)};
 
-  Local<Value> returnValue =
-      (((CallbackInfo *)context)->callback)->Call(2, jsCallbackArguments);
+  Local<Value> returnValue = TRY_CALL(
+      (((CallbackInfo *)context)->callback), Nan::GetCurrentContext()->Global(),
+      2, jsCallbackArguments, OC_STACK_KEEP_TRANSACTION);
 
   // Validate value we got back from it
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
