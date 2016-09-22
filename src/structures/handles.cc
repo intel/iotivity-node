@@ -46,7 +46,7 @@ bool fillCArrayFromJSArray(unsigned char *bytes, size_t length,
   for (index = 0; index < length; index++) {
     Local<Value> byte = Nan::Get(array, index).ToLocalChecked();
     VALIDATE_VALUE_TYPE(byte, IsUint32, "byte array item", false);
-    bytes[index] = (unsigned char)(byte->Uint32Value());
+    bytes[index] = (unsigned char)(Nan::To<uint32_t>(byte).FromJust());
   }
 
   return true;

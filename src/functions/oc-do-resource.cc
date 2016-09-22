@@ -55,7 +55,7 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
                                       "OCClientResponseHandler");
 
   // Pass on the value to the C API
-  return (OCStackApplicationResult)returnValue->Uint32Value();
+  return (OCStackApplicationResult)Nan::To<uint32_t>(returnValue).FromJust();
 }
 
 NAN_METHOD(bind_OCDoResource) {
@@ -97,7 +97,8 @@ NAN_METHOD(bind_OCDoResource) {
   // If a destination is given, we only use it if it can be converted to a
   // OCDevAddr structure
   if (info[3]->IsObject()) {
-    if (c_OCDevAddr(info[3]->ToObject(), &destinationToFillIn)) {
+    if (c_OCDevAddr(Nan::To<Object>(info[3]).ToLocalChecked(),
+                    &destinationToFillIn)) {
       destination = &destinationToFillIn;
     } else {
       free(options);
@@ -108,7 +109,7 @@ NAN_METHOD(bind_OCDoResource) {
   // If a payload is given, we only use it if it can be converted to a
   // OCPayload*
   if (info[4]->IsObject()) {
-    if (!c_OCPayload(info[4]->ToObject(), &payload)) {
+    if (!c_OCPayload(Nan::To<Object>(info[4]).ToLocalChecked(), &payload)) {
       free(options);
       return;
     }
@@ -125,12 +126,12 @@ NAN_METHOD(bind_OCDoResource) {
   data.cb = defaultOCClientResponseHandler;
   data.cd = (OCClientContextDeleter)deleteNanCallback;
 
-  OCStackResult returnValue =
-      OCDoResource(&(callbackInfo->handle), (OCMethod)info[1]->Uint32Value(),
-                   (const char *)*String::Utf8Value(info[2]), destination,
-                   payload, (OCConnectivityType)info[5]->Uint32Value(),
-                   (OCQualityOfService)info[6]->Uint32Value(), &data, options,
-                   (uint8_t)info[9]->Uint32Value());
+  OCStackResult returnValue = OCDoResource(
+      &(callbackInfo->handle), (OCMethod)Nan::To<uint32_t>(info[1]).FromJust(),
+      (const char *)*String::Utf8Value(info[2]), destination, payload,
+      (OCConnectivityType)Nan::To<uint32_t>(info[5]).FromJust(),
+      (OCQualityOfService)Nan::To<uint32_t>(info[6]).FromJust(), &data, options,
+      (uint8_t)Nan::To<uint32_t>(info[9]).FromJust());
 
   free(options);
 
@@ -169,6 +170,6 @@ NAN_METHOD(bind_OCCancel) {
       JSCALLBACKHANDLE_RESOLVE(JSOCDoHandle, OCDoHandle,
                                Nan::To<Object>(info[0]).ToLocalChecked())
           ->handle,
-      (OCQualityOfService)info[1]->Uint32Value(), headerOptions,
+      (OCQualityOfService)Nan::To<uint32_t>(info[1]).FromJust(), headerOptions,
       numberOfOptions)));
 }

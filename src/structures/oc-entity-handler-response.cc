@@ -74,7 +74,8 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
   if (!payload->IsNull()) {
     VALIDATE_VALUE_TYPE(payload, IsObject, "entity handler response payload",
                         false);
-    if (!c_OCPayload(payload->ToObject(), &(response.payload))) {
+    if (!c_OCPayload(Nan::To<Object>(payload).ToLocalChecked(),
+                     &(response.payload))) {
       return false;
     }
   }

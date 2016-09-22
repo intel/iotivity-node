@@ -476,15 +476,16 @@ static bool fillArray(void *flatArray, int *p_index, Local<Array> array,
       switch (arrayType) {
         case OCREP_PROP_INT:
           ((uint64_t *)flatArray)[(*p_index)++] =
-              (uint64_t)member->Uint32Value();
+              (uint64_t)Nan::To<uint32_t>(member).FromJust();
           break;
 
         case OCREP_PROP_DOUBLE:
-          ((double *)flatArray)[(*p_index)++] = member->NumberValue();
+          ((double *)flatArray)[(*p_index)++] =
+              Nan::To<double>(member).FromJust();
           break;
 
         case OCREP_PROP_BOOL:
-          ((bool *)flatArray)[(*p_index)++] = member->BooleanValue();
+          ((bool *)flatArray)[(*p_index)++] = Nan::To<bool>(member).FromJust();
           break;
 
         case OCREP_PROP_STRING: {
@@ -505,7 +506,8 @@ static bool fillArray(void *flatArray, int *p_index, Local<Array> array,
 
         case OCREP_PROP_OBJECT: {
           OCRepPayload *theObject = 0;
-          if (c_OCRepPayload(member->ToObject(), &theObject)) {
+          if (c_OCRepPayload(Nan::To<Object>(member).ToLocalChecked(),
+                             &theObject)) {
             ((OCRepPayload **)flatArray)[(*p_index)++] = theObject;
           } else {
             // If we fail to create the object, we free all objects allocated
@@ -658,22 +660,23 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
         }
       } else if (value->IsUint32()) {
         String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
-        if (!OCRepPayloadSetPropInt(payload, (const char *)*name,
-                                    (int64_t)value->Uint32Value())) {
+        if (!OCRepPayloadSetPropInt(
+                payload, (const char *)*name,
+                (int64_t)Nan::To<uint32_t>(value).FromJust())) {
           Nan::ThrowError("reppayload: Failed to set integer property");
           goto fail;
         }
       } else if (value->IsNumber()) {
         String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
         if (!OCRepPayloadSetPropDouble(payload, (const char *)*name,
-                                       value->NumberValue())) {
+                                       Nan::To<double>(value).FromJust())) {
           Nan::ThrowError("reppayload: Failed to set floating point property");
           goto fail;
         }
       } else if (value->IsBoolean()) {
         String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
         if (!OCRepPayloadSetPropBool(payload, (const char *)*name,
-                                     value->BooleanValue())) {
+                                     Nan::To<bool>(value).FromJust())) {
           Nan::ThrowError("reppayload: Failed to set boolean property");
           goto fail;
         }
@@ -761,7 +764,8 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
       } else if (value->IsObject()) {
         OCRepPayload *child_payload = 0;
 
-        if (c_OCRepPayload(value->ToObject(), &child_payload)) {
+        if (c_OCRepPayload(Nan::To<Object>(value).ToLocalChecked(),
+                           &child_payload)) {
           String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
           if (!OCRepPayloadSetPropObjectAsOwner(payload, (const char *)*name,
                                                 child_payload)) {
@@ -781,7 +785,8 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
     VALIDATE_VALUE_TYPE_OR_FREE(next, IsObject, "reppayload.next", false,
                                 payload, OCRepPayloadDestroy);
     OCRepPayload *next_payload = 0;
-    if (!c_OCRepPayload(next->ToObject(), &next_payload)) {
+    if (!c_OCRepPayload(Nan::To<Object>(next).ToLocalChecked(),
+                        &next_payload)) {
       goto fail;
     }
     OCRepPayloadAppend(payload, next_payload);
@@ -801,7 +806,7 @@ bool c_OCPayload(Local<Object> jsPayload, OCPayload **p_payload) {
         Nan::Get(jsPayload, Nan::New("type").ToLocalChecked()).ToLocalChecked();
     VALIDATE_VALUE_TYPE(type, IsUint32, "payload.type", false);
 
-    switch (type->Uint32Value()) {
+    switch (Nan::To<uint32_t>(type).FromJust()) {
       case PAYLOAD_TYPE_REPRESENTATION:
         return c_OCRepPayload(jsPayload, (OCRepPayload **)p_payload);
 

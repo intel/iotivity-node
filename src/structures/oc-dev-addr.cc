@@ -74,7 +74,7 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
     if (index < length) {
       Local<Value> addressItem = Nan::Get(addrArray, index).ToLocalChecked();
       VALIDATE_VALUE_TYPE(addressItem, IsUint32, "addr.addr item", false);
-      local.addr[index] = (char)addressItem->Uint32Value();
+      local.addr[index] = (char)Nan::To<uint32_t>(addressItem).FromJust();
     } else {
       local.addr[index] = 0;
     }

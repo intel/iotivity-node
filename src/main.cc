@@ -16,10 +16,6 @@
 
 #include <nan.h>
 
-extern "C" {
-#include <ocstack.h>
-}
-
 #include "constants.h"
 #include "enums.h"
 #include "functions.h"
@@ -82,10 +78,10 @@ void debug_print(const char *message, ...) {
 }
 #endif /* def DEBUG */
 
-void Init(Handle<Object> exports, Handle<Object> module) {
-  InitFunctions(exports, module);
-  InitEnums(exports);
-  InitConstants(exports);
+NAN_MODULE_INIT(Init) {
+  InitFunctions(target);
+  InitEnums(target);
+  InitConstants(target);
 }
 
 NODE_MODULE(iotivity, Init)

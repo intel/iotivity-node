@@ -35,7 +35,8 @@ NAN_METHOD(bind_OCInit) {
 
   info.GetReturnValue().Set(Nan::New(OCInit(
       (const char *)(info[0]->IsString() ? (*String::Utf8Value(info[0])) : 0),
-      (uint16_t)info[1]->Uint32Value(), (OCMode)info[2]->Uint32Value())));
+      (uint16_t)Nan::To<uint32_t>(info[1]).FromJust(),
+      (OCMode)Nan::To<uint32_t>(info[2]).FromJust())));
 }
 
 NAN_METHOD(bind_OCStop) { info.GetReturnValue().Set(Nan::New(OCStop())); }
@@ -46,8 +47,8 @@ NAN_METHOD(bind_OCStartPresence) {
   VALIDATE_ARGUMENT_COUNT(info, 1);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
 
-  info.GetReturnValue().Set(
-      Nan::New(OCStartPresence((uint32_t)info[0]->Uint32Value())));
+  info.GetReturnValue().Set(Nan::New(
+      OCStartPresence((uint32_t)Nan::To<uint32_t>(info[0]).FromJust())));
 }
 
 NAN_METHOD(bind_OCStopPresence) {
@@ -60,7 +61,7 @@ NAN_METHOD(bind_OCSetDeviceInfo) {
 
   OCDeviceInfo deviceInfo;
 
-  if (!c_OCDeviceInfo(info[0]->ToObject(), &deviceInfo)) {
+  if (!c_OCDeviceInfo(Nan::To<Object>(info[0]).ToLocalChecked(), &deviceInfo)) {
     return;
   }
 
@@ -77,7 +78,8 @@ NAN_METHOD(bind_OCSetPlatformInfo) {
 
   OCPlatformInfo platformInfo;
 
-  if (!c_OCPlatformInfo(info[0]->ToObject(), &platformInfo)) {
+  if (!c_OCPlatformInfo(Nan::To<Object>(info[0]).ToLocalChecked(),
+                        &platformInfo)) {
     return;
   }
 
@@ -129,8 +131,8 @@ NAN_METHOD(bind_OCGetNumberOfResources) {
   result = OCGetNumberOfResources(&resourceCount);
 
   if (result == OC_STACK_OK) {
-    Nan::Set(info[0]->ToObject(), Nan::New("count").ToLocalChecked(),
-             Nan::New(resourceCount));
+    Nan::Set(Nan::To<Object>(info[0]).ToLocalChecked(),
+             Nan::New("count").ToLocalChecked(), Nan::New(resourceCount));
   }
 
   info.GetReturnValue().Set(Nan::New(result));
@@ -142,7 +144,8 @@ NAN_METHOD(bind_OCGetResourceHandle) {
 
   OCResourceHandle handle = 0;
 
-  handle = OCGetResourceHandle((uint8_t)(info[0]->Uint32Value()));
+  handle =
+      OCGetResourceHandle((uint8_t)(Nan::To<uint32_t>(info[0]).FromJust()));
 
   if (handle) {
     if (JSOCResourceHandle::handles[handle]->IsEmpty()) {
@@ -167,8 +170,8 @@ NAN_METHOD(bind_OCGetResourceHandle) {
 NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();
 
-  OCResourceHandle resourceHandle =
-      OCGetResourceHandleFromCollection(handle, info[1]->Uint32Value());
+  OCResourceHandle resourceHandle = OCGetResourceHandleFromCollection(
+      handle, Nan::To<uint32_t>(info[1]).FromJust());
 
   if (resourceHandle) {
     if (JSOCResourceHandle::handles[resourceHandle]->IsEmpty()) {
@@ -186,7 +189,7 @@ NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
 #define GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(apiFunction) \
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();                        \
   const char *resultOf##apiFunction =                              \
-      apiFunction(handle, info[1]->Uint32Value());                 \
+      apiFunction(handle, Nan::To<uint32_t>(info[1]).FromJust());  \
   if (resultOf##apiFunction) {                                     \
     info.GetReturnValue().Set(                                     \
         Nan::New(resultOf##apiFunction).ToLocalChecked());         \

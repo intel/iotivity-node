@@ -35,7 +35,8 @@ NAN_METHOD(bind_OCDoResponse) {
   OCEntityHandlerResponse response;
   OCStackResult result;
 
-  if (!c_OCEntityHandlerResponse(info[0]->ToObject(), &response)) {
+  if (!c_OCEntityHandlerResponse(Nan::To<Object>(info[0]).ToLocalChecked(),
+                                 &response)) {
     return;
   }
 
@@ -55,7 +56,7 @@ NAN_METHOD(bind_OCNotifyAllObservers) {
       JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,
                                Nan::To<Object>(info[0]).ToLocalChecked())
           ->handle,
-      (OCQualityOfService)info[1]->Uint32Value())));
+      (OCQualityOfService)Nan::To<uint32_t>(info[1]).FromJust())));
 }
 
 NAN_METHOD(bind_OCNotifyListOfObservers) {
@@ -95,18 +96,20 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
       Nan::ThrowTypeError("OCObservationID must satisfy IsUint32()");
       return;
     }
-    c_observations[index] = (OCObservationId)oneObservationId->Uint32Value();
+    c_observations[index] =
+        (OCObservationId)Nan::To<uint32_t>(oneObservationId).FromJust();
   }
 
   OCRepPayload *payload = 0;
-  if (!c_OCPayload(info[2]->ToObject(), (OCPayload **)&payload)) {
+  if (!c_OCPayload(Nan::To<Object>(info[2]).ToLocalChecked(),
+                   (OCPayload **)&payload)) {
     free(c_observations);
     return;
   }
 
-  Local<Number> returnValue = Nan::New(
-      OCNotifyListOfObservers(handle, c_observations, arrayLength, payload,
-                              (OCQualityOfService)info[3]->Uint32Value()));
+  Local<Number> returnValue = Nan::New(OCNotifyListOfObservers(
+      handle, c_observations, arrayLength, payload,
+      (OCQualityOfService)Nan::To<uint32_t>(info[3]).FromJust()));
 
   free(c_observations);
   OCRepPayloadDestroy(payload);

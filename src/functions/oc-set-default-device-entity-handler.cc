@@ -40,7 +40,7 @@ static OCEntityHandlerResult defaultDeviceEntityHandler(
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
                                       "OCDeviceEntityHandler");
 
-  return (OCEntityHandlerResult)(returnValue->Uint32Value());
+  return (OCEntityHandlerResult)(Nan::To<uint32_t>(returnValue).FromJust());
 }
 
 NAN_METHOD(bind_OCSetDefaultDeviceEntityHandler) {

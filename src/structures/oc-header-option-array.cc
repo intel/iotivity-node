@@ -105,7 +105,7 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
                               "(OCHeaderOption array item).optionData item",
                               false);
           options[index].optionData[dataIndex] =
-              (uint8_t)optionDataItem->Uint32Value();
+              (uint8_t)Nan::To<uint32_t>(optionDataItem).FromJust();
         } else {
           options[index].optionData[dataIndex] = 0;
         }

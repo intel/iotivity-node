@@ -39,7 +39,7 @@ static OCEntityHandlerResult defaultEntityHandler(
 
   VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32, "OCEntityHandler");
 
-  return (OCEntityHandlerResult)(returnValue->Uint32Value());
+  return (OCEntityHandlerResult)(Nan::To<uint32_t>(returnValue).FromJust());
 }
 
 NAN_METHOD(bind_OCCreateResource) {
@@ -62,7 +62,7 @@ NAN_METHOD(bind_OCCreateResource) {
       &(callbackInfo->handle), (const char *)*String::Utf8Value(info[1]),
       (const char *)*String::Utf8Value(info[2]),
       (const char *)*String::Utf8Value(info[3]), defaultEntityHandler,
-      (void *)callbackInfo, (uint8_t)info[5]->Uint32Value());
+      (void *)callbackInfo, (uint8_t)Nan::To<uint32_t>(info[5]).FromJust());
 
   if (returnValue == OC_STACK_OK) {
     Nan::Set(Nan::To<Object>(info[0]).ToLocalChecked(),
