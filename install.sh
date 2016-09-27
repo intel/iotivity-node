@@ -70,6 +70,7 @@ if test "x${PLATFORM}x" = "xdarwinx"; then
   cp "${SOURCE}/out/${PLATFORM}/${ARCH}/${CONFIGURATION}"/*.a "${ACTUAL_LIBDIR}" || exit 1
 else
   cp "${SOURCE}/out/${PLATFORM}/${ARCH}/${CONFIGURATION}/liboctbstack.so" "${ACTUAL_LIBDIR}" || exit 1
+  cp "${SOURCE}/out/${PLATFORM}/${ARCH}/${CONFIGURATION}/libconnectivity_abstraction.so" "${ACTUAL_LIBDIR}" || exit 1
 fi
 
 mkdir -p "${ACTUAL_INCLUDEDIR}/iotivity/${OCTB_STACK_DIR}" || exit 1
@@ -80,6 +81,7 @@ touch "${ACTUAL_INCLUDEDIR}/${OCTB_STACK_INCLUDEDIR}"/logger.h
 
 mkdir -p "${ACTUAL_INCLUDEDIR}/iotivity/${OCTB_CCOMMON_DIR}" || exit 1
 cp -a "${SOURCE}/${OCTB_CCOMMON_DIR}/platform_features.h" "${ACTUAL_INCLUDEDIR}/${OCTB_CCOMMON_INCLUDEDIR}" || exit 1
+cp -a "${SOURCE}/${OCTB_CCOMMON_DIR}/iotivity_config.h" "${ACTUAL_INCLUDEDIR}/${OCTB_CCOMMON_INCLUDEDIR}" || exit 1
 
 if test "x${INSTALL_PC}x" = "xtruex"; then
   mkdir -p "${ACTUAL_LIBDIR}/pkgconfig"
