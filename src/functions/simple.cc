@@ -19,7 +19,6 @@
 #include "../structures/handles.h"
 #include "../structures/oc-device-info.h"
 #include "../structures/oc-platform-info.h"
-#include "../structures/string-primitive.h"
 
 extern "C" {
 #include <ocstack.h>

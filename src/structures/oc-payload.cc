@@ -20,7 +20,6 @@
 #include "handles.h"
 #include "oc-device-info.h"
 #include "oc-platform-info.h"
-#include "string-primitive.h"
 
 extern "C" {
 #include <ocpayload.h>
@@ -451,9 +450,9 @@ static bool fillArray(void *flatArray, int *p_index, Local<Array> array,
           break;
 
         case OCREP_PROP_STRING: {
-          char *theString;
+          char *theString = strdup((const char *)*(String::Utf8Value(member)));
 
-          if (c_StringNew(member->ToString(), &theString)) {
+          if (theString) {
             ((char **)flatArray)[(*p_index)++] = theString;
           } else {
             // If we fail to copy the string, we free all strings allocated so

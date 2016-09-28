@@ -195,8 +195,7 @@
 				"src/structures/oc-header-option-array.cc",
 				"src/structures/oc-identity.cc",
 				"src/structures/oc-payload.cc",
-				"src/structures/oc-platform-info.cc",
-				"src/structures/string-primitive.cc"
+				"src/structures/oc-platform-info.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
 		}

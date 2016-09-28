@@ -17,7 +17,6 @@
 #include "oc-platform-info.h"
 #include <nan.h>
 #include "../common.h"
-#include "string-primitive.h"
 
 extern "C" {
 #include <string.h>
