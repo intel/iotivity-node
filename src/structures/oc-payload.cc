@@ -90,8 +90,6 @@ static Local<Array> js_OCRepPayloadValueArray(OCRepPayloadValueArray *array) {
 
 static Local<Object> js_OCRepPayload(OCRepPayload *payload) {
   Local<Object> returnValue = Nan::New<Object>();
-  int count, index;
-  OCStringLL *current;
   OCRepPayloadValue *value;
 
   // payload.type
@@ -102,46 +100,10 @@ static Local<Object> js_OCRepPayload(OCRepPayload *payload) {
   SET_STRING_IF_NOT_NULL(returnValue, payload, uri);
 
   // payload.types
-  if (payload->types) {
-    // Count the items
-    for (current = payload->types, count = 0; current;
-         current = current->next, count++)
-      ;
-
-    Local<Array> types = Nan::New<Array>(count);
-    for (current = payload->types, index = 0; current;
-         current = current->next, index++) {
-      Nan::Set(
-          types, index,
-          current->value
-              ? Nan::New<Value>(
-                    (Handle<String>)Nan::New(current->value).ToLocalChecked())
-              : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
-    }
-
-    Nan::Set(returnValue, Nan::New("types").ToLocalChecked(), types);
-  }
+  ADD_STRING_ARRAY(returnValue, payload, types);
 
   // payload.interfaces
-  if (payload->interfaces) {
-    // Count the items
-    for (current = payload->interfaces, count = 0; current;
-         current = current->next, count++)
-      ;
-
-    Local<Array> interfaces = Nan::New<Array>(count);
-    for (current = payload->interfaces, index = 0; current;
-         current = current->next, index++) {
-      Nan::Set(
-          interfaces, index,
-          current->value
-              ? Nan::New<Value>(
-                    (Handle<String>)Nan::New(current->value).ToLocalChecked())
-              : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
-    }
-
-    Nan::Set(returnValue, Nan::New("interfaces").ToLocalChecked(), interfaces);
-  }
+  ADD_STRING_ARRAY(returnValue, payload, interfaces);
 
   // payload.values
   if (payload->values) {

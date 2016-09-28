@@ -178,6 +178,7 @@
 				"generated/constants.cc",
 				"generated/enums.cc",
 				"generated/functions.cc",
+				"src/common.cc",
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
 				"src/functions/oc-register-persistent-storage-handler.cc",
