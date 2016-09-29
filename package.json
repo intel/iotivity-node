@@ -10,6 +10,9 @@
     "iotivity",
     "iot"
   ],
+  "bin": {
+    "json2cbor": "deps/iotivity/bin/json2cbor"
+  },
   "scripts": {
     "ci": "TESTING=true npm install && grunt testsuite ocf-suite testdist --ci",
     "ci-basic": "TESTING=true npm install && grunt testsuite testdist --suites='Load Library.js' --ci",

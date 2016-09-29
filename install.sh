@@ -44,11 +44,15 @@ fi
 
 CONFIGURATION="$(ls "${SOURCE}/out/${PLATFORM}/${ARCH}" | grep -E "release|debug" | head -n 1)"
 
+SOURCE_OUT_ROOT="${SOURCE}/out/${PLATFORM}/${ARCH}/${CONFIGURATION}"
+
 LIBDIR="${PREFIX}/lib"
+BINDIR="${PREFIX}/bin"
 INCLUDEDIR="${PREFIX}/include"
 SHAREDIR="${PREFIX}/share/iotivity"
 
 OCTB_STACK_DIR=resource/csdk/stack
+OCTB_SECURITY_DIR=resource/csdk/security
 OCTB_CCOMMON_DIR=resource/c_common
 OCTB_STACK_INCLUDEDIR=iotivity/${OCTB_STACK_DIR}/include
 OCTB_CCOMMON_INCLUDEDIR=iotivity/${OCTB_CCOMMON_DIR}
@@ -57,21 +61,25 @@ OCTB_CCOMMON_INCLUDEDIR=iotivity/${OCTB_CCOMMON_DIR}
 # should not be used in the construction of any other variable such as LIBDIR or INCLUDEDIR.
 
 ACTUAL_LIBDIR="${DESTDIR}/${LIBDIR##/}"
+ACTUAL_BINDIR="${DESTDIR}/${BINDIR##/}"
 ACTUAL_INCLUDEDIR="${DESTDIR}/${INCLUDEDIR##/}"
 ACTUAL_SHAREDIR="${DESTDIR}/${SHAREDIR##/}"
 
 # Paths have been established above. Copy the files and fill out the .pc file.
 
 mkdir -p "${ACTUAL_SHAREDIR}" || exit 1
-cp "${SOURCE}/resource/csdk/security/provisioning/sample/oic_svr_db_server_justworks.json" ${ACTUAL_SHAREDIR}
+cp "${SOURCE}/${OCTB_SECURITY_DIR}/provisioning/sample/oic_svr_db_server_justworks.json" ${ACTUAL_SHAREDIR}
 
 mkdir -p "${ACTUAL_LIBDIR}" || exit 1
 if test "x${PLATFORM}x" = "xdarwinx"; then
-  cp "${SOURCE}/out/${PLATFORM}/${ARCH}/${CONFIGURATION}"/*.a "${ACTUAL_LIBDIR}" || exit 1
+  cp "${SOURCE_OUT_ROOT}"/*.a "${ACTUAL_LIBDIR}" || exit 1
 else
-  cp "${SOURCE}/out/${PLATFORM}/${ARCH}/${CONFIGURATION}/liboctbstack.so" "${ACTUAL_LIBDIR}" || exit 1
-  cp "${SOURCE}/out/${PLATFORM}/${ARCH}/${CONFIGURATION}/libconnectivity_abstraction.so" "${ACTUAL_LIBDIR}" || exit 1
+  cp "${SOURCE_OUT_ROOT}/liboctbstack.so" "${ACTUAL_LIBDIR}" || exit 1
+  cp "${SOURCE_OUT_ROOT}/libconnectivity_abstraction.so" "${ACTUAL_LIBDIR}" || exit 1
 fi
+
+mkdir -p "${ACTUAL_BINDIR}" || exit 1
+cp -a "${SOURCE_OUT_ROOT}/${OCTB_SECURITY_DIR}/tool/json2cbor" "${ACTUAL_BINDIR}"
 
 mkdir -p "${ACTUAL_INCLUDEDIR}/iotivity/${OCTB_STACK_DIR}" || exit 1
 cp -a "${SOURCE}/${OCTB_STACK_DIR}/include" "${ACTUAL_INCLUDEDIR}/${OCTB_STACK_INCLUDEDIR}" || exit 1

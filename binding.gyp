@@ -7,7 +7,14 @@
 			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")',
 			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/c_common")',
 			'-DROUTING_EP',
-			'-DTCP_ADAPTER'
+			'-DTCP_ADAPTER',
+			'-DDTLSV12',
+			'-DWITH_SHA256',
+			'-DDTLS_CHECK_CONTENTTYPE',
+			'-DSHA2_USE_INTTYPES_H',
+			'-DWITH_BWT',
+			'-D__WITH_DTLS__',
+			'-DEASY_SETUP_CA_INIT'
 		]
 	},
 

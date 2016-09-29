@@ -57,9 +57,10 @@ while test $# -gt 0; do
 	shift
 done
 
+SCONS_FLAGS="SECURED=1"
 
 if test "x${DO_DEBUG}x" = "xtruex"; then
-	SCONS_FLAGS="RELEASE=False"
+	SCONS_FLAGS="${SCONS_FLAGS} RELEASE=False"
 fi
 
 set -x
@@ -85,7 +86,7 @@ if test "x${DO_BUILD}x" = "xtruex"; then
 				patch -p1 < "${patch}"
 			done
 
-			scons $SCONS_FLAGS logger octbstack connectivity_abstraction coap c_common ocsrm routingmanager || { cat config.log; exit 1; }
+			scons $SCONS_FLAGS logger octbstack connectivity_abstraction coap c_common ocsrm routingmanager json2cbor || { cat config.log; exit 1; }
 
 	cd ../../ || exit 1
 else
