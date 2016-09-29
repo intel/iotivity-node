@@ -53,12 +53,12 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
              Nan::Null());
   }
 
-  SET_VALUE_ON_OBJECT(jsRequest, Number, request, method);
+  SET_VALUE_ON_OBJECT(jsRequest, request, method, Number);
   SET_STRING_IF_NOT_NULL(jsRequest, request, query);
 
   Local<Object> obsInfo = Nan::New<Object>();
-  SET_VALUE_ON_OBJECT(obsInfo, Number, &(request->obsInfo), action);
-  SET_VALUE_ON_OBJECT(obsInfo, Number, &(request->obsInfo), obsId);
+  SET_VALUE_ON_OBJECT(obsInfo, &(request->obsInfo), action, Number);
+  SET_VALUE_ON_OBJECT(obsInfo, &(request->obsInfo), obsId, Number);
   Nan::Set(jsRequest, Nan::New("obsInfo").ToLocalChecked(), obsInfo);
 
   Nan::Set(jsRequest,

@@ -56,32 +56,24 @@ void c_OCPlatformInfoFreeMembers(OCPlatformInfo *info) {
   free(info->systemTime);
 }
 
-bool c_OCPlatformInfo(Local<Object> platformInfo, OCPlatformInfo *info) {
+bool c_OCPlatformInfo(Local<Object> jsInfo, OCPlatformInfo *info) {
   OCPlatformInfo local = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-  VALIDATE_AND_ASSIGN_STRING(&local, platformID, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, manufacturerName, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, manufacturerUrl, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, modelNumber, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, dateOfManufacture, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, platformVersion, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, operatingSystemVersion, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, hardwareVersion, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, firmwareVersion, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, supportUrl, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
-  VALIDATE_AND_ASSIGN_STRING(&local, systemTime, platformInfo,
-                             c_OCPlatformInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, platformID, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, manufacturerName, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, manufacturerUrl, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, modelNumber, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, dateOfManufacture, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, platformVersion, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, operatingSystemVersion, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, hardwareVersion, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, firmwareVersion, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, supportUrl, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, systemTime, goto free);
 
   *info = local;
   return true;
+free:
+  c_OCPlatformInfoFreeMembers(&local);
+  return false;
 }

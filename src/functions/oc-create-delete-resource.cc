@@ -37,7 +37,7 @@ static OCEntityHandlerResult defaultEntityHandler(
       &(((CallbackInfo<OCResourceHandle> *)context)->callback),
       Nan::GetCurrentContext()->Global(), 2, jsCallbackArguments, OC_EH_ERROR);
 
-  VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32, "OCEntityHandler");
+  VALIDATE_VALUE_TYPE(returnValue, IsUint32, "OCEntityHandler return value", );
 
   return (OCEntityHandlerResult)(Nan::To<uint32_t>(returnValue).FromJust());
 }

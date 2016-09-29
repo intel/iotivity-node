@@ -76,6 +76,10 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   uint8_t arrayLength = (uint8_t)obsIds->Length();
 
   OCObservationId *c_observations = 0;
+  int index;
+  Local<Value> oneObservationId;
+  OCRepPayload *payload = 0;
+  Local<Number> returnValue;
 
   if (arrayLength > 0) {
     c_observations =
@@ -88,31 +92,24 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   }
 
   // Populate a C-like array from the V8 array
-  int index;
   for (index = 0; index < arrayLength; index++) {
-    Local<Value> oneObservationId = Nan::Get(obsIds, index).ToLocalChecked();
-    if (!(oneObservationId->IsUint32())) {
-      free(c_observations);
-      Nan::ThrowTypeError("OCObservationID must satisfy IsUint32()");
-      return;
-    }
+    oneObservationId = Nan::Get(obsIds, index).ToLocalChecked();
+    VALIDATE_VALUE_TYPE(oneObservationId, IsUint32, "obsId", goto free);
     c_observations[index] =
         (OCObservationId)Nan::To<uint32_t>(oneObservationId).FromJust();
   }
 
-  OCRepPayload *payload = 0;
   if (!c_OCPayload(Nan::To<Object>(info[2]).ToLocalChecked(),
                    (OCPayload **)&payload)) {
-    free(c_observations);
-    return;
+    goto free;
   }
 
-  Local<Number> returnValue = Nan::New(OCNotifyListOfObservers(
+  returnValue = Nan::New(OCNotifyListOfObservers(
       handle, c_observations, arrayLength, payload,
       (OCQualityOfService)Nan::To<uint32_t>(info[3]).FromJust()));
 
-  free(c_observations);
   OCRepPayloadDestroy(payload);
-
   info.GetReturnValue().Set(returnValue);
+free:
+  free(c_observations);
 }

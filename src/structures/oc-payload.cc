@@ -169,9 +169,9 @@ static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
   // payload.interfaces
   ADD_STRING_ARRAY(returnValue, payload, interfaces);
 
-  SET_VALUE_ON_OBJECT(returnValue, Number, payload, bitmap);
-  SET_VALUE_ON_OBJECT(returnValue, Boolean, payload, secure);
-  SET_VALUE_ON_OBJECT(returnValue, Number, payload, port);
+  SET_VALUE_ON_OBJECT(returnValue, payload, bitmap, Number);
+  SET_VALUE_ON_OBJECT(returnValue, payload, secure, Boolean);
+  SET_VALUE_ON_OBJECT(returnValue, payload, port, Number);
 
   return returnValue;
 }
@@ -247,9 +247,9 @@ static Local<Object> js_OCPresencePayload(OCPresencePayload *payload) {
 
   Nan::Set(returnValue, Nan::New("type").ToLocalChecked(),
            Nan::New(payload->base.type));
-  SET_VALUE_ON_OBJECT(returnValue, Number, payload, sequenceNumber);
-  SET_VALUE_ON_OBJECT(returnValue, Number, payload, maxAge);
-  SET_VALUE_ON_OBJECT(returnValue, Number, payload, trigger);
+  SET_VALUE_ON_OBJECT(returnValue, payload, sequenceNumber, Number);
+  SET_VALUE_ON_OBJECT(returnValue, payload, maxAge, Number);
+  SET_VALUE_ON_OBJECT(returnValue, payload, trigger, Number);
   SET_STRING_IF_NOT_NULL(returnValue, payload, resourceType);
 
   return returnValue;
@@ -550,8 +550,7 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
   if (jsPayload->Has(Nan::New("uri").ToLocalChecked())) {
     Local<Value> uri =
         Nan::Get(jsPayload, Nan::New("uri").ToLocalChecked()).ToLocalChecked();
-    VALIDATE_VALUE_TYPE_OR_FREE(uri, IsString, "reppayload.uri", false, payload,
-                                OCRepPayloadDestroy);
+    VALIDATE_VALUE_TYPE(uri, IsString, "reppayload.uri", goto fail);
     if (!OCRepPayloadSetUri(payload, (const char *)*String::Utf8Value(uri))) {
       goto fail;
     }
@@ -561,14 +560,13 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
   if (jsPayload->Has(Nan::New("types").ToLocalChecked())) {
     Local<Value> types = Nan::Get(jsPayload, Nan::New("types").ToLocalChecked())
                              .ToLocalChecked();
-    VALIDATE_VALUE_TYPE_OR_FREE(types, IsArray, "reppayload.types", false,
-                                payload, OCRepPayloadDestroy);
+    VALIDATE_VALUE_TYPE(types, IsArray, "reppayload.types", goto fail);
     Local<Array> typesArray = Local<Array>::Cast(types);
     length = typesArray->Length();
     for (index = 0; index < length; index++) {
       Local<Value> singleType = Nan::Get(typesArray, index).ToLocalChecked();
-      VALIDATE_VALUE_TYPE_OR_FREE(singleType, IsString, "reppayload.types item",
-                                  false, payload, OCRepPayloadDestroy);
+      VALIDATE_VALUE_TYPE(singleType, IsString, "reppayload.types item",
+                          goto fail);
       if (!OCRepPayloadAddResourceType(
               payload, (const char *)*String::Utf8Value(singleType))) {
         goto fail;
@@ -581,16 +579,15 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
     Local<Value> interfaces =
         Nan::Get(jsPayload, Nan::New("interfaces").ToLocalChecked())
             .ToLocalChecked();
-    VALIDATE_VALUE_TYPE_OR_FREE(interfaces, IsArray, "reppayload.interfaces",
-                                false, payload, OCRepPayloadDestroy);
+    VALIDATE_VALUE_TYPE(interfaces, IsArray, "reppayload.interfaces",
+                        goto fail);
     Local<Array> interfacesArray = Local<Array>::Cast(interfaces);
     length = interfacesArray->Length();
     for (index = 0; index < length; index++) {
       Local<Value> singleInterface =
           Nan::Get(interfacesArray, index).ToLocalChecked();
-      VALIDATE_VALUE_TYPE_OR_FREE(singleInterface, IsString,
-                                  "reppayload.interfaces item", false, payload,
-                                  OCRepPayloadDestroy);
+      VALIDATE_VALUE_TYPE(singleInterface, IsString,
+                          "reppayload.interfaces item", goto fail);
       if (!OCRepPayloadAddInterface(
               payload, (const char *)*String::Utf8Value(singleInterface))) {
         goto fail;
@@ -603,8 +600,7 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
     Local<Value> values =
         Nan::Get(jsPayload, Nan::New("values").ToLocalChecked())
             .ToLocalChecked();
-    VALIDATE_VALUE_TYPE_OR_FREE(values, IsObject, "reppayload.values", false,
-                                payload, OCRepPayloadDestroy);
+    VALIDATE_VALUE_TYPE(values, IsObject, "reppayload.values", goto fail);
     Local<Object> valuesObject = Local<Object>::Cast(values);
     Local<Array> keys = Nan::GetPropertyNames(valuesObject).ToLocalChecked();
     length = keys->Length();
@@ -743,8 +739,7 @@ static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload) {
   if (jsPayload->Has(Nan::New("next").ToLocalChecked())) {
     Local<Value> next =
         Nan::Get(jsPayload, Nan::New("next").ToLocalChecked()).ToLocalChecked();
-    VALIDATE_VALUE_TYPE_OR_FREE(next, IsObject, "reppayload.next", false,
-                                payload, OCRepPayloadDestroy);
+    VALIDATE_VALUE_TYPE(next, IsObject, "reppayload.next", goto fail);
     OCRepPayload *next_payload = 0;
     if (!c_OCRepPayload(Nan::To<Object>(next).ToLocalChecked(),
                         &next_payload)) {
@@ -765,7 +760,7 @@ bool c_OCPayload(Local<Object> jsPayload, OCPayload **p_payload) {
   if (!jsPayload->IsNull()) {
     Local<Value> type =
         Nan::Get(jsPayload, Nan::New("type").ToLocalChecked()).ToLocalChecked();
-    VALIDATE_VALUE_TYPE(type, IsUint32, "payload.type", false);
+    VALIDATE_VALUE_TYPE(type, IsUint32, "payload.type", return false);
 
     switch (Nan::To<uint32_t>(type).FromJust()) {
       case PAYLOAD_TYPE_REPRESENTATION:

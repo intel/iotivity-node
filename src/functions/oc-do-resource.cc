@@ -51,8 +51,8 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
                jsCallbackArguments, OC_STACK_KEEP_TRANSACTION);
 
   // Validate value we got back from it
-  VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
-                                      "OCClientResponseHandler");
+  VALIDATE_VALUE_TYPE(returnValue, IsUint32,
+                      "OCClientResponseHandler return value", );
 
   // Pass on the value to the C API
   return (OCStackApplicationResult)Nan::To<uint32_t>(returnValue).FromJust();

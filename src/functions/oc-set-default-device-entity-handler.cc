@@ -37,8 +37,8 @@ static OCEntityHandlerResult defaultDeviceEntityHandler(
   Local<Value> returnValue =
       ((Nan::Callback *)context)->Call(3, jsCallbackArguments);
 
-  VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
-                                      "OCDeviceEntityHandler");
+  VALIDATE_VALUE_TYPE(returnValue, IsUint32,
+                      "OCDeviceEntityHandler return value", );
 
   return (OCEntityHandlerResult)(Nan::To<uint32_t>(returnValue).FromJust());
 }

@@ -35,14 +35,6 @@ extern "C" {
     returnValue;                                                               \
   })
 
-#define VALIDATE_CALLBACK_RETURN_VALUE_TYPE(value, typecheck, message) \
-  if (!value->typecheck()) {                                           \
-    Nan::ThrowTypeError(                                               \
-        (std::string(message) +                                        \
-         " callback return value type must satisfy " #typecheck "()")  \
-            .c_str());                                                 \
-  }
-
 #define VALIDATE_ARGUMENT_COUNT(args, length)                               \
   if ((args).Length() < (length)) {                                         \
     return Nan::ThrowRangeError("Argument count must be exactly " #length); \
@@ -54,20 +46,11 @@ extern "C" {
                                "()");                                         \
   }
 
-#define VALIDATE_VALUE_TYPE(value, typecheck, message, failReturn)          \
+#define VALIDATE_VALUE_TYPE(value, typecheck, message, ...)                 \
   if (!(value)->typecheck()) {                                              \
     Nan::ThrowTypeError(                                                    \
         (std::string(message) + " must satisfy " #typecheck "()").c_str()); \
-    return failReturn;                                                      \
-  }
-
-#define VALIDATE_VALUE_TYPE_OR_FREE(value, typecheck, message, failReturn,  \
-                                    pointer_to_free, free_function)         \
-  if (!(value)->typecheck()) {                                              \
-    Nan::ThrowTypeError(                                                    \
-        (std::string(message) + " must satisfy " #typecheck "()").c_str()); \
-    free_function((pointer_to_free));                                       \
-    return failReturn;                                                      \
+    __VA_ARGS__;                                                            \
   }
 
 #define VALIDATE_ARGUMENT_TYPE_OR_NULL(args, index, typecheck)                \
@@ -82,38 +65,36 @@ extern "C" {
              Nan::New((source)->memberName).ToLocalChecked());      \
   }
 
-#define SET_VALUE_ON_OBJECT(destination, type, source, memberName) \
+#define SET_VALUE_ON_OBJECT(destination, source, memberName, type) \
   Nan::Set((destination), Nan::New(#memberName).ToLocalChecked(),  \
            Nan::New<type>((source)->memberName));
 
-#define VALIDATE_AND_ASSIGN_STRING(destination, memberName, source,          \
-                                   free_function, failReturn)                \
+#define VALIDATE_AND_ASSIGN_STRING(destination, source, memberName, ...)     \
   do {                                                                       \
     char *resultingValue = 0;                                                \
     Local<String> jsMemberName = Nan::New(#memberName).ToLocalChecked();     \
     if ((source)->Has(jsMemberName)) {                                       \
       Local<Value> memberName =                                              \
           Nan::Get((source), jsMemberName).ToLocalChecked();                 \
-      VALIDATE_VALUE_TYPE_OR_FREE(memberName, IsString, #memberName, false,  \
-                                  destination, free_function);               \
+      VALIDATE_VALUE_TYPE(memberName, IsString, #memberName, __VA_ARGS__);   \
       resultingValue = strdup((const char *)*String::Utf8Value(memberName)); \
       if (!resultingValue) {                                                 \
         Nan::ThrowError("Failed to allocate memory for " #memberName);       \
-        free_function((destination));                                        \
-        return failReturn;                                                   \
+        __VA_ARGS__;                                                         \
       }                                                                      \
       (destination)->memberName = resultingValue;                            \
     }                                                                        \
   } while (0)
 
-#define VALIDATE_AND_ASSIGN(destination, memberName, destinationType,         \
-                            typecheck, message, failReturn, source, accessor) \
+#define VALIDATE_AND_ASSIGN(destination, source, memberName, destinationType, \
+                            typecheck, message, convertType, ...)             \
   Local<Value> memberName =                                                   \
       Nan::Get(source, Nan::New(#memberName).ToLocalChecked())                \
           .ToLocalChecked();                                                  \
   VALIDATE_VALUE_TYPE(memberName, typecheck, message "." #memberName,         \
-                      failReturn);                                            \
-  destination.memberName = (destinationType)memberName->accessor();
+                      __VA_ARGS__);                                           \
+  destination.memberName =                                                    \
+      (destinationType)Nan::To<convertType>(memberName).FromJust();
 
 void addStringArray(v8::Local<v8::Object> destination, OCStringLL *source,
                     const char *name);

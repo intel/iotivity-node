@@ -47,8 +47,8 @@ static FILE *defaultOpen(const char *path, const char *mode) {
                                  Nan::New(mode).ToLocalChecked()};
     Local<Value> returnValue =
         TRY_CALL(callbackFor_open, Nan::New(*context), 2, arguments, 0);
-    VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsNumber,
-                                        "persistent storage open");
+    VALIDATE_VALUE_TYPE(returnValue, IsNumber,
+                        "persistent storage open return value", );
     if (Nan::To<double>(returnValue).FromJust() >= 0) {
       fp = new Nan::Persistent<Value>(returnValue);
     }
@@ -67,8 +67,8 @@ static size_t defaultRead(void *ptr, size_t size, size_t count, FILE *stream) {
         Nan::New<Value>(*(Nan::Persistent<Value> *)stream)};
     Local<Value> returnValue =
         TRY_CALL(callbackFor_read, Nan::New(*context), 3, arguments, 0);
-    VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
-                                        "persistent storage read");
+    VALIDATE_VALUE_TYPE(returnValue, IsUint32,
+                        "persistent storage read return value", );
     sizeRead = Nan::To<uint32_t>(returnValue).FromJust();
 
     memcpy(ptr, Buffer::Data(buffer), totalSize);
@@ -90,8 +90,8 @@ static size_t defaultWrite(const void *ptr, size_t size, size_t count,
         Nan::New<Value>(*(Nan::Persistent<Value> *)stream)};
     Local<Value> returnValue =
         TRY_CALL(callbackFor_write, Nan::New(*context), 3, arguments, 0);
-    VALIDATE_CALLBACK_RETURN_VALUE_TYPE(returnValue, IsUint32,
-                                        "persistent storage write");
+    VALIDATE_VALUE_TYPE(returnValue, IsUint32,
+                        "persistent storage write return value", );
     sizeWritten = Nan::To<uint32_t>(returnValue).FromJust();
   }
 
@@ -106,8 +106,8 @@ static int defaultClose(FILE *stream) {
     Local<Value> arguments[1] = {Nan::New<Value>(*fp)};
     Local<Value> jsReturnValue =
         TRY_CALL(callbackFor_close, Nan::New(*context), 1, arguments, -1);
-    VALIDATE_CALLBACK_RETURN_VALUE_TYPE(jsReturnValue, IsUint32,
-                                        "persistent storage close");
+    VALIDATE_VALUE_TYPE(jsReturnValue, IsUint32,
+                        "persistent storage close return value", );
     returnValue = Nan::To<uint32_t>(jsReturnValue).FromJust();
     if (returnValue == 0) {
       delete fp;
@@ -124,8 +124,8 @@ static int defaultUnlink(const char *path) {
     Local<Value> arguments[1] = {Nan::New(path).ToLocalChecked()};
     Local<Value> jsReturnValue =
         TRY_CALL(callbackFor_unlink, Nan::New(*context), 1, arguments, -1);
-    VALIDATE_CALLBACK_RETURN_VALUE_TYPE(jsReturnValue, IsUint32,
-                                        "persistent storage close");
+    VALIDATE_VALUE_TYPE(jsReturnValue, IsUint32,
+                        "persistent storage close return value", );
     returnValue = Nan::To<uint32_t>(jsReturnValue).FromJust();
   }
 

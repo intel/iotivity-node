@@ -27,10 +27,10 @@ using namespace v8;
 Local<Object> js_OCDevAddr(OCDevAddr *address) {
   Local<Object> returnValue = Nan::New<Object>();
 
-  SET_VALUE_ON_OBJECT(returnValue, Number, address, adapter);
-  SET_VALUE_ON_OBJECT(returnValue, Number, address, flags);
-  SET_VALUE_ON_OBJECT(returnValue, Number, address, interface);
-  SET_VALUE_ON_OBJECT(returnValue, Number, address, port);
+  SET_VALUE_ON_OBJECT(returnValue, address, adapter, Number);
+  SET_VALUE_ON_OBJECT(returnValue, address, flags, Number);
+  SET_VALUE_ON_OBJECT(returnValue, address, interface, Number);
+  SET_VALUE_ON_OBJECT(returnValue, address, port, Number);
   Nan::Set(returnValue, Nan::New("addr").ToLocalChecked(),
            Nan::New(address->addr).ToLocalChecked());
   return returnValue;
@@ -42,18 +42,18 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
 
   memset(&local, 0, sizeof(OCDevAddr));
 
-  VALIDATE_AND_ASSIGN(local, adapter, OCTransportAdapter, IsUint32, "addr",
-                      false, jsDevAddr, Uint32Value);
-  VALIDATE_AND_ASSIGN(local, flags, OCTransportFlags, IsUint32, "addr", false,
-                      jsDevAddr, Uint32Value);
-  VALIDATE_AND_ASSIGN(local, interface, uint32_t, IsUint32, "addr", false,
-                      jsDevAddr, Uint32Value);
-  VALIDATE_AND_ASSIGN(local, port, uint16_t, IsUint32, "addr", false, jsDevAddr,
-                      Uint32Value);
+  VALIDATE_AND_ASSIGN(local, jsDevAddr, adapter, OCTransportAdapter, IsUint32,
+                      "addr", uint32_t, return false);
+  VALIDATE_AND_ASSIGN(local, jsDevAddr, flags, OCTransportFlags, IsUint32,
+                      "addr", uint32_t, return false);
+  VALIDATE_AND_ASSIGN(local, jsDevAddr, interface, uint32_t, IsUint32, "addr",
+                      uint32_t, return false);
+  VALIDATE_AND_ASSIGN(local, jsDevAddr, port, uint16_t, IsUint32, "addr",
+                      uint32_t, return false);
 
   Local<Value> addressValue =
       Nan::Get(jsDevAddr, Nan::New("addr").ToLocalChecked()).ToLocalChecked();
-  VALIDATE_VALUE_TYPE(addressValue, IsString, "addr", false);
+  VALIDATE_VALUE_TYPE(addressValue, IsString, "addr", return false);
   String::Utf8Value addressString(addressValue);
   length = strlen(*addressString);
   if (length >= MAX_ADDR_STR_SIZE) {

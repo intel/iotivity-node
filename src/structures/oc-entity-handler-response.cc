@@ -39,7 +39,7 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
       Nan::Get(jsResponse, Nan::New("requestHandle").ToLocalChecked())
           .ToLocalChecked();
   VALIDATE_VALUE_TYPE(requestHandle, IsObject,
-                      "entitiy handler response request handle", false);
+                      "entitiy handler response request handle", return false);
   response.requestHandle = JSOCRequestHandle::Resolve(
       Nan::To<Object>(requestHandle).ToLocalChecked());
   if (!response.requestHandle) {
@@ -53,7 +53,8 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
           .ToLocalChecked();
   if (!(resourceHandle->IsUndefined() || resourceHandle->IsNull())) {
     VALIDATE_VALUE_TYPE(resourceHandle, IsObject,
-                        "entitiy handler response resource handle", false);
+                        "entitiy handler response resource handle",
+                        return false);
     response.resourceHandle =
         JSCALLBACKHANDLE_RESOLVE(
             JSOCResourceHandle, OCResourceHandle,
@@ -62,9 +63,9 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
   }
 
   // ehResult
-  VALIDATE_AND_ASSIGN(response, ehResult, OCEntityHandlerResult, IsUint32,
-                      "(entity handler response)", false, jsResponse,
-                      Uint32Value);
+  VALIDATE_AND_ASSIGN(response, jsResponse, ehResult, OCEntityHandlerResult,
+                      IsUint32, "(entity handler response)", uint32_t,
+                      return false);
 
   // payload
   response.payload = 0;
@@ -73,7 +74,7 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
           .ToLocalChecked();
   if (!payload->IsNull()) {
     VALIDATE_VALUE_TYPE(payload, IsObject, "entity handler response payload",
-                        false);
+                        return false);
     if (!c_OCPayload(Nan::To<Object>(payload).ToLocalChecked(),
                      &(response.payload))) {
       return false;
@@ -84,38 +85,39 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
   // After this point we need to free the payload whenever we bail.
   //
 
+  Local<Value> resourceUri;
+  size_t length;
+
   // sendVendorSpecificHeaderOptions and numSendVendorSpecificHeaderOptions
   Local<Value> sendVendorSpecificHeaderOptions =
       Nan::Get(jsResponse,
                Nan::New("sendVendorSpecificHeaderOptions").ToLocalChecked())
           .ToLocalChecked();
-  VALIDATE_VALUE_TYPE_OR_FREE(sendVendorSpecificHeaderOptions, IsArray,
-                              "entity handler response header options", false,
-                              response.payload, OCPayloadDestroy);
+  VALIDATE_VALUE_TYPE(sendVendorSpecificHeaderOptions, IsArray,
+                      "entity handler response header options", goto free);
   if (!c_OCHeaderOption(Local<Array>::Cast(sendVendorSpecificHeaderOptions),
                         response.sendVendorSpecificHeaderOptions,
                         &(response.numSendVendorSpecificHeaderOptions))) {
-    OCPayloadDestroy(response.payload);
-    return false;
+    goto free;
   }
 
   // resourceUri
-  Local<Value> resourceUri =
-      Nan::Get(jsResponse, Nan::New("resourceUri").ToLocalChecked())
-          .ToLocalChecked();
-  VALIDATE_VALUE_TYPE_OR_FREE(resourceUri, IsString,
-                              "entity handler response resource URI", false,
-                              response.payload, OCPayloadDestroy);
-  size_t length = strlen((const char *)*String::Utf8Value(resourceUri));
+  resourceUri = Nan::Get(jsResponse, Nan::New("resourceUri").ToLocalChecked())
+                    .ToLocalChecked();
+  VALIDATE_VALUE_TYPE(resourceUri, IsString,
+                      "entity handler response resource URI", goto free);
+  length = strlen((const char *)*String::Utf8Value(resourceUri));
   if (length >= MAX_URI_LENGTH) {
     Nan::ThrowRangeError(
         "entity handler response resource URI cannot fit inside MAX_URI_LENGTH "
         "(remember terminating zero)");
-    OCPayloadDestroy(response.payload);
-    return false;
+    goto free;
   }
   strcpy(response.resourceUri, (const char *)*String::Utf8Value(resourceUri));
 
-  memcpy(p_response, &response, sizeof(OCEntityHandlerResponse));
+  *p_response = response;
   return true;
+free:
+  OCPayloadDestroy(response.payload);
+  return false;
 }
