@@ -164,4 +164,4 @@ result = iotivity.OCDoResource(
 testUtils.stackOKOrDie( messagePrefix, "OCDoResource(discovery)", result );
 
 // Exit gracefully when interrupted
-process.on( "SIGINT", cleanup );
+process.on( "message", cleanup );
