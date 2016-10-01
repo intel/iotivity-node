@@ -16,7 +16,7 @@ var utils = require( "../../assert-to-console" ),
 	device = require( "../../../index" )( "client" ),
 	uuid = process.argv[ 2 ];
 
-console.log( JSON.stringify( { assertionCount: 13 } ) );
+console.log( JSON.stringify( { assertionCount: 14 } ) );
 
 utils.assertProperties( "OicPresence", device, [
 	{ name: "subscribe", type: "function" },
@@ -158,6 +158,11 @@ function performSubscription( operation, resourceIndex ) {
 }
 
 discoverResources()
+	.then( function( resources ) {
+		utils.assert( "notDeepEqual", resources[ 0 ].id, resources[ 1 ].id,
+			"Client: The two discovered resources are not identical" );
+		return resources;
+	} )
 	.then( performStep( "disablePresence",
 		function expectationForDisablePresenceWhileUnsubscribedFromAll() {
 			return [ [], [] ];
