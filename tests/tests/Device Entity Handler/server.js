@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+require( "../../preamble" )( process.argv[ 2 ] );
+
 var result,
 	uuid = process.argv[ 2 ],
 	processCallCount = 0,
@@ -19,6 +21,8 @@ var result,
 	resourceHandleReceptacle = {},
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
+
+iotivity.OCRegisterPersistentStorageHandler( require( "../../../lib/StorageHandler" )() );
 
 console.log( JSON.stringify( { assertionCount: 10 } ) );
 
@@ -36,7 +40,7 @@ result = iotivity.OCSetDefaultDeviceEntityHandler( function( flag, request, uri 
 
 	testUtils.assert( "deepEqual",
 		uri,
-		"/a/" + uuid + "-xyzzy",
+		"/a/xyzzy",
 		"Server: Incoming request has the correct URI" );
 
 	if ( request &&

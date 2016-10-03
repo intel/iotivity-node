@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+require( "../../preamble" )( process.argv[ 2 ] );
+
 var result, notifyObserversTimeoutId, observationId,
 	uuid = process.argv[ 2 ],
 	notificationCount = 0,
@@ -21,6 +23,8 @@ var result, notifyObserversTimeoutId, observationId,
 	resourceHandleReceptacle = {},
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
+
+iotivity.OCRegisterPersistentStorageHandler( require( "../../../lib/StorageHandler" )() );
 
 function cleanup() {
 	var cleanupResult;

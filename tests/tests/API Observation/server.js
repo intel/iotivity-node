@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+require( "../../preamble" )( process.argv[ 2 ] );
+
 var lightResource,
 	onRequestCalls = 0,
 	uuid = process.argv[ 2 ],

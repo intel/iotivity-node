@@ -1,0 +1,20 @@
+{
+	"acl": {
+		"aclist": {
+			"aces": [
+				{
+					"subjectuuid": "*",
+					"permission": 31,
+					"resources": [
+						{
+							"href": "/a/new-resource",
+							"rel": "",
+							"rt": [ "core.light" ],
+							"if": [ "oic.if.baseline" ]
+						}
+					]
+				}
+			]
+		}
+	}
+}

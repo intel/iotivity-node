@@ -45,9 +45,9 @@ function doGetRequest( destination ) {
 		getHandleReceptacle,
 		iotivity.OCMethod.OC_REST_GET,
 
-		// Intentionally mangle the URI so the device entity handler gets called, not the
-		// resource's own entity handler.
-		"/a/" + uuid + "-xyzzy",
+		// Intentionally use a URI for which the server has not registered an entity handler so the
+		// server ends up running the device default entity handler, not the resource's own.
+		"/a/xyzzy",
 		destination,
 		{
 			type: iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION,

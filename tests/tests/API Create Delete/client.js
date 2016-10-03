@@ -72,8 +72,9 @@ device.create( { id: {} } )
 				lowlevel.OCConnectivityType.CT_DEFAULT, lowlevel.OCQualityOfService.OC_HIGH_QOS,
 				function( handle, response ) {
 					utils.assert( "strictEqual", response.result,
-						lowlevel.OCStackResult.OC_STACK_ERROR,
-						"Client: Server sent OC_STACK_ERROR when creating invalid resource" );
+						lowlevel.OCStackResult.OC_STACK_UNAUTHORIZED_REQ,
+						"Client: Server sent OC_STACK_UNAUTHORIZED_REQ when creating invalid " +
+							"resource" );
 					fulfill( template );
 					return lowlevel.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 				}, null, 0 );

@@ -39,7 +39,13 @@ grunt.task.registerTask( "ocf-suite", "Run the OCF test suite", function() {
 			} )( testSuite.defaultCallbacks.done )
 		} )
 	} )( _.extend( {
-		location: path.resolve( path.join( __dirname, "..", ".." ) )
+		location: path.resolve( path.join( __dirname, "..", ".." ) ),
+		preamble: function( uuid ) {
+
+			return "require( \"" +
+				path.join( require( "bindings" ).getRoot( __filename ), "tests", "preamble" ) +
+				"\" )( \"" + uuid + "\" );";
+		}
 	}, grunt.option( "ocf-suites" ) ? {
 		tests: grunt.option( "ocf-suites" ).split( "," )
 	} : {} ) );

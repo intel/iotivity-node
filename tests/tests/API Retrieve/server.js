@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+require( "../../preamble" )( process.argv[ 2 ] );
+
 var theResource,
 	totalRequests = 0,
 	utils = require( "../../assert-to-console" ),
