@@ -176,18 +176,12 @@ discoverResources()
 		function expectationForDisablePresenceWhileSubscribedToAll( resources ) {
 			return [
 				[
-					JSON.stringify( { event: "devicechange", changeType: "changed",
-						source: { deviceId: resources[ 0 ].id.deviceId }
-					} ),
 					JSON.stringify( { event: "devicechange", changeType: "deleted",
 						source: { deviceId: resources[ 0 ].id.deviceId }
 					} ),
 					JSON.stringify( { event: "delete", source: resources[ 0 ].id } )
 				].sort(),
 				[
-					JSON.stringify( { event: "devicechange", changeType: "changed",
-						source: { deviceId: resources[ 1 ].id.deviceId }
-					} ),
 					JSON.stringify( { event: "devicechange", changeType: "deleted",
 						source: { deviceId: resources[ 1 ].id.deviceId }
 					} ),
