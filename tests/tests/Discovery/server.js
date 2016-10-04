@@ -81,4 +81,4 @@ testUtils.stackOKOrDie( "Server", "OCCreateResource", result );
 console.log( JSON.stringify( { ready: true } ) );
 
 // Exit gracefully when interrupted
-process.on( "SIGINT", cleanup );
+process.on( "message", cleanup );

@@ -213,3 +213,5 @@ result = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
 testUtils.stackOKOrDie( "OCDeleteResource(parent)", result );
 testUtils.assert( "strictEqual", resourceHandleReceptacle.handle.stale, true,
 	"Resource handle is marked stale after deletion" );
+
+process.exit( 0 );

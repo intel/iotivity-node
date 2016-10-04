@@ -46,7 +46,7 @@ function spawnOne( assert, options ) {
 		"node",
 		[ options.path ].concat( options.uuid ? [ options.uuid ] : [] ),
 		{
-			stdio: [ process.stdin, "pipe", process.stderr ]
+			stdio: [ process.stdin, "pipe", process.stderr, "ipc" ]
 		} );
 
 	theChild.commandLine = "node" + " " + options.path + " " + options.uuid;
@@ -194,7 +194,11 @@ function runTestSuites( files ) {
 							if ( sourceProcess && sourceProcess === copyOfChildren[ index ] ) {
 								continue;
 							}
-							copyOfChildren[ index ].kill( signal );
+							if ( signal === "SIGINT" ) {
+								copyOfChildren[ index ].send( "die" );
+							} else {
+								copyOfChildren[ index ].kill( signal );
+							}
 						}
 
 						if ( error ) {

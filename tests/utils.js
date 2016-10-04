@@ -14,16 +14,17 @@
 
 var _ = require( "lodash" ),
 	TestUtils = function( iotivity ) {
-		if ( !this._isTestUtils ) {
+		if ( !( this instanceof TestUtils ) ) {
 			return new TestUtils( iotivity );
 		}
 
 		this._iotivity = iotivity;
+		process.on( "message", function() {
+			setTimeout( process.exit, 1000, 0 );
+		} );
 	};
 
 _.extend( TestUtils.prototype, require( "./assert-to-console" ), {
-	_isTestUtils: true,
-
 	lookupEnumValueName: function( enumName, value ) {
 		var index,
 			enumeration = this._iotivity[ enumName ];
