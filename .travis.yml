@@ -40,12 +40,12 @@ matrix:
     - env: NODE_VERSION=4.0 TEST_SCRIPT=ci-lint
       os: linux
 
-    - env: NODE_VERSION=0.12 TEST_SCRIPT=ci-basic
-      os: osx
-
     # Allowed failures must be specified twice - once in "include" to have them
     # run, and again in "allowed_failures" to not have them break the build.
     # Below are the allowed failures:
+
+    - env: NODE_VERSION=0.12 TEST_SCRIPT=ci-basic
+      os: osx
 
     - env: NODE_VERSION=0.10 TEST_SCRIPT=ci
       os: osx
@@ -57,6 +57,9 @@ matrix:
       os: osx
 
   allow_failures:
+    - env: NODE_VERSION=0.12 TEST_SCRIPT=ci-basic
+      os: osx
+
     - env: NODE_VERSION=0.10 TEST_SCRIPT=ci
       os: osx
 
