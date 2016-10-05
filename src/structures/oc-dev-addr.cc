@@ -29,7 +29,7 @@ Local<Object> js_OCDevAddr(OCDevAddr *address) {
 
   SET_VALUE_ON_OBJECT(returnValue, address, adapter, Number);
   SET_VALUE_ON_OBJECT(returnValue, address, flags, Number);
-  SET_VALUE_ON_OBJECT(returnValue, address, interface, Number);
+  SET_VALUE_ON_OBJECT(returnValue, address, ifindex, Number);
   SET_VALUE_ON_OBJECT(returnValue, address, port, Number);
   Nan::Set(returnValue, Nan::New("addr").ToLocalChecked(),
            Nan::New(address->addr).ToLocalChecked());
@@ -46,7 +46,7 @@ bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
                       "addr", uint32_t, return false);
   VALIDATE_AND_ASSIGN(local, jsDevAddr, flags, OCTransportFlags, IsUint32,
                       "addr", uint32_t, return false);
-  VALIDATE_AND_ASSIGN(local, jsDevAddr, interface, uint32_t, IsUint32, "addr",
+  VALIDATE_AND_ASSIGN(local, jsDevAddr, ifindex, uint32_t, IsUint32, "addr",
                       uint32_t, return false);
   VALIDATE_AND_ASSIGN(local, jsDevAddr, port, uint16_t, IsUint32, "addr",
                       uint32_t, return false);

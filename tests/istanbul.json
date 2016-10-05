@@ -1,0 +1,5 @@
+{
+	"hooks": {
+		"handle-sigint": true
+	}
+}

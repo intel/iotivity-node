@@ -1,0 +1,13 @@
+diff --git a/resource/csdk/octbstack_product.def b/resource/csdk/octbstack_product.def
+index 916f8ce..f9aa3bd 100644
+--- a/resource/csdk/octbstack_product.def
++++ b/resource/csdk/octbstack_product.def
+@@ -102,3 +102,8 @@ OCGetHeaderOption
+ FindResourceByUri
+ OCGetDeviceId
+ OCSetDeviceId
++OCRepPayloadSetIntArray
++OCRepPayloadSetBoolArray
++OCRepPayloadSetStringArray
++OCRepPayloadSetDoubleArray
++OCRepPayloadSetPropObjectArray
