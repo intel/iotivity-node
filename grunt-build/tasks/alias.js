@@ -18,8 +18,12 @@ grunt.registerTask( "lint", [ "eslint" ] );
 
 grunt.registerTask( "default", [ "test" ] );
 
-grunt.registerTask( "test", [ "lint", "testsuite", "ocf-suite", "testdist" ] );
+grunt.registerTask( "test", [ "lint", "testsuite", "iot-js-api-ocf:plain" ] );
 
 grunt.registerTask( "format", [ "esformatter", "clangformat" ] );
+
+grunt.registerTask( "coverage", [ "clean:coverage", "iot-js-api-ocf:coverage", "makeReport" ] );
+
+grunt.registerTask( "publish-coverage", [ "coverage", "coveralls:coverage" ] );
 
 };
