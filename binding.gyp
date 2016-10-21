@@ -182,6 +182,7 @@
 				"src/functions/oc-do-resource.cc",
 				"src/functions/oc-register-persistent-storage-handler.cc",
 				"src/functions/oc-set-default-device-entity-handler.cc",
+				"src/functions/oc-server-resource-utils.cc",
 				"src/functions/oc-server-response.cc",
 				"src/functions/simple.cc",
 				"src/main.cc",
