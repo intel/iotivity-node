@@ -41,6 +41,7 @@ cat "${OCTYPES_H}" "${OCPRESENCE_H}" | \
     if ( PRINT == 1 ) {
       if ( !( $1 ~ /^[{}]/ ) && $1 != "typedef" ) {
 	    if ( $1 ~ /^[A-Z]/ ) {
+          gsub(/,/, "", $1);
           OUTPUT = OUTPUT "  SET_CONSTANT_NUMBER(returnValue, " $1 ");\n";
         } else if ( $1 ~ /^#(if|endif)/ ) {
           OUTPUT = OUTPUT $0 "\n";
