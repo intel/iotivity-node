@@ -19,8 +19,9 @@
   "gypfile": true,
   "dependencies": {
     "bindings": "~1.2.1",
-    "lodash": "^3.10.1",
+    "lodash": "^4.16.4",
     "nan": "^2.1.0",
+    "osenv": "^0.1.3",
     "sha.js": "^2.4.4"
   },
   "devDependencies": {
