@@ -3,9 +3,15 @@
 ## Description
 This project provides a Javascript API for [OCF][] functionality. The API follows a maintained [specification][] and is implemented as a native addon using [iotivity][] as its backend.
 
-## Build status
+## Status
+<a href="https://ci.appveyor.com/project/gabrielschulhof/iotivity-node/branch/1.2.0">
+	<img alt="Windows Build Status" src="https://ci.appveyor.com/api/projects/status/github/otcshare/iotivity-node?branch=1.2.0&svg=true"></img>
+</a>
 <a href="https://travis-ci.org/otcshare/iotivity-node">
-	<img alt="Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=master"></img>
+	<img alt="Posix Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=1.2.0"></img>
+</a>
+<a href='https://coveralls.io/github/otcshare/iotivity-node?branch=1.2.0'>
+	<img src='https://coveralls.io/repos/github/otcshare/iotivity-node/badge.svg?branch=1.2.0' alt='Coverage Status' />
 </a>
 
 ## Installation
@@ -35,7 +41,7 @@ var device = require( "iotivity-node" )();
 will give you an instance of OicDevice as described in the JS API spec.
 
 ### In more detail:
-iotivity-node depends on [iotivity][] proper. It has been tested against [1.1.1][] on Linux. iotivity depends on development headers for libuuid and boost.
+iotivity-node depends on [iotivity][] proper. It has been tested against [1.2.0][] on Linux. iotivity depends on development headers for libuuid and boost.
 
 iotivity-node requires a compiler that implements the C++11 standard.
 
@@ -107,11 +113,11 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 
 [iotivity]: http://iotivity.org/
 [node]: https://nodejs.org/
-[1.1.1]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=1.1.1
-[snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=1.1.1;sf=tgz
+[1.2.0]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=1.2.0
+[snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=1.2.0;sf=tgz
 [scons]: http://www.scons.org/
-[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.1-3/install.sh
-[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.1.1-3/octbstack.pc.in
+[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.2.0-0/install.sh
+[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.2.0-0/octbstack.pc.in
 [iotivity wiki]: https://wiki.iotivity.org/faq_s
 [video]: https://www.youtube.com/watch?v=95VTB_qgYfw
 [specification]: https://github.com/01org/iot-js-api-test-suite/blob/master/api/oic.md
