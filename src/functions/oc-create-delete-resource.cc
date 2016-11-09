@@ -33,9 +33,10 @@ static OCEntityHandlerResult defaultEntityHandler(
   // return value
   Local<Value> jsCallbackArguments[2] = {Nan::New(flag),
                                          js_OCEntityHandlerRequest(request)};
-  Local<Value> returnValue = TRY_CALL(
-      &(((CallbackInfo<OCResourceHandle> *)context)->callback),
-      Nan::GetCurrentContext()->Global(), 2, jsCallbackArguments, OC_EH_ERROR);
+  Local<Value> returnValue;
+  TRY_CALL(&(((CallbackInfo<OCResourceHandle> *)context)->callback),
+           Nan::GetCurrentContext()->Global(), 2, jsCallbackArguments,
+           returnValue, OC_EH_ERROR);
 
   VALIDATE_VALUE_TYPE(returnValue, IsUint32, "OCEntityHandler return value", );
 
@@ -84,9 +85,9 @@ NAN_METHOD(bind_OCDeleteResource) {
 
   OCStackResult returnValue;
 
-  CallbackInfo<OCResourceHandle> *callbackInfo =
-      JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,
-                               Nan::To<Object>(info[0]).ToLocalChecked());
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
 
   // Delete the resource identified by the handle
   returnValue = OCDeleteResource(callbackInfo->handle);
@@ -105,25 +106,27 @@ NAN_METHOD(bind_OCBindResourceHandler) {
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsFunction);
 
-  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,
-                           Nan::To<Object>(info[0]).ToLocalChecked())
-      ->callback.Reset(Local<Function>::Cast(info[1]));
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
+  callbackInfo->callback.Reset(Local<Function>::Cast(info[1]));
 
   info.GetReturnValue().Set(Nan::New(OC_STACK_OK));
 }
 
-#define BIND_UNBIND_RESOURCE(api)                                           \
-  do {                                                                      \
-    VALIDATE_ARGUMENT_COUNT(info, 2);                                       \
-    VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                              \
-    VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);                              \
-    info.GetReturnValue().Set(Nan::New(api(                                 \
-        JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,      \
-                                 Nan::To<Object>(info[0]).ToLocalChecked()) \
-            ->handle,                                                       \
-        JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,      \
-                                 Nan::To<Object>(info[1]).ToLocalChecked()) \
-            ->handle)));                                                    \
+#define BIND_UNBIND_RESOURCE(api)                                        \
+  do {                                                                   \
+    VALIDATE_ARGUMENT_COUNT(info, 2);                                    \
+    VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                           \
+    VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);                           \
+    CallbackInfo<OCResourceHandle> *parentInfo;                          \
+    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, parentInfo,             \
+                             Nan::To<Object>(info[0]).ToLocalChecked()); \
+    CallbackInfo<OCResourceHandle> *childInfo;                           \
+    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, childInfo,              \
+                             Nan::To<Object>(info[1]).ToLocalChecked()); \
+    info.GetReturnValue().Set(                                           \
+        Nan::New(api(parentInfo->handle, childInfo->handle)));           \
   } while (0)
 
 NAN_METHOD(bind_OCBindResource) { BIND_UNBIND_RESOURCE(OCBindResource); }
@@ -135,11 +138,11 @@ NAN_METHOD(bind_OCUnBindResource) { BIND_UNBIND_RESOURCE(OCUnBindResource); }
     VALIDATE_ARGUMENT_COUNT(info, 2);                                       \
     VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                              \
     VALIDATE_ARGUMENT_TYPE(info, 1, IsString);                              \
+    CallbackInfo<OCResourceHandle> *callbackInfo;                           \
+    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,              \
+                             Nan::To<Object>(info[0]).ToLocalChecked());    \
     info.GetReturnValue().Set(Nan::New(api(                                 \
-        JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,      \
-                                 Nan::To<Object>(info[0]).ToLocalChecked()) \
-            ->handle,                                                       \
-        (const char *)*String::Utf8Value(info[1]))));                       \
+        callbackInfo->handle, (const char *)*String::Utf8Value(info[1])))); \
   } while (0)
 
 NAN_METHOD(bind_OCBindResourceInterfaceToResource) {
@@ -156,8 +159,9 @@ NAN_METHOD(bind_OCGetResourceHandler) {
   VALIDATE_ARGUMENT_COUNT(info, 1);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
 
-  info.GetReturnValue().Set(
-      *(JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,
-                                 Nan::To<Object>(info[0]).ToLocalChecked())
-            ->callback));
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
+
+  info.GetReturnValue().Set(*(callbackInfo->callback));
 }

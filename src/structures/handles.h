@@ -100,14 +100,13 @@ class CallbackInfo {
   }
 };
 
-#define JSCALLBACKHANDLE_RESOLVE(type, handleType, object, ...)             \
-  ({                                                                        \
-    CallbackInfo<handleType> *handleCallbackInfo = type::Resolve((object)); \
-    if (!handleCallbackInfo) {                                              \
-      return __VA_ARGS__;                                                   \
-    }                                                                       \
-    handleCallbackInfo;                                                     \
-  })
+#define JSCALLBACKHANDLE_RESOLVE(type, info, object, ...) \
+  do {                                                    \
+    info = type::Resolve((object));                       \
+    if (!info) {                                          \
+      return __VA_ARGS__;                                 \
+    }                                                     \
+  } while (0)
 
 class JSOCDoHandle : public JSHandle<JSOCDoHandle, CallbackInfo<OCDoHandle> *> {
  public:

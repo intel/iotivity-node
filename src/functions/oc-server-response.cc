@@ -52,10 +52,12 @@ NAN_METHOD(bind_OCNotifyAllObservers) {
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
 
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
   info.GetReturnValue().Set(Nan::New(OCNotifyAllObservers(
-      JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,
-                               Nan::To<Object>(info[0]).ToLocalChecked())
-          ->handle,
+
+      callbackInfo->handle,
       (OCQualityOfService)Nan::To<uint32_t>(info[1]).FromJust())));
 }
 
@@ -66,10 +68,9 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   VALIDATE_ARGUMENT_TYPE(info, 2, IsObject);
   VALIDATE_ARGUMENT_TYPE(info, 3, IsUint32);
 
-  OCResourceHandle handle =
-      JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,
-                               Nan::To<Object>(info[0]).ToLocalChecked())
-          ->handle;
+  CallbackInfo<OCResourceHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
 
   // Construct the C array of observation IDs.
   Local<Array> obsIds = Local<Array>::Cast(info[1]);
@@ -105,7 +106,7 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
   }
 
   returnValue = Nan::New(OCNotifyListOfObservers(
-      handle, c_observations, arrayLength, payload,
+      callbackInfo->handle, c_observations, arrayLength, payload,
       (OCQualityOfService)Nan::To<uint32_t>(info[3]).FromJust()));
 
   OCRepPayloadDestroy(payload);

@@ -46,9 +46,9 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
   Local<Value> jsCallbackArguments[2] = {Nan::New(callbackInfo->jsHandle),
                                          js_OCClientResponse(clientResponse)};
 
-  Local<Value> returnValue =
-      TRY_CALL(&(callbackInfo->callback), Nan::GetCurrentContext()->Global(), 2,
-               jsCallbackArguments, OC_STACK_KEEP_TRANSACTION);
+  Local<Value> returnValue;
+  TRY_CALL(&(callbackInfo->callback), Nan::GetCurrentContext()->Global(), 2,
+           jsCallbackArguments, returnValue, OC_STACK_KEEP_TRANSACTION);
 
   // Validate value we got back from it
   VALIDATE_VALUE_TYPE(returnValue, IsUint32,
@@ -166,10 +166,12 @@ NAN_METHOD(bind_OCCancel) {
     }
   }
 
+  CallbackInfo<OCDoHandle> *callbackInfo;
+  JSCALLBACKHANDLE_RESOLVE(JSOCDoHandle, callbackInfo,
+                           Nan::To<Object>(info[0]).ToLocalChecked());
   info.GetReturnValue().Set(Nan::New(OCCancel(
-      JSCALLBACKHANDLE_RESOLVE(JSOCDoHandle, OCDoHandle,
-                               Nan::To<Object>(info[0]).ToLocalChecked())
-          ->handle,
+
+      callbackInfo->handle,
       (OCQualityOfService)Nan::To<uint32_t>(info[1]).FromJust(), headerOptions,
       numberOfOptions)));
 }

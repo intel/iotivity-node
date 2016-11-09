@@ -19,6 +19,6 @@
 
 #include <v8.h>
 
-void InitConstants(v8::Handle<v8::Object> exports);
+NAN_MODULE_INIT(InitConstants);
 
 #endif /* __IOTIVITY_NODE_CONSTANTS_H__ */

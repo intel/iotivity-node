@@ -55,11 +55,11 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
     VALIDATE_VALUE_TYPE(resourceHandle, IsObject,
                         "entitiy handler response resource handle",
                         return false);
-    response.resourceHandle =
-        JSCALLBACKHANDLE_RESOLVE(
-            JSOCResourceHandle, OCResourceHandle,
-            Nan::To<Object>(resourceHandle).ToLocalChecked(), false)
-            ->handle;
+    CallbackInfo<OCResourceHandle> *callbackInfo;
+    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
+                             Nan::To<Object>(resourceHandle).ToLocalChecked(),
+                             false);
+    response.resourceHandle = callbackInfo->handle;
   }
 
   // ehResult

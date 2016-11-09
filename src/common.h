@@ -23,17 +23,16 @@ extern "C" {
 #include <ocstack.h>
 }
 
-#define TRY_CALL(callback, context, argumentCount, arguments, exceptionReturn) \
-  ({                                                                           \
+#define TRY_CALL(callback, context, argumentCount, arguments, jsReturnValue,   \
+                 exceptionReturn)                                              \
+  do {                                                                         \
     Nan::TryCatch tryCatch;                                                    \
-    Local<Value> returnValue =                                                 \
-        (callback)->Call((context), (argumentCount), (arguments));             \
+    jsReturnValue = (callback)->Call((context), (argumentCount), (arguments)); \
     if (tryCatch.HasCaught()) {                                                \
       tryCatch.ReThrow();                                                      \
       return (exceptionReturn);                                                \
     }                                                                          \
-    returnValue;                                                               \
-  })
+  } while (0)
 
 #define VALIDATE_ARGUMENT_COUNT(args, length)                               \
   if ((args).Length() < (length)) {                                         \

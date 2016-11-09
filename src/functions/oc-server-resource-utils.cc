@@ -33,11 +33,12 @@ using namespace v8;
     uint8_t interfaceCount = 0;                                               \
     OCStackResult result;                                                     \
                                                                               \
+    CallbackInfo<OCResourceHandle> *callbackInfo;                             \
+    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,                \
+                             Nan::To<Object>(info[0]).ToLocalChecked());      \
     result = api(                                                             \
-        JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,        \
-                                 Nan::To<Object>(info[0]).ToLocalChecked())   \
-            ->handle,                                                         \
-        &interfaceCount);                                                     \
+                                                                              \
+        callbackInfo->handle, &interfaceCount);                               \
                                                                               \
     if (result == OC_STACK_OK) {                                              \
       Nan::Set(Nan::To<Object>(info[1]).ToLocalChecked(),                     \
@@ -75,20 +76,19 @@ NAN_METHOD(bind_OCGetResourceHandle) {
   }
 }
 
-#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()                          \
-  VALIDATE_ARGUMENT_COUNT(info, 2);                                       \
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                              \
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);                              \
-  OCResourceHandle handle =                                               \
-      JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,      \
-                               Nan::To<Object>(info[0]).ToLocalChecked()) \
-          ->handle;
+#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()             \
+  VALIDATE_ARGUMENT_COUNT(info, 2);                          \
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                 \
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);                 \
+  CallbackInfo<OCResourceHandle> *callbackInfo;              \
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo, \
+                           Nan::To<Object>(info[0]).ToLocalChecked());
 
 NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();
 
   OCResourceHandle resourceHandle = OCGetResourceHandleFromCollection(
-      handle, Nan::To<uint32_t>(info[1]).FromJust());
+      callbackInfo->handle, Nan::To<uint32_t>(info[1]).FromJust());
 
   if (resourceHandle) {
     if (JSOCResourceHandle::handles[resourceHandle]->IsEmpty()) {
@@ -103,15 +103,15 @@ NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
   }
 }
 
-#define GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(apiFunction) \
-  RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();                        \
-  const char *resultOf##apiFunction =                              \
-      apiFunction(handle, Nan::To<uint32_t>(info[1]).FromJust());  \
-  if (resultOf##apiFunction) {                                     \
-    info.GetReturnValue().Set(                                     \
-        Nan::New(resultOf##apiFunction).ToLocalChecked());         \
-  } else {                                                         \
-    info.GetReturnValue().Set(Nan::Null());                        \
+#define GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(apiFunction)  \
+  RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();                         \
+  const char *resultOf##apiFunction = apiFunction(                  \
+      callbackInfo->handle, Nan::To<uint32_t>(info[1]).FromJust()); \
+  if (resultOf##apiFunction) {                                      \
+    info.GetReturnValue().Set(                                      \
+        Nan::New(resultOf##apiFunction).ToLocalChecked());          \
+  } else {                                                          \
+    info.GetReturnValue().Set(Nan::Null());                         \
   }
 
 NAN_METHOD(bind_OCGetResourceInterfaceName) {
@@ -122,24 +122,24 @@ NAN_METHOD(bind_OCGetResourceTypeName) {
   GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(OCGetResourceTypeName);
 }
 
-#define LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE()                    \
-  VALIDATE_ARGUMENT_COUNT(info, 1);                                       \
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                              \
-  OCResourceHandle handle =                                               \
-      JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, OCResourceHandle,      \
-                               Nan::To<Object>(info[0]).ToLocalChecked()) \
-          ->handle;
+#define LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE()       \
+  VALIDATE_ARGUMENT_COUNT(info, 1);                          \
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                 \
+  CallbackInfo<OCResourceHandle> *callbackInfo;              \
+  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo, \
+                           Nan::To<Object>(info[0]).ToLocalChecked());
 
 NAN_METHOD(bind_OCGetResourceProperties) {
   LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE();
 
-  info.GetReturnValue().Set(Nan::New(OCGetResourceProperties(handle)));
+  info.GetReturnValue().Set(
+      Nan::New(OCGetResourceProperties(callbackInfo->handle)));
 }
 
 NAN_METHOD(bind_OCGetResourceUri) {
   LONE_ARGUMENT_IS_RESOURCE_HANDLE_BOILERPLATE();
 
-  const char *uri = OCGetResourceUri(handle);
+  const char *uri = OCGetResourceUri(callbackInfo->handle);
 
   if (uri) {
     info.GetReturnValue().Set(Nan::New(uri).ToLocalChecked());
