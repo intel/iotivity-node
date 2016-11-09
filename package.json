@@ -19,8 +19,9 @@
   "gypfile": true,
   "dependencies": {
     "bindings": "~1.2.1",
-    "lodash": "^3.10.1",
+    "lodash": "^4.16.4",
     "nan": "^2.1.0",
+    "osenv": "^0.1.3",
     "sha.js": "^2.4.4"
   },
   "devDependencies": {
@@ -32,7 +33,9 @@
     "grunt": "^0.4.5",
     "grunt-esformatter": "^1.0.1",
     "grunt-eslint": "18.1.0",
-    "iot-js-api-test-suite": "https://github.com/01org/iot-js-api-test-suite.git",
+    "grunt-istanbul": "^0.7.1",
+    "iot-js-api": "git+https://github.com/01org/iot-js-api.git#6c6f75f48fc44c9e2832b65fa3ea6cd110f1063d",
+    "istanbul": "^0.4.5",
     "load-grunt-config": "^0.17.2",
     "load-grunt-tasks": "^3.2.0",
     "qunitjs": "^1.18.0",
