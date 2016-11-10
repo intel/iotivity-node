@@ -20,9 +20,7 @@ This project provides a Javascript API for [OCF][] functionality. The API follow
 0. Make sure [node][] is up and running
 0. Install the following packages, which your distribution should provide:
     0. unzip, scons, wget, git, patch, tar, and make
-    0. Development headers for boost, libuuid, glib2, and libcurl
-
-        boost and libcurl are needed during the build process, but iotivity-node does not ultimately depend on either.
+    0. Development headers for boost (at least 1.55), libuuid, glib2, and libcurl
     0. A C compiler and a C++ compiler
 0. Run ```npm install```
 

@@ -23,7 +23,9 @@ var result, notifyObserversTimeoutId,
 	testUtils = require( "../../utils" )( iotivity ),
 	listOfObservers = [];
 
-console.log( JSON.stringify( { assertionCount: 12 } ) );
+require( "../../preamble" )( process.argv[ 2 ] );
+
+console.log( JSON.stringify( { assertionCount: 13 } ) );
 
 function cleanup() {
 	var cleanupResult;
@@ -64,6 +66,9 @@ function maybeQuit() {
 }
 
 // Initialize
+result = iotivity.OCRegisterPersistentStorageHandler( require( "../../../lib/StorageHandler" )() );
+testUtils.stackOKOrDie( "Server", "OCRegisterPersistentStorageHandler", result );
+
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 testUtils.stackOKOrDie( "Server", "OCInit", result );
 

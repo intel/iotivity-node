@@ -20,6 +20,8 @@ var result, testServerAddress,
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
+require( "../../preamble" )( process.argv[ 2 ] );
+
 console.log( JSON.stringify( { assertionCount: 5 } ) );
 
 // Initialize
