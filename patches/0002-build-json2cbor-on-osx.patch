@@ -1,0 +1,25 @@
+diff --git a/resource/csdk/security/SConscript b/resource/csdk/security/SConscript
+index 51be227..a515134 100644
+--- a/resource/csdk/security/SConscript
++++ b/resource/csdk/security/SConscript
+@@ -144,5 +144,5 @@ libocsrm_env.InstallTarget(libocsrm, 'ocsrm')
+ if target_os in ['linux', 'android', 'tizen', 'msys_nt', 'windows'] and libocsrm_env.get('SECURED') == '1':
+ 	SConscript('provisioning/SConscript')
+ 
+-if target_os in ['linux', 'windows'] and libocsrm_env.get('SECURED') == '1':
++if target_os in ['linux', 'windows', 'darwin'] and libocsrm_env.get('SECURED') == '1':
+ 	SConscript('tool/SConscript')
+diff --git a/resource/csdk/security/tool/SConscript b/resource/csdk/security/tool/SConscript
+index 3a5c94f..46fa324 100644
+--- a/resource/csdk/security/tool/SConscript
++++ b/resource/csdk/security/tool/SConscript
+@@ -54,6 +54,9 @@ if target_os in ['msys_nt', 'windows']:
+     tools_env.AppendUnique(LIBS = ['ws2_32', 'bcrypt', 'iphlpapi',
+                                    'coap', 'tinydtls', 'mbedtls', 'mbedx509', 'mbedcrypto',
+                                    'octbstack_static', 'ocsrm', 'connectivity_abstraction'])
++elif target_os in ['darwin']:
++    tools_env.AppendUnique(LIBS = ['coap', 'tinydtls', 'mbedtls', 'mbedx509', 'mbedcrypto',
++                                   'octbstack', 'ocsrm', 'connectivity_abstraction'])
+ else:
+     tools_env.PrependUnique(LIBS = ['oc', 'octbstack'])
+ 

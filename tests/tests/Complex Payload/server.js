@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+require( "../../preamble" )( process.argv[ 2 ] );
+
 var result,
 	uuid = process.argv[ 2 ],
 	processCallCount = 0,
@@ -40,9 +42,12 @@ function cleanup() {
 	}
 }
 
-console.log( JSON.stringify( { assertionCount: 8 } ) );
+console.log( JSON.stringify( { assertionCount: 9 } ) );
 
 // Initialize
+result = iotivity.OCRegisterPersistentStorageHandler( require( "../../../lib/StorageHandler" )() );
+testUtils.stackOKOrDie( "Server", "OCRegisterPersistentStorageHandler", result );
+
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 testUtils.stackOKOrDie( "Server", "OCInit", result );
 
@@ -129,7 +134,7 @@ var requestSequenceNumber = 0,
 // Create resource
 result = iotivity.OCCreateResource(
 	resourceHandleReceptacle,
-	"core.fan",
+	"core.light",
 	iotivity.OC_RSRVD_INTERFACE_DEFAULT,
 	"/a/" + uuid,
 	function( flag, request ) {

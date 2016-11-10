@@ -39,9 +39,14 @@ function cleanup() {
 	}
 }
 
-console.log( JSON.stringify( { assertionCount: 5 } ) );
+require( "../../preamble" )( process.argv[ 2 ] );
+
+console.log( JSON.stringify( { assertionCount: 6 } ) );
 
 // Initialize
+result = iotivity.OCRegisterPersistentStorageHandler( require( "../../../lib/StorageHandler" )() );
+testUtils.stackOKOrDie( "Server", "OCRegisterPersistentStorageHandler", result );
+
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 testUtils.stackOKOrDie( "Server", "OCInit", result );
 

@@ -78,6 +78,16 @@ if ( fs.existsSync( patchesDirectory ) && fs.statSync( patchesDirectory ).isDire
 	} );
 }
 
+// Clone mbedtls inside iotivity
+commands.push( [ "git",
+	[ "clone", "https://github.com/ARMmbed/mbedtls.git", "extlibs/mbedtls/mbedtls" ],
+	{ shell: true, cwd: iotivityPath, stdio: "inherit" } ] );
+
+// Check out known-good commitid of mbedtls
+commands.push( [ "git", [ "checkout", "ad249f509fd62a3bbea7ccd1fef605dbd482a7bd" ],
+	{ shell: true, cwd: path.join( iotivityPath, "extlibs", "mbedtls", "mbedtls" ) } ] );
+
+
 // Clone tinycbor inside iotivity
 commands.push( [ "git",
 	[ "clone", "https://github.com/01org/tinycbor.git", "extlibs/tinycbor/tinycbor" ],
@@ -88,30 +98,41 @@ commands.push( [ "git", [ "checkout", "31c7f81d45d115d2007b1c881cbbd3a19618465c"
 	{ shell: true, cwd: path.join( iotivityPath, "extlibs", "tinycbor", "tinycbor" ) } ] );
 
 // Build
-commands.push( [ "scons", []
+commands.push( [ "scons", [ "SECURED=1" ]
 	.concat( architecture ? [ "TARGET_ARCH=" + architecture ] : [] )
 	.concat( process.env.npm_config_debug === "true" ?
 		[ "RELEASE=False" ] : [] )
 	.concat( [ "logger", "octbstack", "connectivity_abstraction", "coap", "c_common", "ocsrm",
-		"routingmanager"
+		"routingmanager", "json2cbor"
 	] ),
 	{ shell: true, cwd: iotivityPath, stdio: "inherit" } ] );
 
 // Actually run the commands
 ( function runCommand( index ) {
 	run.apply( null, commands[ index ] ).on( "exit", function( code ) {
+		var binariesSourcePath, binariesDestinationPath, toolName;
+
 		if ( code !== 0 ) {
 			process.exit( 1 );
 		} else if ( ++index < commands.length ) {
 			runCommand( index );
 		} else {
+			binariesSourcePath = findBins( iotivityPath );
+			binariesDestinationPath = path.join( iotivityPath, "binaries" );
+			toolName = "json2cbor" + ( process.platform.match( /^win/ ) ? ".exe" : "" );
 
 			// The last step is to move the binaries from
 			// iotivity-native/out/<os>/<arch>/<buildtype> to a hardcoded path. This is a necessary
 			// step because the binding.gyp file is being evaluated before the path
 			// iotivity-native/out/<os>/<arch>/<buildtype> is created, so it cannot be found at
 			// that time.
-			fs.renameSync( findBins( iotivityPath ), path.join( iotivityPath, "binaries" ) );
+			fs.renameSync( binariesSourcePath, binariesDestinationPath );
+
+			// Move json2cbor next to the libraries
+			fs.renameSync(
+				path.join( binariesDestinationPath, "resource", "csdk", "security", "tool",
+					toolName ),
+				path.join( binariesDestinationPath, toolName ) );
 		}
 	} );
 } )( 0 );

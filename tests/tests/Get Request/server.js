@@ -20,9 +20,14 @@ var result,
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
-console.log( JSON.stringify( { assertionCount: 9 } ) );
+require( "../../preamble" )( process.argv[ 2 ] );
+
+console.log( JSON.stringify( { assertionCount: 10 } ) );
 
 // Initialize
+result = iotivity.OCRegisterPersistentStorageHandler( require( "../../../lib/StorageHandler" )() );
+testUtils.stackOKOrDie( "Server", "OCRegisterPersistentStorageHandler", result );
+
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 testUtils.stackOKOrDie( "Server", "OCInit", result );
 

@@ -15,9 +15,16 @@
 var path = require( "path" );
 var _ = require( "lodash" );
 
-var plain = { location: path.resolve( path.join( __dirname, "..", "..", ".." ) ) };
 var packageRoot = path.join( require( "bindings" ).getRoot( __filename ) );
-
+var plain = {
+	location: packageRoot,
+	preamble: function( uuid ) {
+		return "require( \"" +
+			path.join( require( "bindings" ).getRoot( __filename ), "tests", "preamble" )
+				.replace( /[\\]/g, "\\\\" ) +
+			"\" )( \"" + uuid + "\" );";
+	}
+};
 var coverage = _.extend( {}, plain, {
 	spawn: function( interpreter, commandline ) {
 		var testScript = commandline.shift();

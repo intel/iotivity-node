@@ -42,6 +42,8 @@ process.on( "uncaughtException", function( exception ) {
 	cleanup();
 } );
 
+require( "../../preamble" )( process.argv[ 2 ] );
+
 console.log( JSON.stringify( { assertionCount: 5 } ) );
 
 // Initialize

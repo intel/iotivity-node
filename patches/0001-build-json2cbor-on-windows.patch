@@ -1,0 +1,76 @@
+commit 80cff1c595b1bc4934bd25847edaad6cc7cdae74
+Author: Dan Mihai <Daniel.Mihai@microsoft.com>
+Date:   Wed Oct 19 17:22:37 2016 -0700
+
+    Start building json2cbor for Windows.
+    
+    Change-Id: I9a1e43969c597eed68eac0df28b90571c67de931
+    Signed-off-by: Dan Mihai <Daniel.Mihai@microsoft.com>
+    Reviewed-on: https://gerrit.iotivity.org/gerrit/13521
+    Reviewed-by: Kevin Kane <kkane@microsoft.com>
+    Tested-by: jenkins-iotivity <jenkins-iotivity@opendaylight.org>
+    Reviewed-by: David Antler <david.a.antler@intel.com>
+    Reviewed-by: Randeep Singh <randeep.s@samsung.com>
+
+diff --git a/resource/csdk/security/SConscript b/resource/csdk/security/SConscript
+index 834e8b5..51be227 100644
+--- a/resource/csdk/security/SConscript
++++ b/resource/csdk/security/SConscript
+@@ -144,5 +144,5 @@ libocsrm_env.InstallTarget(libocsrm, 'ocsrm')
+ if target_os in ['linux', 'android', 'tizen', 'msys_nt', 'windows'] and libocsrm_env.get('SECURED') == '1':
+ 	SConscript('provisioning/SConscript')
+ 
+-if target_os in ['linux'] and libocsrm_env.get('SECURED') == '1':
++if target_os in ['linux', 'windows'] and libocsrm_env.get('SECURED') == '1':
+ 	SConscript('tool/SConscript')
+diff --git a/resource/csdk/security/tool/SConscript b/resource/csdk/security/tool/SConscript
+index 871e7a9..3a5c94f 100644
+--- a/resource/csdk/security/tool/SConscript
++++ b/resource/csdk/security/tool/SConscript
+@@ -22,6 +22,7 @@ Import('env')
+ 
+ tools_env = env.Clone()
+ src_dir = tools_env.get('SRC_DIR')
++target_os = tools_env.get('TARGET_OS')
+ 
+ ######################################################################
+ # Build flags
+@@ -47,7 +48,14 @@ tools_env.PrependUnique(CPPPATH = ['../../../../extlibs/cjson',
+ tools_env.AppendUnique(CXXFLAGS = ['-O2', '-g', '-Wall', '-Wextra', '-std=c++0x'])
+ tools_env.AppendUnique(LIBPATH = [tools_env.get('BUILD_DIR')])
+ tools_env.AppendUnique(RPATH = [tools_env.get('BUILD_DIR')])
+-tools_env.PrependUnique(LIBS = ['oc', 'octbstack'])
++
++if target_os in ['msys_nt', 'windows']:
++    # octbstack.dll doesn't export all the functions called by this app, so use static LIBs instead.
++    tools_env.AppendUnique(LIBS = ['ws2_32', 'bcrypt', 'iphlpapi',
++                                   'coap', 'tinydtls', 'mbedtls', 'mbedx509', 'mbedcrypto',
++                                   'octbstack_static', 'ocsrm', 'connectivity_abstraction'])
++else:
++    tools_env.PrependUnique(LIBS = ['oc', 'octbstack'])
+ 
+ ######################################################################
+ # Source files and Targets
+diff --git a/resource/csdk/security/tool/json2cbor.c b/resource/csdk/security/tool/json2cbor.c
+index 40dc5f9..9806f75 100644
+--- a/resource/csdk/security/tool/json2cbor.c
++++ b/resource/csdk/security/tool/json2cbor.c
+@@ -44,7 +44,8 @@
+ #define TAG  "JSON2CBOR"
+ #define MAX_RANGE   ((size_t)-1)
+ //SVR database buffer block size
+-static const size_t DB_FILE_SIZE_BLOCK = 1023;
++
++#define DB_FILE_SIZE_BLOCK 1023
+ 
+ static OicSecPstat_t* JSONToPstatBin(const char * jsonStr);
+ static OicSecDoxm_t* JSONToDoxmBin(const char * jsonStr);
+@@ -941,7 +942,7 @@ static OicSecSvc_t* JSONToSvcBin(const char * jsonStr)
+             }
+ 
+             cJSON *jsonObj = NULL;
+-            unsigned char base64Buff[sizeof(((OicUuid_t*)0)->id)] = {};
++            unsigned char base64Buff[sizeof(((OicUuid_t*)0)->id)] = {0};
+             uint32_t outLen = 0;
+             B64Result b64Ret = B64_OK;
+ 

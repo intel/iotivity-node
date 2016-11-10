@@ -43,6 +43,8 @@ function cleanup() {
 	}
 }
 
+require( "../../preamble" )( process.argv[ 2 ] );
+
 console.log( JSON.stringify( { assertionCount: 6 } ) );
 
 // Initialize

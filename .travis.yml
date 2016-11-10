@@ -8,24 +8,18 @@ matrix:
     - env: NODE_VERSION=4.0 TEST_SCRIPT=lint
       os: linux
 
-    - env: NODE_VERSION=0.10 TEST_SCRIPT=test
+    - env: NODE_VERSION=0.12 TEST_SCRIPT=test
       os: linux
       addons: &buildpackages
         apt:
           sources:
           - ubuntu-toolchain-r-test
+          - boost-latest
           packages:
-          - libboost-all-dev
+          - libboost1.55-all-dev
           - libcurl4-openssl-dev
           - uuid-dev
           - g++-4.8
-
-    - env: NODE_VERSION=0.10 TEST_SCRIPT=test
-      os: osx
-
-    - env: NODE_VERSION=0.12 TEST_SCRIPT=test
-      os: linux
-      addons: *buildpackages
 
     - env: NODE_VERSION=0.12 TEST_SCRIPT=test
       os: osx

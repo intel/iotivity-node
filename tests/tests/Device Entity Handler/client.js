@@ -84,6 +84,8 @@ function doGetRequest( destination ) {
 	testUtils.stackOKOrDie( "Client", "OCDoResource(get)", getResult );
 }
 
+require( "../../preamble" )( process.argv[ 2 ] );
+
 console.log( JSON.stringify( { assertionCount: 7 } ) );
 
 // Initialize
