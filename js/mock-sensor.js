@@ -14,8 +14,14 @@
 
 // This mock sensor implementation triggers an event with some data every once in a while
 
-var Emitter = require( "events" ).EventEmitter,
-	possibleStrings = [
+// Return a random integer between 0 and @upperLimit
+function randomInteger( upperLimit ) {
+	return Math.round( Math.random() * upperLimit );
+}
+
+var _ = require( "lodash" );
+
+var possibleStrings = [
 		"Helsinki",
 		"Espoo",
 		"Tampere",
@@ -24,23 +30,27 @@ var Emitter = require( "events" ).EventEmitter,
 		"Ii"
 	];
 
-// Return a random integer between 0 and @upperLimit
-function randomInteger( upperLimit ) {
-	return Math.round( Math.random() * upperLimit );
-}
-
-module.exports = function mockSensor() {
-var returnValue = new Emitter(),
-	trigger = function() {
-		var someValue = Math.round( Math.random() * 42 ),
-			someOtherValue = possibleStrings[ randomInteger( possibleStrings.length - 1 ) ];
-
-		returnValue.emit( "change", { someValue: someValue, someOtherValue: someOtherValue } );
-		setTimeout( trigger, randomInteger( 1000 ) + 1000 );
-	};
-
-setTimeout( trigger, randomInteger( 1000 ) + 1000 );
-
-return returnValue;
+var MockSensor = function MockSensor() {
+	function trigger() {
+		this.emit( "change", this.currentData() );
+		setTimeout( _.bind( trigger, this ), randomInteger( 1000 ) + 1000 );
+	}
+	if ( !this._isMockSensor ) {
+		return new MockSensor();
+	}
+	setTimeout( _.bind( trigger, this ), randomInteger( 1000 ) + 1000 );
 };
 
+require( "util" ).inherits( MockSensor, require( "events" ).EventEmitter );
+
+_.extend( MockSensor.prototype, {
+	_isMockSensor: true,
+	currentData: function() {
+		return {
+			someValue: Math.round( Math.random() * 42 ),
+			someOtherValue: possibleStrings[ randomInteger( possibleStrings.length - 1 ) ]
+		};
+	}
+} );
+
+module.exports = MockSensor;

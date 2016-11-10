@@ -31,18 +31,10 @@ function listenForPresence() {
 			// The bindings fill in this object
 			handleReceptacle,
 
-			iotivity.OCMethod.OC_REST_PRESENCE,
+			iotivity.OCMethod.OC_REST_DISCOVER,
 			iotivity.OC_RSRVD_PRESENCE_URI,
 
-			// Initialize the destination with an empty structure
-			{
-				adapter: iotivity.OCTransportAdapter.OC_DEFAULT_ADAPTER,
-				flags: iotivity.OCTransportFlags.OC_DEFAULT_FLAGS,
-				interface: 0,
-				port: 0,
-				addr: [ 0 ],
-				identity: [ 0 ]
-			},
+			null,
 			null,
 			iotivity.OCConnectivityType.CT_DEFAULT,
 			iotivity.OCQualityOfService.OC_HIGH_QOS,

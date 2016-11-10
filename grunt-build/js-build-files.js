@@ -14,5 +14,6 @@
 
 module.exports = [
 	"Gruntfile.js",
-	"grunt-build/**/*.js"
+	"grunt-build/**/*.js",
+	"build-scripts/**/*.js"
 ];

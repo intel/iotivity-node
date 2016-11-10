@@ -20,7 +20,7 @@ var result,
 	iotivity = require( "../../../lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
-console.log( JSON.stringify( { assertionCount: 8 } ) );
+console.log( JSON.stringify( { assertionCount: 9 } ) );
 
 // Initialize
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
@@ -49,6 +49,11 @@ result = iotivity.OCCreateResource(
 	function( flag, request ) {
 		var responseResult,
 			returnValue = iotivity.OCEntityHandlerResult.OC_EH_ERROR;
+
+		testUtils.assert( "ok",
+			request.resource === resourceHandleReceptacle.handle,
+			"The resource handle in the entity handler request is the same JS object as the " +
+			"resource handle returned at creation" );
 
 		testUtils.assert( "deepEqual",
 			testUtils.lookupBitfieldValueNames( "OCEntityHandlerFlag", flag ),
@@ -113,4 +118,4 @@ function cleanup() {
 }
 
 // Exit gracefully when interrupted
-process.on( "SIGINT", cleanup );
+process.on( "message", cleanup );

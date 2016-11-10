@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include "oc-header-option-array.h"
+#include <nan.h>
 #include "../common.h"
 
 extern "C" {
@@ -35,8 +35,8 @@ v8::Local<v8::Array> js_OCHeaderOption(OCHeaderOption *options,
     // options[ index ]
     Local<Object> item = Nan::New<Object>();
 
-    SET_VALUE_ON_OBJECT(item, Number, &options[index], protocolID);
-    SET_VALUE_ON_OBJECT(item, Number, &options[index], optionID);
+    SET_VALUE_ON_OBJECT(item, &options[index], protocolID, Number);
+    SET_VALUE_ON_OBJECT(item, &options[index], optionID, Number);
 
     // option[ index ].optionData
     uint16_t optionLength =
@@ -71,22 +71,24 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
     for (index = 0; index < length; index++) {
       // option[ index ]
       Local<Value> item = Nan::Get(jsOptions, index).ToLocalChecked();
-      VALIDATE_VALUE_TYPE(item, IsObject, "OCHeaderOption array item", false);
+      VALIDATE_VALUE_TYPE(item, IsObject, "OCHeaderOption array item",
+                          return false);
       Local<Object> itemObject = Local<Object>::Cast(item);
 
-      VALIDATE_AND_ASSIGN(options[index], protocolID, OCTransportProtocolID,
-                          IsUint32, "(OCHeaderOption array item)", false,
-                          itemObject, Uint32Value);
-      VALIDATE_AND_ASSIGN(options[index], optionID, uint16_t, IsUint32,
-                          "(OCHeaderOption array item)", false, itemObject,
-                          Uint32Value);
+      VALIDATE_AND_ASSIGN(
+          options[index], itemObject, protocolID, OCTransportProtocolID,
+          IsUint32, "(OCHeaderOption array item)", uint32_t, return false);
+      VALIDATE_AND_ASSIGN(options[index], itemObject, optionID, uint16_t,
+                          IsUint32, "(OCHeaderOption array item)", uint32_t,
+                          return false);
 
       // option[ index ].optionData
       Local<Value> optionData =
           Nan::Get(itemObject, Nan::New("optionData").ToLocalChecked())
               .ToLocalChecked();
       VALIDATE_VALUE_TYPE(optionData, IsArray,
-                          "(OCHeaderOption array item).optionData", false);
+                          "(OCHeaderOption array item).optionData",
+                          return false);
       Local<Array> optionDataArray = Local<Array>::Cast(optionData);
       dataLength = optionDataArray->Length();
       if (dataLength > MAX_HEADER_OPTION_DATA_LENGTH) {
@@ -103,9 +105,9 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
               Nan::Get(optionDataArray, dataIndex).ToLocalChecked();
           VALIDATE_VALUE_TYPE(optionDataItem, IsUint32,
                               "(OCHeaderOption array item).optionData item",
-                              false);
+                              return false);
           options[index].optionData[dataIndex] =
-              (uint8_t)optionDataItem->Uint32Value();
+              (uint8_t)Nan::To<uint32_t>(optionDataItem).FromJust();
         } else {
           options[index].optionData[dataIndex] = 0;
         }

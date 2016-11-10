@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include "oc-client-response.h"
-#include "oc-dev-addr.h"
+#include <nan.h>
 #include "../common.h"
+#include "oc-dev-addr.h"
 #include "oc-header-option-array.h"
-#include "oc-payload.h"
 #include "oc-identity.h"
+#include "oc-payload.h"
 
 extern "C" {
 #include <string.h>
@@ -47,13 +47,13 @@ Local<Object> js_OCClientResponse(OCClientResponse *response) {
              js_OCPayload(response->payload));
   }
 
-  SET_VALUE_ON_OBJECT(returnValue, Number, response, connType);
+  SET_VALUE_ON_OBJECT(returnValue, response, connType, Number);
 
   Nan::Set(returnValue, Nan::New("identity").ToLocalChecked(),
            js_OCIdentity(&(response->identity)));
 
-  SET_VALUE_ON_OBJECT(returnValue, Number, response, result);
-  SET_VALUE_ON_OBJECT(returnValue, Number, response, sequenceNumber);
+  SET_VALUE_ON_OBJECT(returnValue, response, result, Number);
+  SET_VALUE_ON_OBJECT(returnValue, response, sequenceNumber, Number);
 
   // FIXME - iotivity has a bug whereby these fields are left uninitialized in
   // a presence response

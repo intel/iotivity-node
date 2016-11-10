@@ -148,7 +148,7 @@ async.series( [
 	testUtils.die( "Client: " + error );
 } );
 
-process.on( "SIGINT", function() {
+process.on( "message", function() {
 	if ( processLoop ) {
 		clearInterval( processLoop );
 		processLoop = null;

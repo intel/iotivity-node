@@ -1,0 +1,21 @@
+init:
+  - git config --global core.autocrlf input
+
+shallow_clone: true
+
+matrix:
+  fast_finish: true
+
+install:
+  - ps: Install-Product node 6.9.1 x64
+  - pip install --egg scons
+
+test_script:
+  - node --version
+  - npm --version
+  - pip --version
+  - npm install
+  - npm install -g grunt-cli
+  - npm run-script test
+
+build: off
