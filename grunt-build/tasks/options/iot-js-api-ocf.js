@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var path = require( "path" );
 var _ = require( "lodash" );
+var path = require( "path" );
+var ocfRunner = require( "iot-js-api" );
+var results = require( "../../../tests/getresult" );
 
 var plain = {
 	location: path.resolve( path.join( __dirname, "..", "..", ".." ) ),
@@ -28,6 +30,21 @@ var coverage = _.extend( {}, plain, {
 		interpreter:
 			path.resolve( path.join( __dirname, "..", "..", "..", "tests", "run-istanbul.sh" ) )
 } );
+
+// Shim the default log() and done() to also record results in JSON
+ocfRunner.defaultCallbacks.done = ( function( originalDone ) {
+	return function() {
+		results.saveResults( "ocf" );
+		return originalDone.apply( this, arguments );
+	};
+} )( ocfRunner.defaultCallbacks.done );
+
+ocfRunner.defaultCallbacks.log = ( function( originalLog ) {
+	return function( status ) {
+		results.getTestResult( status );
+		return originalLog.apply( this, arguments );
+	};
+} )( ocfRunner.defaultCallbacks.log );
 
 module.exports = {
 	plain: { client: plain, server: plain, single: plain },
