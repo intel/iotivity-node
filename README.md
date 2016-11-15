@@ -4,110 +4,95 @@
 This project provides a Javascript API for [OCF][] functionality. The API follows a maintained [specification][] and is implemented as a native addon using [iotivity][] as its backend.
 
 ## Status
-<a href="https://ci.appveyor.com/project/gabrielschulhof/iotivity-node/branch/maintenance">
-	<img alt="Windows Build Status" src="https://ci.appveyor.com/api/projects/status/github/otcshare/iotivity-node?branch=maintenance&svg=true"></img>
+<a href="https://ci.appveyor.com/project/gabrielschulhof/iotivity-node/branch/master">
+	<img alt="Windows Build Status" src="https://ci.appveyor.com/api/projects/status/github/otcshare/iotivity-node?branch=master&svg=true"></img>
 </a>
 <a href="https://travis-ci.org/otcshare/iotivity-node">
-	<img alt="Posix Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=maintenance"></img>
+	<img alt="Posix Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=master"></img>
 </a>
 <a href='https://coveralls.io/github/otcshare/iotivity-node?branch=maintenance'>
-	<img src='https://coveralls.io/repos/github/otcshare/iotivity-node/badge.svg?branch=maintenance' alt='Coverage Status' />
+	<img src='https://coveralls.io/repos/github/otcshare/iotivity-node/badge.svg?branch=master' alt='Coverage Status' />
 </a>
 
 ## Installation
 
-### For the impatient:
-0. Make sure [node][] is up and running
-0. Install the following packages, which your distribution should provide:
-    0. unzip, scons, wget, git, patch, tar, and make
-    0. Development headers for boost (at least 1.55), libuuid, glib2, and libcurl
-    0. A C compiler and a C++ compiler
-0. Run ```npm install```
+* On Linux and OSX
+  0. Make sure [node][] is up and running
+  0. Install the following packages, which your distribution should provide:
+      0. unzip, scons, git, and make
+      0. Development headers for boost (at least 1.55), libuuid, and glib2
+      0. A C compiler and a C++ compiler (gcc-5 or later)
+  0. Clone this repository
+  0. cd `iotivity-node`
+  0. Run `npm install`
+* On Windows ([video](https://www.youtube.com/watch?v=RgsZpv8IrWA))
+  0. Install [node][]
+  0. In a PowerShell running as Administrator, run `npm install -g --production windows-build-tools`. This will install Python and the toolchain necessary for building iotivity-node. While this command runs, you can perform some of the following steps.
+  0. Install [git][]
+  0. Install [7-Zip][]
+  0. The installation of the `windows-build-tools` package eventually indicates that it has installed Python. After that message appears, you can perform some of the steps below.
+  0. In a command prompt, append the python folder, the python scripts folder, and the 7-Zip folder to your PATH. The paths you append are based on your Windows user name, so replace "yourusernamehere" in the example below with your actual Windows user name.
 
-Alternatively, there's a [video][] showing how to prepare a pristine Fedora 23 Cloud image for iotivity-node.
+      ```
+      setx PATH "%PATH%;c:\Users\yourusernamehere\.windows-build-tools\python27;c:\Users\yourusernamehere\.windows-build-tools\python27\scripts;c:\Program Files\7-Zip"
+      ```
+  0. Close the command prompt and reopen it.
+  0. In the command prompt, run `pip install --egg scons` to install scons (a python package)
+  0. Wait for the installation of the `windows-build-tools` to complete. Afterwards, you can perform the remaining steps.
+  0. Clone this repository and the change directory into it
+  0. Run `npm install` to build iotivity-node.
+  0. After the successful completion of the above command, you are ready to use iotivity-node. You can use the usual npm process of adding iotivity-node to the `dependencies` section of your package's `package.json` file.
 
-iotivity-node provides two interfaces: The low-level interface is a close mapping of the iotivity C API.
-```JS
-var iotivity = require( "iotivity-node/lowlevel" );
-```
-will give you access to the low-level interface.
+After installation using the steps above, you may want to run the iotivity-node test suite. To do so, perform the following steps from the iotivity-node repository root. The steps apply to all platforms:
 
-There is also a high-level interface which implements the [JS API spec][specification]. This interface requires the ```Promise``` object which is only available starting node.js 4.0.
-```JS
-var device = require( "iotivity-node" )();
-```
-will give you an instance of OicDevice as described in the JS API spec.
+0. Run `npm -g install grunt-cli`
+0. Run `grunt test`
+
+The file [appveyor.yml](./appveyor.yml) provides an example of the commands necessary for setting up a Windows environment, and the file [.travis.yml](./.travis.yml) provides an example of the commands necessary for setting up the Linux and OSX environments.
 
 ### In more detail:
-iotivity-node depends on [iotivity][] proper. It has been tested against [1.2.0][] on Linux. iotivity depends on development headers for libuuid and boost.
+iotivity-node depends on [iotivity][] proper. It has been tested against [1.2.0][]. The above installation instructions cover the dependencies for both iotivity-node and iotivity.
 
 iotivity-node requires a compiler that implements the C++11 standard.
 
-During compilation, iotivity-node downloads iotivity from its git repository, builds it, and links against it. If you wish to build iotivity separately, set the environment variable OCTBSTACK_CFLAGS to contain the compiler arguments necessary for building against iotivity, and also set the environment variable OCTBSTACK_LIBS to contain the linker arguments necessary for linking against iotivity. If both variables are set to non-empty values, iotivity-node will skip the step of downloading and building iotivity from sources. If you choose to build iotivity separately, you can use the following procedure, which is known to work on Linux:
+During compilation, iotivity-node downloads iotivity from its git repository, builds it, and links against it. If you wish to build iotivity separately, set the environment variable `OCTBSTACK_CFLAGS` to contain the compiler arguments necessary for building against iotivity, and also set the environment variable `OCTBSTACK_LIBS` to contain the linker arguments necessary for linking against iotivity. If both variables are set to non-empty values, iotivity-node will skip the step of downloading and building iotivity from sources. If you choose to build iotivity separately, you can use the following procedure:
 
 0. Grab a [snapshot][] of iotivity from its git repository and unpack it locally.
-0. Make sure a compiler, make, [scons][] (a build tool), and the headers for the above-mentioned library dependencies (boost and libuuid) are installed. Your distribution should provide all these tools and libraries.
-0. ```cd iotivity```
-0. scons has the concept of targets just like make. You can get a list of targets contained in the iotivity repository, as well as a listing of recognized build flags via ```scons --help```. The only target you need for the node.js bindings is ```liboctbstack```. Thus, run ```scons liboctbstack``` to build this target.
+0. Make sure a build toolchain, [scons][] (a build tool), and the headers for the above-mentioned library dependencies are installed. Your distribution should provide all these tools and libraries.
+0. `cd iotivity`
+0. If you're building against version 1.2.0 of iotivity on OSX or Windows, you will first need to apply the downstream patches which iotivity-node provides in the `patches/` subdirectory. You can use `git apply <path-to-patch>` for this. These patches are on track to appear in later versions of iotivity, so they will disappear from later versions of iotivity-node.
+0. scons has the concept of targets just like make. You can get a list of targets contained in the iotivity repository, as well as a listing of recognized build flags via `scons --help`. The only targets you need for the node.js bindings are `octbstack` and `json2cbor`. Thus, run `scons SECURED=1 json2cbor octbstack` to build these targets.
 
-    On OSX you need more targets than just ```liboctbstack``` because on that platform iotivity does not build ```liboctbstack``` as a shared library, but rather as an archive. Thus, you need to build all targets that correspond to archives that go into the Linux ```liboctbstack``` shared library:
-    * ```libconnectivity_abstraction```
-    * ```libcoap```
-    * ```c_common```
-    * ```libocsrm```
+    On OSX you need more targets than just `octbstack` and `json2cbor` because on that platform iotivity does not build `octbstack` as a shared library, but rather as an archive. Thus, you need to build all targets that correspond to archives that go into the Linux `liboctbstack` shared library:
+
+    * `c_common`
+    * `coap`
+    * `connectivity_abstraction`
+    * `json2cbor`
+    * `logger`
+    * `ocsrm`
+    * `octbstack`
+    * `routingmanager`
+
 0. Now that iotivity is built, clone this repository, and change directory into it.
 0. Set the following environment variables:
-	* ```OCTBSTACK_CFLAGS``` - this should contain the compiler flags for locating the iotivity include files. For example, the value of this variables can be ```-I/home/nix/iot/iotivity/resource/csdk/stack/include```.
-	* ```OCTBSTACK_LIBS``` - this should contain the linker flags necessary for locating ```liboctbstack.so``` both at compile time and at runtime. Its value can be as simple as ```-loctbstack``` if liboctbstack is in /usr/lib, but may need to be as complex as ```-L/home/nix/iot/iotivity/out/linux/x86/release -loctbstack -Wl,-rpath=/home/nix/iot/iotivity/out/linux/x86/release``` if liboctbstack.so is located on an unusual path.
-0. Run ```npm install``` with these environment variables set.
+	* `OCTBSTACK_CFLAGS` - this should contain the compiler flags for locating the iotivity include files. For example, the value of this variable can be `-I/home/nix/iot/iotivity/resource/csdk/stack/include`.
+	* `OCTBSTACK_LIBS` - this should contain the linker flags necessary for locating `liboctbstack.so` both at compile time and at runtime. Its value can be as simple as `-loctbstack` if liboctbstack is in /usr/lib, but may need to be as complex as `-L/home/nix/iot/iotivity/out/linux/x86/release -loctbstack -Wl,-rpath=/home/nix/iot/iotivity/out/linux/x86/release` if liboctbstack.so is located on an unusual path.
+0. Run `npm install` with these environment variables set.
 
-<a name="install-scripts"></a>Alternatively, you can use some rudimentary install scripts for both iotivity and this repository. Using them will help you avoid having to set the environment variables ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the scripts will supply them to the build process.
+## Provisioning and device ID persistence
 
-0. Grab [install.sh][] and [octbstack.pc.in][] and place them in the root of the iotivity repository.
-0. As root, change directory to the iotivity repository and run ```./install.sh```. The script recognizes the following environment variables:
-    0. ```PREFIX``` is set to ```/usr``` by default
-    0. ```DESTDIR``` is unset.
-    0. ```INSTALL_PC``` is unset. Setting it to ```true``` will cause ```install.sh``` to also copy the file ```octbstack.pc``` into ```${DESTDIR}/${PREFIX}/lib/pkgconfig```.
-    0. ```SOURCE``` is set to the present working directory by default.
-
-    Use ```PREFIX``` to install to a location other than ```/usr``` and use ```DESTDIR``` to set an additional prefix where to put the files. This latter option is especially useful for packaging. Examples:
-
-    ```PREFIX=/usr/local ./install.sh``` will install the files into ```/usr/local``` instead.
-
-    ```PREFIX=/usr/local DESTDIR=/home/username/iotivity-installation ./install.sh``` will install the files into ```/home/username/iotivity-installation/usr/local```, but will configure liboctbstack to work when loaded from ```/usr/local```.
-
-    Use ```SOURCE``` if the ```install.sh``` script is not located in the root of the iotivity repository to indicate the absolute path to the root of the iotivity repository. Note that if you also wish to distribute the octbstack.pc file, you need to copy octbstack.pc.in from the root of this repository to the root of the iotivity repository first.
-
-0. After having installed iotivity using the above script, you can run ```./dist.sh``` from the root of this repository without first having to set any environment variables. The script will grab the environment via ```pkg-config``` from the file installed above, and will build, test, and create a directory structure under ```dist/``` which is suitable for deployment on a target device. See ```./dist.sh --help``` for more options.
-
-## Placing the binaries onto a device
-The distribution scripts ```dist.sh``` and ```install.sh``` when used together make it easy to create a binary tarball which can be unpacked into the root directory of a device:
-
-0. Change directory to the root of the ```iotivity``` repository and run ```DESTDIR=/tmp/iotivity-installation ./install.sh```
-0. ```mkdir -p /tmp/iotivity-installation/usr/lib/node_modules```
-0. Change directory to the root of the ```iotivity-node``` repository.
-0. ```./dist.sh```
-0. ```cd dist```
-0. ```cp -a iotivity /tmp/iotivity-installation/usr/lib/node_modules```
-0. ```cd /tmp/iotivity-installation```
-0. ```rm -rf usr/include usr/lib/pkgconfig```
-0. ```tar cvjf iotivity.bin.tar.bz2 *```
-
-You can now transfer iotivity.bin.tar.bz2 to the device and then unpack it into the root directory.
-
-## Persistence
-
-The high-level JS API provides a means for persisting the device ID across instantiations of a process according to the [iotivity wiki][]. It does so by creating a directory ```${HOME}/.iotivity-node```. Thereunder, it creates directories whose name is the sha256 checksum of the absolute path of the given script. Thus, if you write a script located in ```/home/user/myscript.js``` that uses the high-level JS API, its persistent state will be stored in the directory
+The high-level JS API provides a means for persisting the device ID across instantiations of a script according to the [iotivity wiki][]. This mechanism is also responsible for initially creating the configuration file that stores security-related information for a given script. It does so by creating a directory ```${HOME}/.iotivity-node```. Thereunder, it creates directories whose name is the sha256 checksum of the absolute path of the given script. Thus, if you write a script located in ```/home/user/myscript.js``` that uses the high-level JS API, its persistent state will be stored in the directory
 ```
 /home/user/.iotivity-node/1abfb1b70eaa1ccc17a42990723b153a0d4b913a8b15161f8043411fc7f24fb1
 ```
-in a file named ```oic_svr_db.json```. The file initially contains enough information to persist the device ID used whenever you run ```/home/user/myscript.js```. You can add more information to the file in accordance with the [iotivity wiki][].
+in a file named ```oic_svr_db.dat```. The file initially contains enough information to persist the device ID used whenever you run ```/home/user/myscript.js```. You can add more information to the file in accordance with the [iotivity wiki][], and using the `json2cbor` tool. The tool is located in `iotivity-installed/bin` off the root of this repository, or, if you have chosen to build iotivity externally, then in the output directory created by the iotivity build process.
 
 ## Examples
 
 The JavaScript examples are located in [js/](./js/) and come in pairs of one client and one server, each illustrating a basic aspect of iotivity. To run them, open two terminals and change directory to the root of the iotivity-node repository in both. Always launch the server before the client. For example, in one terminal you can run ```node js/server.discoverable.js``` and in the other terminal you can run ```node js/client.discovery.js```.
 
-Make sure no firewall is running (or one is properly configured to allow iotivity-related traffic) on the machine(s) where these applications are running.
+Make sure no firewall is running (or one is properly configured to allow iotivity-related traffic and especially multicast traffic) on the machine(s) where these applications are running.
 
 [iotivity]: http://iotivity.org/
 [node]: https://nodejs.org/
@@ -118,5 +103,7 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 [octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.2.0-0/octbstack.pc.in
 [iotivity wiki]: https://wiki.iotivity.org/faq_s
 [video]: https://www.youtube.com/watch?v=95VTB_qgYfw
-[specification]: https://github.com/01org/iot-js-api-test-suite/blob/master/api/oic.md
+[specification]: https://github.com/01org/iot-js-api/tree/ocf-1.1.0/api/ocf
 [OCF]: http://openconnectivity.org/
+[git]: http://git-scm.org/
+[7-Zip]: http://7-zip.org/
