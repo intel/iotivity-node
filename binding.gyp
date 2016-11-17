@@ -2,9 +2,7 @@
 	"variables": {
 		"externalOCTBStack": "<!(node -p \"( process.env.OCTBSTACK_CFLAGS && process.env.OCTBSTACK_LIBS ) ? 'true' : 'false';\")",
 		"internalOCTBStack_include_dirs": [
-			"<(module_root_dir)/iotivity-native/resource/csdk/stack/include",
-			"<(module_root_dir)/iotivity-native/resource/c_common",
-			"<(module_root_dir)/iotivity-native/extlibs/tinycbor/tinycbor/src"
+			"<(module_root_dir)/iotivity-installed/include"
 		],
 	},
 
@@ -37,14 +35,14 @@
 
 					[ "OS=='win'", {
 						"libraries": [
-							"<(module_root_dir)/iotivity-native/binaries/octbstack.lib"
+							"<(module_root_dir)/iotivity-installed/lib/octbstack.lib"
 						]
 					}, {
 
 					# Generic way that works for POSIX
 						"libraries": [
-							"-L<(module_root_dir)/iotivity-native/binaries",
-							"-Wl,-rpath <(module_root_dir)/iotivity-native/binaries",
+							"-L<(module_root_dir)/iotivity-installed/lib",
+							"-Wl,-rpath <(module_root_dir)/iotivity-installed/lib",
 							"-loctbstack"
 						]
 					} ],
@@ -86,7 +84,7 @@
 					"actions": [ {
 						"action_name": "build",
 						"inputs": [""],
-						"outputs": ["iotivity-native"],
+						"outputs": ["iotivity-installed"],
 						"action": [
 							"node",
 							"build-scripts/build-csdk.js",
@@ -101,7 +99,7 @@
 							"copies": [ {
 								"destination": "<(PRODUCT_DIR)",
 								"files": [
-									"<(module_root_dir)/iotivity-native/binaries/octbstack.dll"
+									"<(module_root_dir)/iotivity-installed/lib/octbstack.dll"
 								]
 							} ]
 						} ]
@@ -118,7 +116,7 @@
 				"outputs": ["generated/constants.cc"],
 				"conditions": [
 					[ "'<(externalOCTBStack)'=='false'", {
-						"inputs": ["iotivity-native"],
+						"inputs": ["iotivity-installed"],
 						"action": [
 							"node",
 							"build-scripts/generate-constants.js",
@@ -146,7 +144,7 @@
 				"outputs": ["generated/enums.cc"],
 				"conditions": [
 					[ "'<(externalOCTBStack)'=='false'", {
-						"inputs": ["iotivity-native"],
+						"inputs": ["iotivity-installed"],
 						"action": [
 							"node",
 							"build-scripts/generate-enums.js",
@@ -174,7 +172,7 @@
 				"outputs": ["generated/functions.cc"],
 				"conditions": [
 					[ "'<(externalOCTBStack)'=='false'", {
-						"inputs": ["iotivity-native"],
+						"inputs": ["iotivity-installed"],
 						"action": [
 							"node",
 							"build-scripts/generate-functions.js"
