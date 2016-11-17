@@ -53,7 +53,7 @@ QUnit.config.callbacks.log.push( function( status ) {
 
 	// Parameters: status: { module, result(t/f), message, actual, expected, testId, runtime }
 
-	results.getTestResult( status, success, failure );
+	results.getTestResult( status );
 
 	console.log(
 		( status.result ? success : failure ) +
@@ -73,6 +73,8 @@ QUnit.config.callbacks.done.push( function( status ) {
 
 	console.log( "Total assertions: " +
 		"(" + passed + ( status.failed > 0 ? "+" + failed : "" ) + ") / " + status.total );
+
+	results.saveResults( "lowlevel" );
 
 	process.exit( status.failed > 0 ? 1 : 0 );
 } );
