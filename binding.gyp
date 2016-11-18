@@ -5,7 +5,6 @@
 		# Used when externalOCTBStack is false
 		"internal_octbstack_cflags": [
 			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")',
-			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/c_common/ocrandom/include")',
 			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/c_common")',
 			'-DROUTING_EP',
 			'-DTCP_ADAPTER'
@@ -179,14 +178,13 @@
 				"generated/constants.cc",
 				"generated/enums.cc",
 				"generated/functions.cc",
-				"src/functions/oc-cancel.cc",
+				"src/common.cc",
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
-				"src/functions/oc-do-response.cc",
-				"src/functions/oc-notify.cc",
-				"src/functions/oc-random.cc",
 				"src/functions/oc-register-persistent-storage-handler.cc",
 				"src/functions/oc-set-default-device-entity-handler.cc",
+				"src/functions/oc-server-resource-utils.cc",
+				"src/functions/oc-server-response.cc",
 				"src/functions/simple.cc",
 				"src/main.cc",
 				"src/structures.cc",
@@ -198,9 +196,7 @@
 				"src/structures/oc-header-option-array.cc",
 				"src/structures/oc-identity.cc",
 				"src/structures/oc-payload.cc",
-				"src/structures/oc-platform-info.cc",
-				"src/structures/oc-sid.cc",
-				"src/structures/string-primitive.cc"
+				"src/structures/oc-platform-info.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
 		}

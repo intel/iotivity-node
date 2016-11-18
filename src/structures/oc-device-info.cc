@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include "oc-device-info.h"
-#include "string-primitive.h"
+#include <nan.h>
 #include "../common.h"
 
 extern "C" {
@@ -60,7 +59,7 @@ bool c_StringArrayFromProperty(Local<Object> source, const char *propertyName,
           .ToLocalChecked();
   VALIDATE_VALUE_TYPE(sourceValue, IsArray,
                       (std::string("device info ") + propertyName).c_str(),
-                      false);
+                      return false);
   Local<Array> jsArray = Local<Array>::Cast(sourceValue);
 
   size_t index, length = jsArray->Length();
@@ -68,55 +67,52 @@ bool c_StringArrayFromProperty(Local<Object> source, const char *propertyName,
 
   for (index = 0; index < length; index++, previous = &((*previous)->next)) {
     Local<Value> itemValue = Nan::Get(jsArray, index).ToLocalChecked();
-    VALIDATE_VALUE_TYPE_OR_FREE(
+    VALIDATE_VALUE_TYPE(
         itemValue, IsString,
         (std::string("device info ") + propertyName + " list item").c_str(),
-        false, local, c_freeLinkedList);
+        goto free);
 
     (*previous) = new OCStringLL;
     if (!(*previous)) {
-      goto freeAndQuit;
+      goto free;
     }
     (*previous)->next = 0;
     (*previous)->value = strdup((const char *)*(String::Utf8Value(itemValue)));
     if (!(*previous)->value) {
-      goto freeAndQuit;
+      goto free;
     }
   }
 
   *destination = local;
   return true;
-freeAndQuit:
+free:
   c_freeLinkedList(local);
   return false;
 }
 
 bool c_OCDeviceInfo(Local<Object> deviceInfo, OCDeviceInfo *info) {
-  OCDeviceInfo local = {
-      .deviceName = 0, .types = 0, .specVersion = 0, .dataModelVersions = 0};
+  OCDeviceInfo local = {0};
 
-  VALIDATE_AND_ASSIGN_STRING(&local, deviceName, deviceInfo,
-                             c_OCDeviceInfoFreeMembers, false);
-
-  VALIDATE_AND_ASSIGN_STRING(&local, specVersion, deviceInfo,
-                             c_OCDeviceInfoFreeMembers, false);
+  VALIDATE_AND_ASSIGN_STRING(&local, deviceInfo, deviceName, goto free);
+  VALIDATE_AND_ASSIGN_STRING(&local, deviceInfo, specVersion, goto free);
 
   // Make sure the "types" property is an array and copy it to the C structure
   if (!c_StringArrayFromProperty(deviceInfo, "types", &(local.types))) {
-    c_OCDeviceInfoFreeMembers(&local);
-    return false;
+    goto free;
   }
 
   // Make sure the "dataModelVersion" property is an array and copy it to the C
   // structure
   if (!c_StringArrayFromProperty(deviceInfo, "dataModelVersions",
                                  &(local.dataModelVersions))) {
-    c_OCDeviceInfoFreeMembers(&local);
-    return false;
+    goto free;
   }
 
   // If we've successfully created the structure, we transfer it to the
   // passed-in structure
   *info = local;
   return true;
+free:
+  c_OCDeviceInfoFreeMembers(&local);
+  return false;
 }

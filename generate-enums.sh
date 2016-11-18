@@ -34,7 +34,7 @@ mkdir -p generated
 cat src/enums.cc.in > generated/enums.cc.new || ( rm -f generated/enums.cc.new && exit 1 )
 
 # Parse header for enums
-cat "${OCTYPES_H}" "${OCRANDOM_H}" "${OCPRESENCE_H}" | \
+cat "${OCTYPES_H}" "${OCPRESENCE_H}" | \
   grep -v '^$' | \
   awk -v PRINT=0 -v OUTPUT="" -v ENUM_LIST="" '{
     if ( $0 == "typedef enum" ) PRINT=1;
@@ -49,7 +49,7 @@ cat "${OCTYPES_H}" "${OCRANDOM_H}" "${OCPRESENCE_H}" | \
 	    ENUM_NAME = $0;
 	    gsub( /^} */, "", ENUM_NAME );
 	    gsub( / *;.*$/, "", ENUM_NAME );
-        ENUM_LIST = ENUM_LIST "  SET_ENUM(exports, " ENUM_NAME ");\n";
+        ENUM_LIST = ENUM_LIST "  SET_ENUM(target, " ENUM_NAME ");\n";
         print("static Local<Object> bind_" ENUM_NAME "() {\n  Local<Object> returnValue = Nan::New<Object>();\n" );
       }
       else if ( $1 != "typedef" && $1 != "{" ) {
@@ -63,7 +63,7 @@ cat "${OCTYPES_H}" "${OCRANDOM_H}" "${OCPRESENCE_H}" | \
     }
   }
   END {
-    print( "void InitEnums(Handle<Object> exports) {\n" ENUM_LIST "}" );
+    print( "NAN_MODULE_INIT(InitEnums) {\n" ENUM_LIST "}" );
   }' | \
   sed 's/[,=]);$/);/' >> generated/enums.cc.new || ( rm -f generated/enums.cc.new && exit 1 )
 

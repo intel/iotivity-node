@@ -29,7 +29,7 @@ echo '' >> generated/function-prototypes.h
 echo '#include "../src/functions.h"' >> generated/functions.cc
 echo '#include "function-prototypes.h"' >> generated/functions.cc
 echo '' >> generated/functions.cc
-echo 'void InitFunctions(Handle<Object> exports, Handle<Object> module) {' >> generated/functions.cc
+echo 'NAN_MODULE_INIT(InitFunctions) {' >> generated/functions.cc
 
 find src -type f | while read filename; do
 	cat "${filename}" | grep NAN_METHOD;
@@ -38,7 +38,7 @@ done | \
 	sort -u | \
 while read methodname; do
 	echo "NAN_METHOD(bind_${methodname});" >> generated/function-prototypes.h
-	echo "  SET_FUNCTION(exports, ${methodname});" >> generated/functions.cc
+	echo "  SET_FUNCTION(target, ${methodname});" >> generated/functions.cc
 done
 
 echo '' >> generated/function-prototypes.h

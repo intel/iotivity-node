@@ -71,12 +71,6 @@ parseFileForConstants "${OCTYPES_H}" >> generated/constants.cc.new || \
 # Separate the two sections with a newline
 echo '' >> generated/constants.cc.new || ( rm -f generated/constants.cc.new && exit 1 )
 
-# Parse octypes.h and append to the generated file
-echo '  // ocrandom.h: Definitions' >> generated/constants.cc.new || \
-	( rm -f generated/constants.cc.new && exit 1 )
-parseFileForConstants "${OCRANDOM_H}" >> generated/constants.cc.new || \
-	( rm -f generated/constants.cc.new && exit 1 )
-
 # Close the function
 echo '}' >> generated/constants.cc.new || ( rm -f generated/constants.cc.new && exit 1 )
 

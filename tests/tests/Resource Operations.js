@@ -26,7 +26,7 @@ var result, countReceptacle, initialResourceCount,
 	};
 
 // Report assertion count
-console.log( JSON.stringify( { assertionCount: 33 } ) );
+console.log( JSON.stringify( { assertionCount: 35 } ) );
 
 // Init
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
@@ -205,7 +205,11 @@ testUtils.assert( "strictEqual",
 // Delete the child resource
 result = iotivity.OCDeleteResource( childResourceHandleReceptacle.handle );
 testUtils.stackOKOrDie( "OCDeleteResource(child)", result );
+testUtils.assert( "strictEqual", childResourceHandleReceptacle.handle.stale, true,
+	"Child resource handle is marked stale after deletion" );
 
 // Delete the resource
 result = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
 testUtils.stackOKOrDie( "OCDeleteResource(parent)", result );
+testUtils.assert( "strictEqual", resourceHandleReceptacle.handle.stale, true,
+	"Resource handle is marked stale after deletion" );
