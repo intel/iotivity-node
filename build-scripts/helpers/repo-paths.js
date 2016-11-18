@@ -1,4 +1,3 @@
-//
 // Copyright 2016 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,31 +11,24 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-module.exports = function( grunt ) {
-"use strict";
 
+var fs = require( "fs" );
 var path = require( "path" );
-var suites;
 
-require( "load-grunt-config" )( grunt, {
-	configPath: [
-		path.join( __dirname, "grunt-build", "tasks", "options" ),
-		path.join( __dirname, "grunt-build", "tasks" )
-	],
-	init: true
-} );
+var rootPath = path.resolve( path.join( __dirname, "..", ".." ) );
 
-suites = process.version.match( /v0.10/ ) ? [] :
-	grunt.option( "ocf-suites" ) ?
-		grunt.option( "ocf-suites" ).split( "," ) : undefined;
-
-if ( suites ) {
-	grunt.config.set( "iot-js-api-ocf.plain.tests", suites );
-	grunt.config.set( "iot-js-api-ocf.coverage.tests", suites );
-}
-
-require( "load-grunt-tasks" )( grunt );
-grunt.task.loadNpmTasks( "iot-js-api" );
-
+var paths = {
+	root: rootPath,
+	generated: path.join( rootPath, "generated" ),
+	src: path.join( rootPath, "src" )
 };
+
+try {
+	fs.mkdirSync( paths.generated );
+} catch ( anError ) {
+	if ( anError.code !== "EEXIST" ) {
+		throw anError;
+	}
+};
+
+module.exports = paths;

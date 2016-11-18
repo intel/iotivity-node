@@ -1,70 +1,72 @@
 {
 	"variables": {
-		"externalOCTBStack": '<!(if test "x${OCTBSTACK_CFLAGS}x" != "xx" -a "x${OCTBSTACK_CFLAGS}x" != "xx"; then echo true; else echo false; fi)',
-
-		# Used when externalOCTBStack is false
-		"internal_octbstack_cflags": [
-			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/csdk/stack/include")',
-			'<!@(echo "-I$(pwd)/deps/iotivity/include/iotivity/resource/c_common")',
-			'-DROUTING_EP'
-		]
+		"externalOCTBStack": "<!(node -p \"( process.env.OCTBSTACK_CFLAGS && process.env.OCTBSTACK_LIBS ) ? 'true' : 'false';\")",
+		"internalOCTBStack_include_dirs": [
+			"<(module_root_dir)/iotivity-native/resource/csdk/stack/include",
+			"<(module_root_dir)/iotivity-native/resource/c_common",
+			"<(module_root_dir)/iotivity-native/extlibs/tinycbor/tinycbor/src"
+		],
 	},
-
-	"conditions": [
-
-		# Build dlopennow when testing so we can make sure the library has all the symbols it needs
-		[ "'<!(echo $TESTING)'=='true'", {
-			"targets+": [
-				{
-					"target_name": "dlopennow",
-					"sources": [ "tests/dlopennow.cc" ],
-					"include_dirs": [
-					"<!(node -e \"require('nan')\")"
-					]
-				}
-			]
-		} ]
-	],
 
 	"target_defaults": {
 		"include_dirs": [
-			"<!(node -e \"require('nan')\")",
-			"<!@(echo \"$(pwd)/src\")"
+			"<!(node -e \"require( 'nan' );\")",
+			"<(module_root_dir)/src"
 		],
 		"conditions": [
 
-			# Platform-independent conditions
-
 			[ "'<(externalOCTBStack)'=='true'", {
-				"libraries": [ '<!@(echo "$OCTBSTACK_LIBS")' ],
-				"cflags": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ],
+
+				# When building externally we simply follow the CFLAGS/LIBS
+
+				"libraries": [ "<!@(node -p \"process.env.OCTBSTACK_LIBS\")" ],
+				"cflags": [ "<!@(node -p \"process.env.OCTBSTACK_CFLAGS\")" ],
 				"xcode_settings": {
-					"OTHER_CFLAGS": [ '<!@(echo "$OCTBSTACK_CFLAGS")' ]
+					"OTHER_CFLAGS": [ "<!@(node -p \"process.env.OCTBSTACK_CFLAGS\")" ]
 				}
 			}, {
-				"libraries": [
-					'<!@(echo "-L$(pwd)/deps/iotivity/lib")',
-					'-loctbstack',
-					'<!@(echo "-Wl,-rpath $(pwd)/deps/iotivity/lib")'
-				],
-				"cflags": [ '<(internal_octbstack_cflags)' ],
-				"xcode_settings": {
-					"OTHER_CFLAGS": [ '<(internal_octbstack_cflags)' ]
-				}
-			} ],
 
-			# OSX-specific conditions
+				# When building internally, we use pre-defined CFLAGS/LIBS, trusting that the CSDK
+				# will be built successfully
 
-			[ "OS=='mac' and '<(externalOCTBStack)'=='false'", {
-				"libraries+": [
-					"-lconnectivity_abstraction",
-					"-lcoap",
-					"-lc_common",
-					"-lroutingmanager",
-					"-llogger",
-					"-locsrm"
+				"defines": [ "ROUTING_EP" ],
+				"include_dirs+": [ '<@(internalOCTBStack_include_dirs)' ],
+				"conditions": [
+
+					# Windows-specific way of adding libraries
+
+					[ "OS=='win'", {
+						"libraries": [
+							"<(module_root_dir)/iotivity-native/binaries/octbstack.lib"
+						]
+					}, {
+
+					# Generic way that works for POSIX
+						"libraries": [
+							"-L<(module_root_dir)/iotivity-native/binaries",
+							"-Wl,-rpath <(module_root_dir)/iotivity-native/binaries",
+							"-loctbstack"
+						]
+					} ],
+
+					[ "OS=='mac'", {
+
+						# OSX needs some more libraries
+
+						"libraries+": [
+							"-lconnectivity_abstraction",
+							"-lcoap",
+							"-lc_common",
+							"-lroutingmanager",
+							"-llogger",
+							"-locsrm"
+						]
+					} ]
 				]
 			} ],
+
+			# OSX quirk
+
 			[ "OS=='mac'", {
 				"xcode_settings": { "OTHER_CFLAGS": [ '-std=c++11' ] }
 			} ]
@@ -81,14 +83,26 @@
 					"actions": [ {
 						"action_name": "build",
 						"inputs": [""],
-						"outputs": ["deps/iotivity"],
+						"outputs": ["iotivity-native"],
 						"action": [
-							"sh",
-							"./build-csdk.sh",
-							'<!@(if test "x${npm_config_debug}x" != "xtruex"; then echo ""; else echo "--debug"; fi)'
+							"node",
+							"build-scripts/build-csdk.js",
+							"<!@(node -p \"process.env.npm_config_debug === 'true' ? '--debug' : '';\")"
 						],
 						"message": "Building CSDK"
-					} ]
+					} ],
+					"conditions": [
+
+						# On Windows we need to copy the dll next to the nodejs module
+						[ "OS=='win'", {
+							"copies": [ {
+								"destination": "<(PRODUCT_DIR)",
+								"files": [
+									"<(module_root_dir)/iotivity-native/binaries/octbstack.dll"
+								]
+							} ]
+						} ]
+					]
 				} ]
 			]
 		},
@@ -101,18 +115,19 @@
 				"outputs": ["generated/constants.cc"],
 				"conditions": [
 					[ "'<(externalOCTBStack)'=='false'", {
-						"inputs": ["deps/iotivity"],
+						"inputs": ["iotivity-native"],
 						"action": [
-							"sh",
-							"./generate-constants.sh",
-							'<(internal_octbstack_cflags)'
+							"node",
+							"build-scripts/generate-constants.js",
+							'<@(internalOCTBStack_include_dirs)'
 						]
 					}, {
 						"inputs": [""],
 						"action": [
-							"sh",
-							"./generate-constants.sh",
-							'<!@(echo "$OCTBSTACK_CFLAGS")'
+							"node",
+							"build-scripts/generate-constants.js",
+							"-c",
+							"<!@(node -p \"process.env.OCTBSTACK_CFLAGS\")"
 						]
 					} ]
 				]
@@ -128,18 +143,19 @@
 				"outputs": ["generated/enums.cc"],
 				"conditions": [
 					[ "'<(externalOCTBStack)'=='false'", {
-						"inputs": ["deps/iotivity"],
+						"inputs": ["iotivity-native"],
 						"action": [
-							"sh",
-							"./generate-enums.sh",
-							'<(internal_octbstack_cflags)'
+							"node",
+							"build-scripts/generate-enums.js",
+							'<@(internalOCTBStack_include_dirs)'
 						]
 					}, {
 						"inputs": [""],
 						"action": [
-							"sh",
-							"./generate-enums.sh",
-							'<!@(echo "$OCTBSTACK_CFLAGS")'
+							"node",
+							"build-scripts/generate-enums.js",
+							"-c",
+							"<!@(node -p process.env.OCTBSTACK_CFLAGS)"
 						]
 					} ]
 				]
@@ -155,16 +171,16 @@
 				"outputs": ["generated/functions.cc"],
 				"conditions": [
 					[ "'<(externalOCTBStack)'=='false'", {
-						"inputs": ["deps/iotivity"],
+						"inputs": ["iotivity-native"],
 						"action": [
-							"sh",
-							"./generate-functions.sh"
+							"node",
+							"build-scripts/generate-functions.js"
 						]
 					}, {
 						"inputs": [""],
 						"action": [
-							"sh",
-							"./generate-functions.sh"
+							"node",
+							"build-scripts/generate-functions.js"
 						]
 					} ]
 				]
