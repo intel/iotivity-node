@@ -10,7 +10,7 @@ This project provides a Javascript API for [OCF][] functionality. The API follow
 <a href="https://travis-ci.org/otcshare/iotivity-node">
 	<img alt="Posix Build Status" src="https://travis-ci.org/otcshare/iotivity-node.svg?branch=master"></img>
 </a>
-<a href='https://coveralls.io/github/otcshare/iotivity-node?branch=maintenance'>
+<a href='https://coveralls.io/github/otcshare/iotivity-node?branch=master'>
 	<img src='https://coveralls.io/repos/github/otcshare/iotivity-node/badge.svg?branch=master' alt='Coverage Status' />
 </a>
 
@@ -99,8 +99,6 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 [1.2.0]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=1.2.0
 [snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=1.2.0;sf=tgz
 [scons]: http://www.scons.org/
-[install.sh]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.2.0-0/install.sh
-[octbstack.pc.in]: https://raw.githubusercontent.com/otcshare/iotivity-node/1.2.0-0/octbstack.pc.in
 [iotivity wiki]: https://wiki.iotivity.org/faq_s
 [video]: https://www.youtube.com/watch?v=95VTB_qgYfw
 [specification]: https://github.com/01org/iot-js-api/tree/ocf-1.1.0/api/ocf
