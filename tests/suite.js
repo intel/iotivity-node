@@ -44,7 +44,11 @@ function havePromises() {
 function spawnOne( assert, options ) {
 	var theChild = childProcess.spawn(
 		"node",
-		[ options.path ].concat( options.uuid ? [ options.uuid ] : [] ),
+		[ options.path ]
+			.concat( options.uuid ? [ options.uuid ] : [ "" ] )
+
+			// What to put into require() to load iotivity-node
+			.concat( [ process.argv[ 2 ] ] ),
 		{
 			stdio: [ process.stdin, "pipe", process.stderr, "ipc" ]
 		} );
@@ -250,8 +254,8 @@ function runTestSuites( files ) {
 
 // Run tests. If no tests were specified on the command line, we scan the tests directory and run
 // all the tests we find therein.
-runTestSuites( ( ( process.argv.length > 2 ) ?
-	( _.map( process.argv[ 2 ].split( "," ), function( item ) {
+runTestSuites( ( ( process.argv.length > 3 ) ?
+	( _.map( process.argv[ 3 ].split( "," ), function( item ) {
 		return path.join( __dirname, "tests", item );
 	} ) ) :
 	( glob.sync( path.join( __dirname, "tests", ( havePromises() ? "" : "!(API)" ) + "*" ) ) ) ) );

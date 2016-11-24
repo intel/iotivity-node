@@ -12,35 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+module.exports = function( grunt ) {
+
 var _ = require( "lodash" );
 var path = require( "path" );
 var ocfRunner = require( "iot-js-api" );
 var results = require( "../../../tests/getresult" );
 
 var packageRoot = path.join( require( "bindings" ).getRoot( __filename ) );
+var location = grunt.option( "ci" ) ?
+		path.join( packageRoot, "node_modules", "iotivity-node" ) : packageRoot;
 var plain = {
-	location: packageRoot,
+	location: location,
 	preamble: function( uuid ) {
 		return "require( \"" +
-			path.join( require( "bindings" ).getRoot( __filename ), "tests", "preamble" )
+			path.join( packageRoot, "tests", "preamble" )
 				.replace( /[\\]/g, "\\\\" ) +
-			"\" )( \"" + uuid + "\" );";
+			"\" )( \"" + uuid + "\", \"" +
+			location
+				.replace( /[\\]/g, "\\\\" ) + "\" );";
 	}
 };
 var coverage = _.extend( {}, plain, {
 	spawn: function( interpreter, commandline ) {
 		var testScript = commandline.shift();
 		return require( "child_process" ).spawn(
-			path.resolve( packageRoot, "node_modules", ".bin", "istanbul" ),
-			[
-				"cover", "--print", "none", "--report", "none",
+			path.resolve( packageRoot, "node_modules", ".bin", "istanbul" ), [
+				"cover",
+				"--print", "none",
+				"--report", "none",
 				"--config", path.join( packageRoot, "tests", "istanbul.json" ),
-				"--dir",
-				path.join( ".", "coverage", testScript.split( path.sep ).slice( -2 ).join( "!" ) ),
-				testScript,
-				"--"
-			].concat( commandline ),
-			{ stdio: [ process.stdin, "pipe", process.stderr ] } );
+				"--dir", path.join( packageRoot, "coverage",
+					testScript.split( path.sep ).slice( -2 ).join( "!" ) ),
+				"--root", location,
+				testScript, "--"
+			].concat( commandline ), { stdio: [ process.stdin, "pipe", process.stderr ] } );
 	}
 } );
 
@@ -59,7 +65,9 @@ ocfRunner.defaultCallbacks.log = ( function( originalLog ) {
 	};
 } )( ocfRunner.defaultCallbacks.log );
 
-module.exports = {
+return {
 	plain: { client: plain, server: plain, single: plain },
 	coverage: { client: coverage, server: coverage, single: coverage }
+};
+
 };

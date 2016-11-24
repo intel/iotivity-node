@@ -11,9 +11,8 @@
     "iot"
   ],
   "scripts": {
-    "lint": "npm install --ignore-scripts && grunt lint",
-    "coverage": "npm install && grunt publish-coverage",
-    "test": "npm install && grunt test"
+    "test": "grunt test",
+    "postinstall": "node build-scripts/postinstall.js"
   },
   "gypfile": true,
   "dependencies": {

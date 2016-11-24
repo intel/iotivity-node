@@ -20,7 +20,7 @@ var messagePrefix = "Client 1",
 	processCallCount = 0,
 	processLoop = null,
 	discoverHandleReceptacle = {},
-	iotivity = require( "../../../lowlevel" ),
+	iotivity = require( process.argv[ 3 ] + "/lowlevel" ),
 	result = iotivity.OCStackResult.OC_STACK_ERROR,
 	testUtils = require( "../../utils" )( iotivity );
 
@@ -107,7 +107,7 @@ function doObserveRequest( destination ) {
 	testUtils.stackOKOrDie( messagePrefix, "OCDoResource(observation)", observeResult );
 }
 
-require( "../../preamble" )( process.argv[ 2 ] );
+require( "../../preamble" )( process.argv[ 2 ], process.argv[ 3 ] );
 
 // Initialize
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );

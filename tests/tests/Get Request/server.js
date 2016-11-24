@@ -17,10 +17,10 @@ var result,
 	processCallCount = 0,
 	processLoop = null,
 	resourceHandleReceptacle = {},
-	iotivity = require( "../../../lowlevel" ),
+	iotivity = require( process.argv[ 3 ] + "/lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
-require( "../../preamble" )( process.argv[ 2 ] );
+require( "../../preamble" )( process.argv[ 2 ], process.argv[ 3 ] );
 
 console.log( JSON.stringify( { assertionCount: 10 } ) );
 

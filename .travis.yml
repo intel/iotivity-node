@@ -56,12 +56,12 @@ matrix:
     # run, and again in "allow_failures" to not have them break the build.
     # Below are the allowed failures:
 
-    - env: NODE_VERSION=4.5 TEST_SCRIPT=coverage
+    - env: NODE_VERSION=4.5 TEST_SCRIPT=publish-coverage
       os: linux
       addons: *buildpackages
 
   allow_failures:
-    - env: NODE_VERSION=4.5 TEST_SCRIPT=coverage
+    - env: NODE_VERSION=4.5 TEST_SCRIPT=publish-coverage
       os: linux
       addons: *buildpackages
 
@@ -81,7 +81,18 @@ install:
   fi
 - npm install -g grunt-cli
 
-script: npm run-script "${TEST_SCRIPT}"
+script:
+- npm pack
+- npm install --ignore-scripts
+- >
+  if "x${TEST_SCRIPT}x" = "xlintx"; then
+    grunt lint
+  else
+    mv package.json package.json.bak
+    npm install *tgz
+    mv package.json.bak package.json
+    grunt "${TEST_SCRIPT}" --ci
+  fi
 
 notifications:
   irc:

@@ -14,16 +14,13 @@
 
 var utils = require( "../assert-to-console" );
 
-var requirePath = require( "path" )
-	.join( require( "bindings" ).getRoot( __filename ), "index" );
-
 console.log( JSON.stringify( { assertionCount: 4 } ) );
 
 var stderr = "";
 var stdout = "";
 
 var childArguments = [ "-e",
-		"try { require( '" + requirePath.replace( /[\\]/g, "\\\\" ) + "' ); } " +
+		"try { require( '" + process.argv[ 3 ].replace( /[\\]/g, "\\\\" ) + "' ); } " +
 		"catch( anError ) { " +
 			"console.error( anError.stack ); process.exit( 1 ); " +
 		"}" +

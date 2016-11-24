@@ -22,6 +22,14 @@ grunt.task.registerTask( "testsuite", "Run the test suite", function() {
 	var done = this.async();
 	spawn( "node",
 		[ path.join( process.cwd(), "tests", "suite.js" ) ]
+
+			// The argument to pass to require() in order to obtain iotivity-node
+			.concat( [ grunt.option( "ci" ) ?
+				path.join( process.cwd(), "node_modules", "iotivity-node" ) :
+				process.cwd()
+			] )
+
+			// The suites to run, or no argument if suites are not specified
 			.concat( grunt.option( "suites" ) ? [ grunt.option( "suites" ) ] : [] ),
 		{
 			env: _.extend( {}, process.env, { "MALLOC_CHECK_": 2 } ),

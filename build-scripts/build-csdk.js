@@ -43,8 +43,7 @@ function findBins( iotivityPath ) {
 	return thePath;
 }
 
-var binariesSource, patchesPath, installBinaries, installLibraries, installHeaders,
-	windowsInstallHeaders, architecture, iotivityPath, mbedtlsPath, tinycborPath;
+var binariesSource, installBinaries, installWinHeaders, architecture, mbedtlsPath, tinycborPath;
 
 // Map npm arch to iotivity arch - different mapping in each OS, it seems :/
 // This can get complicated ...
@@ -59,104 +58,100 @@ var csdkRevision = process.env.CSDK_REVISION ||
 		.replace( /-[0-9]*$/, "" )
 		.replace(  /^([^-]*-)pre-(.*$)/, "$2" );
 
-// Install
-var installPrefix = path.join( repoPaths.root, "iotivity-installed" );
-
 // We assume that, if the path is there, its contents are also ready to go
-if ( fs.existsSync( installPrefix ) ) {
+if ( fs.existsSync( repoPaths.installPrefix ) ) {
 	return;
 }
 
-// Establish the path to the downstream iotivity patches
-patchesPath = path.join( repoPaths.root, "patches" );
-
 // Establish paths needed by the iotivity source tree
-iotivityPath = path.join( repoPaths.root, "iotivity-native" );
-mbedtlsPath = path.join( iotivityPath, "extlibs", "mbedtls", "mbedtls" );
-tinycborPath = path.join( iotivityPath, "extlibs", "tinycbor", "tinycbor" );
+mbedtlsPath = path.join( repoPaths.iotivity, "extlibs", "mbedtls", "mbedtls" );
+tinycborPath = path.join( repoPaths.iotivity, "extlibs", "tinycbor", "tinycbor" );
 
 // Establish paths needed by the installed version of iotivity
-installBinaries = path.join( installPrefix, "bin" );
-installLibraries = path.join( installPrefix, "lib" );
-installHeaders = path.join( installPrefix, "include" );
+installBinaries = path.join( repoPaths.installPrefix, "bin" );
 
 // Attempt to determine the architecture
 architecture = ( process.env.npm_config_user_agent || "" ).match( /\S+/g ) || [];
 architecture =
 	archMap[ architecture[ 2 ] ] ? archMap[ architecture[ 2 ] ][ architecture[ 3 ] ] : null;
 
-// Do a shallow checkout of iotivity
-run( "git", [ "clone", "--depth", "1", "--single-branch", "--branch", csdkRevision,
-	"https://gerrit.iotivity.org/gerrit/iotivity", iotivityPath ]  );
+// If the iotivity source tree is in place, we assume it's build and ready to go. This reduces this
+// script to an install.
+if ( !fs.existsSync( repoPaths.iotivity ) ) {
 
-// Apply patches
-if ( fs.existsSync( patchesPath ) && fs.statSync( patchesPath ).isDirectory() ) {
-	fs.readdirSync( patchesPath ).forEach( function( item ) {
-		run( "git", [ "apply", path.join( patchesPath, item ) ], { cwd: iotivityPath } );
-	} );
+	// Do a shallow checkout of iotivity
+	run( "git", [ "clone", "--depth", "1", "--single-branch", "--branch", csdkRevision,
+		"https://gerrit.iotivity.org/gerrit/iotivity", repoPaths.iotivity ]  );
+
+	// Apply patches
+	if ( fs.existsSync( repoPaths.patchesPath ) &&
+			fs.statSync( repoPaths.patchesPath ).isDirectory() ) {
+		fs.readdirSync( repoPaths.patchesPath ).forEach( function( item ) {
+			run( "git", [ "apply", path.join( repoPaths.patchesPath, item ) ],
+				{ cwd: repoPaths.iotivity } );
+		} );
+	}
+
+	// Clone mbedtls inside iotivity
+	run( "git", [ "clone", "https://github.com/ARMmbed/mbedtls.git", mbedtlsPath ] );
+
+	// Check out known-good commitid of mbedtls
+	run( "git", [ "checkout", "ad249f509fd62a3bbea7ccd1fef605dbd482a7bd" ], { cwd: mbedtlsPath } );
+
+
+	// Clone tinycbor inside iotivity
+	run( "git", [ "clone", "https://github.com/01org/tinycbor.git", tinycborPath ] );
+
+	// Check out known-good commitid of tinycbor
+	run( "git", [ "checkout", "31c7f81d45d115d2007b1c881cbbd3a19618465c" ],
+		{ cwd: tinycborPath } );
+
+	// Build
+	run( "scons", [ "SECURED=1" ]
+		.concat( ( process.env.V === "1" || process.env.npm_config_verbose === "true" ) ?
+			[ "VERBOSE=True" ] : [] )
+		.concat( architecture ?
+			[ "TARGET_ARCH=" + architecture ] : [] )
+		.concat( process.env.npm_config_debug === "true" ?
+			[ "RELEASE=False" ] : [] )
+		.concat(
+			[ "logger", "octbstack", "connectivity_abstraction", "coap", "c_common", "ocsrm",
+				"routingmanager", "json2cbor"
+			] ), { cwd: repoPaths.iotivity } );
 }
 
-// Clone mbedtls inside iotivity
-run( "git", [ "clone", "https://github.com/ARMmbed/mbedtls.git", mbedtlsPath ] );
+// Where are the binaries?
+binariesSource = findBins( repoPaths.iotivity );
 
-// Check out known-good commitid of mbedtls
-run( "git", [ "checkout", "ad249f509fd62a3bbea7ccd1fef605dbd482a7bd" ], { cwd: mbedtlsPath } );
-
-
-// Clone tinycbor inside iotivity
-run( "git", [ "clone", "https://github.com/01org/tinycbor.git", tinycborPath ] );
-
-// Check out known-good commitid of tinycbor
-run( "git", [ "checkout", "31c7f81d45d115d2007b1c881cbbd3a19618465c" ], { cwd: tinycborPath } );
-
-// Build
-run( "scons", [ "SECURED=1" ]
-	.concat( ( process.env.V === "1" || process.env.npm_config_verbose === "true" ) ?
-		[ "VERBOSE=True" ] : [] )
-	.concat( architecture ?
-		[ "TARGET_ARCH=" + architecture ] : [] )
-	.concat( process.env.npm_config_debug === "true" ?
-		[ "RELEASE=False" ] : [] )
-	.concat(
-		[ "logger", "octbstack", "connectivity_abstraction", "coap", "c_common", "ocsrm",
-			"routingmanager", "json2cbor"
-		] ), { cwd: iotivityPath } );
-
-// Binaries
-binariesSource = findBins( iotivityPath );
-
-// json2cbor
+// Install json2cbor
 shelljs.mkdir( "-p", installBinaries );
-shelljs.mv(
+shelljs.cp(
 	path.join( binariesSource, "resource", "csdk", "security", "tool",
 		"json2cbor" + ( process.platform.match( /^win/ ) ? ".exe" : "" ) ),
 	installBinaries );
 
-// Libraries
-shelljs.mv( binariesSource, installLibraries );
-shelljs.rm( "-rf", path.join( installLibraries, "extlibs" ) );
-shelljs.rm( "-rf", path.join( installLibraries, "resource" ) );
+// Install the libraries
+shelljs.cp( "-r", path.join( binariesSource, "*" ), repoPaths.installLibraries );
+shelljs.rm( "-rf", path.join( repoPaths.installLibraries, "extlibs" ) );
+shelljs.rm( "-rf", path.join( repoPaths.installLibraries, "resource" ) );
 
-// Includes
-shelljs.mkdir( "-p", installHeaders );
-shelljs.mv(
-	path.join( iotivityPath, "resource", "csdk", "stack", "include", "ocpayload.h" ),
-	path.join( iotivityPath, "resource", "csdk", "stack", "include", "ocpresence.h" ),
-	path.join( iotivityPath, "resource", "csdk", "stack", "include", "ocstackconfig.h" ),
-	path.join( iotivityPath, "resource", "csdk", "stack", "include", "ocstack.h" ),
-	path.join( iotivityPath, "resource", "csdk", "stack", "include", "octypes.h" ),
-	path.join( iotivityPath, "resource", "c_common", "iotivity_config.h" ),
-	path.join( iotivityPath, "resource", "c_common", "platform_features.h" ),
-	path.join( iotivityPath, "extlibs", "tinycbor", "tinycbor", "src", "cbor.h" ),
-	installHeaders );
+// Install the headers
+shelljs.mkdir( "-p", repoPaths.installHeaders );
+shelljs.cp(
+	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocpayload.h" ),
+	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocpresence.h" ),
+	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocstackconfig.h" ),
+	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocstack.h" ),
+	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "octypes.h" ),
+	path.join( repoPaths.iotivity, "resource", "c_common", "iotivity_config.h" ),
+	path.join( repoPaths.iotivity, "resource", "c_common", "platform_features.h" ),
+	path.join( repoPaths.iotivity, "extlibs", "tinycbor", "tinycbor", "src", "cbor.h" ),
+	repoPaths.installHeaders );
 
 if ( process.platform.match( /^win/ ) ) {
-	windowsInstallHeaders = path.join( installHeaders, "windows" );
-	shelljs.mkdir( "-p", windowsInstallHeaders );
-	shelljs.mv(
-		path.join( iotivityPath, "resource", "c_common", "windows", "include" ),
-		windowsInstallHeaders );
+	installWinHeaders = path.join( repoPaths.installHeaders, "windows" );
+	shelljs.mkdir( "-p", installWinHeaders );
+	shelljs.cp( "-r",
+		path.join( repoPaths.iotivity, "resource", "c_common", "windows", "include" ),
+		installWinHeaders );
 }
-
-// Remove of the source tree
-shelljs.rm( "-rf", iotivityPath );

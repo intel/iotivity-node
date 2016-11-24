@@ -14,7 +14,7 @@
 
 // Create the configuration database that will allow the server to connect to the client.
 
-module.exports = function( resourceUuid ) {
+module.exports = function( resourceUuid, location ) {
 
 var _ = require( "lodash" );
 var osenv = require( "osenv" );
@@ -24,11 +24,10 @@ var path = require( "path" );
 var sha = require( "sha.js" );
 var uuid = require( "uuid" );
 var spawnSync = require( "child_process" ).spawnSync;
-var rootPath = require( "bindings" ).getRoot( __filename );
 
-var toolResult;
+var toolResult, toolPath;
 
-var toolPath = path.join( rootPath, "iotivity-installed", "bin" );
+var installPrefix = path.join( location, "iotivity-installed" );
 var configPath = path.join( osenv.home(), ".iotivity-node",
 	sha( "sha256" )
 		.update( require.main && require.main.filename ||
@@ -123,6 +122,8 @@ var configuration = _.mergeWith( {},
 		}
 	} );
 
+toolPath = path.join( installPrefix, "bin" );
+
 shelljs.mkdir( "-p", configPath );
 
 fs.writeFileSync( path.join( configPath, "oic_svr_db.json" ),
@@ -136,7 +137,7 @@ toolResult = spawnSync( "json2cbor", [
 				.split( path.delimiter )
 				.concat( [ toolPath ] )
 				.join( path.delimiter ),
-			LD_LIBRARY_PATH: path.join( rootPath, "iotivity-installed", "lib" ),
+			LD_LIBRARY_PATH: path.join( installPrefix, "lib" ),
 			stdio: [ process.stdin, process.stdout, process.stderr ]
 		} )
 	} );

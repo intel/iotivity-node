@@ -16,11 +16,17 @@ var fs = require( "fs" );
 var path = require( "path" );
 
 var rootPath = path.resolve( path.join( __dirname, "..", ".." ) );
+var installPrefix = path.join( rootPath, "iotivity-installed" );
 
 var paths = {
 	root: rootPath,
 	generated: path.join( rootPath, "generated" ),
-	src: path.join( rootPath, "src" )
+	src: path.join( rootPath, "src" ),
+	iotivity: path.join( rootPath, "iotivity-native" ),
+	installPrefix: installPrefix,
+	patchesPath: path.join( rootPath, "patches" ),
+	installLibraries: path.join( installPrefix, "lib" ),
+	installHeaders: path.join( installPrefix, "include" )
 };
 
 try {

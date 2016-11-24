@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-require( "../../preamble" )( process.argv[ 2 ] );
+require( "../../preamble" )( process.argv[ 2 ], process.argv[ 3 ] );
 
 var result,
 	uuid = process.argv[ 2 ],
 	processCallCount = 0,
 	processLoop = null,
 	resourceHandleReceptacle = {},
-	iotivity = require( "../../../lowlevel" ),
+	iotivity = require( process.argv[ 3 ] + "/lowlevel" ),
 	testUtils = require( "../../utils" )( iotivity );
 
 function cleanup() {
