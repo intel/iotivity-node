@@ -18,8 +18,6 @@
 #include <nan.h>
 #include "../common.h"
 #include "handles.h"
-#include "oc-device-info.h"
-#include "oc-platform-info.h"
 
 extern "C" {
 #include <ocpayload.h>
@@ -208,41 +206,6 @@ static Local<Object> js_OCDiscoveryPayload(OCDiscoveryPayload *payload) {
   return returnValue;
 }
 
-static Local<Object> js_OCDevicePayload(OCDevicePayload *payload) {
-  Local<Object> returnValue = Nan::New<Object>();
-
-  Nan::Set(returnValue, Nan::New("type").ToLocalChecked(),
-           Nan::New(payload->base.type));
-
-  if (payload->sid) {
-    Nan::Set(returnValue, Nan::New("sid").ToLocalChecked(),
-             Nan::New(payload->sid).ToLocalChecked());
-  }
-
-  SET_STRING_IF_NOT_NULL(returnValue, payload, deviceName);
-  SET_STRING_IF_NOT_NULL(returnValue, payload, specVersion);
-
-  ADD_STRING_ARRAY(returnValue, payload, dataModelVersions);
-  ADD_STRING_ARRAY(returnValue, payload, interfaces);
-  ADD_STRING_ARRAY(returnValue, payload, types);
-
-  return returnValue;
-}
-
-static Local<Object> js_OCPlatformPayload(OCPlatformPayload *payload) {
-  Local<Object> returnValue = Nan::New<Object>();
-
-  Nan::Set(returnValue, Nan::New("type").ToLocalChecked(),
-           Nan::New(payload->base.type));
-
-  SET_STRING_IF_NOT_NULL(returnValue, payload, uri);
-
-  Nan::Set(returnValue, Nan::New("info").ToLocalChecked(),
-           js_OCPlatformInfo(&(payload->info)));
-
-  return returnValue;
-}
-
 static Local<Object> js_OCPresencePayload(OCPresencePayload *payload) {
   Local<Object> returnValue = Nan::New<Object>();
 
@@ -278,12 +241,6 @@ Local<Value> js_OCPayload(OCPayload *payload) {
 
     case PAYLOAD_TYPE_REPRESENTATION:
       return js_OCRepPayload((OCRepPayload *)payload);
-
-    case PAYLOAD_TYPE_DEVICE:
-      return js_OCDevicePayload((OCDevicePayload *)payload);
-
-    case PAYLOAD_TYPE_PLATFORM:
-      return js_OCPlatformPayload((OCPlatformPayload *)payload);
 
     case PAYLOAD_TYPE_PRESENCE:
       return js_OCPresencePayload((OCPresencePayload *)payload);

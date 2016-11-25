@@ -99,10 +99,12 @@ extern "C" {
   destination.memberName =                                                    \
       (destinationType)Nan::To<convertType>(memberName).FromJust();
 
-void addStringArray(v8::Local<v8::Object> destination, OCStringLL *source,
-                    const char *name);
-#define ADD_STRING_ARRAY(destination, source, memberName) \
-  addStringArray((destination), (source)->memberName, #memberName)
+v8::Local<v8::Value> js_StringArray(OCStringLL *source);
+#define ADD_STRING_ARRAY(destination, source, memberName)           \
+  if ((source)->memberName) {                                       \
+    Nan::Set((destination), Nan::New(#memberName).ToLocalChecked(), \
+             js_StringArray((source)->memberName));                 \
+  }
 
 #ifdef DEBUG
 void console_log(v8::Local<v8::Value> argument);
