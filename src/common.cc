@@ -18,17 +18,14 @@
 
 using namespace v8;
 
-void addStringArray(Local<Object> destination, OCStringLL *source,
-                    const char *name) {
-  if (source) {
-    int counter;
-    OCStringLL *item;
-    for (item = source, counter = 0; item; item = item->next, counter++)
-      ;
-    Local<Array> jsArray = Nan::New<Array>(counter);
-    for (item = source, counter = 0; item; item = item->next, counter++) {
-      Nan::Set(jsArray, counter, Nan::New(item->value).ToLocalChecked());
-    }
-    Nan::Set(destination, Nan::New(name).ToLocalChecked(), jsArray);
+Local<Value> js_StringArray(OCStringLL *source) {
+  int count;
+  OCStringLL *item;
+  for (item = source, count = 0; item; item = item->next, count++)
+    ;
+  Local<Array> jsArray = Nan::New<Array>(count);
+  for (item = source, count = 0; item; item = item->next, count++) {
+    Nan::Set(jsArray, count, Nan::New(item->value).ToLocalChecked());
   }
+  return jsArray;
 }

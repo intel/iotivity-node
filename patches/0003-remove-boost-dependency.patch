@@ -35,7 +35,7 @@ index 25c90aa..a73535f 100644
 --- a/resource/SConscript
 +++ b/resource/SConscript
 @@ -61,40 +61,3 @@ SConscript('csdk/SConscript')
- if target_os not in ['arduino','darwin','ios']:
+ if target_os not in ['arduino','darwin']:
  	# Build liboc_logger
  	SConscript('oc_logger/SConscript')
 -
@@ -93,8 +93,8 @@ index 83d809b..1f539ca 100755
 +++ b/resource/csdk/resource-directory/SConscript
 @@ -89,15 +89,3 @@ if 'CLIENT' in rd_mode:
  if 'SERVER' in rd_mode:
-     rd_env.UserInstallTargetHeader('include/rd_server.h', 'service/resource-directory', 'rd_server.h')
-     rd_env.UserInstallTargetHeader('include/rd_database.h', 'service/resource-directory', 'rd_database.h')
+     rd_env.UserInstallTargetHeader('include/rd_server.h', 'resource', 'rd_server.h')
+     rd_env.UserInstallTargetHeader('include/rd_database.h', 'resource', 'rd_database.h')
 -
 -######################################################################
 -# Samples for the resource directory
@@ -103,7 +103,7 @@ index 83d809b..1f539ca 100755
 -    SConscript('samples/SConscript')
 -
 -######################################################################
--# Build UnitTests Things Manager
+-# Build UnitTests of the Resource Directory
 -################################################ ######################
 -if target_os in ['linux']:
 -    SConscript('unittests/SConscript')

@@ -1,23 +1,9 @@
-commit 80cff1c595b1bc4934bd25847edaad6cc7cdae74
-Author: Dan Mihai <Daniel.Mihai@microsoft.com>
-Date:   Wed Oct 19 17:22:37 2016 -0700
-
-    Start building json2cbor for Windows.
-    
-    Change-Id: I9a1e43969c597eed68eac0df28b90571c67de931
-    Signed-off-by: Dan Mihai <Daniel.Mihai@microsoft.com>
-    Reviewed-on: https://gerrit.iotivity.org/gerrit/13521
-    Reviewed-by: Kevin Kane <kkane@microsoft.com>
-    Tested-by: jenkins-iotivity <jenkins-iotivity@opendaylight.org>
-    Reviewed-by: David Antler <david.a.antler@intel.com>
-    Reviewed-by: Randeep Singh <randeep.s@samsung.com>
-
 diff --git a/resource/csdk/security/SConscript b/resource/csdk/security/SConscript
-index 834e8b5..51be227 100644
+index 6d7ccbf..5fe46c9 100644
 --- a/resource/csdk/security/SConscript
 +++ b/resource/csdk/security/SConscript
 @@ -144,5 +144,5 @@ libocsrm_env.InstallTarget(libocsrm, 'ocsrm')
- if target_os in ['linux', 'android', 'tizen', 'msys_nt', 'windows'] and libocsrm_env.get('SECURED') == '1':
+ if target_os in ['linux', 'android', 'tizen', 'msys_nt', 'windows', 'ios'] and libocsrm_env.get('SECURED') == '1':
  	SConscript('provisioning/SConscript')
  
 -if target_os in ['linux'] and libocsrm_env.get('SECURED') == '1':
@@ -43,7 +29,7 @@ index 871e7a9..3a5c94f 100644
 +
 +if target_os in ['msys_nt', 'windows']:
 +    # octbstack.dll doesn't export all the functions called by this app, so use static LIBs instead.
-+    tools_env.AppendUnique(LIBS = ['ws2_32', 'bcrypt', 'iphlpapi',
++    tools_env.AppendUnique(LIBS = ['ws2_32', 'bcrypt', 'iphlpapi', 'crypt32',
 +                                   'coap', 'tinydtls', 'mbedtls', 'mbedx509', 'mbedcrypto',
 +                                   'octbstack_static', 'ocsrm', 'connectivity_abstraction'])
 +else:
@@ -52,11 +38,11 @@ index 871e7a9..3a5c94f 100644
  ######################################################################
  # Source files and Targets
 diff --git a/resource/csdk/security/tool/json2cbor.c b/resource/csdk/security/tool/json2cbor.c
-index 40dc5f9..9806f75 100644
+index 03b9718..9528634 100644
 --- a/resource/csdk/security/tool/json2cbor.c
 +++ b/resource/csdk/security/tool/json2cbor.c
 @@ -44,7 +44,8 @@
- #define TAG  "JSON2CBOR"
+ #define TAG  "OIC_JSON2CBOR"
  #define MAX_RANGE   ((size_t)-1)
  //SVR database buffer block size
 -static const size_t DB_FILE_SIZE_BLOCK = 1023;
@@ -65,7 +51,7 @@ index 40dc5f9..9806f75 100644
  
  static OicSecPstat_t* JSONToPstatBin(const char * jsonStr);
  static OicSecDoxm_t* JSONToDoxmBin(const char * jsonStr);
-@@ -941,7 +942,7 @@ static OicSecSvc_t* JSONToSvcBin(const char * jsonStr)
+@@ -977,7 +978,7 @@ static OicSecSvc_t* JSONToSvcBin(const char * jsonStr)
              }
  
              cJSON *jsonObj = NULL;

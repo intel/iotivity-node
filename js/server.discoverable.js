@@ -25,15 +25,15 @@ intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
 
-iotivity.OCSetDeviceInfo( {
-	dataModelVersions: [ "test.0.0.1" ],
-	deviceName: "server.discoverable",
-	types: []
-} );
-iotivity.OCSetPlatformInfo( {
-	platformID: "server.discoverable.sample",
-	manufacturerName: "iotivity-node"
-} );
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
+	iotivity.OC_RSRVD_SPEC_VERSION, "res.1.1.0" );
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
+	iotivity.OC_RSRVD_DATA_MODEL_VERSION, [ "test.0.0.1" ] );
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
+	iotivity.OC_RSRVD_DEVICE_NAME, "server.discoverable" );
+
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_PLATFORM,
+	iotivity.OC_RSRVD_MFG_NAME, "iotivity-node" );
 
 console.log( "Registering resources" );
 

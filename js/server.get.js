@@ -24,16 +24,15 @@ console.log( "Starting OCF stack in server mode" );
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 
-iotivity.OCSetDeviceInfo( {
-	specVersion: "res.1.1.0",
-	dataModelVersions: [ "abc.0.0.1" ],
-	deviceName: "server.get",
-	types: []
-} );
-iotivity.OCSetPlatformInfo( {
-	platformID: "server.get.sample",
-	manufacturerName: "iotivity-node"
-} );
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
+	iotivity.OC_RSRVD_SPEC_VERSION, "res.1.1.0" );
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
+	iotivity.OC_RSRVD_DATA_MODEL_VERSION, [ "abc.0.0.1" ] );
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
+	iotivity.OC_RSRVD_DEVICE_NAME, "server.get" );
+
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_PLATFORM,
+	iotivity.OC_RSRVD_MFG_NAME, "iotivity-node" );
 
 intervalId = setInterval( function() {
 	iotivity.OCProcess();
