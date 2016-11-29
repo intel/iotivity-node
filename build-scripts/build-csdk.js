@@ -20,11 +20,16 @@ var repoPaths = require( "./helpers/repo-paths" );
 var shelljs = require( "shelljs" );
 
 function run( command, arguments, options ) {
+	var status;
 	options = options || {};
-	spawnSync( command, arguments, _.extend( {}, options, {
+	status = spawnSync( command, arguments, _.extend( {}, options, {
 		stdio: [ process.stdin, process.stdout, process.stderr ],
 		shell: true
-	} ) );
+	} ) ).status;
+
+	if ( status !== 0 ) {
+		process.exit( status );
+	}
 }
 
 function findBins( iotivityPath ) {
