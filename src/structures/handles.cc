@@ -23,8 +23,8 @@ using namespace v8;
 std::map<OCResourceHandle, Nan::Persistent<v8::Object> *>
     JSOCResourceHandle::handles;
 
-Local<Array> jsArrayFromBytes(unsigned char *bytes, size_t length) {
-  size_t index;
+Local<Array> jsArrayFromBytes(unsigned char *bytes, uint32_t length) {
+  uint32_t index;
   Local<Array> returnValue = Nan::New<Array>(length);
 
   for (index = 0; index < length; index++) {
@@ -33,9 +33,9 @@ Local<Array> jsArrayFromBytes(unsigned char *bytes, size_t length) {
   return returnValue;
 }
 
-bool fillCArrayFromJSArray(unsigned char *bytes, size_t length,
+bool fillCArrayFromJSArray(unsigned char *bytes, uint32_t length,
                            Local<Array> array) {
-  size_t index, arrayLength;
+  uint32_t index, arrayLength;
 
   arrayLength = array->Length();
   if (arrayLength != length) {

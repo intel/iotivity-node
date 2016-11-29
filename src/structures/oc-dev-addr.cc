@@ -37,7 +37,7 @@ Local<Object> js_OCDevAddr(OCDevAddr *address) {
 }
 
 bool c_OCDevAddr(Local<Object> jsDevAddr, OCDevAddr *address) {
-  uint32_t length;
+  size_t length;
   OCDevAddr local;
 
   memset(&local, 0, sizeof(OCDevAddr));

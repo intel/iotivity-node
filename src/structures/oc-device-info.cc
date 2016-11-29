@@ -62,7 +62,7 @@ bool c_StringArrayFromProperty(Local<Object> source, const char *propertyName,
                       return false);
   Local<Array> jsArray = Local<Array>::Cast(sourceValue);
 
-  size_t index, length = jsArray->Length();
+  uint32_t index, length = jsArray->Length();
   OCStringLL *local = 0, **previous = &local;
 
   for (index = 0; index < length; index++, previous = &((*previous)->next)) {
@@ -91,7 +91,7 @@ free:
 }
 
 bool c_OCDeviceInfo(Local<Object> deviceInfo, OCDeviceInfo *info) {
-  OCDeviceInfo local = {0};
+  OCDeviceInfo local = {0, 0, 0, 0};
 
   VALIDATE_AND_ASSIGN_STRING(&local, deviceInfo, deviceName, goto free);
   VALIDATE_AND_ASSIGN_STRING(&local, deviceInfo, specVersion, goto free);

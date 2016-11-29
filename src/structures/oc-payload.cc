@@ -43,10 +43,11 @@ static Local<Value> objectOrUndefined(OCRepPayload *payload) {
 
 static Local<Array> createPayloadValueArrayRecursively(
     OCRepPayloadValueArray *array, size_t *p_dataIndex, int dimensionIndex) {
-  size_t index;
+  uint32_t index;
   Local<Array> returnValue = Nan::New<Array>(array->dimensions[dimensionIndex]);
 
-  for (index = 0; index < array->dimensions[dimensionIndex]; index++) {
+  for (index = 0; index < (uint32_t)(array->dimensions[dimensionIndex]);
+       index++) {
     Nan::Set(
         returnValue, index,
         (dimensionIndex < MAX_REP_ARRAY_DEPTH - 1 &&
@@ -264,7 +265,7 @@ static Local<Object> js_OCSecurityPayload(OCSecurityPayload *payload) {
   if (payload->securityData) {
     Nan::Set(returnValue, Nan::New("securityData").ToLocalChecked(),
              jsArrayFromBytes((unsigned char *)(payload->securityData),
-                              payload->payloadSize));
+                              (uint32_t)(payload->payloadSize)));
   }
 
   return returnValue;
@@ -346,13 +347,13 @@ static bool validateRepPayloadArray(Local<Array> array, bool *p_typeEstablished,
     return false;
   }
 
-  size_t length = array->Length();
+  uint32_t length = array->Length();
 
   if (length > 0) {
     Local<Value> firstValue = Nan::Get(array, 0).ToLocalChecked();
     if (firstValue->IsArray()) {
-      size_t child_length = Local<Array>::Cast(firstValue)->Length();
-      for (size_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
+      uint32_t child_length = Local<Array>::Cast(firstValue)->Length();
+      for (uint32_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
         Local<Value> member = Nan::Get(array, arrayIndex).ToLocalChecked();
         if (!member->IsArray()) {
           Nan::ThrowError("Rep payload array is heterogeneous");
@@ -404,7 +405,8 @@ static bool validateRepPayloadArray(Local<Array> array, bool *p_typeEstablished,
 
       for (size_t arrayIndex = 1; arrayIndex < length; arrayIndex++) {
         if (!jsTypeToOCRepPayloadPropTypeValidForArray(
-                Nan::Get(array, arrayIndex).ToLocalChecked(), &valueType)) {
+                Nan::Get(array, (uint32_t)arrayIndex).ToLocalChecked(),
+                &valueType)) {
           return false;
         }
         if (valueType != *p_arrayType) {
@@ -424,10 +426,11 @@ static bool validateRepPayloadArray(Local<Array> array, bool *p_typeEstablished,
 // monotonically.
 static bool fillArray(void *flatArray, int *p_index, Local<Array> array,
                       OCRepPayloadPropType arrayType) {
-  size_t length = array->Length();
+  uint32_t length = array->Length();
 
-  for (size_t localIndex = 0; localIndex < length; localIndex++) {
-    Local<Value> member = Nan::Get(array, localIndex).ToLocalChecked();
+  for (uint32_t localIndex = 0; localIndex < length; localIndex++) {
+    Local<Value> member =
+        Nan::Get(array, (uint32_t)localIndex).ToLocalChecked();
     if (member->IsArray()) {
       if (!fillArray(flatArray, p_index, Local<Array>::Cast(member),
                      arrayType)) {
@@ -505,7 +508,7 @@ static bool flattenArray(Local<Array> array, void **flatArray,
     totalElements *= dimensions[dimensionIndex];
   }
 
-  int neededAmount =
+  size_t neededAmount =
       (arrayType == OCREP_PROP_INT
            ? sizeof(uint64_t)
            : arrayType == OCREP_PROP_DOUBLE

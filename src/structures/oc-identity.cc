@@ -26,11 +26,11 @@ extern "C" {
 using namespace v8;
 
 Local<Array> js_OCIdentity(OCIdentity *identity) {
-  return jsArrayFromBytes(identity->id, identity->id_length);
+  return jsArrayFromBytes(identity->id, (uint32_t)(identity->id_length));
 }
 
 bool c_OCIdentity(Local<Array> jsIdentity, OCIdentity *identity) {
-  size_t length = jsIdentity->Length();
+  uint32_t length = jsIdentity->Length();
   if (length > MAX_IDENTITY_SIZE) {
     Nan::ThrowError("OCIdentity array length exceed MAX_IDENTITY_SIZE");
     return false;

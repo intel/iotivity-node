@@ -155,8 +155,7 @@ NAN_METHOD(bind_OCCancel) {
   VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
   VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 2, IsArray);
 
-  OCHeaderOption headerOptions[MAX_HEADER_OPTIONS] = {
-      {OC_INVALID_ID, 0, 0, {0}}};
+  OCHeaderOption headerOptions[MAX_HEADER_OPTIONS] = {{OC_INVALID_ID, 0, 0, 0}};
   uint8_t numberOfOptions = 0;
 
   if (info[2]->IsArray()) {

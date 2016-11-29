@@ -45,9 +45,9 @@ class JSHandle {
  public:
   static v8::Local<v8::Object> New(handleType data) {
     v8::Local<v8::Object> returnValue =
-        Nan::GetFunction(Nan::New(theTemplate()))
-            .ToLocalChecked()
-            ->NewInstance();
+        Nan::NewInstance(
+            Nan::GetFunction(Nan::New(theTemplate())).ToLocalChecked())
+            .ToLocalChecked();
     Nan::SetInternalFieldPointer(returnValue, 0, data);
 
     return returnValue;
@@ -120,9 +120,9 @@ class JSOCResourceHandle
   static std::map<OCResourceHandle, Nan::Persistent<v8::Object> *> handles;
 };
 
-v8::Local<v8::Array> jsArrayFromBytes(unsigned char *bytes, size_t length);
+v8::Local<v8::Array> jsArrayFromBytes(unsigned char *bytes, uint32_t length);
 
-bool fillCArrayFromJSArray(unsigned char *bytes, size_t length,
+bool fillCArrayFromJSArray(unsigned char *bytes, uint32_t length,
                            v8::Local<v8::Array> array);
 
 #endif /* __IOTIVITY_NODE_HANDLES_H__ */

@@ -28,6 +28,14 @@ extern "C" {
 #include <ocstack.h>
 }
 
+#include <limits.h>
+
+#define THROW_IF_EXCEEDS_UINT32_MAX(prefix, sizeAsSizeT, returnValue) \
+  if ((sizeAsSizeT) > UINT32_MAX) {                                   \
+    Nan::ThrowRangeError(prefix ": request exceeds UINT32_MAX");      \
+    return (returnValue);                                             \
+  }
+
 using namespace v8;
 using namespace node;
 
@@ -62,7 +70,8 @@ static size_t defaultRead(void *ptr, size_t size, size_t count, FILE *stream) {
 
   if (callbackFor_read) {
     size_t totalSize = size * count;
-    Local<Object> buffer = Nan::NewBuffer(totalSize).ToLocalChecked();
+    THROW_IF_EXCEEDS_UINT32_MAX("defaultRead", totalSize, -1);
+    Local<Object> buffer = Nan::NewBuffer((uint32_t)totalSize).ToLocalChecked();
     Local<Value> arguments[3] = {
         buffer, Nan::New((double)totalSize),
         Nan::New<Value>(*(Nan::Persistent<Value> *)stream)};
@@ -85,8 +94,10 @@ static size_t defaultWrite(const void *ptr, size_t size, size_t count,
 
   if (callbackFor_write) {
     size_t totalSize = size * count;
+    THROW_IF_EXCEEDS_UINT32_MAX("defaultWrite", totalSize, -1);
     Local<Object> buffer =
-        Nan::CopyBuffer((const char *)ptr, totalSize).ToLocalChecked();
+        Nan::CopyBuffer((const char *)ptr, (uint32_t)totalSize)
+            .ToLocalChecked();
     Local<Value> arguments[3] = {
         buffer, Nan::New((double)totalSize),
         Nan::New<Value>(*(Nan::Persistent<Value> *)stream)};

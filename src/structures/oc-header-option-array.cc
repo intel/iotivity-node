@@ -61,7 +61,7 @@ bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
   uint16_t dataIndex, dataLength;
   uint8_t length = (uint8_t)jsOptions->Length();
   OCHeaderOption options[MAX_HEADER_OPTIONS] = {
-      {(OCTransportProtocolID)0, 0, 0, {0}}};
+      {(OCTransportProtocolID)0, 0, 0, 0}};
 
   if (length > MAX_HEADER_OPTIONS) {
     Nan::ThrowRangeError("Too many header options");
