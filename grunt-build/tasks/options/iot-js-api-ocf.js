@@ -29,6 +29,11 @@ var generateSpawn = function( spawnFinal ) {
 	};
 };
 var plain = {
+	lineFilter: function( line, childPath ) {
+		grunt.verbose.write(
+			( childPath.match( /tests[/](.*)$/ ) || [] )[ 1 ] + ": " + line + "\n" );
+		return line.match( /^{/ ) ? line : "";
+	},
 	spawn: generateSpawn( ocfRunner.defaultSpawn )
 };
 var coverage = _.extend( {}, plain, {
