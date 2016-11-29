@@ -56,24 +56,27 @@ NAN_METHOD(bind_OCGetNumberOfResourceTypes) {
   GET_STRING_COUNT(OCGetNumberOfResourceTypes);
 }
 
+#define RETURN_RESOURCE_HANDLE(handle)                            \
+  do {                                                            \
+    OCResourceHandle localHandle = (handle);                      \
+    if (localHandle) {                                            \
+      if (JSOCResourceHandle::handles[localHandle]->IsEmpty()) {  \
+        Nan::ThrowError("JS handle not found for native handle"); \
+        return;                                                   \
+      }                                                           \
+      info.GetReturnValue().Set(                                  \
+          Nan::New(*(JSOCResourceHandle::handles[localHandle]))); \
+    } else {                                                      \
+      info.GetReturnValue().Set(Nan::Null());                     \
+    }                                                             \
+  } while (0)
+
 NAN_METHOD(bind_OCGetResourceHandle) {
   VALIDATE_ARGUMENT_COUNT(info, 1);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
 
-  OCResourceHandle handle = 0;
-
-  handle =
-      OCGetResourceHandle((uint8_t)(Nan::To<uint32_t>(info[0]).FromJust()));
-
-  if (handle) {
-    if (JSOCResourceHandle::handles[handle]->IsEmpty()) {
-      Nan::ThrowError("JS handle not found for native handle");
-      return;
-    }
-    info.GetReturnValue().Set(Nan::New(*(JSOCResourceHandle::handles[handle])));
-  } else {
-    info.GetReturnValue().Set(Nan::Null());
-  }
+  RETURN_RESOURCE_HANDLE(
+      OCGetResourceHandle((uint8_t)(Nan::To<uint32_t>(info[0]).FromJust())));
 }
 
 #define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()             \
@@ -87,20 +90,8 @@ NAN_METHOD(bind_OCGetResourceHandle) {
 NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();
 
-  OCResourceHandle resourceHandle = OCGetResourceHandleFromCollection(
-      callbackInfo->handle, Nan::To<uint32_t>(info[1]).FromJust());
-
-  if (resourceHandle) {
-    if (JSOCResourceHandle::handles[resourceHandle]->IsEmpty()) {
-      Nan::ThrowError("Failed to find JS resource handle");
-      return;
-    } else {
-      info.GetReturnValue().Set(
-          Nan::New(*(JSOCResourceHandle::handles[resourceHandle])));
-    }
-  } else {
-    info.GetReturnValue().Set(Nan::Null());
-  }
+  RETURN_RESOURCE_HANDLE(OCGetResourceHandleFromCollection(
+      callbackInfo->handle, Nan::To<uint32_t>(info[1]).FromJust()));
 }
 
 #define GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(apiFunction)  \
