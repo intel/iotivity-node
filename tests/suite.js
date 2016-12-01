@@ -20,6 +20,7 @@ var QUnit,
 	fs = require( "fs" ),
 	path = require( "path" ),
 	uuid = require( "uuid" ),
+	preamble = require( "./preamble" ),
 	runningProcesses = [],
 	getQUnit = function() {
 		if ( !QUnit ) {
@@ -42,18 +43,20 @@ function havePromises() {
 
 // Spawn a single child and process its stdout.
 function spawnOne( assert, options ) {
-	var theChild = childProcess.spawn(
-		"node",
-		[ options.path ]
-			.concat( options.uuid ? [ options.uuid ] : [ "" ] )
+	var theChild;
+	var commandLine = [ options.path ]
+		.concat( options.uuid ? [ options.uuid ] : [ "" ] )
 
-			// What to put into require() to load iotivity-node
-			.concat( [ process.argv[ 2 ] ] ),
-		{
+		// What to put into require() to load iotivity-node
+		.concat( [ process.argv[ 2 ] ] );
+
+	// Create the preamble before spawning this child
+	preamble.apply( this, commandLine );
+
+	theChild = childProcess.spawn(
+		"node", commandLine, {
 			stdio: [ process.stdin, "pipe", process.stderr, "ipc" ]
 		} );
-
-	theChild.commandLine = "node" + " " + options.path + " " + options.uuid;
 	runningProcesses.push( theChild );
 
 	theChild

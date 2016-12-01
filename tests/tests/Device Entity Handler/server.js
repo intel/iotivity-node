@@ -22,8 +22,6 @@ var result,
 
 console.log( JSON.stringify( { assertionCount: 11 } ) );
 
-require( "../../preamble" )( process.argv[ 2 ], process.argv[ 3 ] );
-
 // Initialize
 result = iotivity.OCRegisterPersistentStorageHandler( require( "../../../lib/StorageHandler" )() );
 testUtils.stackOKOrDie( "Server", "OCRegisterPersistentStorageHandler", result );

@@ -20,22 +20,19 @@ var ocfRunner = require( "iot-js-api" );
 var results = require( "../../../tests/getresult" );
 
 var packageRoot = path.join( require( "bindings" ).getRoot( __filename ) );
+var preamblePath = path.join( packageRoot, "tests", "preamble" );
 var location = grunt.option( "ci" ) ?
 		path.join( packageRoot, "node_modules", "iotivity-node" ) : packageRoot;
 var plain = {
 	location: location,
-	preamble: function( uuid ) {
-		return "require( \"" +
-			path.join( packageRoot, "tests", "preamble" )
-				.replace( /[\\]/g, "\\\\" ) +
-			"\" )( \"" + uuid + "\", \"" +
-			location
-				.replace( /[\\]/g, "\\\\" ) + "\" );";
+	spawn: function( interpreter, commandLine ) {
+		require( preamblePath ).apply( this, commandLine );
+		return ocfRunner.defaultSpawn( interpreter, commandLine );
 	}
 };
 var coverage = _.extend( {}, plain, {
-	spawn: function( interpreter, commandline ) {
-		var testScript = commandline.shift();
+	spawn: function( interpreter, commandLine ) {
+		require( preamblePath ).apply( this, commandLine );
 		return require( "child_process" ).spawn(
 			path.resolve( packageRoot, "node_modules", ".bin", "istanbul" ), [
 				"cover",
@@ -43,10 +40,12 @@ var coverage = _.extend( {}, plain, {
 				"--report", "none",
 				"--config", path.join( packageRoot, "tests", "istanbul.json" ),
 				"--dir", path.join( packageRoot, "coverage",
-					testScript.split( path.sep ).slice( -2 ).join( "!" ) ),
+					commandLine[ 0 ].split( path.sep ).slice( -2 ).join( "!" ) ),
 				"--root", location,
-				testScript, "--"
-			].concat( commandline ), { stdio: [ process.stdin, "pipe", process.stderr ] } );
+				commandLine[ 0 ], "--"
+			].concat( commandLine.slice( 1 ) ), {
+				stdio: [ process.stdin, "pipe", process.stderr ]
+			} );
 	}
 } );
 

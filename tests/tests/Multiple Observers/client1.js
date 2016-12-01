@@ -107,8 +107,6 @@ function doObserveRequest( destination ) {
 	testUtils.stackOKOrDie( messagePrefix, "OCDoResource(observation)", observeResult );
 }
 
-require( "../../preamble" )( process.argv[ 2 ], process.argv[ 3 ] );
-
 // Initialize
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT );
 testUtils.stackOKOrDie( messagePrefix, "OCInit", result );
