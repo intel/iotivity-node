@@ -56,10 +56,10 @@ sensor.on( "change", function( newData ) {
 	}
 
 	if ( observerCount > 0 ) {
+		console.log( "Issuing notification" );
 		lightResource.notify().catch( function( error ) {
-			if ( error.message === "notify: There are no observers" ) {
-				observerCount = 0;
-			}
+			console.log( "Error while notifying: " + error.message + "\n" +
+				JSON.stringify( error, null, 4 ) );
 		} );
 	}
 } );
@@ -72,9 +72,7 @@ function handleError( theError ) {
 var lightResourceRequestHandlers = {
 	retrieve: function( request ) {
 		request.respond( request.target ).catch( handleError );
-		if ( "observe" in request ) {
-			observerCount += Math.max( 0, request.observe ? 1 : -1 );
-		}
+		observerCount += ( "observe" in request ) ? ( request.observe ? 1 : -1 ) : 0;
 	}
 };
 
