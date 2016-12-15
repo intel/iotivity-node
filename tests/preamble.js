@@ -14,7 +14,7 @@
 
 // Create the configuration database that will allow the server to connect to the client.
 
-module.exports = function( testFile, resourceUuid, location ) {
+module.exports = function( testFile, resourceUuid, location, noClobber ) {
 
 var _ = require( "lodash" );
 var osenv = require( "osenv" );
@@ -25,13 +25,24 @@ var sha = require( "sha.js" );
 var uuid = require( "uuid" );
 var spawnSync = require( "child_process" ).spawnSync;
 
-var toolResult, toolPath, configPath;
+var configuration, toolResult, toolPath, configPath;
 
 var installPrefix = path.join( location, "iotivity-installed" );
 var deviceUuid = uuid.v4();
 
+testFile = path.normalize( testFile );
+
+configPath = path.join( osenv.home(), ".iotivity-node",
+	sha( "sha256" )
+		.update( testFile || path.join( process.cwd(), ( "" + process.pid ) ), "utf8" )
+		.digest( "hex" ) );
+
+if ( fs.existsSync( configPath ) && noClobber ) {
+	return;
+}
+
 // Load the per-test configuration (if any) and add a permissive acl for the path ("/a/" + uuid)
-var configuration = _.mergeWith( {},
+configuration = _.mergeWith( {},
 
 	// The boilerplate
 	require( "./security.boilerplate.json" ),
@@ -116,13 +127,6 @@ var configuration = _.mergeWith( {},
 			return objectValue.concat( sourceValue );
 		}
 	} );
-
-testFile = path.normalize( testFile );
-
-configPath = path.join( osenv.home(), ".iotivity-node",
-	sha( "sha256" )
-		.update( testFile || path.join( process.cwd(), ( "" + process.pid ) ), "utf8" )
-		.digest( "hex" ) );
 
 toolPath = path.join( installPrefix, "bin" );
 
