@@ -27,7 +27,7 @@ console.log( "Starting OCF stack in client-server mode: " +
 	iotivity.OCInit( null, 0, iotivity.OCMode.OC_CLIENT_SERVER ) );
 
 iotivity.OCSetDeviceInfo( {
-	specVersion: "res.1.0.0",
+	specVersion: "res.1.1.0",
 	dataModelVersions: [ "abc.0.0.1" ],
 	deviceName: "server.get", types: []
 } );

@@ -19,10 +19,11 @@ var lightResource, device,
 
 console.log( "Acquiring OCF device" );
 
+
 device = require( "iotivity-node" )( "server" );
 device.device = _.extend( device.device, {
-	coreSpecVersion: "res.1.0.0",
-	dataModels: [ "something.1.0.0" ],
+	coreSpecVersion: "res.1.1.0",
+	dataModels: [ "something.1.1.0" ],
 	name: "api-server-example"
 } );
 device.platform = _.extend( device.platform, {

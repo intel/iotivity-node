@@ -38,8 +38,8 @@ device = require( "iotivity-node" )( "server" );
 
 device.device = _.extend( device.device, {
 	name: "api-server-example.secure",
-	coreSpecVersion: "ocf.1.0.0",
-	dataModels: [ "res.1.0.0" ]
+	coreSpecVersion: "res.1.1.0",
+	dataModels: [ "res.1.1.0" ]
 } );
 device.platform = _.extend( device.platform, {
 	manufacturerName: "Intel",
