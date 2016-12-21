@@ -1,0 +1,141 @@
+diff --git a/SConstruct b/SConstruct
+index ac76f39..f1ed54a 100644
+--- a/SConstruct
++++ b/SConstruct
+@@ -55,27 +55,3 @@ build_dir = env.get('BUILD_DIR')
+ 
+ # Build 'resource' sub-project
+ SConscript(build_dir + 'resource/SConscript')
+-
+-if target_os not in ['arduino','darwin','ios', 'android', 'msys_nt', 'windows']:
+-	SConscript(build_dir + 'examples/OICMiddle/SConscript')
+-
+-# Build 'service' sub-project
+-SConscript(build_dir + 'service/SConscript')
+-
+-# Build "cloud" sub-project
+-SConscript(build_dir + 'cloud/SConscript')
+-
+-# Build "plugin interface" sub-project
+-SConscript(build_dir + 'plugins/SConscript')
+-
+-# Append targets information to the help information, to see help info, execute command line:
+-#     $ scon [options] -h
+-env.PrintTargets()
+-
+-# Print bin upload command line (arduino only)
+-if target_os == 'arduino':
+-	env.UploadHelp()
+-
+-# to install the generated pc file into custom prefix location
+-env.UserInstallTargetPCFile('iotivity.pc', 'iotivity.pc')
+-
+diff --git a/resource/SConscript b/resource/SConscript
+index 25c90aa..a73535f 100644
+--- a/resource/SConscript
++++ b/resource/SConscript
+@@ -61,40 +61,3 @@ SConscript('csdk/SConscript')
+ if target_os not in ['arduino','darwin','ios']:
+ 	# Build liboc_logger
+ 	SConscript('oc_logger/SConscript')
+-
+-	# Build liboc
+-	SConscript('src/SConscript')
+-
+-if target_os not in ['arduino','darwin','ios','android']:
+-	# Build examples
+-	SConscript('examples/SConscript')
+-
+-if target_os in ['linux', 'windows']:
+-	# Build C Samples
+-	SConscript('csdk/stack/test/linux/SConscript')
+-	SConscript('csdk/stack/samples/linux/SimpleClientServer/SConscript')
+-
+-        if env.get('SECURED') == '1':
+-		# Build secure samples
+-		SConscript('csdk/stack/samples/linux/secure/SConscript')
+-
+-	# Build C/C++ unit tests
+-	SConscript('unit_tests.scons')
+-
+-elif target_os == 'darwin':
+-	env.Command('../../out/darwin/iotivity-csdk.framework',None,src_dir + '/tools/darwin/mkfwk_osx.sh')
+-	# Build linux samples for now
+-	SConscript('csdk/stack/samples/linux/SimpleClientServer/SConscript')
+-
+-	# Build C stack's unit tests.
+-	SConscript('unit_tests.scons')
+-
+-elif target_os == 'arduino':
+-	SConscript('csdk/stack/samples/arduino/SimpleClientServer/ocserver/SConscript')
+-
+-elif target_os == 'msys_nt':
+-	# Build secure samples. Using linux samples for now.
+-	SConscript('csdk/stack/samples/linux/secure/SConscript')
+-
+-	# Build C/C++ unit tests
+-	SConscript('unit_tests.scons')
+diff --git a/resource/csdk/SConscript b/resource/csdk/SConscript
+index 5897a39..1f43a64 100644
+--- a/resource/csdk/SConscript
++++ b/resource/csdk/SConscript
+@@ -24,7 +24,6 @@
+ Import('env')
+ 
+ lib_env = env.Clone()
+-SConscript('#resource/third_party_libs.scons', 'lib_env')
+ 
+ liboctbstack_env = lib_env.Clone()
+ 
+diff --git a/resource/csdk/resource-directory/SConscript b/resource/csdk/resource-directory/SConscript
+index 83d809b..1f539ca 100755
+--- a/resource/csdk/resource-directory/SConscript
++++ b/resource/csdk/resource-directory/SConscript
+@@ -89,15 +89,3 @@ if 'CLIENT' in rd_mode:
+ if 'SERVER' in rd_mode:
+     rd_env.UserInstallTargetHeader('include/rd_server.h', 'service/resource-directory', 'rd_server.h')
+     rd_env.UserInstallTargetHeader('include/rd_database.h', 'service/resource-directory', 'rd_database.h')
+-
+-######################################################################
+-# Samples for the resource directory
+-######################################################################
+-if target_os in ['linux']:
+-    SConscript('samples/SConscript')
+-
+-######################################################################
+-# Build UnitTests Things Manager
+-################################################ ######################
+-if target_os in ['linux']:
+-    SConscript('unittests/SConscript')
+diff --git a/resource/csdk/security/SConscript b/resource/csdk/security/SConscript
+index 834e8b5..ba26f08 100644
+--- a/resource/csdk/security/SConscript
++++ b/resource/csdk/security/SConscript
+@@ -25,7 +25,6 @@ Import('env')
+ import os
+ 
+ lib_env = env.Clone()
+-SConscript('#resource/third_party_libs.scons', 'lib_env')
+ 
+ libocsrm_env = lib_env.Clone()
+ 
+diff --git a/resource/oc_logger/SConscript b/resource/oc_logger/SConscript
+index bc27c9e..f76d010 100644
+--- a/resource/oc_logger/SConscript
++++ b/resource/oc_logger/SConscript
+@@ -25,7 +25,6 @@
+ Import('env')
+ 
+ lib_env = env.Clone()
+-SConscript('#resource/third_party_libs.scons', 'lib_env')
+ 
+ liboc_logger_env = lib_env.Clone()
+ ######################################################################
+@@ -73,7 +72,3 @@ liboc_logger_env.UserInstallTargetHeader('include/oc_logger_types.h', 'resource'
+ liboc_logger_env.UserInstallTargetHeader('include/oc_log_stream.hpp', 'resource', 'oc_log_stream.hpp')
+ liboc_logger_env.UserInstallTargetHeader('include/targets/oc_console_logger.h', 'resource/targets', 'oc_console_logger.h')
+ liboc_logger_env.UserInstallTargetHeader('include/targets/oc_ostream_logger.h', 'resource/targets', 'oc_ostream_logger.h')
+-
+-if target_os not in ['ios', 'android']:
+-	SConscript('examples/SConscript')
+-

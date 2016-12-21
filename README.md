@@ -20,7 +20,7 @@ This project provides a Javascript API for [OCF][] functionality. The API follow
   0. Make sure [node][] version 0.12 or later is up and running
   0. Install the following packages, which your distribution should provide:
       0. unzip, scons, git, and make
-      0. Development headers for boost (at least 1.55), libuuid, and glib2
+      0. Development headers for libuuid, and glib2
       0. A C compiler and a C++ compiler (gcc-5 or later)
   0. Clone this repository
   0. cd `iotivity-node`

@@ -21,5 +21,5 @@ index 3a5c94f..46fa324 100644
 +    tools_env.AppendUnique(LIBS = ['coap', 'tinydtls', 'mbedtls', 'mbedx509', 'mbedcrypto',
 +                                   'octbstack', 'ocsrm', 'connectivity_abstraction'])
  else:
-     tools_env.PrependUnique(LIBS = ['oc', 'octbstack'])
+     tools_env.PrependUnique(LIBS = ['octbstack'])
  

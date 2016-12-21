@@ -47,7 +47,7 @@ index 871e7a9..3a5c94f 100644
 +                                   'coap', 'tinydtls', 'mbedtls', 'mbedx509', 'mbedcrypto',
 +                                   'octbstack_static', 'ocsrm', 'connectivity_abstraction'])
 +else:
-+    tools_env.PrependUnique(LIBS = ['oc', 'octbstack'])
++    tools_env.PrependUnique(LIBS = ['octbstack'])
  
  ######################################################################
  # Source files and Targets
