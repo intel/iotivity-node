@@ -29,7 +29,7 @@ intervalId = setInterval( function() {
 }, 1000 );
 
 iotivity.OCSetDeviceInfo( {
-	specVersion: "res.1.0.0",
+	specVersion: "res.1.1.0",
 	dataModelVersions: [ "abc.0.0.1" ],
 	deviceName: "server.discoverable",
 	types: []
