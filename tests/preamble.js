@@ -17,13 +17,11 @@
 module.exports = function( testFile, resourceUuid, location, noClobber ) {
 
 var _ = require( "lodash" );
-var osenv = require( "osenv" );
 var fs = require( "fs" );
-var shelljs = require( "shelljs" );
 var path = require( "path" );
-var sha = require( "sha.js" );
 var uuid = require( "uuid" );
 var spawnSync = require( "child_process" ).spawnSync;
+var configurationDirectory = require( "../lib/configurationDirectory" );
 
 var configuration, toolResult, toolPath, configPath;
 
@@ -32,12 +30,9 @@ var deviceUuid = uuid.v4();
 
 testFile = path.normalize( testFile );
 
-configPath = path.join( osenv.home(), ".iotivity-node",
-	sha( "sha256" )
-		.update( testFile || path.join( process.cwd(), ( "" + process.pid ) ), "utf8" )
-		.digest( "hex" ) );
+configPath = configurationDirectory.apply( configurationDirectory, testFile ? [ testFile ] : [] );
 
-if ( fs.existsSync( configPath ) && noClobber ) {
+if ( fs.existsSync( path.join( configPath, "oic_svr_db.dat" ) ) && noClobber ) {
 	return;
 }
 
@@ -129,8 +124,6 @@ configuration = _.mergeWith( {},
 	} );
 
 toolPath = path.join( installPrefix, "bin" );
-
-shelljs.mkdir( "-p", configPath );
 
 fs.writeFileSync( path.join( configPath, "oic_svr_db.json" ),
 	JSON.stringify( configuration, null, "\t" ) );
