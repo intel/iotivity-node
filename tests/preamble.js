@@ -28,7 +28,9 @@ var configuration, toolResult, toolPath, configPath;
 var installPrefix = path.join( location, "iotivity-installed" );
 var deviceUuid = uuid.v4();
 
-testFile = path.normalize( testFile );
+if ( testFile ) {
+	testFile = path.normalize( testFile );
+}
 
 configPath = configurationDirectory.apply( configurationDirectory, testFile ? [ testFile ] : [] );
 
@@ -97,16 +99,14 @@ configuration = _.mergeWith( {},
 
 	// Per-test configuration (if any)
 	( function() {
-		var perTestConfiguration;
-		var thePath = path.join( path.dirname( testFile ), "security.json" );
+		var configuration = {};
 
-		try {
-			perTestConfiguration =
-				require( thePath );
-		} catch ( anError ) {
-			perTestConfiguration = {};
+		if ( testFile ) {
+			try {
+				configuration = require( path.join( path.dirname( testFile ), "security.json" ) );
+			} catch ( anError ) {}
 		}
-		return perTestConfiguration;
+		return configuration;
 	} )(),
 
 	// The device ID
