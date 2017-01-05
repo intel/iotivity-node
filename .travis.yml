@@ -83,7 +83,7 @@ script:
 - npm pack
 - npm install --ignore-scripts
 - >
-  if "x${TEST_SCRIPT}x" = "xlintx"; then
+  if test "x${TEST_SCRIPT}x" = "xlintx"; then
     grunt lint
   else
     mv package.json package.json.bak
