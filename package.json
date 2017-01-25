@@ -36,7 +36,7 @@
     "grunt-esformatter": "^1.0.1",
     "grunt-eslint": "18.1.0",
     "grunt-istanbul": "^0.7.1",
-    "iot-js-api": "git+https://github.com/01org/iot-js-api.git#dev",
+    "iot-js-api": "git+https://github.com/01org/iot-js-api.git#a351649b07ac0286e217066394fdf5406a22dc21",
     "istanbul": "^0.4.5",
     "load-grunt-config": "^0.17.2",
     "load-grunt-tasks": "^3.2.0",
