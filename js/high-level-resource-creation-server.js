@@ -12,25 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var path = require( "path" );
-
-require( "../tests/preamble" )( __filename, [
-	{
-		href: "/a/high-level-resource-creation-example",
-		rel: "",
-		rt: [ "core.light" ],
-		"if": [ "oic.if.baseline" ]
-	},
-
-	// The resource the remote end will ask us to create
-	{
-		href: "/a/new-resource",
-		rel: "",
-		rt: [ "core.light" ],
-		"if": [ "oic.if.baseline" ]
-	}
-], path.resolve( path.join( __dirname, ".." ) ) );
-
 var resourceCreatedByRemote,
 	device = require( "iotivity-node" ),
 	_ = require( "lodash" );

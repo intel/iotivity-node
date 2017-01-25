@@ -20,19 +20,13 @@ var ocfRunner = require( "iot-js-api" );
 var results = require( "../../../tests/getresult" );
 
 var packageRoot = path.join( require( "bindings" ).getRoot( __filename ) );
-var preamblePath = path.join( packageRoot, "tests", "preamble" );
 var location = grunt.option( "ci" ) ?
 		path.join( packageRoot, "node_modules", "iotivity-node" ) : packageRoot;
 var plain = {
-	location: location,
-	spawn: function( interpreter, commandLine ) {
-		require( preamblePath ).apply( this, commandLine );
-		return ocfRunner.defaultSpawn( interpreter, commandLine );
-	}
+	location: location
 };
 var coverage = _.extend( {}, plain, {
 	spawn: function( interpreter, commandLine ) {
-		require( preamblePath ).apply( this, commandLine );
 		return require( "child_process" ).spawn(
 			path.resolve( packageRoot, "node_modules", ".bin", "istanbul" ), [
 				"cover",

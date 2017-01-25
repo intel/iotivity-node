@@ -14,19 +14,10 @@
 
 var lightResource, device,
 	_ = require( "lodash" ),
-	path = require( "path" ),
 	observerCount = 0,
 	sensor = require( "./mock-sensor" )();
 
 console.log( "Acquiring OCF device" );
-
-// We need to create the appropriate ACLs so security will work
-require( "../tests/preamble" )( __filename, [ {
-	href: "/a/high-level-example",
-	rel: "",
-	rt: [ "core.light" ],
-	"if": [ "oic.if.baseline" ]
-} ], path.resolve( path.join( __dirname, ".." ) ) );
 
 device = require( "iotivity-node" );
 

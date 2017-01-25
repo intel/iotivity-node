@@ -57,9 +57,6 @@
 							"-lc_common",
 							"-lroutingmanager",
 							"-llogger",
-							"-lmbedtls",
-							"-lmbedcrypto",
-							"-lmbedx509",
 							"-locsrm"
 						]
 					} ]

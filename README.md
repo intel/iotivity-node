@@ -60,21 +60,20 @@ During compilation, iotivity-node downloads iotivity from its git repository, bu
 0. Grab a [snapshot][] of iotivity from its git repository and unpack it locally.
 0. Make sure a build toolchain, [scons][] (a build tool), and the headers for the above-mentioned library dependencies are installed. Your distribution should provide all these tools and libraries.
 0. `cd iotivity`
-0. If you're building against version 1.2.0 of iotivity on OSX or Windows, you will first need to apply the downstream patches which iotivity-node provides in the `patches/` subdirectory. You can use `git apply <path-to-patch>` for this. These patches are on track to appear in later versions of iotivity, so they will disappear from later versions of iotivity-node.
-0. scons has the concept of targets just like make. You can get a list of targets contained in the iotivity repository, as well as a listing of recognized build flags via `scons --help`. The only targets you need for the node.js bindings are `octbstack` and `json2cbor`. Thus, run `scons SECURED=1 json2cbor octbstack` to build these targets.
+0. If you're building against version 1.2.0 of iotivity on OSX or Windows, you will first need to apply all the downstream patches which iotivity-node provides in the `patches/` subdirectory except the patch which removes the boost dependency. The latter patch serves only to improve build time by eliminating the ability to build targets which require boost. You can apply the patches with `git apply <path-to-patch>`. All these patches except the boost elmination patch are on track to appear in later versions of iotivity, so they will disappear from later versions of iotivity-node.
+0. scons has the concept of targets just like make. You can get a list of targets contained in the iotivity repository, as well as a listing of recognized build flags via `scons --help`. The only targets you need for the node.js bindings are `octbstack` and `json2cbor` if you are building in SECURED=1 mode. Thus, run `scons SECURED=1 json2cbor octbstack` to build these targets or `scons octbstack` if you do not require `SECURED=1` mode.
 
     On OSX you need more targets than just `octbstack` and `json2cbor` because on that platform iotivity does not build `octbstack` as a shared library, but rather as an archive. Thus, you need to build all targets that correspond to archives that go into the Linux `liboctbstack` shared library:
 
     * `c_common`
     * `coap`
     * `connectivity_abstraction`
-    * `json2cbor`
     * `logger`
     * `ocsrm`
     * `octbstack`
     * `routingmanager`
 
-0. Now that iotivity is built, clone this repository, and change directory into it.
+0. Now that iotivity is built, clone this repository and change directory into it.
 0. Set the following environment variables:
 	* `OCTBSTACK_CFLAGS` - this should contain the compiler flags for locating the iotivity include files. For example, the value of this variable can be `-I/home/nix/iot/iotivity/resource/csdk/stack/include`.
 	* `OCTBSTACK_LIBS` - this should contain the linker flags necessary for locating `liboctbstack.so` both at compile time and at runtime. Its value can be as simple as `-loctbstack` if liboctbstack is in /usr/lib, but may need to be as complex as `-L/home/nix/iot/iotivity/out/linux/x86/release -loctbstack -Wl,-rpath=/home/nix/iot/iotivity/out/linux/x86/release` if liboctbstack.so is located on an unusual path.
@@ -82,15 +81,15 @@ During compilation, iotivity-node downloads iotivity from its git repository, bu
 
 ## Provisioning and device ID persistence
 
-The high-level JS API provides a means for persisting the device ID across instantiations of a script according to the [iotivity wiki][]. This mechanism is also responsible for initially creating the configuration file that stores security-related information for a given script. It does so by creating a directory ```${HOME}/.iotivity-node```. Thereunder, it creates directories whose name is the sha256 checksum of the absolute path of the given script. Thus, if you write a script located in ```/home/user/myscript.js``` that uses the high-level JS API, its persistent state will be stored in the directory
+The high-level JS API provides a means for persisting the device ID across instantiations of a script according to the [iotivity wiki][]. This mechanism is also responsible for initially creating the configuration file that stores security-related information for a given script. It does so by creating a directory `${HOME}/.iotivity-node`. Thereunder, it creates directories whose name is the sha256 checksum of the absolute path of the given script. Thus, if you write a script located in `/home/user/myscript.js` that uses the high-level JS API, its persistent state will be stored in the directory
 ```
 /home/user/.iotivity-node/1abfb1b70eaa1ccc17a42990723b153a0d4b913a8b15161f8043411fc7f24fb1
 ```
-in a file named ```oic_svr_db.dat```. The file initially contains enough information to persist the device ID used whenever you run ```/home/user/myscript.js```. You can add more information to the file in accordance with the [iotivity wiki][], and using the `json2cbor` tool. The tool is located in `iotivity-installed/bin` off the root of this repository, or, if you have chosen to build iotivity externally, then in the output directory created by the iotivity build process.
+in a file named `oic_svr_db.dat`. The file initially contains enough information to persist the device ID used whenever you run `/home/user/myscript.js`. You can add more information to the file in accordance with the [iotivity wiki][], and using the `json2cbor` tool. The tool is located in `iotivity-installed/bin` off the root of this repository, or, if you have chosen to build iotivity externally, then in the output directory created by the iotivity build process.
 
 ## Examples
 
-The JavaScript examples are located in [js/](./js/) and come in pairs of one client and one server, each illustrating a basic aspect of iotivity. To run them, open two terminals and change directory to the root of the iotivity-node repository in both. Always launch the server before the client. For example, in one terminal you can run ```node js/server.discoverable.js``` and in the other terminal you can run ```node js/client.discovery.js```.
+The JavaScript examples are located in [js/](./js/) and come in pairs of one client and one server, each illustrating a basic aspect of iotivity. To run them, open two terminals and change directory to the root of the iotivity-node repository in both. Always launch the server before the client. For example, in one terminal you can run `node js/server.discoverable.js` and in the other terminal you can run `node js/client.discovery.js`.
 
 Make sure no firewall is running (or one is properly configured to allow iotivity-related traffic and especially multicast traffic) on the machine(s) where these applications are running.
 
