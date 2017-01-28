@@ -39,23 +39,14 @@ static void deleteNanCallback(CallbackInfo<OCDoHandle> *handle) {
 // structure
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
-  Nan::HandleScope scope;
   CallbackInfo<OCDoHandle> *callbackInfo = (CallbackInfo<OCDoHandle> *)context;
 
-  // Call the JS Callback
-  Local<Value> jsCallbackArguments[2] = {Nan::New(callbackInfo->jsHandle),
-                                         js_OCClientResponse(clientResponse)};
-
-  Local<Value> returnValue;
-  TRY_CALL(&(callbackInfo->callback), Nan::GetCurrentContext()->Global(), 2,
-           jsCallbackArguments, returnValue, OC_STACK_KEEP_TRANSACTION);
-
-  // Validate value we got back from it
-  VALIDATE_VALUE_TYPE(returnValue, IsUint32,
-                      "OCClientResponseHandler return value", );
-
-  // Pass on the value to the C API
-  return (OCStackApplicationResult)Nan::To<uint32_t>(returnValue).FromJust();
+  CALL_JS(
+      &(callbackInfo->callback), Nan::GetCurrentContext()->Global(), 2,
+      OC_STACK_KEEP_TRANSACTION, IsUint32,
+      "OCClientResponseHandler return value",
+      return ((OCStackApplicationResult)Nan::To<uint32_t>(jsReturn).FromJust()),
+      Nan::New(callbackInfo->jsHandle), js_OCClientResponse(clientResponse));
 }
 
 NAN_METHOD(bind_OCDoResource) {

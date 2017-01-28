@@ -23,15 +23,19 @@ extern "C" {
 #include <ocstack.h>
 }
 
-#define TRY_CALL(callback, context, argumentCount, arguments, jsReturnValue,   \
-                 exceptionReturn)                                              \
-  do {                                                                         \
-    Nan::TryCatch tryCatch;                                                    \
-    jsReturnValue = (callback)->Call((context), (argumentCount), (arguments)); \
-    if (tryCatch.HasCaught()) {                                                \
-      tryCatch.ReThrow();                                                      \
-      return (exceptionReturn);                                                \
-    }                                                                          \
+#define CALL_JS(callback, context, argc, failReturn, typecheck, message,  \
+                onSuccess, ...)                                           \
+  do {                                                                    \
+    Nan::HandleScope scope;                                               \
+    Nan::TryCatch tryCatch;                                               \
+    Local<Value> argv[argc] = {__VA_ARGS__};                              \
+    Local<Value> jsReturn = (callback)->Call((context), (argc), argv);    \
+    if (tryCatch.HasCaught()) {                                           \
+      tryCatch.ReThrow();                                                 \
+      return failReturn;                                                  \
+    }                                                                     \
+    VALIDATE_VALUE_TYPE(jsReturn, typecheck, message, return failReturn); \
+    onSuccess;                                                            \
   } while (0)
 
 #define VALIDATE_ARGUMENT_COUNT(args, length)                               \
