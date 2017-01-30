@@ -13,6 +13,7 @@
 // limitations under the License.
 
 var path = require( "path" );
+var fs = require( "fs" );
 var shelljs = require( "shelljs" );
 var repoPaths = require( "./helpers/repo-paths" );
 var run = require( "child_process" ).spawnSync;
@@ -24,6 +25,14 @@ try {
 } catch ( anError ) {}
 isDependency = isDependency ||
 	( "NODE_ENV" in process.env && process.env.NODE_ENV === "production" );
+if ( !isDependency ) {
+	try {
+		isDependency = ( "iotivity-node" in
+			JSON.parse(
+				fs.readFileSync(
+					path.join( __dirname, "..", "..", "..", "package.json" ) ) ).dependencies );
+	} catch ( anError ) {}
+}
 
 // If we're not installed as a dependency of another package then leave intermediate files,
 // sources, and build scripts lying around
