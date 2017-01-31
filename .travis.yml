@@ -8,7 +8,7 @@ matrix:
     - env: NODE_VERSION=4.0 TEST_SCRIPT=lint
       os: linux
 
-    - env: NODE_VERSION=0.12 TEST_SCRIPT=test
+    - env: NODE_VERSION=lts/argon TEST_SCRIPT=test
       os: linux
       addons: &buildpackages
         apt:
@@ -19,39 +19,31 @@ matrix:
           - uuid-dev
           - g++-4.8
 
-    - env: NODE_VERSION=0.12 TEST_SCRIPT=test
+    - env: NODE_VERSION=lts/argon TEST_SCRIPT=test
       os: osx
       osx_image: xcode8.2
 
-    - env: NODE_VERSION=4.0 TEST_SCRIPT=test
+    - env: NODE_VERSION=lts/boron TEST_SCRIPT=test
       os: linux
       addons: *buildpackages
 
-    - env: NODE_VERSION=4.0 TEST_SCRIPT=test
+    - env: NODE_VERSION=lts/boron TEST_SCRIPT=test
       os: osx
       osx_image: xcode8.2
 
-    - env: NODE_VERSION=4.4 TEST_SCRIPT=test
+    - env: NODE_VERSION=stable TEST_SCRIPT=test
       os: linux
       addons: *buildpackages
 
-    - env: NODE_VERSION=4.4 TEST_SCRIPT=test
+    - env: NODE_VERSION=stable TEST_SCRIPT=test
       os: osx
       osx_image: xcode8.2
 
-    - env: NODE_VERSION=4.5 TEST_SCRIPT=test
+    - env: NODE_VERSION=7 TEST_SCRIPT=test
       os: linux
       addons: *buildpackages
 
-    - env: NODE_VERSION=4.5 TEST_SCRIPT=test
-      os: osx
-      osx_image: xcode8.2
-
-    - env: NODE_VERSION=6 TEST_SCRIPT=test
-      os: linux
-      addons: *buildpackages
-
-    - env: NODE_VERSION=6 TEST_SCRIPT=test
+    - env: NODE_VERSION=7 TEST_SCRIPT=test
       os: osx
       osx_image: xcode8.2
 
@@ -74,7 +66,7 @@ install:
     export CXX="g++-4.8" CC="gcc-4.8"
   fi
 - rm -rf ~/.nvm
-- wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.26.1/install.sh | bash
+- wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.31.7/install.sh | bash
 - source ~/.nvm/nvm.sh
 - nvm install "${NODE_VERSION}"
 - npm install -g npm@^2.14.2
@@ -82,6 +74,8 @@ install:
   if test "x${TRAVIS_OS_NAME}x" = "xosxx"; then
     brew install scons
   fi
+- node --version
+- npm --version
 - npm install -g grunt-cli
 
 script:
