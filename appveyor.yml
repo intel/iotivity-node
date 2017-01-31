@@ -5,8 +5,8 @@ shallow_clone: true
 
 environment:
   matrix:
-    - nodejs_version: "6.9.1"
-    - nodejs_version: "7.0.0"
+    - nodejs_version: "6"
+    - nodejs_version: ""
 
 matrix:
   fast_finish: true
@@ -14,12 +14,14 @@ matrix:
 install:
   - ps: Install-Product node $env:nodejs_version x64
   - pip install --egg scons
+  - node --version
+  - npm --version
+  - npm install -g grunt-cli
 
 test_script:
-  - npm install -g grunt-cli
   - ps: npm install -g "$(npm pack)"
-  - npm install --ignore-scripts
   - npm link iotivity-node
+  - npm install --ignore-scripts
   - grunt test --ci
 
 build: off
