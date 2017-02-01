@@ -20,11 +20,13 @@ var ocfRunner = require( "iot-js-api" );
 var results = require( "../../../tests/getresult" );
 
 var packageRoot = path.join( require( "bindings" ).getRoot( __filename ) );
+var preamblePath = path.join( packageRoot, "tests", "preamble" );
 var generateSpawn = function( spawnFinal ) {
 	return function( interpreter, commandLine ) {
 		commandLine[ 2 ] = grunt.option( "ci" ) ?
 			path.dirname( require.resolve( "iotivity-node" ) ) :
 			packageRoot;
+		require( preamblePath ).apply( this, commandLine );
 		return spawnFinal( interpreter, commandLine );
 	};
 };

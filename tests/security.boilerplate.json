@@ -1,77 +1,54 @@
 {
 	"acl": {
-		"aclist": {
-			"aces": [
-				{
-					"subjectuuid": "*",
-					"resources": [
-						{
-							"href": "/oic/res",
-							"rel": "",
-							"rt": ["oic.wk.res"],
-							"if": ["oic.if.ll"]
-						},
-						{
-							"href": "/oic/d",
-							"rel": "",
-							"rt": ["oic.wk.d"],
-							"if": ["oic.if.baseline", "oic.if.r"]
-						},
-						{
-							"href": "/oic/p",
-							"rel": "",
-							"rt": ["oic.wk.p"],
-							"if": ["oic.if.baseline", "oic.if.r"]
-						}
-					],
-					"permission": 2
-				},
-				{
-					"subjectuuid": "*",
-					"resources": [
-						{
-							"href": "/oic/sec/doxm",
-							"rel": "",
-							"rt": ["oic.r.doxm"],
-							"if": ["oic.if.baseline"]
-						},
-						{
-							"href": "/oic/sec/pstat",
-							"rel": "",
-							"rt": ["oic.r.pstat"],
-							"if": ["oic.if.baseline"]
-						},
-						{
-							"href": "/oic/sec/acl",
-							"rel": "",
-							"rt": ["oic.r.acl"],
-							"if": ["oic.if.baseline"]
-						},
-						{
-							"href": "/oic/sec/cred",
-							"rel": "",
-							"rt": ["oic.r.cred"],
-							"if": ["oic.if.baseline"]
-						}
-					],
-					"permission": 6
-				}
-			]
-		}
+		"aclist2": [
+			{
+				"subject": { "conntype": "anon-clear" },
+				"resources": [
+					{ "href": "/oic/res" },
+					{ "href": "/oic/d" },
+					{ "href": "/oic/p" }
+				],
+				"permission": 2
+			},
+			{
+				"subject": { "conntype": "auth-crypt" },
+				"resources": [
+					{ "href": "/oic/res" },
+					{ "href": "/oic/d" },
+					{ "href": "/oic/p"}
+				],
+				"permission": 2
+			},
+			{
+				"subject": { "conntype": "anon-clear" },
+				"resources": [
+					{ "href": "/oic/sec/doxm" }
+				],
+				"permission": 14
+			},
+			{
+				"subject": { "conntype": "auth-crypt" },
+				"resources": [
+					{ "href": "/oic/sec/doxm" },
+					{ "href": "/oic/sec/roles" }
+				],
+				"permission": 14
+			}
+		]
 	},
 	"pstat": {
+		"dos": { "s": 1, "p": false },
 		"isop": false,
 		"cm": 2,
 		"tm": 0,
-		"om": 3,
-		"sm": 3
+		"om": 4,
+		"sm": 4
 	},
 	"doxm": {
 		"oxms": [ 0 ],
 		"oxmsel": 0,
 		"sct": 1,
 		"owned": false,
-		"devowneruuid": "",
-		"x.org.iotivity.dpc": true
+		"devowneruuid": ""
 	}
 }

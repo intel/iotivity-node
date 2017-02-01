@@ -70,8 +70,8 @@ function checkRevision() {
 	return true;
 }
 
-var binariesSource, installWinHeaders, tinycborPath,
-	userAgentParts, platform, localArch, targetArch, sysVersion;
+var binariesSource, installWinHeaders, tinycborPath, userAgentParts, platform, localArch,
+	targetArch, sysVersion, installBinaries, mbedtlsPath;
 
 // Map npm arch to iotivity arch - different mapping in each OS, it seems :/
 // This can get complicated ...
@@ -105,7 +105,11 @@ if ( checkRevision() && fs.existsSync( repoPaths.installPrefix ) ) {
 }
 
 // Establish paths needed by the iotivity source tree
+mbedtlsPath = path.join( repoPaths.iotivity, "extlibs", "mbedtls", "mbedtls" );
 tinycborPath = path.join( repoPaths.iotivity, "extlibs", "tinycbor", "tinycbor" );
+
+// Establish paths needed by the installed version of iotivity
+installBinaries = path.join( repoPaths.installPrefix, "bin" );
 
 // Attempt to determine the architecture
 userAgentParts = ( process.env.npm_config_user_agent || "" ).match( /\S+/g ) || [];
@@ -149,6 +153,13 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 		} );
 	}
 
+	// Clone mbedtls inside iotivity
+	run( "git", [ "clone", "https://github.com/ARMmbed/mbedtls.git", mbedtlsPath ] );
+
+	// Check out known-good commitid of mbedtls
+	run( "git", [ "checkout", "ad249f509fd62a3bbea7ccd1fef605dbd482a7bd" ], { cwd: mbedtlsPath } );
+
+
 	// Clone tinycbor inside iotivity
 	run( "git", [ "clone", "https://github.com/01org/tinycbor.git", tinycborPath ] );
 
@@ -157,7 +168,7 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 		{ cwd: tinycborPath } );
 
 	// Build
-	run( "scons", []
+	run( "scons", [ "SECURED=1" ]
 		.concat( ( process.env.V === "1" || process.env.npm_config_verbose === "true" ) ?
 			[ "VERBOSE=True" ] : [] )
 		.concat( targetArch ?
@@ -168,15 +179,21 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 			[ "RELEASE=False", "LOGGING=False" ] : [] )
 		.concat(
 			[ "logger", "octbstack", "connectivity_abstraction", "coap", "c_common", "ocsrm",
-				"routingmanager"
+				"routingmanager", "json2cbor"
 			] ), { cwd: repoPaths.iotivity } );
 }
 
 // Where are the binaries?
 binariesSource = findBins( repoPaths.iotivity );
 
+// Install json2cbor
+shelljs.mkdir( "-p", installBinaries );
+shelljs.cp(
+	path.join( binariesSource, "resource", "csdk", "security", "tool",
+		"json2cbor" + ( process.platform.match( /^win/ ) ? ".exe" : "" ) ),
+	installBinaries );
+
 // Install the libraries
-shelljs.mkdir( "-p", repoPaths.installLibraries );
 shelljs.cp( "-r", path.join( binariesSource, "*" ), repoPaths.installLibraries );
 shelljs.rm( "-rf", path.join( repoPaths.installLibraries, "extlibs" ) );
 shelljs.rm( "-rf", path.join( repoPaths.installLibraries, "resource" ) );

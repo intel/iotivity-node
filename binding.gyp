@@ -3,7 +3,7 @@
 		"externalOCTBStack": "<!(node -p \"( process.env.OCTBSTACK_CFLAGS && process.env.OCTBSTACK_LIBS ) ? 'true' : 'false';\")",
 		"internalOCTBStack_include_dirs": [
 			"<(module_root_dir)/iotivity-installed/include"
-		],
+		]
 	},
 
 	"target_defaults": {
@@ -57,6 +57,9 @@
 							"-lc_common",
 							"-lroutingmanager",
 							"-llogger",
+							"-lmbedtls",
+							"-lmbedcrypto",
+							"-lmbedx509",
 							"-locsrm"
 						]
 					} ]

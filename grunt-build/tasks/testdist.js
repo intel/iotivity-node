@@ -41,7 +41,11 @@ var allowedStructure = {
 		}
 	},
 	"iotivity-installed": {
-		"lib": "required"
+		"lib": "required",
+		"bin": [
+			{ "json2cbor": "required" },
+			{ "json2cbor.exe": "required" }
+		]
 	},
 	"CONTRIBUTING.md": "required",
 	"AUTHORS.txt": "required",
