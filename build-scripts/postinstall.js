@@ -59,6 +59,6 @@ shelljs.rm( "-rf",
 	repoPaths.patchesPath,
 	repoPaths.src );
 
-// shelljs is only used by the build scripts, so remove that too
-run( "npm", [ "remove", "shelljs" ],
+// Remove package(s) used only during build
+run( "npm", [ "remove", "nan" ],
 	{ stdio: [ process.stdin, process.stdout, process.stderr ], shell: true } );
