@@ -1,0 +1,7 @@
+.eslintrc.json
+.npmignore
+.travis.yml
+appveyor.yml
+grunt-build
+Gruntfile.js
+tests

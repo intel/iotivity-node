@@ -20,13 +20,19 @@ var ocfRunner = require( "iot-js-api" );
 var results = require( "../../../tests/getresult" );
 
 var packageRoot = path.join( require( "bindings" ).getRoot( __filename ) );
-var location = grunt.option( "ci" ) ?
-		path.join( packageRoot, "node_modules", "iotivity-node" ) : packageRoot;
+var generateSpawn = function( spawnFinal ) {
+	return function( interpreter, commandLine ) {
+		commandLine[ 2 ] = grunt.option( "ci" ) ?
+			path.dirname( require.resolve( "iotivity-node" ) ) :
+			packageRoot;
+		return spawnFinal( interpreter, commandLine );
+	};
+};
 var plain = {
-	location: location
+	spawn: generateSpawn( ocfRunner.defaultSpawn )
 };
 var coverage = _.extend( {}, plain, {
-	spawn: function( interpreter, commandLine ) {
+	spawn: generateSpawn( function( interpreter, commandLine ) {
 		return require( "child_process" ).spawn(
 			path.resolve( packageRoot, "node_modules", ".bin", "istanbul" ), [
 				"cover",
@@ -35,12 +41,12 @@ var coverage = _.extend( {}, plain, {
 				"--config", path.join( packageRoot, "tests", "istanbul.json" ),
 				"--dir", path.join( packageRoot, "coverage",
 					commandLine[ 0 ].split( path.sep ).slice( -2 ).join( "!" ) ),
-				"--root", location,
+				"--root", commandLine[ 2 ],
 				commandLine[ 0 ], "--"
 			].concat( commandLine.slice( 1 ) ), {
 				stdio: [ process.stdin, "pipe", process.stderr ]
 			} );
-	}
+	} )
 } );
 
 // Shim the default log() and done() to also record results in JSON

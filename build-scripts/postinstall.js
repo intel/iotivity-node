@@ -16,7 +16,6 @@ var path = require( "path" );
 var fs = require( "fs" );
 var shelljs = require( "shelljs" );
 var repoPaths = require( "./helpers/repo-paths" );
-var run = require( "child_process" ).spawnSync;
 
 var isDependency;
 
@@ -40,14 +39,12 @@ if ( !isDependency ) {
 	return;
 }
 
-// Purge any and all files not needed for production
+// Purge any and all files not needed after building
 shelljs.rm( "-rf",
-	path.join( repoPaths.root, "appveyor.yml" ),
-	path.join( repoPaths.root, ".travis.yml" ),
-	path.join( repoPaths.root, "Gruntfile.js" ),
+	path.join( repoPaths.root, "binding.gyp" ),
+	path.join( repoPaths.root, "node_modules", "nan" ),
+	path.join( repoPaths.root, "node_modules", ".bin" ),
 	path.join( repoPaths.root, "build-scripts" ),
-	path.join( repoPaths.root, "grunt-build" ),
-	path.join( repoPaths.root, "tests" ),
 	path.join( repoPaths.installLibraries, "*.a" ),
 	path.join( repoPaths.installLibraries, "*.lib" ),
 	path.join( repoPaths.installLibraries, "*.dll" ),
@@ -58,7 +55,3 @@ shelljs.rm( "-rf",
 	repoPaths.iotivity,
 	repoPaths.patchesPath,
 	repoPaths.src );
-
-// Remove package(s) used only during build
-run( "npm", [ "remove", "nan" ],
-	{ stdio: [ process.stdin, process.stdout, process.stderr ], shell: true } );

@@ -16,27 +16,10 @@ install:
   - pip install --egg scons
 
 test_script:
-  - node --version
-  - npm --version
-  - pip --version
   - npm install -g grunt-cli
-  - npm pack
+  - ps: npm install -g "$(npm pack)"
   - npm install --ignore-scripts
-  - move package.json package.json.bak
-
-  # npm install *tgz
-  # Since Windows doesn't know about shell wildcard expansion nor does cmd have proper utilities to
-  # perform such an expansion and assign the result to a command line argument, we must use
-  # powershell here, because at least it has "$(command)", and node to do some painstaking manual
-  # wildcard expansion.
-  #
-  # Because of appveyor, the quote escaping has gotten so ridiculous that I couldn't figure out the
-  # proper escape sequence for things like require( "fs" ). That's why I had to go with
-  # require( Buffer.from( [ 0x66, 0x73 ] ).toString() ); below. The creation of the Buffer and its
-  # subsequent conversion to a string basically let me write strings in hex without having to use
-  # quotation marks.
-  - powershell -Command "npm install \"$(node -p 'require( Buffer.from( [ 0x66, 0x73 ] ).toString() ).readdirSync( Buffer.from( [ 0x2e ] ).toString() ).reduce( function( value, potential ) { if ( value ) { return value; } else if ( potential.match( /[.]tgz$/ ) ) { return potential } else { return value; } }, undefined );')\""
-  - move package.json.bak package.json
+  - npm link iotivity-node
   - grunt test --ci
 
 build: off
