@@ -106,9 +106,18 @@ if ( platform === "darwin" ) {
 // script to an install.
 if ( !fs.existsSync( repoPaths.iotivity ) ) {
 
-	// Do a shallow checkout of iotivity
-	run( "git", [ "clone", "--depth", "1", "--single-branch", "--branch", csdkRevision,
-		"https://gerrit.iotivity.org/gerrit/iotivity", repoPaths.iotivity ]  );
+	if ( csdkRevision.match( /[0-9a-f]{40}/ ) ) {
+
+		// Do a full checkout when doing a commitid
+		run( "git", [ "clone",
+			"https://gerrit.iotivity.org/gerrit/iotivity", repoPaths.iotivity ] );
+		run( "git", [ "checkout", csdkRevision ], { cwd: repoPaths.iotivity } );
+	} else {
+
+		// Do a shallow checkout of iotivity
+		run( "git", [ "clone", "--depth", "1", "--single-branch", "--branch", csdkRevision,
+			"https://gerrit.iotivity.org/gerrit/iotivity", repoPaths.iotivity ] );
+	}
 
 	// Apply patches
 	if ( fs.existsSync( repoPaths.patchesPath ) &&
