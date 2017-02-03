@@ -188,28 +188,7 @@
 		{
 			"target_name": "iotivity",
 			"sources": [
-				"generated/constants.cc",
-				"generated/enums.cc",
-				"generated/functions.cc",
-				"src/common.cc",
-				"src/functions/oc-create-delete-resource.cc",
-				"src/functions/oc-do-resource.cc",
-				"src/functions/oc-register-persistent-storage-handler.cc",
-				"src/functions/oc-set-default-device-entity-handler.cc",
-				"src/functions/oc-server-resource-utils.cc",
-				"src/functions/oc-server-response.cc",
-				"src/functions/simple.cc",
-				"src/main.cc",
-				"src/structures.cc",
-				"src/structures/handles.cc",
-				"src/structures/oc-client-response.cc",
-				"src/structures/oc-dev-addr.cc",
-				"src/structures/oc-device-info.cc",
-				"src/structures/oc-entity-handler-response.cc",
-				"src/structures/oc-header-option-array.cc",
-				"src/structures/oc-identity.cc",
-				"src/structures/oc-payload.cc",
-				"src/structures/oc-platform-info.cc"
+				"src/main.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
 		}
