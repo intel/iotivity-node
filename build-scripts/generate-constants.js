@@ -12,42 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var _ = require( "lodash" );
+var _ = {
+	map: require( "lodash.map" ),
+	uniq: require( "lodash.uniq" ),
+	without: require( "lodash.without" )
+};
 var path = require( "path" );
 var fs = require( "fs" );
 var includePaths = require( "./helpers/header-paths" );
 var repoPaths = require( "./helpers/repo-paths" );
 
 function parseFileForConstants( fileName ) {
-	return _( fs.readFileSync( fileName, { encoding: "utf8" } )
-		.replace( /\r/g, "" )
-		.split( "\n" ) )
-	.map( function( line ) {
-			var fields;
+	return _.map(
+		_.without(
+			_.uniq(
+				_.map(
+					fs.readFileSync( fileName, { encoding: "utf8" } )
+						.replace( /\r/g, "" )
+						.split( "\n" ),
+					function( line ) {
+						var fields;
 
-			if ( !line.match( /^#define/ ) ) {
-				return;
-			}
+						if ( !line.match( /^#define/ ) ) {
+							return;
+						}
 
-			// Do what awk does - split into tokens by whitespace
-			fields = line.match( /\S+/g );
-			if ( fields.length > 2 && !fields[ 1 ].match( /[()]/ ) ) {
-				return "SET_CONSTANT_" + ( fields[ 2 ][ 0 ] === "\"" ? "STRING" : "NUMBER" ) +
-					" " + fields[ 1 ];
-			}
-		} )
-	.uniq()
-	.without( undefined )
-	.map( function( line ) {
-		var fields = line.split( " " );
-		return [
-			"#ifdef " + fields[ 1 ],
-			"  " + fields[ 0 ] + "(target, " + fields[ 1 ] + ");",
-			"#endif /* def " + fields[ 1 ] + " */"
-		].join( "\n" ) + "\n";
-	} )
-	.value()
-	.join( "\n" ) + "\n";
+						// Do what awk does - split into tokens by whitespace
+						fields = line.match( /\S+/g );
+						if ( fields.length > 2 && !fields[ 1 ].match( /[()]/ ) ) {
+							return "SET_CONSTANT_" +
+								( fields[ 2 ][ 0 ] === "\"" ? "STRING" : "NUMBER" ) +
+								" " + fields[ 1 ];
+						}
+					} )
+				),
+			undefined ),
+		function( line ) {
+			var fields = line.split( " " );
+			return [
+				"#ifdef " + fields[ 1 ],
+				"  " + fields[ 0 ] + "(target, " + fields[ 1 ] + ");",
+				"#endif /* def " + fields[ 1 ] + " */"
+			].join( "\n" ) + "\n";
+		} ).join( "\n" ) + "\n";
 }
 
 var constantsCC = path.join( repoPaths.generated, "constants.cc" );

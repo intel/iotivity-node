@@ -15,7 +15,12 @@
 var QUnit,
 	async = require( "async" ),
 	glob = require( "glob" ),
-	_ = require( "lodash" ),
+	_ = {
+		map: require( "lodash.map" ),
+		each: require( "lodash.foreach" ),
+		bind: require( "lodash.bind" ),
+		extend: require( "lodash.assignin" )
+	},
 	childProcess = require( "child_process" ),
 	fs = require( "fs" ),
 	path = require( "path" ),

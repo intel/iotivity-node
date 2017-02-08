@@ -14,7 +14,7 @@
 
 module.exports = function( grunt ) {
 
-var _ = require( "lodash" );
+var assignIn = require( "lodash.assignin" );
 var path = require( "path" );
 var ocfRunner = require( "iot-js-api" );
 var results = require( "../../../tests/getresult" );
@@ -36,7 +36,7 @@ var plain = {
 	},
 	spawn: generateSpawn( ocfRunner.defaultSpawn )
 };
-var coverage = _.extend( {}, plain, {
+var coverage = assignIn( {}, plain, {
 	spawn: generateSpawn( function( interpreter, commandLine ) {
 		return require( "child_process" ).spawn(
 			path.resolve( packageRoot, "node_modules", ".bin", "istanbul" ), [

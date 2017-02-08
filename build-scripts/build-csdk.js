@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var _ = require( "lodash" );
+var assignIn = require( "lodash.assignin" );
 var path = require( "path" );
 var spawnSync = require( "child_process" ).spawnSync;
 var fs = require( "fs" );
@@ -23,7 +23,7 @@ var os = require( "os" );
 function run( command, args, options ) {
 	var status;
 	options = options || {};
-	status = spawnSync( command, args, _.extend( {}, options, {
+	status = spawnSync( command, args, assignIn( {}, options, {
 		stdio: [ process.stdin, process.stdout, process.stderr ],
 		shell: true
 	} ) ).status;

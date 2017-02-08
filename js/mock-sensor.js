@@ -19,7 +19,10 @@ function randomInteger( upperLimit ) {
 	return Math.round( Math.random() * upperLimit );
 }
 
-var _ = require( "lodash" );
+var _ = {
+	extend: require( "lodash.assignin" ),
+	bind: require( "lodash.bind" )
+};
 
 var possibleStrings = [
 		"Helsinki",

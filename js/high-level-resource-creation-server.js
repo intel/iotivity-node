@@ -14,7 +14,10 @@
 
 var resourceCreatedByRemote,
 	device = require( "iotivity-node" ),
-	_ = require( "lodash" );
+	_ = {
+		extend: require( "lodash.assignin" ),
+		bind: require( "lodash.bind" )
+	};
 
 device.device = _.extend( device.device, {
 	coreSpecVersion: "res.1.1.0",
