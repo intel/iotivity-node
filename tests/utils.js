@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var _ = require( "lodash" ),
+var assignIn = require( "lodash.assignin" ),
 	TestUtils = function( iotivity ) {
 		if ( !( this instanceof TestUtils ) ) {
 			return new TestUtils( iotivity );
@@ -24,7 +24,7 @@ var _ = require( "lodash" ),
 		} );
 	};
 
-_.extend( TestUtils.prototype, require( "./assert-to-console" ), {
+assignIn( TestUtils.prototype, require( "./assert-to-console" ), {
 	lookupEnumValueName: function( enumName, value ) {
 		var index,
 			enumeration = this._iotivity[ enumName ];

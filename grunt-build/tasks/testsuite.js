@@ -14,7 +14,7 @@
 
 module.exports = function( grunt ) {
 
-var _ = require( "lodash" ),
+var assignIn = require( "lodash.assignin" ),
 	path = require( "path" ),
 	spawn = require( "child_process" ).spawn;
 
@@ -32,7 +32,7 @@ grunt.task.registerTask( "testsuite", "Run the test suite", function() {
 			// The suites to run, or no argument if suites are not specified
 			.concat( grunt.option( "suites" ) ? [ grunt.option( "suites" ) ] : [] ),
 		{
-			env: _.extend( {}, process.env, { "MALLOC_CHECK_": 2 } ),
+			env: assignIn( {}, process.env, { "MALLOC_CHECK_": 2 } ),
 			stdio: "inherit"
 		} )
 		.on( "close", function( code ) {

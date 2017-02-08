@@ -12,32 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var _ = require( "lodash" );
+var _ = {
+	map: require( "lodash.map" ),
+	flattenDeep: require( "lodash.flattendeep" ),
+	uniq: require( "lodash.uniq" ),
+	without: require( "lodash.without" )
+};
 var fs = require( "fs" );
 var path = require( "path" );
 var repoPaths = require( "./helpers/repo-paths" );
 
 function getMethods( topPath ) {
-	return _( fs.readdirSync( topPath ) )
-		.map( function( item ) {
-			item = path.join( topPath, item );
-			return fs.statSync( item ).isDirectory() ?
-				getMethods( item ) :
-				_( fs.readFileSync( item, { encoding: "utf8" } )
-					.replace( /\r/g, "" )
-					.split( "\n" ) )
-					.map( function( line ) {
-						var match = line.match( /^NAN_METHOD\s*[(]\s*bind_([^)]*)*/ );
-						if ( match && match.length > 1 ) {
-							return match[ 1 ].replace( /\s/g, "" );
-						}
-					} )
-					.without( undefined )
-					.value();
-		} )
-		.flattenDeep()
-		.uniq()
-		.value();
+	return _.uniq(
+		_.flattenDeep(
+			_.map(
+				fs.readdirSync( topPath ),
+				function( item ) {
+					item = path.join( topPath, item );
+					return fs.statSync( item ).isDirectory() ?
+						getMethods( item ) :
+						_.without(
+							_.map(
+								fs.readFileSync( item, { encoding: "utf8" } )
+									.replace( /\r/g, "" )
+									.split( "\n" ),
+								function( line ) {
+									var match = line.match( /^NAN_METHOD\s*[(]\s*bind_([^)]*)*/ );
+									if ( match && match.length > 1 ) {
+										return match[ 1 ].replace( /\s/g, "" );
+									}
+								} ),
+							undefined );
+				} ) ) );
 }
 
 var methods;
