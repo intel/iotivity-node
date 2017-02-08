@@ -190,7 +190,9 @@
 			"sources": [
 				"generated/constants.cc",
 				"generated/enums.cc",
+				"generated/functions.cc",
 				"src/common.cc",
+				"src/functions/simple.cc",
 				"src/main.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]

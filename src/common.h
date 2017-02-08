@@ -57,6 +57,17 @@ extern "C" {
     }                                          \
   } while (0)
 
+#define BINDING_NAPI_CALL(env, theCall)                                      \
+  do {                                                                       \
+    napi_status status = theCall;                                            \
+    if (!(status == napi_ok || status == napi_pending_exception)) {          \
+      napi_throw_error(                                                      \
+          (env),                                                             \
+          LOCAL_MESSAGE(napi_get_last_error_info()->error_message).c_str()); \
+      return;                                                                \
+    }                                                                        \
+  } while (0)
+
 #define SET_PROPERTY_JS(env, destination, name, jsValue)                 \
   do {                                                                   \
     napi_propertyname jsName;                                            \
