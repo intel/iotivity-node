@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <nan.h>
+#include <node_api_helpers.h>
 
 #include "enums.h"
 
@@ -22,11 +22,11 @@ extern "C" {
 #include <ocstack.h>
 }
 
-using namespace v8;
-
-#define SET_ENUM(destination, enumName)                              \
-  Nan::ForceSet((destination), Nan::New(#enumName).ToLocalChecked(), \
-                bind_##enumName(),                                   \
-                (v8::PropertyAttribute)(v8::ReadOnly | v8::DontDelete));
+#define SET_ENUM(env, destination, enumName)                  \
+  do {                                                        \
+    napi_value jsEnum;                                        \
+    HELPER_CALL(bind_##enumName((env), &jsEnum));             \
+    SET_PROPERTY_JS((env), (destination), #enumName, jsEnum); \
+  } while (0)
 
 // The rest of this file is generated

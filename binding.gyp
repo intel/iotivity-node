@@ -188,6 +188,8 @@
 		{
 			"target_name": "iotivity",
 			"sources": [
+				"generated/enums.cc",
+				"src/common.cc",
 				"src/main.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]

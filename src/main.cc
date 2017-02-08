@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <node_jsvmapi.h>
 #include <node_api_helpers.h>
+#include <node_jsvmapi.h>
+#include "enums.h"
 
-NAPI_MODULE_INIT(Init) {
-}
+NAPI_MODULE_INIT(Init) { BINDING_HELPER_CALL(env, InitEnums(env, exports)); }
 
 NODE_MODULE_ABI(iotivity, Init)
