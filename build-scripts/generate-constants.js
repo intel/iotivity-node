@@ -40,8 +40,7 @@ function parseFileForConstants( fileName ) {
 						// Do what awk does - split into tokens by whitespace
 						fields = line.match( /\S+/g );
 						if ( fields.length > 2 && !fields[ 1 ].match( /[()]/ ) ) {
-							return "SET_CONSTANT_" +
-								( fields[ 2 ][ 0 ] === "\"" ? "STRING" : "NUMBER" ) +
+							return ( fields[ 2 ][ 0 ] === "\"" ? "string_utf8" : "number" ) +
 								" " + fields[ 1 ];
 						}
 					} )
@@ -51,40 +50,29 @@ function parseFileForConstants( fileName ) {
 			var fields = line.split( " " );
 			return [
 				"#ifdef " + fields[ 1 ],
-				"  " + fields[ 0 ] + "(target, " + fields[ 1 ] + ");",
+				"SET_PROPERTY(" + ( [
+					"env",
+					"exports",
+					"\"" + fields[ 1 ] + "\"",
+					fields[ 0 ],
+					fields[ 1 ]
+				]
+				.concat( fields[ 0 ] === "string_utf8" ? [ "strlen(" + fields[ 1 ] + ")" ] : [] )
+				.join( ", " ) ) + ");",
 				"#endif /* def " + fields[ 1 ] + " */"
 			].join( "\n" ) + "\n";
-		} ).join( "\n" ) + "\n";
+		} ).join( "\n" );
 }
 
 var constantsCC = path.join( repoPaths.generated, "constants.cc" );
 
-fs.writeFileSync( constantsCC, "" );
-
-fs.writeFileSync( constantsCC,
+fs.writeFileSync( constantsCC, [
 	fs.readFileSync( path.join( repoPaths.src, "constants.cc.in" ), { encoding: "utf8" } ),
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC,
-	"NAN_MODULE_INIT(InitConstants) {\n",
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC,
-	"  // ocstackconfig.h: Stack configuration\n",
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC,
+	"std::string InitConstants(napi_env env, napi_value exports) {",
+	"  // ocstackconfig.h: Stack configuration",
 	parseFileForConstants( includePaths[ "ocstackconfig.h" ] ),
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC, "\n", { flag: "a" } );
-
-fs.writeFileSync( constantsCC,
-	"  // octypes.h: Definitions\n",
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC,
+	"  // octypes.h: Definitions",
 	parseFileForConstants( includePaths[ "octypes.h" ] ),
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC, "}\n", { flag: "a" } );
+	"  return std::string();",
+	"}"
+].join( "\n" ) );

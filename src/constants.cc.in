@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-#include <nan.h>
-
-#include "enums.h"
+#include <string.h>
+#include "common.h"
 
 extern "C" {
 #include <ocstack.h>
 }
-
-using namespace v8;
 
 // The rest of this file is generated

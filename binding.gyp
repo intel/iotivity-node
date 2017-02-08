@@ -188,6 +188,7 @@
 		{
 			"target_name": "iotivity",
 			"sources": [
+				"generated/constants.cc",
 				"generated/enums.cc",
 				"src/common.cc",
 				"src/main.cc"

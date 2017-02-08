@@ -16,8 +16,12 @@
 
 #include <node_api_helpers.h>
 #include <node_jsvmapi.h>
+#include "constants.h"
 #include "enums.h"
 
-NAPI_MODULE_INIT(Init) { BINDING_HELPER_CALL(env, InitEnums(env, exports)); }
+NAPI_MODULE_INIT(Init) {
+  BINDING_HELPER_CALL(env, InitEnums(env, exports));
+  BINDING_HELPER_CALL(env, InitConstants(env, exports));
+}
 
 NODE_MODULE_ABI(iotivity, Init)
