@@ -20,11 +20,65 @@ extern "C" {
 #include <ocstack.h>
 }
 
-#define CONVEY_SIMPLE_CALL(api)                                    \
-  napi_value result;                                               \
-  BINDING_NAPI_CALL(env, napi_create_number(env, api(), &result)); \
-  BINDING_NAPI_CALL(env, napi_set_return_value(env, info, result));
+NAPI_METHOD(bind_OCStop) {
+  SET_RETURN_VALUE(env, info, number, ((double)OCStop()));
+}
 
-NAPI_METHOD(bind_OCStop) { CONVEY_SIMPLE_CALL(OCStop); }
+NAPI_METHOD(bind_OCProcess) {
+  SET_RETURN_VALUE(env, info, number, ((double)OCProcess()));
+}
 
-NAPI_METHOD(bind_OCProcess) { CONVEY_SIMPLE_CALL(OCProcess); }
+NAPI_METHOD(bind_OCStartPresence) {
+  DECLARE_ARGUMENTS(env, info, 1);
+  VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_number, false, "arg 1");
+
+  uint32_t timeToLive;
+  NAPI_CALL_THROW(env, napi_get_value_uint32(env, arguments[0], &timeToLive));
+
+  SET_RETURN_VALUE(env, info, number, ((double)OCStartPresence(timeToLive)));
+}
+
+NAPI_METHOD(bind_OCStopPresence) {
+  SET_RETURN_VALUE(env, info, number, ((double)OCStopPresence()));
+}
+
+NAPI_METHOD(bind_OCInit) {
+  DECLARE_ARGUMENTS(env, info, 3);
+  VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_string, true, "arg 1");
+  VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_number, false, "arg 2");
+  VALIDATE_VALUE_TYPE_THROW(env, arguments[2], napi_number, false, "arg 3");
+
+  int ipAddressLength;
+  NAPI_CALL_THROW(env, napi_get_value_string_utf8_length(env, arguments[0],
+                                                         &ipAddressLength));
+  char ipAddress[ipAddressLength + 1];
+  int ipAddressWritten;
+  NAPI_CALL_THROW(
+      env, napi_get_value_string_utf8(env, arguments[0], ipAddress,
+                                      ipAddressLength, &ipAddressWritten));
+
+  uint32_t port;
+  NAPI_CALL_THROW(env, napi_get_value_uint32(env, arguments[1], &port));
+
+  uint32_t mode;
+  NAPI_CALL_THROW(env, napi_get_value_uint32(env, arguments[2], &mode));
+
+  SET_RETURN_VALUE(env, info, number,
+                   ((double)OCInit(ipAddress, (uint16_t)port, (OCMode)mode)));
+}
+
+NAPI_METHOD(bind_OCGetNumberOfResources) {
+  DECLARE_ARGUMENTS(env, info, 1);
+  VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, false, "arg 1");
+
+  OCStackResult result;
+  uint8_t resourceCount;
+  result = OCGetNumberOfResources(&resourceCount);
+
+  if (result == OC_STACK_OK) {
+    SET_PROPERTY_THROW(env, arguments[0], "count", number,
+                       ((double)resourceCount));
+  }
+
+  SET_RETURN_VALUE(env, info, number, ((double)result));
+}

@@ -21,9 +21,9 @@
 #include "functions.h"
 
 NAPI_MODULE_INIT(Init) {
-  BINDING_HELPER_CALL(env, InitEnums(env, exports));
-  BINDING_HELPER_CALL(env, InitConstants(env, exports));
-  BINDING_HELPER_CALL(env, InitFunctions(env, exports));
+  HELPER_CALL_THROW(env, InitEnums(env, exports));
+  HELPER_CALL_THROW(env, InitConstants(env, exports));
+  HELPER_CALL_THROW(env, InitFunctions(env, exports));
 }
 
 NODE_MODULE_ABI(iotivity, Init)

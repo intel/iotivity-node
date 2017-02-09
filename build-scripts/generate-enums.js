@@ -55,7 +55,7 @@ function parseFileForEnums( destination, fileName ) {
 						[
 							"static std::string bind_" + enumName +
 							"(napi_env env, napi_value *jsEnum) {",
-							"  NAPI_CALL(env, napi_create_object(env, jsEnum));"
+							"  NAPI_CALL_RETURN(napi_create_object(env, jsEnum));"
 						].join( "\n" ) + "\n",
 						{ flag: "a" } );
 				} else if ( fields[ 0 ] !== "typedef" && fields[ 0 ] !== "{" ) {
