@@ -59,7 +59,7 @@ var archMap = {
 	"linux": {
 			"x64": "x86_64",
 			"arm": "arm"
-			},
+	},
 	"darwin": { "x64": "x86_64" }
 };
 
