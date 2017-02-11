@@ -18,11 +18,12 @@ var spawnSync = require( "child_process" ).spawnSync;
 var fs = require( "fs" );
 var repoPaths = require( "./helpers/repo-paths" );
 var shelljs = require( "shelljs" );
+var os = require( "os" );
 
-function run( command, arguments, options ) {
+function run( command, args, options ) {
 	var status;
 	options = options || {};
-	status = spawnSync( command, arguments, _.extend( {}, options, {
+	status = spawnSync( command, args, _.extend( {}, options, {
 		stdio: [ process.stdin, process.stdout, process.stderr ],
 		shell: true
 	} ) ).status;
@@ -48,7 +49,8 @@ function findBins( iotivityPath ) {
 	return thePath;
 }
 
-var binariesSource, installWinHeaders, architecture, tinycborPath;
+var binariesSource, installWinHeaders, tinycborPath,
+	userAgentParts, platform, localArch, targetArch, sysVersion;
 
 // Map npm arch to iotivity arch - different mapping in each OS, it seems :/
 // This can get complicated ...
@@ -57,7 +59,17 @@ var archMap = {
 	"linux": {
 			"x64": "x86_64",
 			"arm": "arm"
-			}
+	},
+	"darwin": { "x64": "x86_64" }
+};
+
+// map of major version in os.release() to SYS_VERSION
+var darwinMap = {
+	"12": "10.8",
+	"13": "10.9",
+	"14": "10.10",
+	"15": "10.11",
+	"16": "10.12"
 };
 
 // Determine the CSDK revision
@@ -75,9 +87,20 @@ if ( fs.existsSync( repoPaths.installPrefix ) ) {
 tinycborPath = path.join( repoPaths.iotivity, "extlibs", "tinycbor", "tinycbor" );
 
 // Attempt to determine the architecture
-architecture = ( process.env.npm_config_user_agent || "" ).match( /\S+/g ) || [];
-architecture =
-	archMap[ architecture[ 2 ] ] ? archMap[ architecture[ 2 ] ][ architecture[ 3 ] ] : null;
+userAgentParts = ( process.env.npm_config_user_agent || "" ).match( /\S+/g ) || [];
+platform = userAgentParts[ 2 ];
+localArch = userAgentParts[ 3 ];
+
+targetArch =
+	archMap[ platform ] ? archMap[ platform ][ localArch ] : null;
+
+if ( platform === "darwin" ) {
+	var kernelVersionParts = os.release().split( "." );
+	var majorVersion = kernelVersionParts[ 0 ];
+	sysVersion = darwinMap[ majorVersion ] ? darwinMap[ majorVersion ] : null;
+} else {
+	sysVersion = null;
+}
 
 // If the iotivity source tree is in place, we assume it's build and ready to go. This reduces this
 // script to an install.
@@ -107,8 +130,10 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 	run( "scons", []
 		.concat( ( process.env.V === "1" || process.env.npm_config_verbose === "true" ) ?
 			[ "VERBOSE=True" ] : [] )
-		.concat( architecture ?
-			[ "TARGET_ARCH=" + architecture ] : [] )
+		.concat( targetArch ?
+			[ "TARGET_ARCH=" + targetArch ] : [] )
+		.concat( sysVersion ?
+			[ "SYS_VERSION=" + sysVersion ] : [] )
 		.concat( process.env.npm_config_debug === "true" ?
 			[ "RELEASE=False" ] : [] )
 		.concat(
