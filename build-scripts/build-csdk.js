@@ -54,7 +54,10 @@ var binariesSource, installWinHeaders, architecture, tinycborPath;
 // This can get complicated ...
 var archMap = {
 	"win32": { "x64": "amd64" },
-	"linux": { "x64": "x86_64" }
+	"linux": {
+			"x64": "x86_64",
+			"arm": "arm"
+			}
 };
 
 // Determine the CSDK revision
