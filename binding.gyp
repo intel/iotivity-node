@@ -187,13 +187,15 @@
 		},
 		{
 			"target_name": "iotivity",
+			"cflags+": [ "-pedantic" ],
 			"sources": [
 				"generated/constants.cc",
 				"generated/enums.cc",
 				"generated/functions.cc",
 				"src/common.cc",
 				"src/functions/simple.cc",
-				"src/main.cc"
+				"src/main.cc",
+				"src/structures/oc-device-info.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
 		}

@@ -15,104 +15,86 @@
  */
 
 #include "oc-device-info.h"
-#include <nan.h>
-#include "../common.h"
 
 extern "C" {
 #include <string.h>
 }
 
-using namespace v8;
-
-v8::Local<v8::Object> js_OCDeviceInfo(OCDeviceInfo *info) {
-  Local<Object> returnValue = Nan::New<Object>();
-
-  SET_STRING_IF_NOT_NULL(returnValue, info, deviceName);
-  SET_STRING_IF_NOT_NULL(returnValue, info, specVersion);
-  ADD_STRING_ARRAY(returnValue, info, types);
-  ADD_STRING_ARRAY(returnValue, info, dataModelVersions);
-
-  return returnValue;
-}
-
-void c_freeLinkedList(OCStringLL *list) {
+void delete_OCStringLL(OCStringLL *list) {
   OCStringLL *item, *nextItem;
   for (item = list; item;) {
     nextItem = item->next;
     free(item->value);
-    free(item);
+    delete item;
     item = nextItem;
   }
 }
 
-void c_OCDeviceInfoFreeMembers(OCDeviceInfo *info) {
-  free(info->deviceName);
-  free(info->specVersion);
-  c_freeLinkedList(info->types);
-  c_freeLinkedList(info->dataModelVersions);
+OCDeviceInfo *new_OCDeviceInfo() {
+  OCDeviceInfo *info = new OCDeviceInfo;
+  info->deviceName = 0;
+  info->specVersion = 0;
+  info->types = 0;
+  info->dataModelVersions = 0;
+  return info;
 }
 
-bool c_StringArrayFromProperty(Local<Object> source, const char *propertyName,
-                               OCStringLL **destination) {
-  Local<Value> sourceValue =
-      Nan::Get(source, Nan::New(propertyName).ToLocalChecked())
-          .ToLocalChecked();
-  VALIDATE_VALUE_TYPE(sourceValue, IsArray,
-                      (std::string("device info ") + propertyName).c_str(),
-                      return false);
-  Local<Array> jsArray = Local<Array>::Cast(sourceValue);
+void delete_OCDeviceInfo(OCDeviceInfo *info) {
+  free(info->deviceName);
+  free(info->specVersion);
+  delete_OCStringLL(info->types);
+  delete_OCStringLL(info->dataModelVersions);
+}
 
-  uint32_t index, length = jsArray->Length();
-  OCStringLL *local = 0, **previous = &local;
+static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
+                                             const char *propertyName,
+                                             OCStringLL **destination) {
+  DECLARE_PROPERTY_JS_RETURN(sourceValue, env, source, propertyName);
+  NAPI_IS_ARRAY_RETURN(env, sourceValue,
+                       std::string("device info ") + propertyName);
+
+  uint32_t index, length;
+  NAPI_CALL_RETURN(napi_get_array_length(env, sourceValue, &length));
+
+  auto local = std::unique_ptr<OCStringLL *, void (*)(OCStringLL **)>(
+      new OCStringLL *(0), [](OCStringLL **ll) {
+        delete_OCStringLL(*ll);
+        delete ll;
+      });
+  OCStringLL **previous = local.get();
 
   for (index = 0; index < length; index++, previous = &((*previous)->next)) {
-    Local<Value> itemValue = Nan::Get(jsArray, index).ToLocalChecked();
-    VALIDATE_VALUE_TYPE(
-        itemValue, IsString,
-        (std::string("device info ") + propertyName + " list item").c_str(),
-        goto free);
+    napi_value jsItemValue;
 
     (*previous) = new OCStringLL;
     if (!(*previous)) {
-      goto free;
+      return LOCAL_MESSAGE("Failed to allocate " + propertyName + " list item");
     }
+
+    NAPI_CALL_RETURN(napi_get_element(env, sourceValue, index, &jsItemValue));
+    VALIDATE_AND_ASSIGN_STRING_JS_RETURN(
+        env, ((*previous)->value), jsItemValue, false,
+        "device info " + propertyName + " list item");
     (*previous)->next = 0;
-    (*previous)->value = strdup((const char *)*(String::Utf8Value(itemValue)));
-    if (!(*previous)->value) {
-      goto free;
-    }
   }
 
-  *destination = local;
-  return true;
-free:
-  c_freeLinkedList(local);
-  return false;
+  *destination = *(local.get());
+  return std::string();
 }
 
-bool c_OCDeviceInfo(Local<Object> deviceInfo, OCDeviceInfo *info) {
-  OCDeviceInfo local = {0, 0, 0, 0};
+std::string c_OCDeviceInfo(
+    napi_env env, napi_value deviceInfo,
+    std::unique_ptr<OCDeviceInfo, void (*)(OCDeviceInfo *)> &info) {
+  VALIDATE_AND_ASSIGN_STRING_RETURN(env, info->deviceName, deviceInfo, true,
+                                    "deviceName");
 
-  VALIDATE_AND_ASSIGN_STRING(&local, deviceInfo, deviceName, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, deviceInfo, specVersion, goto free);
+  VALIDATE_AND_ASSIGN_STRING_RETURN(env, info->specVersion, deviceInfo, true,
+                                    "specVersion");
 
-  // Make sure the "types" property is an array and copy it to the C structure
-  if (!c_StringArrayFromProperty(deviceInfo, "types", &(local.types))) {
-    goto free;
-  }
+  HELPER_CALL_RETURN(
+      c_StringArrayFromProperty(env, deviceInfo, "types", &(info->types)));
+  HELPER_CALL_RETURN(c_StringArrayFromProperty(
+      env, deviceInfo, "dataModelVersions", &(info->dataModelVersions)));
 
-  // Make sure the "dataModelVersion" property is an array and copy it to the C
-  // structure
-  if (!c_StringArrayFromProperty(deviceInfo, "dataModelVersions",
-                                 &(local.dataModelVersions))) {
-    goto free;
-  }
-
-  // If we've successfully created the structure, we transfer it to the
-  // passed-in structure
-  *info = local;
-  return true;
-free:
-  c_OCDeviceInfoFreeMembers(&local);
-  return false;
+  return std::string();
 }
