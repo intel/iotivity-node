@@ -57,7 +57,7 @@ var archMap = {
 	"linux": {
 			"x64": "x86_64",
 			"arm": "arm"
-		 }
+			}
 };
 
 // Determine the CSDK revision
