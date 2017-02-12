@@ -77,8 +77,7 @@ extern "C" {
               __VA_ARGS__);                                           \
   } while (0)
 
-#define J2C_VALIDATE_AND_GET_STRING_JS(env, destination, source, nullOk,    \
-                                       message, ...)                        \
+#define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...)   \
   RESULT_CALL(                                                              \
       do {                                                                  \
         napi_valuetype valueType;                                           \
@@ -111,13 +110,12 @@ extern "C" {
       } while (0),                                                          \
       __VA_ARGS__)
 
-#define J2C_VALIDATE_AND_GET_STRING(env, destination, source, nullOk, name, \
-                                    ...)                                    \
-  do {                                                                      \
-    (destination) = nullptr;                                                \
-    J2C_GET_PROPERTY_JS(jsValue, (env), (source), name, __VA_ARGS__);       \
-    J2C_VALIDATE_AND_GET_STRING_JS((env), (destination), jsValue, (nullOk), \
-                                   #destination "." name, __VA_ARGS__);     \
+#define J2C_GET_STRING(env, destination, source, nullOk, name, ...)   \
+  do {                                                                \
+    (destination) = nullptr;                                          \
+    J2C_GET_PROPERTY_JS(jsValue, (env), (source), name, __VA_ARGS__); \
+    J2C_GET_STRING_JS((env), (destination), jsValue, (nullOk),        \
+                      #destination "." name, __VA_ARGS__);            \
   } while (0)
 
 #define C2J_SET_PROPERTY_JS(env, destination, name, jsValue, ...)           \
@@ -154,19 +152,16 @@ extern "C" {
     }                                                                       \
   } while (0)
 
-#define J2C_VALIDATE_AND_GET_STRING_RETURN(env, destination, source, nullOk,  \
-                                           name)                              \
-  J2C_VALIDATE_AND_GET_STRING((env), (destination), (source), (nullOk), name, \
-                              return FAIL_STATUS_RETURN)
+#define J2C_GET_STRING_RETURN(env, destination, source, nullOk, name) \
+  J2C_GET_STRING((env), (destination), (source), (nullOk), name,      \
+                 return FAIL_STATUS_RETURN)
 
-#define J2C_VALIDATE_AND_GET_STRING_JS_RETURN(env, destination, source,    \
-                                              nullOk, message)             \
-  J2C_VALIDATE_AND_GET_STRING_JS((env), (destination), (source), (nullOk), \
-                                 message, return FAIL_STATUS_RETURN)
+#define J2C_GET_STRING_JS_RETURN(env, destination, source, nullOk, message) \
+  J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,      \
+                    return FAIL_STATUS_RETURN)
 
-#define J2C_ASSIGN_MEMBER_RETURN(env, destination, source, name)               \
-  J2C_VALIDATE_AND_GET_STRING_RETURN((env), (destination)->name, source, true, \
-                                     #name)
+#define J2C_ASSIGN_MEMBER_RETURN(env, destination, source, name) \
+  J2C_GET_STRING_RETURN((env), (destination)->name, source, true, #name)
 
 #define C2J_SET_PROPERTY_RETURN(env, destination, name, type, ...)        \
   do {                                                                    \
@@ -220,10 +215,9 @@ extern "C" {
   napi_value arguments[count];                                               \
   NAPI_CALL_THROW((env), napi_get_cb_args((env), (info), arguments, (count)));
 
-#define J2C_VALIDATE_AND_GET_STRING_JS_THROW(env, destination, source, nullOk, \
-                                             message)                          \
-  J2C_VALIDATE_AND_GET_STRING_JS((env), (destination), (source), (nullOk),     \
-                                 message, THROW_BODY((env)))
+#define J2C_GET_STRING_JS_THROW(env, destination, source, nullOk, message) \
+  J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,     \
+                    THROW_BODY((env)))
 
 #define C2J_SET_PROPERTY_THROW(env, destination, name, type, ...)        \
   do {                                                                   \

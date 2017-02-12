@@ -64,8 +64,7 @@ NAPI_METHOD(bind_OCInit) {
 
   std::unique_ptr<char> ipAddress_tracker;
   char *ipAddress;
-  J2C_VALIDATE_AND_GET_STRING_JS_THROW(env, ipAddress, arguments[0], true,
-                                       "address");
+  J2C_GET_STRING_JS_THROW(env, ipAddress, arguments[0], true, "address");
   ipAddress_tracker.reset(ipAddress);
 
   uint32_t port;

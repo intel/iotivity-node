@@ -72,9 +72,8 @@ static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
     }
 
     NAPI_CALL_RETURN(napi_get_element(env, sourceValue, index, &jsItemValue));
-    J2C_VALIDATE_AND_GET_STRING_JS_RETURN(
-        env, ((*previous)->value), jsItemValue, false,
-        "device info " + propertyName + " list item");
+    J2C_GET_STRING_JS_RETURN(env, ((*previous)->value), jsItemValue, false,
+                             "device info " + propertyName + " list item");
     (*previous)->next = 0;
   }
 
