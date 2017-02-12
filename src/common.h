@@ -59,14 +59,18 @@ extern "C" {
 #define HELPER_CALL(theCall, ...) \
   RESULT_CALL(__resultingStatus = theCall, __VA_ARGS__)
 
-#define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, ...)                   \
-  do {                                                                        \
-    napi_valuetype theType;                                                   \
-    NAPI_CALL(napi_get_type_of_value((env), (value), &theType), __VA_ARGS__); \
-    if (theType != (typecheck)) {                                             \
-      __VA_ARGS__;                                                            \
-    }                                                                         \
-  } while (0)
+#define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, message, ...) \
+  RESULT_CALL(                                                       \
+      do {                                                           \
+        napi_valuetype theType;                                      \
+        NAPI_CALL(napi_get_type_of_value((env), (value), &theType),  \
+                  __VA_ARGS__);                                      \
+        if (theType != (typecheck)) {                                \
+          __resultingStatus =                                        \
+              std::string() + message + " is not a " #typecheck;     \
+        }                                                            \
+      } while (0),                                                   \
+      __VA_ARGS__)
 
 #define J2C_GET_PROPERTY_JS(varName, env, source, name, ...)          \
   napi_value varName;                                                 \
@@ -138,10 +142,9 @@ extern "C" {
 #define J2C_GET_PROPERTY_JS_RETURN(varName, env, source, name) \
   J2C_GET_PROPERTY_JS(varName, env, source, name, return FAIL_STATUS_RETURN)
 
-#define J2C_VALIDATE_VALUE_TYPE_RETURN(env, value, typecheck, message)     \
-  J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck),                     \
-                          return LOCAL_MESSAGE(std::string("") + message + \
-                                               " is not of type " #typecheck))
+#define J2C_VALIDATE_VALUE_TYPE_RETURN(env, value, typecheck, message) \
+  J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck),                 \
+                          return FAIL_STATUS_RETURN)
 
 #define NAPI_IS_ARRAY_RETURN(env, theValue, message)                        \
   do {                                                                      \
@@ -194,13 +197,9 @@ extern "C" {
 
 #define HELPER_CALL_THROW(env, theCall) HELPER_CALL(theCall, THROW_BODY((env)))
 
-#define J2C_VALIDATE_VALUE_TYPE_THROW(env, value, typecheck, message)    \
-  J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck), do {              \
-    napi_throw_error((env), LOCAL_MESSAGE(std::string("") + message +    \
-                                          " is not of type " #typecheck) \
-                                .c_str());                               \
-    return;                                                              \
-  } while (0))
+#define J2C_VALIDATE_VALUE_TYPE_THROW(env, value, typecheck, message) \
+  J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck), message,       \
+                          THROW_BODY((env)))
 
 #define J2C_GET_ARGUMENTS(env, info, count)                                  \
   do {                                                                       \
