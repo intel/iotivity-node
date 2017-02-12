@@ -1,0 +1,7 @@
+.vscode/
+build/
+node_modules
+generated/
+iotivity-installed/
+iotivity-native/
+
