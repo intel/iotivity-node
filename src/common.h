@@ -59,29 +59,6 @@ extern "C" {
 #define HELPER_CALL(theCall, ...) \
   RESULT_CALL(__resultingStatus = theCall, __VA_ARGS__)
 
-#define CHAR_VLA_DECLARATION(variableName, length, message, ...)            \
-  std::unique_ptr<char> variableName(new char[length + 1]());               \
-  RESULT_CALL(                                                              \
-      if (!variableName.get()) {                                            \
-        __resultingStatus =                                                 \
-            std::string("Failed to allocate memory for ") + message + "\n"; \
-      },                                                                    \
-      __VA_ARGS__)
-
-#define J2C_GET_STRING(env, variableName, declaration, reference, source, ...) \
-  int variableName##__length;                                                  \
-  NAPI_CALL(napi_get_value_string_utf8_length((env), (source),                 \
-                                              &variableName##__length),        \
-            __VA_ARGS__);                                                      \
-  declaration;                                                                 \
-  do {                                                                         \
-    int bytesWritten;                                                          \
-    NAPI_CALL(                                                                 \
-        napi_get_value_string_utf8((env), (source), reference,                 \
-                                   variableName##__length, &bytesWritten),     \
-        __VA_ARGS__);                                                          \
-  } while (0)
-
 #define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, ...)                   \
   do {                                                                        \
     napi_valuetype theType;                                                   \
@@ -100,26 +77,38 @@ extern "C" {
               __VA_ARGS__);                                           \
   } while (0)
 
-#define J2C_VALIDATE_AND_GET_STRING_JS(env, destination, source, nullOk, \
-                                       message, ...)                     \
-  RESULT_CALL(                                                           \
-      do {                                                               \
-        napi_valuetype valueType;                                        \
-        NAPI_CALL(napi_get_type_of_value((env), (source), &valueType),   \
-                  __VA_ARGS__);                                          \
-        if (nullOk && valueType == napi_null) {                          \
-          (destination) = nullptr;                                       \
-        } else if (valueType == napi_string) {                           \
-          J2C_GET_STRING((env), cString,                                 \
-                         CHAR_VLA_DECLARATION(cString, cString__length,  \
-                                              message, __VA_ARGS__),     \
-                         cString.get(), (source), __VA_ARGS__);          \
-          (destination) = cString.release();                             \
-        } else {                                                         \
-          __resultingStatus =                                            \
-              (std::string("") + message + " is not a string\n");        \
-        }                                                                \
-      } while (0),                                                       \
+#define J2C_VALIDATE_AND_GET_STRING_JS(env, destination, source, nullOk,    \
+                                       message, ...)                        \
+  RESULT_CALL(                                                              \
+      do {                                                                  \
+        napi_valuetype valueType;                                           \
+        NAPI_CALL(napi_get_type_of_value((env), (source), &valueType),      \
+                  __VA_ARGS__);                                             \
+        if (nullOk && valueType == napi_null) {                             \
+          (destination) = nullptr;                                          \
+        } else if (valueType == napi_string) {                              \
+          int cString__length;                                              \
+          NAPI_CALL(napi_get_value_string_utf8_length((env), (source),      \
+                                                      &cString__length),    \
+                    __VA_ARGS__);                                           \
+          std::unique_ptr<char> cString(new char[cString__length + 1]());   \
+          if (cString.get()) {                                              \
+            int bytesWritten;                                               \
+            NAPI_CALL(                                                      \
+                napi_get_value_string_utf8((env), (source), cString.get(),  \
+                                           cString__length, &bytesWritten), \
+                __VA_ARGS__);                                               \
+            (destination) = cString.release();                              \
+          } else {                                                          \
+            __resultingStatus = std::string("") +                           \
+                                "Failed to allocate memory for" + message + \
+                                "\n";                                       \
+          }                                                                 \
+        } else {                                                            \
+          __resultingStatus =                                               \
+              (std::string("") + message + " is not a string\n");           \
+        }                                                                   \
+      } while (0),                                                          \
       __VA_ARGS__)
 
 #define J2C_VALIDATE_AND_GET_STRING(env, destination, source, nullOk, name, \
@@ -148,9 +137,6 @@ extern "C" {
 #define HELPER_CALL_RETURN(theCall) \
   HELPER_CALL(theCall, return FAIL_STATUS_RETURN)
 
-#define CHAR_VLA_DECLARATION_RETURN(variableName, length, message) \
-  CHAR_VLA_DECLARATION(variableName, length, message, return FAIL_STATUS_RETURN)
-
 #define J2C_GET_PROPERTY_JS_RETURN(varName, env, source, name) \
   J2C_GET_PROPERTY_JS(varName, env, source, name, return FAIL_STATUS_RETURN)
 
@@ -167,11 +153,6 @@ extern "C" {
       return LOCAL_MESSAGE(std::string("") + message + " is not an array"); \
     }                                                                       \
   } while (0)
-
-#define J2C_GET_STRING_RETURN(env, variableName, declaration, reference, \
-                              source)                                    \
-  J2C_GET_STRING((env), variableName, declaration, reference, (source),  \
-                 return FAIL_STATUS_RETURN)
 
 #define J2C_VALIDATE_AND_GET_STRING_RETURN(env, destination, source, nullOk,  \
                                            name)                              \
@@ -238,11 +219,6 @@ extern "C" {
   } while (0);                                                               \
   napi_value arguments[count];                                               \
   NAPI_CALL_THROW((env), napi_get_cb_args((env), (info), arguments, (count)));
-
-#define J2C_GET_STRING_THROW(env, variableName, declaration, reference, \
-                             source)                                    \
-  J2C_GET_STRING((env), variableName, declaration, reference, (source), \
-                 THROW_BODY((env)))
 
 #define J2C_VALIDATE_AND_GET_STRING_JS_THROW(env, destination, source, nullOk, \
                                              message)                          \
