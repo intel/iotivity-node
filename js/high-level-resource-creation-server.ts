@@ -66,6 +66,10 @@ device.server
 		resourcePath: "/a/high-level-resource-creation-example",
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],
+		mediaTypes: [],
+		links: [],
+		secure: true,
+		slow: false,
 		discoverable: true,
 		observable: true,
 		properties: { someValue: 0, someOtherValue: "Helsinki" }

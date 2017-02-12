@@ -76,6 +76,10 @@ if ( device.device.uuid ) {
 		resourcePath: "/a/high-level-example",
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],
+		mediaTypes: [],
+		links: [],
+		secure: true,
+		slow: false,
 		discoverable: true,
 		observable: true,
 		properties: { someValue: 0, someOtherValue: "Helsinki" }

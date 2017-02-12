@@ -50,6 +50,8 @@ new Promise( function( fulfill, reject ) {
 		resourcePath: "/a/new-resource",
 		resourceTypes: [ "core.light" ],
 		interfaces: [ "oic.if.baseline" ],
+		mediaTypes: [],
+		links: [],
 		properties: {
 			exampleProperty: 23
 		}
