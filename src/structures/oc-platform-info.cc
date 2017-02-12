@@ -15,65 +15,74 @@
  */
 
 #include "oc-platform-info.h"
-#include <nan.h>
-#include "../common.h"
 
 extern "C" {
 #include <string.h>
 }
 
-using namespace v8;
-
-v8::Local<v8::Object> js_OCPlatformInfo(OCPlatformInfo *info) {
-  Local<Object> returnValue = Nan::New<Object>();
-
-  SET_STRING_IF_NOT_NULL(returnValue, info, platformID);
-  SET_STRING_IF_NOT_NULL(returnValue, info, manufacturerName);
-  SET_STRING_IF_NOT_NULL(returnValue, info, manufacturerUrl);
-  SET_STRING_IF_NOT_NULL(returnValue, info, modelNumber);
-  SET_STRING_IF_NOT_NULL(returnValue, info, dateOfManufacture);
-  SET_STRING_IF_NOT_NULL(returnValue, info, platformVersion);
-  SET_STRING_IF_NOT_NULL(returnValue, info, operatingSystemVersion);
-  SET_STRING_IF_NOT_NULL(returnValue, info, hardwareVersion);
-  SET_STRING_IF_NOT_NULL(returnValue, info, firmwareVersion);
-  SET_STRING_IF_NOT_NULL(returnValue, info, supportUrl);
-  SET_STRING_IF_NOT_NULL(returnValue, info, systemTime);
-
-  return returnValue;
+std::string js_OCPlatformInfo(napi_env env, OCPlatformInfo *info,
+                              napi_value *destination) {
+  napi_value jsInfo;
+  NAPI_CALL_RETURN(napi_create_object(env, &jsInfo));
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, platformID);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, manufacturerName);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, manufacturerUrl);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, modelNumber);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, dateOfManufacture);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, platformVersion);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, operatingSystemVersion);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, hardwareVersion);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, firmwareVersion);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, supportUrl);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, systemTime);
+  *destination = jsInfo;
+  return std::string();
 }
 
-void c_OCPlatformInfoFreeMembers(OCPlatformInfo *info) {
-  free(info->platformID);
-  free(info->manufacturerName);
-  free(info->manufacturerUrl);
-  free(info->modelNumber);
-  free(info->dateOfManufacture);
-  free(info->platformVersion);
-  free(info->operatingSystemVersion);
-  free(info->hardwareVersion);
-  free(info->firmwareVersion);
-  free(info->supportUrl);
-  free(info->systemTime);
+OCPlatformInfo *new_OCPlatformInfo() {
+  OCPlatformInfo *info = new OCPlatformInfo;
+  info->platformID = 0;
+  info->manufacturerName = 0;
+  info->manufacturerUrl = 0;
+  info->modelNumber = 0;
+  info->dateOfManufacture = 0;
+  info->platformVersion = 0;
+  info->operatingSystemVersion = 0;
+  info->hardwareVersion = 0;
+  info->firmwareVersion = 0;
+  info->supportUrl = 0;
+  info->systemTime = 0;
+  return info;
 }
 
-bool c_OCPlatformInfo(Local<Object> jsInfo, OCPlatformInfo *info) {
-  OCPlatformInfo local = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+void delete_OCPlatformInfo(OCPlatformInfo *info) {
+  delete info->platformID;
+  delete info->manufacturerName;
+  delete info->manufacturerUrl;
+  delete info->modelNumber;
+  delete info->dateOfManufacture;
+  delete info->platformVersion;
+  delete info->operatingSystemVersion;
+  delete info->hardwareVersion;
+  delete info->firmwareVersion;
+  delete info->supportUrl;
+  delete info->systemTime;
+  delete info;
+}
 
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, platformID, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, manufacturerName, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, manufacturerUrl, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, modelNumber, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, dateOfManufacture, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, platformVersion, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, operatingSystemVersion, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, hardwareVersion, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, firmwareVersion, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, supportUrl, goto free);
-  VALIDATE_AND_ASSIGN_STRING(&local, jsInfo, systemTime, goto free);
-
-  *info = local;
-  return true;
-free:
-  c_OCPlatformInfoFreeMembers(&local);
-  return false;
+std::string c_OCPlatformInfo(
+    napi_env env, napi_value source,
+    std::unique_ptr<OCPlatformInfo, void (*)(OCPlatformInfo *)> &destination) {
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, platformID);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, manufacturerName);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, manufacturerUrl);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, modelNumber);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, dateOfManufacture);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, platformVersion);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, operatingSystemVersion);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, hardwareVersion);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, firmwareVersion);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, supportUrl);
+  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, systemTime);
+  return std::string();
 }

@@ -24,7 +24,7 @@ void delete_OCStringLL(OCStringLL *list) {
   OCStringLL *item, *nextItem;
   for (item = list; item;) {
     nextItem = item->next;
-    free(item->value);
+    delete item->value;
     delete item;
     item = nextItem;
   }
@@ -40,8 +40,8 @@ OCDeviceInfo *new_OCDeviceInfo() {
 }
 
 void delete_OCDeviceInfo(OCDeviceInfo *info) {
-  free(info->deviceName);
-  free(info->specVersion);
+  delete info->deviceName;
+  delete info->specVersion;
   delete_OCStringLL(info->types);
   delete_OCStringLL(info->dataModelVersions);
 }
@@ -49,7 +49,7 @@ void delete_OCDeviceInfo(OCDeviceInfo *info) {
 static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
                                              const char *propertyName,
                                              OCStringLL **destination) {
-  DECLARE_PROPERTY_JS_RETURN(sourceValue, env, source, propertyName);
+  J2C_GET_PROPERTY_JS_RETURN(sourceValue, env, source, propertyName);
   NAPI_IS_ARRAY_RETURN(env, sourceValue,
                        std::string("device info ") + propertyName);
 
@@ -72,7 +72,7 @@ static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
     }
 
     NAPI_CALL_RETURN(napi_get_element(env, sourceValue, index, &jsItemValue));
-    VALIDATE_AND_ASSIGN_STRING_JS_RETURN(
+    J2C_VALIDATE_AND_GET_STRING_JS_RETURN(
         env, ((*previous)->value), jsItemValue, false,
         "device info " + propertyName + " list item");
     (*previous)->next = 0;
@@ -85,11 +85,8 @@ static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
 std::string c_OCDeviceInfo(
     napi_env env, napi_value deviceInfo,
     std::unique_ptr<OCDeviceInfo, void (*)(OCDeviceInfo *)> &info) {
-  VALIDATE_AND_ASSIGN_STRING_RETURN(env, info->deviceName, deviceInfo, true,
-                                    "deviceName");
-
-  VALIDATE_AND_ASSIGN_STRING_RETURN(env, info->specVersion, deviceInfo, true,
-                                    "specVersion");
+  J2C_ASSIGN_MEMBER_RETURN(env, info, deviceInfo, deviceName);
+  J2C_ASSIGN_MEMBER_RETURN(env, info, deviceInfo, specVersion);
 
   HELPER_CALL_RETURN(
       c_StringArrayFromProperty(env, deviceInfo, "types", &(info->types)));

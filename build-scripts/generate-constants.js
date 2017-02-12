@@ -50,7 +50,7 @@ function parseFileForConstants( fileName ) {
 			var fields = line.split( " " );
 			return [
 				"#ifdef " + fields[ 1 ],
-				"SET_PROPERTY_RETURN(" + ( [
+				"C2J_SET_PROPERTY_RETURN(" + ( [
 					"env",
 					"exports",
 					"\"" + fields[ 1 ] + "\"",

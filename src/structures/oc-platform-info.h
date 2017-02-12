@@ -17,13 +17,21 @@
 #ifndef __IOTIVITY_NODE_OCPLATFORMINFO_H__
 #define __IOTIVITY_NODE_OCPLATFORMINFO_H__
 
-#include <v8.h>
+#include <memory>
+#include "../common.h"
+
 extern "C" {
 #include <ocstack.h>
 }
 
-v8::Local<v8::Object> js_OCPlatformInfo(OCPlatformInfo *platformInfo);
-bool c_OCPlatformInfo(v8::Local<v8::Object> platformInfo, OCPlatformInfo *info);
-void c_OCPlatformInfoFreeMembers(OCPlatformInfo *info);
+OCPlatformInfo *new_OCPlatformInfo();
+void delete_OCPlatformInfo(OCPlatformInfo *info);
+
+std::string c_OCPlatformInfo(
+    napi_env env, napi_value source,
+    std::unique_ptr<OCPlatformInfo, void (*)(OCPlatformInfo *)> &destination);
+
+std::string js_OCPlatformInfo(napi_env env, OCPlatformInfo *source,
+                              napi_value *destination);
 
 #endif /* __IOTIVITY_NODE_OCPLATFORMINFO_H__ */

@@ -23,14 +23,14 @@ extern "C" {
 }
 
 #define SET_CONSTANT(env, destination, name, type) \
-  SET_PROPERTY_RETURN((env), (destination), #name, type, name)
+  C2J_SET_PROPERTY_RETURN((env), (destination), #name, type, name)
 
-#define SET_ENUM(env, destination, enumName)                 \
-  do {                                                       \
-    napi_value jsEnum;                                       \
-    HELPER_CALL_RETURN(bind_##enumName((env), &jsEnum));     \
-    SET_PROPERTY_JS((env), (destination), #enumName, jsEnum, \
-                    return FAIL_STATUS_RETURN);              \
+#define SET_ENUM(env, destination, enumName)                     \
+  do {                                                           \
+    napi_value jsEnum;                                           \
+    HELPER_CALL_RETURN(bind_##enumName((env), &jsEnum));         \
+    C2J_SET_PROPERTY_JS((env), (destination), #enumName, jsEnum, \
+                        return FAIL_STATUS_RETURN);              \
   } while (0)
 
 // The rest of this file is generated

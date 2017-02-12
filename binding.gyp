@@ -195,7 +195,8 @@
 				"src/common.cc",
 				"src/functions/simple.cc",
 				"src/main.cc",
-				"src/structures/oc-device-info.cc"
+				"src/structures/oc-device-info.cc",
+				"src/structures/oc-platform-info.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
 		}
