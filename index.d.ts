@@ -466,15 +466,6 @@ export class Server {
 export class OcfRequest {
 
     /**
-     * TODO not part of the spec?
-     * 
-     * @type {*}
-     * @memberOf OcfRequest
-     */
-    id?: any;// TODO
-
-
-    /**
      * OCF request type.
      * Can be "create", "retrieve", "update", "delete"
      * @type {string}
