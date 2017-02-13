@@ -5,3 +5,4 @@ Sudarsana Nagineni <sudarsana.nagineni@intel.com>
 Zhiqiang Zhang <zhiqiang.zhang@intel.com>
 Zoltan Kis <zoltan.kis@intel.com>
 Hans Bakker <hansmbakker+github@gmail.com>
+Philippe Coval <philippe.coval@osg.samsung.com>
