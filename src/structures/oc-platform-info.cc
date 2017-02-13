@@ -79,7 +79,8 @@ std::string c_OCPlatformInfo(
   J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, modelNumber);
   J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, dateOfManufacture);
   J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, platformVersion);
-  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, operatingSystemVersion);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source,
+                                  operatingSystemVersion);
   J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, hardwareVersion);
   J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, firmwareVersion);
   J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, supportUrl);

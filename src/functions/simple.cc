@@ -32,7 +32,8 @@ NAPI_METHOD(bind_OCProcess) {
 NAPI_METHOD(bind_OCStartPresence) {
   J2C_GET_ARGUMENTS(env, info, 1);
 
-  J2C_GET_VALUE_JS_THROW(uint32_t, ttl, env, arguments[0], napi_number, "ttl", uint32, uint32_t);
+  J2C_GET_VALUE_JS_THROW(uint32_t, ttl, env, arguments[0], napi_number, "ttl",
+                         uint32, uint32_t);
 
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OCStartPresence(ttl)));
 }
@@ -61,11 +62,14 @@ NAPI_METHOD(bind_OCInit) {
   J2C_GET_STRING_JS_THROW(env, ipAddress, arguments[0], true, "address");
   ipAddress_tracker.reset(ipAddress);
 
-  J2C_GET_VALUE_JS_THROW(uint16_t, port, env, arguments[1], napi_number, "port", uint32, uint32_t);
+  J2C_GET_VALUE_JS_THROW(uint16_t, port, env, arguments[1], napi_number, "port",
+                         uint32, uint32_t);
 
-  J2C_GET_VALUE_JS_THROW(OCMode, mode, env, arguments[2], napi_number, "mode", uint32, uint32_t);
+  J2C_GET_VALUE_JS_THROW(OCMode, mode, env, arguments[2], napi_number, "mode",
+                         uint32, uint32_t);
 
-  C2J_SET_RETURN_VALUE(env, info, number, ((double)OCInit(ipAddress, port, mode)));
+  C2J_SET_RETURN_VALUE(env, info, number,
+                       ((double)OCInit(ipAddress, port, mode)));
 }
 
 NAPI_METHOD(bind_OCGetNumberOfResources) {
