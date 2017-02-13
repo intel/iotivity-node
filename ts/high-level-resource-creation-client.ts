@@ -55,7 +55,7 @@ new Promise( function( fulfill, reject ) {
 		properties: {
 			exampleProperty: 23
 		}
-	} );
+	} as device.Resource);
 } ).then( function( resource: device.ClientResource ) {
 	console.log( "remote resource successfully created: " +
 		JSON.stringify( resource, null, 4 ) );

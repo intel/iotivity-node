@@ -40,7 +40,7 @@ device.server
 		console.log( "create request" );
 		device.server.register( _.extend( request.data, {
 			discoverable: true
-		} ) ).then( function( resource ) {
+		} ) as device.RegisterResourceDictionary ).then( function( resource ) {
 			console.log( "resource successfully registered" );
 			resourceCreatedByRemote = resource;
 			request.respond( resource );

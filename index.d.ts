@@ -3,9 +3,57 @@
 // Definitions by: Hans Bakker https://www.github.com/wind-rider
 
 /// <reference types="node" />
-/// <reference path="./interfaces.d.ts" />
 
 import { EventEmitter } from "events";
+
+/**
+ * Exposes information about the OCF device that runs the current OCF stack instance.
+ * 
+ * @interface ocf.OcfDevice
+ */
+export interface OcfDevice {
+
+    /**
+     * UUID of the device
+     * 
+     * @type {string}
+     * @memberOf OcfDevice
+     */
+    uuid: string;
+
+    /**
+     * host:port
+     * 
+     * @type {string}
+     * @memberOf OcfDevice
+     */
+    url?: string;
+
+    /**
+     * Name of the device
+     * 
+     * @type {string}
+     * @memberOf OcfDevice
+     */
+    name?: string;
+
+    /**
+     * List of supported OCF data models.
+     * The dataModels property is in the following format: vertical.major.minor where major and minor are numbers and vertical is a string such as "Smart Home".
+     * 
+     * @type {string[]}
+     * @memberOf OcfDevice
+     */
+    dataModels: string[];
+
+    /**
+     * OCF Core Specification version
+     * 
+     * @type {string}
+     * @memberOf OcfDevice
+     */
+    coreSpecVersion: string;
+}
 
 /**
  * Exposes information about the OCF platform that hosts the current device.
@@ -89,52 +137,31 @@ export interface OcfPlatform {
 }
 
 /**
- * Exposes information about the OCF device that runs the current OCF stack instance.
+ * TODO follow implementation or spec?
  * 
- * @interface ocf.OcfDevice
+ * @export
+ * @abstract
+ * @class OcfError
+ * @extends {Error}
  */
-export interface OcfDevice {
-
+export abstract class OcfError extends Error {
     /**
-     * UUID of the device
-     * 
+     * UUID of the device.
+     * Represents the device UUID causing the error. The value null means the local device,
+     * and the value undefined means the error source device is not available.
      * @type {string}
-     * @memberOf OcfDevice
+     * @memberOf OcfError
      */
-    uuid: string;
+    deviceId?: string;
 
     /**
-     * host:port
-     * 
+     * URI path of the resource.
+     * Represents the resource path of the resource causing the error.
+     * If deviceId is undefined, then the value of resourcePath should also be set to undefined.
      * @type {string}
-     * @memberOf OcfDevice
+     * @memberOf OcfError
      */
-    url?: string;
-
-    /**
-     * Name of the device
-     * 
-     * @type {string}
-     * @memberOf OcfDevice
-     */
-    name?: string;
-
-    /**
-     * List of supported OCF data models.
-     * The dataModels property is in the following format: vertical.major.minor where major and minor are numbers and vertical is a string such as "Smart Home".
-     * 
-     * @type {string[]}
-     * @memberOf OcfDevice
-     */
-    dataModels: string[];
-
-    /**
-     * OCF Core Specification version
-     * 
-     * @type {string}
-     * @memberOf OcfDevice
-     */
-    coreSpecVersion: string;
+    resourcePath?: string;
 }
 
 /**
@@ -193,7 +220,7 @@ export interface ResourceLink extends ResourceId {
      * @type {boolean}
      * @memberOf ResourceLink
      */
-    discoverable?: boolean;
+    discoverable: boolean;
 
     /**
      * Whether the resource is observable
@@ -201,7 +228,7 @@ export interface ResourceLink extends ResourceId {
      * @type {boolean}
      * @memberOf ResourceLink
      */
-    observable?: boolean;
+    observable: boolean;
 
     /**
      * Immutable instance identifier of a link
@@ -209,7 +236,32 @@ export interface ResourceLink extends ResourceId {
      * @type {string}
      * @memberOf ResourceLink
      */
-    ins: string;
+    ins?: string;
+}
+
+/**
+ * Object to create resources via Client
+ * 
+ * @export
+ * @interface ResoureCreateObject
+ */
+export interface ResoureCreateObject {
+
+    /**
+     * OCF resource URI path
+     * 
+     * @type {string}
+     * @memberOf ResoureCreateObject
+     */
+    resourcePath: string;
+
+    /**
+     * OCF resource types
+     * TODO the spec says resourceType_ is string_
+     * @type {string[]}
+     * @memberOf ResoureCreateObject
+     */
+    resourceTypes: string[];
 }
 
 /**
@@ -221,7 +273,7 @@ export interface ResourceLink extends ResourceId {
  * @interface Resource
  * @extends {ResourceId}
  */
-export interface Resource extends ResourceId {
+export interface Resource extends ResourceId, ResoureCreateObject {
 
     /**
      * List of OCF resource types
@@ -252,7 +304,7 @@ export interface Resource extends ResourceId {
      * @type {boolean}
      * @memberOf Resource
      */
-    discoverable?: boolean;
+    discoverable: boolean;
 
     /**
      * Whether the resource is observable
@@ -260,7 +312,7 @@ export interface Resource extends ResourceId {
      * @type {boolean}
      * @memberOf Resource
      */
-    observable?: boolean;
+    observable: boolean;
 
     /**
      * Collection of links
@@ -278,7 +330,7 @@ export interface Resource extends ResourceId {
      * @type {boolean}
      * @memberOf Resource
      */
-    secure?: boolean;
+    secure: boolean;
 
     /**
      * Whether the resource is constrained
@@ -299,11 +351,16 @@ export interface Resource extends ResourceId {
 
     /**
      * TODO Not in the spec???
-     * 
+     * True means that the resource is initialized, otherwise the resource is 'inactive'.
+     * 'inactive' signifies that the resource has been marked for deletion or is already deleted.
      * @type {boolean}
      * @memberOf Resource
      */
     active?: boolean;
+}
+
+export interface ResourceRepresentation {
+    //TODO is timestamp always in ResourceRepresentation?
 }
 
 export interface FindResourcesOptions {
@@ -354,33 +411,6 @@ export var platform: OcfPlatform;
 export const server: Server;
 export const client: Client;
 
-/**
- * TODO follow implementation or spec?
- * 
- * @export
- * @abstract
- * @class OcfError
- * @extends {Error}
- */
-export abstract class OcfError extends Error {
-    /**
-     * UUID of the device.
-     * Represents the device UUID causing the error. The value null means the local device,
-     * and the value undefined means the error source device is not available.
-     * @type {string}
-     * @memberOf OcfError
-     */
-    deviceId?: string;
-
-    /**
-     * URI path of the resource.
-     * Represents the resource path of the resource causing the error.
-     * If deviceId is undefined, then the value of resourcePath should also be set to undefined.
-     * @type {string}
-     * @memberOf OcfError
-     */
-    resourcePath?: string;
-}
 
 export interface RegisterResourceDictionary {
     resourcePath: string;
@@ -395,29 +425,52 @@ export interface RegisterResourceDictionary {
     links?: ResourceLink[];
 }
 
+/**
+ * The Server API provides the means to register and unregister resources,
+ * register handlers that serve CRUDN requests on a device,
+ * notify of resource changes.
+ * A device that implements the Server API may provide special resources to handle CRUDN requests.
+ * The Server API object does not expose its own properties, only methods for registering handlers. 
+ * @export
+ * @class Server
+ */
 export class Server {
-    constructor();
 
     /**
-     * 
+     * Registers a function to handle OCF create resource requests
      * 
      * @param {RequestHandler} handler
-     * @returns {Server} TODO spec says void?
+     * @returns {Server} this for chaining
      * 
      * @memberOf Server
      */
     oncreate(handler: RequestHandler): Server;
-    register(init: RegisterResourceDictionary): Promise<ServerResource>;//todo
 
-    // TODO not implemented?
-    // Enable/disable presence for this device.
-    //enablePresence(optional unsigned long timeToLive): Promise<void>;  // in ms
-    //disablePresence(): Promise<void>;
+    /**
+     * Registers a resource in the OCF network.
+     * 
+     * @param {RegisterResourceDictionary} init
+     * @returns {Promise<ServerResource>}
+     * 
+     * @memberOf Server
+     */
+    register(init: RegisterResourceDictionary): Promise<ServerResource>;//todo
 }
 
+/**
+ * Describes an object that is passed to server event listeners.
+ * 
+ * @export
+ * @class OcfRequest
+ */
 export class OcfRequest {
-    constructor(init?: OcfRequest);
 
+    /**
+     * TODO not part of the spec?
+     * 
+     * @type {*}
+     * @memberOf OcfRequest
+     */
     id?: any;// TODO
 
 
@@ -444,28 +497,139 @@ export class OcfRequest {
      * @memberOf OcfRequest
      */
     target: ResourceId; // TODO
-    data: ResourceId | ServerResource | any; //TODO
+    data: ResourceId | Resource | ResourceRepresentation; //TODO
+
+    /**
+     * Object whose properties represent the REST query parameters
+     * passed along with the request as a JSON-serializable dictionary.
+     * The semantics of the parameters are application-specific
+     * (e.g. requesting a resource representation in metric or imperial units).
+     * For instance request options may be used with the retrieve request.
+     * 
+     * @type {*}
+     * @memberOf OcfRequest
+     */
     options?: any //TODO
+
+    /**
+     * Flag for OCF retrieve requests that tells whether observation
+     * for the requested resource should be on or off. For
+     * requests other than "retrieve" the value SHOULD be undefined.
+     * 
+     * @type {boolean}
+     * @memberOf OcfRequest
+     */
     observe: boolean;
 
-    respond(data?: ServerResource | any): Promise<{}>; //TODO
-    respondWithError(error: string): Promise<{}>;
+    /**
+     * Sends a response to this request.
+     * The data argument is optional and used with requests such as create and update.
+     * The method is typically used from request handlers, and internally
+     * reuses the request information in order to construct a response message.
+     * 
+     * @param {(ResourceId | Resource | ResourceRepresentation)} [data]
+     * @returns {Promise<void>}
+     * 
+     * @memberOf OcfRequest
+     */
+    respond(data?: ResourceId | Resource | ResourceRepresentation): Promise<void>;
+
+    /**
+     * Sends an error response to this request.
+     * The error argument is an Error object.
+     * The method is typically used from request handlers, and internally
+     * reuses the request information in order to construct a response message.
+     * 
+     * @param {string} error
+     * @returns {Promise<void>}
+     * 
+     * @memberOf OcfRequest
+     */
+    respondWithError(error: string): Promise<void>;
 }
 
-export type TranslateHandler = (requestOptions: any) => any; //TODO
+export type TranslateHandler = (requestOptions: any) => ResourceRepresentation; //TODO
 export type RequestHandler = (request: OcfRequest) => void;
 
 export class ServerResource implements Resource {
-    constructor();
 
+    /**
+     * Registers a callback function handler for translation and returns this.
+     * 
+     * The handler function will be invoked by the implementation when the client
+     * requests a certain representation of the resource by the means of request options.
+     * The handler function will receive as argument a dictionary object options that contains
+     * the REST request options parsed into property-value pairs.
+     * The handler can use options and this.properties in order to compute
+     * the modified resource representation object.
+     * 
+     * @param {TranslateHandler} handler
+     * @returns {ServerResource}
+     * 
+     * @memberOf ServerResource
+     */
     ontranslate(handler: TranslateHandler): ServerResource;
+
+    /**
+     * Registers the function handler to handle OCF retrieve resource requests
+     * and returns this for chaining.
+     * 
+     * @param {RequestHandler} handler
+     * @returns {ServerResource}
+     * 
+     * @memberOf ServerResource
+     */
     onretrieve(handler: RequestHandler): ServerResource;
+
+    /**
+     * Registers the function handler to handle OCF update resource requests
+     * and returns this for chaining.
+     * 
+     * @param {RequestHandler} handler
+     * @returns {ServerResource}
+     * 
+     * @memberOf ServerResource
+     */
     onupdate(handler: RequestHandler): ServerResource;
+
+    /**
+     * Registers the handler function to handle OCF delete resource requests
+     * and returns this for chaining. 
+     * 
+     * @param {RequestHandler} handler
+     * @returns {ServerResource}
+     * 
+     * @memberOf ServerResource
+     */
     ondelete(handler: RequestHandler): ServerResource;
+
+    /**
+     * TODO not part of the spec?
+     * 
+     * @param {RequestHandler} handler
+     * @returns {ServerResource}
+     * 
+     * @memberOf ServerResource
+     */
     oncreate(handler: RequestHandler): ServerResource;
 
-    unregister(): Promise<void>; //TODO
+    /**
+     * Notifies subscribed clients about a resource representation change.
+     * Notifications are sent with the update event
+     * @returns {Promise<void>}
+     * 
+     * @memberOf ServerResource
+     */
     notify(): Promise<void>;
+
+    /**
+     * Unregisters the given resource from the OCF network.
+     * 
+     * @returns {Promise<void>}
+     * 
+     * @memberOf ServerResource
+     */
+    unregister(): Promise<void>; //TODO
 
     /**
      * UUID of the device
@@ -512,7 +676,7 @@ export class ServerResource implements Resource {
      * @type {boolean}
      * @memberOf Resource
      */
-    discoverable?: boolean;
+    discoverable: boolean;
 
     /**
      * Whether the resource is observable
@@ -520,7 +684,7 @@ export class ServerResource implements Resource {
      * @type {boolean}
      * @memberOf Resource
      */
-    observable?: boolean;
+    observable: boolean;
 
     /**
      * Collection of links
@@ -538,7 +702,7 @@ export class ServerResource implements Resource {
      * @type {boolean}
      * @memberOf Resource
      */
-    secure?: boolean;
+    secure: boolean;
 
     /**
      * Whether the resource is constrained
@@ -578,16 +742,6 @@ export class ServerResource implements Resource {
 export class Client extends EventEmitter {
 
     /**
-     * Fetches a remote device information object. The deviceId argument is a string that contains an OCF device UUID. 
-     * deviceId could also be an object but this is undocumented
-     * @param {string} deviceId
-     * @returns {Promise<OcfDevice>}
-     * 
-     * @memberOf Client
-     */
-    getDeviceInfo(deviceId: string): Promise<OcfDevice>;
-
-    /**
      * Fetches a remote platform information object. The {@link deviceId} argument is
      * a string that contains an OCF device UUID. 
      * 
@@ -599,15 +753,14 @@ export class Client extends EventEmitter {
     getPlatformInfo(deviceId: string): Promise<OcfPlatform>;
 
     /**
-     * Initiates a device discovery network operation.
-     * When a device is discovered, a {@link devicefound} event is fired that contains
-     * a property named {@link device}, whose value is a {@link OcfDevice} object.
-     * @param {DeviceHandler} [listener]
-     * @returns {Promise<void>}
+     * Fetches a remote device information object. The deviceId argument is a string that contains an OCF device UUID. 
+     * deviceId could also be an object but this is undocumented
+     * @param {string} deviceId
+     * @returns {Promise<OcfDevice>}
      * 
      * @memberOf Client
      */
-    findDevices(listener?: DeviceHandler): Promise<void>;
+    getDeviceInfo(deviceId: string): Promise<OcfDevice>;
 
     /**
      * Initiates a platform discovery network operation.
@@ -619,6 +772,17 @@ export class Client extends EventEmitter {
      * @memberOf Client
      */
     findPlatforms(listener?: PlatformHandler): Promise<void>;
+
+    /**
+     * Initiates a device discovery network operation.
+     * When a device is discovered, a {@link devicefound} event is fired that contains
+     * a property named {@link device}, whose value is a {@link OcfDevice} object.
+     * @param {DeviceHandler} [listener]
+     * @returns {Promise<void>}
+     * 
+     * @memberOf Client
+     */
+    findDevices(listener?: DeviceHandler): Promise<void>;
 
     /**
      * Whenever a resource resource is discovered, the {@link resourcefound} event is fired
@@ -651,12 +815,11 @@ export class Client extends EventEmitter {
      * @param {Resource} [resource] It should contain at least the resourcePath and resourceType properties
      * @param {ResourceId} [target] The optional target argument is a ResourceId object that contains at least a device UUID and a resource path that identifies the target resource responsible for creating the requested resource.
      * @returns {Promise<ClientResource>}
-     * 
      * @memberOf Client
      */
-    create(resource?: Resource, target?: ResourceId): Promise<ClientResource>;
-    retrieve(resourceId: Resource, listener?: ClientResourceListener): Promise<ClientResource>;
-    retrieve(resourceId: Resource, query: any, listener?: ClientResourceListener): Promise<ClientResource>;
+    create(resource: ResoureCreateObject, target?: ResourceId): Promise<Resource>;
+    retrieve(resourceId: Resource, listener?: ClientResourceListener): Promise<Resource>;
+    retrieve(resourceId: Resource, query: any, listener?: ClientResourceListener): Promise<Resource>;
 
     /**
      * Updates a resource on the network by sending a request to the device specified by resource.deviceId.
@@ -705,7 +868,6 @@ export type ClientResourceListener = (resource: ClientResource) => void;
  * @implements {Resource}
  */
 export class ClientResource extends EventEmitter implements Resource {
-    constructor(init, forceNew);
 
     /**
      * UUID of the device
@@ -751,7 +913,7 @@ export class ClientResource extends EventEmitter implements Resource {
      * @type {boolean}
      * @memberOf Resource
      */
-    discoverable?: boolean;
+    discoverable: boolean;
 
     /**
      * Whether the resource is observable
@@ -759,7 +921,7 @@ export class ClientResource extends EventEmitter implements Resource {
      * @type {boolean}
      * @memberOf Resource
      */
-    observable?: boolean;
+    observable: boolean;
 
     /**
      * Collection of links
@@ -777,7 +939,7 @@ export class ClientResource extends EventEmitter implements Resource {
      * @type {boolean}
      * @memberOf Resource
      */
-    secure?: boolean;
+    secure: boolean;
 
     /**
      * Whether the resource is constrained
@@ -803,19 +965,6 @@ export class ClientResource extends EventEmitter implements Resource {
      * @memberOf Resource
      */
     active?: boolean;
-
-    /**
-     * Polling hint for this resource.
-     * The {@link polling} property is a number that represents the period of polling
-     * in milliseconds, used in the
-     * [resource polling algorithm]{@link https://github.com/01org/iot-js-api/blob/master/api/ocf/client.md#resourcepolling}.
-     * By writing {@link polling}, applications provide a hint to the implementation about
-     * how often it should attempt retrieving the resource in order to determine it is alive.
-     * Implementations MAY override the value of {@link polling}.
-     * @type {number}
-     * @memberOf ClientResource
-     */
-    polling?: number;
 
     /**
      * The {@link delete} event is fired on a {@link ClientResource} object when the implementation gets notified
@@ -846,7 +995,7 @@ export class ClientResource extends EventEmitter implements Resource {
      * `retrieve(resource, null, listener). When the last listener is removed,
      * the implementations SHOULD call retrieve(resource), i.e. make an OCF retrieve request
      * with the {@link observe} flag off.
-     * 
+     * TODO not sure how to model this because it may be partial and not sure whether it is Resource or ClientResource     * 
      * @param {'update'} event
      * @param {ClientResourceListener} listener
      * @returns {this}
