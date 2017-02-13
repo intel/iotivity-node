@@ -44,7 +44,7 @@ NAPI_METHOD(bind_OCStopPresence) {
 
 NAPI_METHOD(bind_OCSetDeviceInfo) {
   J2C_GET_ARGUMENTS(env, info, 1);
-  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "arg 1");
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "device info");
 
   auto devInfo = std::unique_ptr<OCDeviceInfo, void (*)(OCDeviceInfo *)>(
       new_OCDeviceInfo(), delete_OCDeviceInfo);
@@ -56,25 +56,18 @@ NAPI_METHOD(bind_OCSetDeviceInfo) {
 
 NAPI_METHOD(bind_OCInit) {
   J2C_GET_ARGUMENTS(env, info, 3);
-
-  std::unique_ptr<char> ipAddress_tracker;
-  char *ipAddress;
-  J2C_GET_STRING_JS_THROW(env, ipAddress, arguments[0], true, "address");
-  ipAddress_tracker.reset(ipAddress);
-
+  J2C_GET_STRING_ARGUMENT_THROW(ipAddress, env, arguments[0], true, "address");
   J2C_GET_VALUE_JS_THROW(uint16_t, port, env, arguments[1], napi_number, "port",
                          uint32, uint32_t);
-
   J2C_GET_VALUE_JS_THROW(OCMode, mode, env, arguments[2], napi_number, "mode",
                          uint32, uint32_t);
-
   C2J_SET_RETURN_VALUE(env, info, number,
                        ((double)OCInit(ipAddress, port, mode)));
 }
 
 NAPI_METHOD(bind_OCGetNumberOfResources) {
   J2C_GET_ARGUMENTS(env, info, 1);
-  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "arg 1");
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "receptacle");
 
   OCStackResult result;
   uint8_t resourceCount;

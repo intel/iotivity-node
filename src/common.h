@@ -141,6 +141,15 @@ extern "C" {
               __VA_ARGS__);                                               \
   } while (0)
 
+#define J2C_VALIDATE_IS_ARRAY(env, theValue, message, ...)                \
+  RESULT_CALL(                                                            \
+      bool isArray;                                                       \
+      NAPI_CALL(napi_is_array((env), (theValue), &isArray), __VA_ARGS__); \
+      if (!isArray) {                                                     \
+        __resultingStatus = std::string() + message + " is not an array"; \
+      },                                                                  \
+      __VA_ARGS__)
+
 // Macros used in helpers - they cause the function to return a std::string
 
 #define FAIL_STATUS_RETURN (__resultingStatus + SOURCE_LOCATION)
@@ -157,14 +166,8 @@ extern "C" {
   J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck),                 \
                           return FAIL_STATUS_RETURN)
 
-#define NAPI_IS_ARRAY_RETURN(env, theValue, message)                        \
-  do {                                                                      \
-    bool isArray;                                                           \
-    NAPI_CALL_RETURN(napi_is_array((env), (theValue), &isArray));           \
-    if (!isArray) {                                                         \
-      return LOCAL_MESSAGE(std::string("") + message + " is not an array"); \
-    }                                                                       \
-  } while (0)
+#define J2C_VALIDATE_IS_ARRAY_RETURN(env, theValue, message) \
+  J2C_VALIDATE_IS_ARRAY((env), (theValue), message, return FAIL_STATUS_RETURN)
 
 #define J2C_GET_STRING_RETURN(env, destination, source, nullOk, name) \
   J2C_GET_STRING((env), (destination), (source), (nullOk), name,      \
@@ -244,6 +247,15 @@ extern "C" {
 #define J2C_GET_STRING_JS_THROW(env, destination, source, nullOk, message) \
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,     \
                     THROW_BODY((env)))
+
+#define J2C_GET_STRING_ARGUMENT_THROW(varName, env, source, nullOk, message) \
+  std::unique_ptr<char> __##varName##__tracker;                              \
+  char *varName = nullptr;                                                   \
+  J2C_GET_STRING_JS_THROW((env), varName, (source), (nullOk), message);      \
+  __##varName##__tracker.reset(varName);
+
+#define J2C_VALIDATE_IS_ARRAY_THROW(env, theValue, message) \
+  J2C_VALIDATE_IS_ARRAY((env), (theValue), message, THROW_BODY((env)))
 
 #define C2J_SET_PROPERTY_THROW(env, destination, name, type, ...)        \
   do {                                                                   \

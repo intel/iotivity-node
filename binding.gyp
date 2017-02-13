@@ -193,6 +193,7 @@
 				"generated/enums.cc",
 				"generated/functions.cc",
 				"src/common.cc",
+				"src/functions/oc-do-resource.cc",
 				"src/functions/simple.cc",
 				"src/main.cc",
 				"src/structures/oc-dev-addr.cc",

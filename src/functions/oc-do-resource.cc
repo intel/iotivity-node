@@ -15,20 +15,72 @@
  */
 
 #include "../common.h"
+#include "../structures/oc-dev-addr.h"
+/*s
 #include "../structures/handles.h"
 #include "../structures/oc-client-response.h"
-#include "../structures/oc-dev-addr.h"
 #include "../structures/oc-header-option-array.h"
 #include "../structures/oc-payload.h"
-
+*/
 extern "C" {
 #include <ocpayload.h>
 #include <ocstack.h>
 #include <stdlib.h>
 }
 
-using namespace v8;
+static void deleteCallback(void *callback) {}
 
+static OCStackApplicationResult defaultOCClientResponseHandler(
+    void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
+  return OC_STACK_KEEP_TRANSACTION;
+}
+
+NAPI_METHOD(bind_OCDoResource) {
+  J2C_GET_ARGUMENTS(env, info, 9);
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
+  J2C_GET_VALUE_JS_THROW(OCMethod, method, env, arguments[1], napi_number,
+                         "method", uint32, uint32_t);
+  J2C_GET_STRING_ARGUMENT_THROW(requestUri, env, arguments[2], false,
+                                "requestUri");
+
+  OCDevAddr localAddr;
+  OCDevAddr *destination = nullptr;
+  DECLARE_VALUE_TYPE(addrType, env, arguments[3], THROW_BODY(env));
+  if (addrType != napi_null) {
+    J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[3], napi_object,
+                                  "destination");
+    HELPER_CALL_THROW(env, c_OCDevAddr(env, arguments[3], &localAddr));
+    destination = &localAddr;
+  }
+
+  OCPayload *payload = nullptr;
+
+  J2C_GET_VALUE_JS_THROW(OCConnectivityType, connectivityType, env,
+                         arguments[5], napi_number, "connectivityType", uint32,
+                         uint32_t);
+  J2C_GET_VALUE_JS_THROW(OCQualityOfService, qos, env, arguments[6],
+                         napi_number, "qos", uint32, uint32_t);
+
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[7], napi_function, "callback");
+
+  J2C_VALIDATE_IS_ARRAY_THROW(env, arguments[8], "options");
+
+  OCDoHandle handle;
+  OCCallbackData cbData;
+  cbData.context = nullptr;
+  cbData.cb = defaultOCClientResponseHandler;
+  cbData.cd = deleteCallback;
+  OCStackResult result =
+      OCDoResource(&handle, method, requestUri, destination, payload,
+                   connectivityType, qos, &cbData, nullptr, 0);
+
+  if (result == OC_STACK_OK) {
+    /* set up the handle */
+  }
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
+}
+
+/*
 static void deleteNanCallback(CallbackInfo<OCDoHandle> *handle) {
   Nan::HandleScope scope;
 
@@ -165,3 +217,4 @@ NAN_METHOD(bind_OCCancel) {
       (OCQualityOfService)Nan::To<uint32_t>(info[1]).FromJust(), headerOptions,
       numberOfOptions)));
 }
+*/
