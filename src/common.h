@@ -81,6 +81,18 @@ extern "C" {
               __VA_ARGS__);                                           \
   } while (0)
 
+#define J2C_ASSIGN_VALUE_JS(cType, destination, env, source, jsType, message, getterSuffix, jsParameterType, ...) \
+  do { \
+    jsParameterType fromJSValue; \
+    J2C_VALIDATE_VALUE_TYPE((env), (source), (jsType), message, __VA_ARGS__); \
+    NAPI_CALL(napi_get_value_##getterSuffix((env), (source), &fromJSValue), __VA_ARGS__); \
+	(destination) = (cType)fromJSValue; \
+  } while(0)
+
+#define J2C_GET_VALUE_JS(cType, variableName, env, source, jsType, message, getterSuffix, jsParameterType, ...) \
+  cType variableName; \
+  J2C_ASSIGN_VALUE_JS(cType, variableName, (env), (source), jsType, message, getterSuffix, jsParameterType, __VA_ARGS__);
+
 #define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...)   \
   RESULT_CALL(                                                              \
       do {                                                                  \
@@ -163,7 +175,16 @@ extern "C" {
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,      \
                     return FAIL_STATUS_RETURN)
 
-#define J2C_ASSIGN_MEMBER_RETURN(env, destination, source, name) \
+#define J2C_GET_VALUE_JS_RETURN(cType, variableName, env, source, jsType, message, getterSuffix, jsParameterType) \
+  J2C_GET_VALUE_JS(cType, variableName, (env), (source), jsType, message, getterSuffix, jsParameterType, return FAIL_STATUS_RETURN)
+
+#define J2C_ASSIGN_MEMBER_VALUE_RETURN(env, destination, source, cType, name, jsType, message, getterSuffix, jsParameterType) \
+  do { \
+    J2C_GET_PROPERTY_JS_RETURN(jsValue, (env), (source), #name); \
+    J2C_ASSIGN_VALUE_JS(cType, (destination)->name, (env), jsValue, jsType, std::string() + message + "." + #name, getterSuffix, jsParameterType, ...) \
+  }
+
+#define J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, name) \
   J2C_GET_STRING_RETURN((env), (destination)->name, source, true, #name)
 
 #define C2J_SET_PROPERTY_RETURN(env, destination, name, type, ...)        \
@@ -213,6 +234,9 @@ extern "C" {
   } while (0);                                                               \
   napi_value arguments[count];                                               \
   NAPI_CALL_THROW((env), napi_get_cb_args((env), (info), arguments, (count)));
+
+#define J2C_GET_VALUE_JS_THROW(cType, variableName, env, source, jsType, message, getterSuffix, jsParameterType) \
+  J2C_GET_VALUE_JS(cType, variableName, (env), (source), jsType, message, getterSuffix, jsParameterType, THROW_BODY((env)))
 
 #define J2C_GET_STRING_JS_THROW(env, destination, source, nullOk, message) \
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,     \

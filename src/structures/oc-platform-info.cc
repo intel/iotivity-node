@@ -73,16 +73,16 @@ void delete_OCPlatformInfo(OCPlatformInfo *info) {
 std::string c_OCPlatformInfo(
     napi_env env, napi_value source,
     std::unique_ptr<OCPlatformInfo, void (*)(OCPlatformInfo *)> &destination) {
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, platformID);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, manufacturerName);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, manufacturerUrl);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, modelNumber);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, dateOfManufacture);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, platformVersion);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, operatingSystemVersion);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, hardwareVersion);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, firmwareVersion);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, supportUrl);
-  J2C_ASSIGN_MEMBER_RETURN(env, destination, source, systemTime);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, platformID);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, manufacturerName);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, manufacturerUrl);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, modelNumber);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, dateOfManufacture);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, platformVersion);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, operatingSystemVersion);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, hardwareVersion);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, firmwareVersion);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, supportUrl);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, systemTime);
   return std::string();
 }

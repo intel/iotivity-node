@@ -31,10 +31,8 @@ NAPI_METHOD(bind_OCProcess) {
 
 NAPI_METHOD(bind_OCStartPresence) {
   J2C_GET_ARGUMENTS(env, info, 1);
-  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_number, "arg 1");
 
-  uint32_t ttl;
-  NAPI_CALL_THROW(env, napi_get_value_uint32(env, arguments[0], &ttl));
+  J2C_GET_VALUE_JS_THROW(uint32_t, ttl, env, arguments[0], napi_number, "ttl", uint32, uint32_t);
 
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OCStartPresence(ttl)));
 }
@@ -58,24 +56,16 @@ NAPI_METHOD(bind_OCSetDeviceInfo) {
 NAPI_METHOD(bind_OCInit) {
   J2C_GET_ARGUMENTS(env, info, 3);
 
-  // arguments[0] is validated below
-  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_number, "arg 2");
-  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[2], napi_number, "arg 3");
-
   std::unique_ptr<char> ipAddress_tracker;
   char *ipAddress;
   J2C_GET_STRING_JS_THROW(env, ipAddress, arguments[0], true, "address");
   ipAddress_tracker.reset(ipAddress);
 
-  uint32_t port;
-  NAPI_CALL_THROW(env, napi_get_value_uint32(env, arguments[1], &port));
+  J2C_GET_VALUE_JS_THROW(uint16_t, port, env, arguments[1], napi_number, "port", uint32, uint32_t);
 
-  uint32_t mode;
-  NAPI_CALL_THROW(env, napi_get_value_uint32(env, arguments[2], &mode));
+  J2C_GET_VALUE_JS_THROW(OCMode, mode, env, arguments[2], napi_number, "mode", uint32, uint32_t);
 
-  C2J_SET_RETURN_VALUE(
-      env, info, number,
-      ((double)OCInit(ipAddress, (uint16_t)port, (OCMode)mode)));
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)OCInit(ipAddress, port, mode)));
 }
 
 NAPI_METHOD(bind_OCGetNumberOfResources) {

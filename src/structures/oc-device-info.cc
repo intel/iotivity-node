@@ -84,8 +84,8 @@ static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
 std::string c_OCDeviceInfo(
     napi_env env, napi_value deviceInfo,
     std::unique_ptr<OCDeviceInfo, void (*)(OCDeviceInfo *)> &info) {
-  J2C_ASSIGN_MEMBER_RETURN(env, info, deviceInfo, deviceName);
-  J2C_ASSIGN_MEMBER_RETURN(env, info, deviceInfo, specVersion);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, info, deviceInfo, deviceName);
+  J2C_ASSIGN_MEMBER_STRING_RETURN(env, info, deviceInfo, specVersion);
 
   HELPER_CALL_RETURN(
       c_StringArrayFromProperty(env, deviceInfo, "types", &(info->types)));
