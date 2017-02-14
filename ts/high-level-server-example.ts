@@ -23,7 +23,7 @@ var lightResource: device.ServerResource,
 
 
 _.extend( device.device, {
-	coreSpecVersion: "res.1.0.0",
+	coreSpecVersion: "res.1.1.0",
 	dataModels: [ "something.1.0.0" ],
 	name: "api-server-example"
 } );
