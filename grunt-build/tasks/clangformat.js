@@ -23,8 +23,7 @@ grunt.task.registerTask( "clangformat", "Format the C++ files", function() {
 		[
 			"-c",
 			"find src -type f | while read; do " +
-			"clang-format -style=Google \"$REPLY\" > \"$REPLY\".new && " +
-			"mv \"$REPLY\".new \"$REPLY\" && echo \"File $REPLY formatted.\";" +
+			"clang-format -style=Google -i \"$REPLY\" && echo \"File $REPLY formatted.\";" +
 			"done"
 		],
 		{ stdio: "inherit" } )
