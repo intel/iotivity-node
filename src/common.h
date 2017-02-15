@@ -18,13 +18,10 @@
 #define __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 
 #include <node_api_helpers.h>
+#include <stdlib.h>
 #include <string.h>
 #include <memory>
 #include <string>
-
-extern "C" {
-#include <ocstack.h>
-}
 
 #define SOURCE_LOCATION                                        \
   (std::string("    at ") + std::string(__func__) +            \
@@ -65,12 +62,13 @@ extern "C" {
   napi_valuetype varName;                            \
   NAPI_CALL(napi_get_type_of_value((env), (value), &varName), __VA_ARGS__);
 
-#define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, message, ...)           \
-  RESULT_CALL(                                                                 \
-      DECLARE_VALUE_TYPE(theType, (env), value, __VA_ARGS__);                  \
-      if (theType != (typecheck)) {                                            \
-        __resultingStatus = std::string() + message + " is not a " #typecheck; \
-      },                                                                       \
+#define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, message, ...) \
+  RESULT_CALL(                                                       \
+      DECLARE_VALUE_TYPE(theType, (env), value, __VA_ARGS__);        \
+      if (theType != (typecheck)) {                                  \
+        __resultingStatus =                                          \
+            std::string() + message + " is not a " #typecheck "\n";  \
+      },                                                             \
       __VA_ARGS__)
 
 #define J2C_GET_PROPERTY_JS(varName, env, source, name, ...)        \
@@ -141,13 +139,16 @@ extern "C" {
               __VA_ARGS__);                                               \
   } while (0)
 
-#define J2C_VALIDATE_IS_ARRAY(env, theValue, message, ...)                \
-  RESULT_CALL(                                                            \
-      bool isArray;                                                       \
-      NAPI_CALL(napi_is_array((env), (theValue), &isArray), __VA_ARGS__); \
-      if (!isArray) {                                                     \
-        __resultingStatus = std::string() + message + " is not an array"; \
-      },                                                                  \
+#define J2C_VALIDATE_IS_ARRAY(env, theValue, nullOk, message, ...)            \
+  RESULT_CALL(                                                                \
+      DECLARE_VALUE_TYPE(jsType, (env), theValue, __VA_ARGS__);               \
+      if (!((nullOk) && jsType == napi_null)) {                               \
+        bool isArray;                                                         \
+        NAPI_CALL(napi_is_array((env), (theValue), &isArray), __VA_ARGS__);   \
+        if (!isArray) {                                                       \
+          __resultingStatus = std::string() + message + " is not an array\n"; \
+        }                                                                     \
+      },                                                                      \
       __VA_ARGS__)
 
 // Macros used in helpers - they cause the function to return a std::string
@@ -166,8 +167,9 @@ extern "C" {
   J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck),                 \
                           return FAIL_STATUS_RETURN)
 
-#define J2C_VALIDATE_IS_ARRAY_RETURN(env, theValue, message) \
-  J2C_VALIDATE_IS_ARRAY((env), (theValue), message, return FAIL_STATUS_RETURN)
+#define J2C_VALIDATE_IS_ARRAY_RETURN(env, theValue, nullOk, message) \
+  J2C_VALIDATE_IS_ARRAY((env), (theValue), (nullOk), message,        \
+                        return FAIL_STATUS_RETURN)
 
 #define J2C_GET_STRING_RETURN(env, destination, source, nullOk, name) \
   J2C_GET_STRING((env), (destination), (source), (nullOk), name,      \
@@ -214,17 +216,18 @@ extern "C" {
 
 // Macros used in bindings - they cause the function to throw and return void
 
-#define THROW_BODY(env)                                \
+#define THROW_BODY(env, returnValue)                   \
   napi_throw_error((env), FAIL_STATUS_RETURN.c_str()); \
-  return;
+  return returnValue;
 
-#define NAPI_CALL_THROW(env, theCall) NAPI_CALL(theCall, THROW_BODY((env)))
+#define NAPI_CALL_THROW(env, theCall) NAPI_CALL(theCall, THROW_BODY((env), ))
 
-#define HELPER_CALL_THROW(env, theCall) HELPER_CALL(theCall, THROW_BODY((env)))
+#define HELPER_CALL_THROW(env, theCall) \
+  HELPER_CALL(theCall, THROW_BODY((env), ))
 
 #define J2C_VALIDATE_VALUE_TYPE_THROW(env, value, typecheck, message) \
   J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck), message,       \
-                          THROW_BODY((env)))
+                          THROW_BODY((env), ))
 
 #define J2C_GET_ARGUMENTS(env, info, count)                                  \
   do {                                                                       \
@@ -242,11 +245,11 @@ extern "C" {
 #define J2C_GET_VALUE_JS_THROW(cType, variableName, env, source, jsType,  \
                                message, getterSuffix, jsParameterType)    \
   J2C_GET_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
-                   getterSuffix, jsParameterType, THROW_BODY((env)))
+                   getterSuffix, jsParameterType, THROW_BODY((env), ))
 
 #define J2C_GET_STRING_JS_THROW(env, destination, source, nullOk, message) \
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,     \
-                    THROW_BODY((env)))
+                    THROW_BODY((env), ))
 
 #define J2C_GET_STRING_ARGUMENT_THROW(varName, env, source, nullOk, message) \
   std::unique_ptr<char> __##varName##__tracker;                              \
@@ -254,16 +257,20 @@ extern "C" {
   J2C_GET_STRING_JS_THROW((env), varName, (source), (nullOk), message);      \
   __##varName##__tracker.reset(varName);
 
-#define J2C_VALIDATE_IS_ARRAY_THROW(env, theValue, message) \
-  J2C_VALIDATE_IS_ARRAY((env), (theValue), message, THROW_BODY((env)))
+#define J2C_VALIDATE_IS_ARRAY_THROW(env, theValue, nullOk, message) \
+  J2C_VALIDATE_IS_ARRAY((env), (theValue), (nullOk), message,       \
+                        THROW_BODY((env), ))
+
+#define C2J_SET_PROPERTY_JS_THROW(env, destination, name, jsValue) \
+  C2J_SET_PROPERTY_JS((env), (destination), (name), (jsValue),     \
+                      THROW_BODY((env), ))
 
 #define C2J_SET_PROPERTY_THROW(env, destination, name, type, ...)        \
   do {                                                                   \
     napi_value __jsValue;                                                \
     NAPI_CALL_THROW((env),                                               \
                     napi_create_##type((env), __VA_ARGS__, &__jsValue)); \
-    C2J_SET_PROPERTY_JS((env), (destination), name, __jsValue,           \
-                        THROW_BODY((env)));                              \
+    C2J_SET_PROPERTY_JS_THROW((env), (destination), name, __jsValue);    \
   } while (0)
 
 #define C2J_SET_RETURN_VALUE(env, info, type, ...)                            \
@@ -273,5 +280,17 @@ extern "C" {
                     napi_create_##type((env), __VA_ARGS__, &__jsResult));     \
     NAPI_CALL_THROW((env), napi_set_return_value((env), (info), __jsResult)); \
   } while (0)
+
+#define ENTER_C_CALLBACK         \
+  napi_handle_scope scope;       \
+  napi_env env = napi_get_env(); \
+  NAPI_CALL(napi_open_handle_scope(env, &scope), abort())
+
+#define EXIT_C_CALLBACK(returnValue)               \
+  NAPI_CALL(napi_close_handle_scope((env), scope), \
+            THROW_BODY((env), returnValue));       \
+  return returnValue
+
+napi_env napi_get_env();
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__ */

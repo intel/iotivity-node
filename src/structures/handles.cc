@@ -15,8 +15,25 @@
  */
 
 #include "handles.h"
+
+NAPI_METHOD(JSHandle_constructor) {}
+
+template <>
+const char *JSHandle<OCDoHandle>::jsClassName() {
+  return "OCDoHandle";
+}
+
+std::string InitHandles(napi_env env) {
+  HELPER_CALL_RETURN(JSHandle<OCDoHandle>::InitClass(env));
+  HELPER_CALL_RETURN(JSHandle<OCRequestHandle>::InitClass(env));
+  HELPER_CALL_RETURN(JSHandle<OCResourceHandle>::InitClass(env));
+  return std::string();
+}
+
+/*
 #include <nan.h>
 #include "../common.h"
+#include "handles.h"
 
 using namespace v8;
 
@@ -51,3 +68,4 @@ bool fillCArrayFromJSArray(unsigned char *bytes, uint32_t length,
 
   return true;
 }
+*/

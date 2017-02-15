@@ -196,6 +196,7 @@
 				"src/functions/oc-do-resource.cc",
 				"src/functions/simple.cc",
 				"src/main.cc",
+				"src/structures/handles.cc",
 				"src/structures/oc-dev-addr.cc",
 				"src/structures/oc-device-info.cc",
 				"src/structures/oc-platform-info.cc"

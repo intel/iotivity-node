@@ -17,6 +17,103 @@
 #ifndef __IOTIVITY_NODE_HANDLES_H__
 #define __IOTIVITY_NODE_HANDLES_H__
 
+#include "../common.h"
+extern "C" {
+#include <ocstack.h>
+}
+
+NAPI_METHOD(JSHandle_constructor);
+
+template <typename T>
+class JSHandle {
+ public:
+  T data;
+  napi_ref callback;
+  napi_ref self;
+  static const char *jsClassName();
+
+  std::string Init(napi_env env, napi_value _callback, napi_value _self) {
+    NAPI_CALL_RETURN(napi_create_reference(env, _callback, 1, &callback));
+    NAPI_CALL_RETURN(napi_create_reference(env, _self, 1, &self));
+    return std::string();
+  }
+
+  static std::string New(napi_env env, napi_value *jsValue,
+                         JSHandle<T> **cData) {
+    napi_value theConstructor;
+    HELPER_CALL_RETURN(InitClass(env, &theConstructor));
+    NAPI_CALL_RETURN(
+        napi_new_instance(env, theConstructor, 0, nullptr, jsValue));
+    auto nativeData = std::unique_ptr<JSHandle<T> >(new JSHandle<T>);
+    nativeData->self = nullptr;
+    nativeData->callback = nullptr;
+    NAPI_CALL_RETURN(
+        napi_wrap(env, *jsValue, nativeData.get(), nullptr, nullptr));
+    *cData = nativeData.release();
+    return std::string();
+  }
+
+  static std::string Get(napi_env env, napi_value jsValue,
+                         JSHandle<T> **cData) {
+    napi_valuetype theType;
+    NAPI_CALL_RETURN(napi_get_type_of_value(env, jsValue, &theType));
+    if (theType != napi_object) {
+      return LOCAL_MESSAGE("Not an object");
+    }
+    napi_value jsConstructor;
+    HELPER_CALL_RETURN(InitClass(env, &jsConstructor));
+    bool isInstanceOf;
+    NAPI_CALL_RETURN(
+        napi_instanceof(env, jsValue, jsConstructor, &isInstanceOf));
+    if (!isInstanceOf) {
+      return LOCAL_MESSAGE("Not an object of type OCDoHandle");
+    }
+    void *nativeDataRaw;
+    NAPI_CALL_RETURN(napi_unwrap(env, jsValue, &nativeDataRaw));
+    *cData = (JSHandle<T> *)nativeDataRaw;
+    return std::string();
+  }
+
+  static std::string Destroy(napi_env env, JSHandle<T> *cData) {
+    if (cData->callback) {
+      NAPI_CALL_RETURN(napi_reference_release(env, cData->callback, nullptr));
+    }
+    if (cData->self) {
+      NAPI_CALL_RETURN(napi_reference_release(env, cData->self, nullptr));
+    }
+    delete cData;
+    return std::string();
+  }
+
+  static std::string Destroy(napi_env env, napi_value jsHandle) {
+    JSHandle<T> *cData;
+    HELPER_CALL_RETURN(Get(env, jsHandle, &cData));
+    HELPER_CALL_RETURN(Destroy(env, cData));
+    return std::string();
+  }
+
+  static std::string InitClass(napi_env env,
+                               napi_value *theConstructor = nullptr) {
+    static napi_ref localConstructor = nullptr;
+    if (!localConstructor) {
+      napi_value constructorValue;
+      NAPI_CALL_RETURN(napi_define_class(env, jsClassName(),
+                                         JSHandle_constructor, nullptr, 0,
+                                         nullptr, &constructorValue));
+      NAPI_CALL_RETURN(
+          napi_create_reference(env, constructorValue, 1, &localConstructor));
+    }
+    if (theConstructor) {
+      NAPI_CALL_RETURN(
+          napi_get_reference_value(env, localConstructor, theConstructor));
+    }
+    return std::string();
+  }
+};
+
+std::string InitHandles(napi_env env);
+
+/*
 #include <nan.h>
 #include <map>
 extern "C" {
@@ -124,5 +221,6 @@ v8::Local<v8::Array> jsArrayFromBytes(unsigned char *bytes, uint32_t length);
 
 bool fillCArrayFromJSArray(unsigned char *bytes, uint32_t length,
                            v8::Local<v8::Array> array);
+*/
 
 #endif /* __IOTIVITY_NODE_HANDLES_H__ */

@@ -19,11 +19,18 @@
 #include "constants.h"
 #include "enums.h"
 #include "functions.h"
+#include "structures/handles.h"
+
+static napi_env global__env = nullptr;
+
+napi_env napi_get_env() { return global__env; }
 
 NAPI_MODULE_INIT(Init) {
+  global__env = env;
   HELPER_CALL_THROW(env, InitEnums(env, exports));
   HELPER_CALL_THROW(env, InitConstants(env, exports));
   HELPER_CALL_THROW(env, InitFunctions(env, exports));
+  HELPER_CALL_THROW(env, InitHandles(env));
 }
 
 NODE_MODULE_ABI(iotivity, Init)

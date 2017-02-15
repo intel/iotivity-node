@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
 #include "../common.h"
-#include "../structures/oc-dev-addr.h"
-/*s
 #include "../structures/handles.h"
+#include "../structures/oc-dev-addr.h"
+/*
 #include "../structures/oc-client-response.h"
 #include "../structures/oc-header-option-array.h"
 #include "../structures/oc-payload.h"
@@ -25,14 +26,42 @@
 extern "C" {
 #include <ocpayload.h>
 #include <ocstack.h>
-#include <stdlib.h>
 }
 
-static void deleteCallback(void *callback) {}
+static void deleteCallback(void *data) {
+  ENTER_C_CALLBACK;
+
+  HELPER_CALL_THROW(
+      env, JSHandle<OCDoHandle>::Destroy(env, (JSHandle<OCDoHandle> *)data));
+
+  EXIT_C_CALLBACK();
+}
 
 static OCStackApplicationResult defaultOCClientResponseHandler(
-    void *context, OCDoHandle handle, OCClientResponse *clientResponse) {
-  return OC_STACK_KEEP_TRANSACTION;
+    void *context, OCDoHandle, OCClientResponse *clientResponse) {
+  ENTER_C_CALLBACK;
+
+  OCStackApplicationResult failReturn = OC_STACK_KEEP_TRANSACTION;
+
+  JSHandle<OCDoHandle> *cData = (JSHandle<OCDoHandle> *)context;
+  napi_value jsContext, jsCallback, jsReturnValue;
+  NAPI_CALL(napi_get_null(env, &jsContext), THROW_BODY(env, failReturn));
+  NAPI_CALL(napi_get_reference_value(env, cData->callback, &jsCallback),
+            THROW_BODY(env, failReturn));
+
+  napi_value arguments[2];
+  NAPI_CALL(napi_get_reference_value(env, cData->self, &arguments[0]),
+            THROW_BODY(env, failReturn));
+  NAPI_CALL(napi_get_null(env, &arguments[1]), THROW_BODY(env, failReturn));
+  NAPI_CALL(napi_call_function(env, jsContext, jsCallback, 2, arguments,
+                               &jsReturnValue),
+            THROW_BODY(env, failReturn));
+
+  J2C_GET_VALUE_JS(OCStackApplicationResult, cResult, env, jsReturnValue,
+                   napi_number, "OCDoResource response callback return value",
+                   uint32, uint32_t, THROW_BODY(env, failReturn));
+
+  EXIT_C_CALLBACK(cResult);
 }
 
 NAPI_METHOD(bind_OCDoResource) {
@@ -45,7 +74,7 @@ NAPI_METHOD(bind_OCDoResource) {
 
   OCDevAddr localAddr;
   OCDevAddr *destination = nullptr;
-  DECLARE_VALUE_TYPE(addrType, env, arguments[3], THROW_BODY(env));
+  DECLARE_VALUE_TYPE(addrType, env, arguments[3], THROW_BODY(env, ));
   if (addrType != napi_null) {
     J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[3], napi_object,
                                   "destination");
@@ -63,19 +92,23 @@ NAPI_METHOD(bind_OCDoResource) {
 
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[7], napi_function, "callback");
 
-  J2C_VALIDATE_IS_ARRAY_THROW(env, arguments[8], "options");
+  J2C_VALIDATE_IS_ARRAY_THROW(env, arguments[8], true, "options");
 
-  OCDoHandle handle;
+  JSHandle<OCDoHandle> *cData;
+  napi_value jsHandle;
+  HELPER_CALL_THROW(env, JSHandle<OCDoHandle>::New(env, &jsHandle, &cData));
+
   OCCallbackData cbData;
-  cbData.context = nullptr;
+  cbData.context = cData;
   cbData.cb = defaultOCClientResponseHandler;
   cbData.cd = deleteCallback;
   OCStackResult result =
-      OCDoResource(&handle, method, requestUri, destination, payload,
+      OCDoResource(&(cData->data), method, requestUri, destination, payload,
                    connectivityType, qos, &cbData, nullptr, 0);
 
   if (result == OC_STACK_OK) {
-    /* set up the handle */
+    HELPER_CALL_THROW(env, cData->Init(env, arguments[7], jsHandle));
+    C2J_SET_PROPERTY_JS_THROW(env, arguments[0], "handle", jsHandle);
   }
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
