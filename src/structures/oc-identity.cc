@@ -15,31 +15,28 @@
  */
 
 #include "oc-identity.h"
-#include <nan.h>
-#include "../common.h"
-#include "handles.h"
 
 extern "C" {
 #include <string.h>
 }
 
-using namespace v8;
-
-Local<Array> js_OCIdentity(OCIdentity *identity) {
-  return jsArrayFromBytes(identity->id, (uint32_t)(identity->id_length));
+std::string js_OCIdentity(napi_env env, OCIdentity *source,
+                          napi_value *destination) {
+  HELPER_CALL_RETURN(js_ArrayFromBytes(
+      env, source->id, (uint32_t)(source->id_length), destination));
+  return std::string();
 }
 
-bool c_OCIdentity(Local<Array> jsIdentity, OCIdentity *identity) {
-  uint32_t length = jsIdentity->Length();
+std::string c_OCIdentity(napi_env env, napi_value source,
+                         OCIdentity *destination) {
+  uint32_t length;
+  NAPI_CALL_RETURN(napi_get_array_length(env, source, &length));
   if (length > MAX_IDENTITY_SIZE) {
-    Nan::ThrowError("OCIdentity array length exceed MAX_IDENTITY_SIZE");
-    return false;
+    return LOCAL_MESSAGE("array length " + std::to_string(length) +
+                         " exceeds MAX_IDENTITY_SIZE(" +
+                         std::to_string(MAX_IDENTITY_SIZE) + ")");
   }
-
-  if (!fillCArrayFromJSArray(identity->id, length, jsIdentity)) {
-    return false;
-  }
-
-  identity->id_length = (uint16_t)length;
-  return true;
+  HELPER_CALL_RETURN(c_ArrayFromBytes(env, source, destination->id, length));
+  destination->id_length = (uint16_t)length;
+  return std::string();
 }

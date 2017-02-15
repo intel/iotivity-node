@@ -15,3 +15,29 @@
  */
 
 #include "common.h"
+
+std::string js_ArrayFromBytes(napi_env env, unsigned char *bytes,
+                              uint32_t length, napi_value *array) {
+  uint32_t index;
+  napi_value oneValue;
+  NAPI_CALL_RETURN(napi_create_array_with_length(env, length, array));
+  for (index = 0; index < length; index++) {
+    NAPI_CALL_RETURN(napi_create_number(env, bytes[index], &oneValue));
+    NAPI_CALL_RETURN(napi_set_element(env, *array, index, oneValue));
+  }
+  return std::string();
+}
+
+std::string c_ArrayFromBytes(napi_env env, napi_value array,
+                             unsigned char *bytes, uint32_t length) {
+  uint32_t index, arrayLength;
+  napi_value oneValue;
+  NAPI_CALL_RETURN(napi_get_array_length(env, array, &arrayLength));
+  for (index = 0; index < arrayLength; index++) {
+    NAPI_CALL_RETURN(napi_get_element(env, array, index, &oneValue));
+    J2C_ASSIGN_VALUE_JS_RETURN(
+        unsigned char, bytes[index], env, oneValue, napi_number,
+        "byte array item " + std::to_string(index), uint32, uint32_t);
+  }
+  return std::string();
+}

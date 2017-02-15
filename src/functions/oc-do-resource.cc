@@ -31,8 +31,7 @@ extern "C" {
 static void deleteCallback(void *data) {
   ENTER_C_CALLBACK;
 
-  HELPER_CALL_THROW(
-      env, JSHandle<OCDoHandle>::Destroy(env, (JSHandle<OCDoHandle> *)data));
+  HELPER_CALL_THROW(env, JSOCDoHandle::Destroy(env, (JSOCDoHandle *)data));
 
   EXIT_C_CALLBACK();
 }
@@ -43,7 +42,7 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
 
   OCStackApplicationResult failReturn = OC_STACK_KEEP_TRANSACTION;
 
-  JSHandle<OCDoHandle> *cData = (JSHandle<OCDoHandle> *)context;
+  JSOCDoHandle *cData = (JSOCDoHandle *)context;
   napi_value jsContext, jsCallback, jsReturnValue;
   NAPI_CALL(napi_get_null(env, &jsContext), THROW_BODY(env, failReturn));
   NAPI_CALL(napi_get_reference_value(env, cData->callback, &jsCallback),
@@ -95,9 +94,9 @@ NAPI_METHOD(bind_OCDoResource) {
 
   J2C_VALIDATE_IS_ARRAY_THROW(env, arguments[8], true, "options");
 
-  JSHandle<OCDoHandle> *cData;
+  JSOCDoHandle *cData;
   napi_value jsHandle;
-  HELPER_CALL_THROW(env, JSHandle<OCDoHandle>::New(env, &jsHandle, &cData));
+  HELPER_CALL_THROW(env, JSOCDoHandle::New(env, &jsHandle, &cData));
 
   OCCallbackData cbData;
   cbData.context = cData;

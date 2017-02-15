@@ -22,8 +22,7 @@ extern "C" {
 #include <ocstack.h>
 }
 
-using namespace v8;
-
+/*
 #define GET_STRING_COUNT(api)                                                 \
   do {                                                                        \
     VALIDATE_ARGUMENT_COUNT(info, 2);                                         \
@@ -138,3 +137,4 @@ NAN_METHOD(bind_OCGetResourceUri) {
     info.GetReturnValue().Set(Nan::Null());
   }
 }
+*/

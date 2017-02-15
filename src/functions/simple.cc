@@ -16,6 +16,7 @@
 
 #include "../common.h"
 #include "../structures/oc-device-info.h"
+#include "../structures/oc-platform-info.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -42,16 +43,22 @@ NAPI_METHOD(bind_OCStopPresence) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OCStopPresence()));
 }
 
+#define INFO_SETTER(cType, description, api)                                  \
+  J2C_GET_ARGUMENTS(env, info, 1);                                            \
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, description); \
+                                                                              \
+  auto devInfo = std::unique_ptr<cType, void (*)(cType *)>(new_##cType(),     \
+                                                           delete_##cType);   \
+  HELPER_CALL_THROW(env, c_##cType(env, arguments[0], devInfo));              \
+                                                                              \
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)api(*(devInfo.get()))));
+
 NAPI_METHOD(bind_OCSetDeviceInfo) {
-  J2C_GET_ARGUMENTS(env, info, 1);
-  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "device info");
+  INFO_SETTER(OCDeviceInfo, "device info", OCSetDeviceInfo);
+}
 
-  auto devInfo = std::unique_ptr<OCDeviceInfo, void (*)(OCDeviceInfo *)>(
-      new_OCDeviceInfo(), delete_OCDeviceInfo);
-  HELPER_CALL_THROW(env, c_OCDeviceInfo(env, arguments[0], devInfo));
-
-  C2J_SET_RETURN_VALUE(env, info, number,
-                       ((double)OCSetDeviceInfo(*(devInfo.get()))));
+NAPI_METHOD(bind_OCSetPlatformInfo) {
+  INFO_SETTER(OCPlatformInfo, "platform info", OCSetPlatformInfo);
 }
 
 NAPI_METHOD(bind_OCInit) {

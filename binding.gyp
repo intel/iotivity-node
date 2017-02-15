@@ -193,6 +193,7 @@
 				"generated/enums.cc",
 				"generated/functions.cc",
 				"src/common.cc",
+				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
 				"src/functions/simple.cc",
 				"src/main.cc",
@@ -200,6 +201,7 @@
 				"src/structures/oc-client-response.cc",
 				"src/structures/oc-dev-addr.cc",
 				"src/structures/oc-device-info.cc",
+				"src/structures/oc-identity.cc",
 				"src/structures/oc-platform-info.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]

@@ -18,15 +18,9 @@
 
 NAPI_METHOD(JSHandle_constructor) {}
 
-template <>
-const char *JSHandle<OCDoHandle>::jsClassName() {
-  return "OCDoHandle";
-}
-
 std::string InitHandles(napi_env env) {
-  HELPER_CALL_RETURN(JSHandle<OCDoHandle>::InitClass(env));
-  HELPER_CALL_RETURN(JSHandle<OCRequestHandle>::InitClass(env));
-  HELPER_CALL_RETURN(JSHandle<OCResourceHandle>::InitClass(env));
+  HELPER_CALL_RETURN(JSOCDoHandle::InitClass(env));
+  HELPER_CALL_RETURN(JSOCResourceHandle::InitClass(env));
   return std::string();
 }
 

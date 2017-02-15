@@ -184,6 +184,12 @@
   J2C_GET_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
                    getterSuffix, jsParameterType, return FAIL_STATUS_RETURN)
 
+#define J2C_ASSIGN_VALUE_JS_RETURN(cType, destination, env, source, jsType, \
+                                   message, getterSuffix, jsParameterType)  \
+  J2C_ASSIGN_VALUE_JS(cType, destination, env, source, jsType, message,     \
+                      getterSuffix, jsParameterType,                        \
+                      return FAIL_STATUS_RETURN)
+
 #define J2C_ASSIGN_MEMBER_VALUE_RETURN(env, destination, source, cType, name, \
                                        jsType, message, getterSuffix,         \
                                        jsParameterType)                       \
@@ -300,5 +306,9 @@
   return returnValue
 
 napi_env napi_get_env();
+std::string js_ArrayFromBytes(napi_env env, unsigned char *bytes,
+                              uint32_t length, napi_value *array);
+std::string c_ArrayFromBytes(napi_env env, napi_value array,
+                             unsigned char *bytes, uint32_t length);
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__ */

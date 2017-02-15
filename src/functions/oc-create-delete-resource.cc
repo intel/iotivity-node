@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include <map>
 
 #include "../common.h"
@@ -25,76 +24,90 @@ extern "C" {
 #include <ocstack.h>
 }
 
-using namespace v8;
-
 static OCEntityHandlerResult defaultEntityHandler(
-    OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *context) {
-  CALL_JS(
-      &(((CallbackInfo<OCResourceHandle> *)context)->callback),
-      Nan::GetCurrentContext()->Global(), 2, OC_EH_ERROR, IsUint32,
-      "OCEntityHandler return value",
-      return ((OCEntityHandlerResult)(Nan::To<uint32_t>(jsReturn).FromJust())),
-      Nan::New(flag), js_OCEntityHandlerRequest(request));
+    OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *data) {
+  ENTER_C_CALLBACK;
+
+  OCEntityHandlerResult failReturn = OC_EH_ERROR;
+
+  JSOCResourceHandle *cData = (JSOCResourceHandle *)data;
+  napi_value jsContext, jsCallback, jsReturnValue;
+  NAPI_CALL(napi_get_null(env, &jsContext), THROW_BODY(env, failReturn));
+  NAPI_CALL(napi_get_reference_value(env, cData->callback, &jsCallback),
+            THROW_BODY(env, failReturn));
+
+  napi_value arguments[2];
+  NAPI_CALL(napi_create_number(env, (double)flag, &arguments[0]),
+            THROW_BODY(env, failReturn));
+  NAPI_CALL(napi_get_null(env, &arguments[1]), THROW_BODY(env, failReturn));
+  NAPI_CALL(napi_call_function(env, jsContext, jsCallback, 2, arguments,
+                               &jsReturnValue),
+            THROW_BODY(env, failReturn));
+
+  J2C_GET_VALUE_JS(OCEntityHandlerResult, cResult, env, jsReturnValue,
+                   napi_number, "entity handler return value", uint32, uint32_t,
+                   THROW_BODY(env, failReturn));
+
+  EXIT_C_CALLBACK(cResult);
 }
 
-NAN_METHOD(bind_OCCreateResource) {
-  VALIDATE_ARGUMENT_COUNT(info, 6);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
-  VALIDATE_ARGUMENT_TYPE(info, 2, IsString);
-  VALIDATE_ARGUMENT_TYPE(info, 3, IsString);
-  VALIDATE_ARGUMENT_TYPE(info, 4, IsFunction);
-  VALIDATE_ARGUMENT_TYPE(info, 5, IsUint32);
+NAPI_METHOD(bind_OCCreateResource) {
+  J2C_GET_ARGUMENTS(env, info, 6);
 
-  CallbackInfo<OCResourceHandle> *callbackInfo =
-      new CallbackInfo<OCResourceHandle>;
-  if (!callbackInfo) {
-    Nan::ThrowError("Failed to allocate memory for callback info");
-    return;
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
+  J2C_GET_STRING_ARGUMENT_THROW(type, env, arguments[1], false, "type");
+  J2C_GET_STRING_ARGUMENT_THROW(iface, env, arguments[2], false, "interface");
+  J2C_GET_STRING_ARGUMENT_THROW(uri, env, arguments[3], false, "uri");
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[4], napi_function, "callback");
+  J2C_GET_VALUE_JS_THROW(OCResourceProperty, properties, env, arguments[5],
+                         napi_number, "properties", uint32, uint32_t);
+
+  JSOCResourceHandle *cData;
+  napi_value jsHandle;
+  HELPER_CALL_THROW(env, JSOCResourceHandle::New(env, &jsHandle, &cData));
+
+  OCStackResult result =
+      OCCreateResource(&(cData->data), type, iface, uri, defaultEntityHandler,
+                       cData, properties);
+
+  if (result == OC_STACK_OK) {
+    HELPER_CALL_THROW(env, cData->Init(env, arguments[4], jsHandle));
+    C2J_SET_PROPERTY_JS_THROW(env, arguments[0], "handle", jsHandle);
   }
-
-  OCStackResult returnValue = OCCreateResource(
-      &(callbackInfo->handle), (const char *)*String::Utf8Value(info[1]),
-      (const char *)*String::Utf8Value(info[2]),
-      (const char *)*String::Utf8Value(info[3]), defaultEntityHandler,
-      (void *)callbackInfo, (uint8_t)Nan::To<uint32_t>(info[5]).FromJust());
-
-  if (returnValue == OC_STACK_OK) {
-    Nan::Set(Nan::To<Object>(info[0]).ToLocalChecked(),
-             Nan::New("handle").ToLocalChecked(),
-             callbackInfo->Init(JSOCResourceHandle::New(callbackInfo),
-                                Local<Function>::Cast(info[4])));
-    JSOCResourceHandle::handles[callbackInfo->handle] =
-        &(callbackInfo->jsHandle);
-  } else {
-    delete callbackInfo;
-  }
-
-  info.GetReturnValue().Set(Nan::New(returnValue));
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
 
-NAN_METHOD(bind_OCDeleteResource) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+NAPI_METHOD(bind_OCDeleteResource) {
+  J2C_GET_ARGUMENTS(env, info, 1);
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
 
-  OCStackResult returnValue;
+  JSOCResourceHandle *cData;
+  HELPER_CALL_THROW(env, JSOCResourceHandle::Get(env, arguments[0], &cData));
 
-  CallbackInfo<OCResourceHandle> *callbackInfo;
-  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
-                           Nan::To<Object>(info[0]).ToLocalChecked());
-
-  // Delete the resource identified by the handle
-  returnValue = OCDeleteResource(callbackInfo->handle);
-
-  if (returnValue == OC_STACK_OK) {
-    JSOCResourceHandle::handles.erase(callbackInfo->handle);
-    delete callbackInfo;
+  OCStackResult result = OCDeleteResource(cData->data);
+  if (result == OC_STACK_OK) {
+    JSOCResourceHandle::Destroy(env, cData);
   }
 
-  info.GetReturnValue().Set(Nan::New(returnValue));
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
 
 // This is not really a binding since it only replaces the JS entity handler
+NAPI_METHOD(bind_OCBindResourceHandler) {
+  J2C_GET_ARGUMENTS(env, info, 2);
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_function,
+                                "entity handler");
+
+  JSOCResourceHandle *cData;
+  HELPER_CALL_THROW(env, JSOCResourceHandle::Get(env, arguments[0], &cData));
+  NAPI_CALL_THROW(env, napi_reference_release(env, cData->callback, nullptr));
+  NAPI_CALL_THROW(
+      env, napi_create_reference(env, arguments[1], 1, &(cData->callback)));
+
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)OC_STACK_OK));
+}
+/*
 NAN_METHOD(bind_OCBindResourceHandler) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
@@ -159,3 +172,4 @@ NAN_METHOD(bind_OCGetResourceHandler) {
 
   info.GetReturnValue().Set(*(callbackInfo->callback));
 }
+*/
