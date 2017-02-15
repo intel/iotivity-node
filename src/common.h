@@ -197,13 +197,21 @@
 #define J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, name) \
   J2C_GET_STRING_RETURN((env), (destination)->name, source, true, #name)
 
-#define C2J_SET_PROPERTY_RETURN(env, destination, name, type, ...)        \
-  do {                                                                    \
-    napi_value __jsValue;                                                 \
-    NAPI_CALL_RETURN(napi_create_##type((env), __VA_ARGS__, &__jsValue)); \
-    C2J_SET_PROPERTY_JS((env), (destination), name, __jsValue,            \
-                        return FAIL_STATUS_RETURN);                       \
+#define C2J_SET_PROPERTY_JS_RETURN(env, destination, name, jsValue) \
+  C2J_SET_PROPERTY_JS((env), (destination), name, (jsValue),        \
+                      return FAIL_STATUS_RETURN)
+
+#define C2J_SET_PROPERTY_CALL_RETURN(env, destination, name, call)   \
+  do {                                                               \
+    napi_value jsValue;                                              \
+    call;                                                            \
+    C2J_SET_PROPERTY_JS_RETURN((env), (destination), name, jsValue); \
   } while (0)
+
+#define C2J_SET_PROPERTY_RETURN(env, destination, name, type, ...) \
+  C2J_SET_PROPERTY_CALL_RETURN(                                    \
+      (env), (destination), name,                                  \
+      NAPI_CALL_RETURN(napi_create_##type((env), __VA_ARGS__, &jsValue)))
 
 #define C2J_SET_NUMBER_MEMBER_RETURN(env, destination, source, name) \
   C2J_SET_PROPERTY_RETURN((env), (destination), #name, number, (source)->name)

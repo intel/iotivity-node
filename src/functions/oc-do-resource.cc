@@ -17,9 +17,9 @@
 #include <stdio.h>
 #include "../common.h"
 #include "../structures/handles.h"
+#include "../structures/oc-client-response.h"
 #include "../structures/oc-dev-addr.h"
 /*
-#include "../structures/oc-client-response.h"
 #include "../structures/oc-header-option-array.h"
 #include "../structures/oc-payload.h"
 */
@@ -52,7 +52,8 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
   napi_value arguments[2];
   NAPI_CALL(napi_get_reference_value(env, cData->self, &arguments[0]),
             THROW_BODY(env, failReturn));
-  NAPI_CALL(napi_get_null(env, &arguments[1]), THROW_BODY(env, failReturn));
+  HELPER_CALL(js_OCClientResponse(env, clientResponse, &arguments[1]),
+              THROW_BODY(env, failReturn));
   NAPI_CALL(napi_call_function(env, jsContext, jsCallback, 2, arguments,
                                &jsReturnValue),
             THROW_BODY(env, failReturn));

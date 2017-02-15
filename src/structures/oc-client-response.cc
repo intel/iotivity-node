@@ -15,19 +15,45 @@
  */
 
 #include "oc-client-response.h"
-#include <nan.h>
-#include "../common.h"
 #include "oc-dev-addr.h"
-#include "oc-header-option-array.h"
-#include "oc-identity.h"
-#include "oc-payload.h"
 
 extern "C" {
 #include <string.h>
 }
 
-using namespace v8;
+std::string js_OCClientResponse(napi_env env, OCClientResponse *source,
+                                napi_value *destination) {
+  NAPI_CALL_RETURN(napi_create_object(env, destination));
 
+  C2J_SET_PROPERTY_CALL_RETURN(
+      env, *destination, "devAddr",
+      HELPER_CALL_RETURN(js_OCDevAddr(env, &(source->devAddr), &jsValue)));
+
+  if (source->addr) {
+    C2J_SET_PROPERTY_CALL_RETURN(
+        env, *destination, "addr",
+        HELPER_CALL_RETURN(js_OCDevAddr(env, source->addr, &jsValue)));
+  }
+
+  // response.payload is not set
+
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, connType);
+
+  // response.identity is not set
+
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, result);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, sequenceNumber);
+
+  // FIXME - iotivity has a bug whereby these fields are left uninitialized in
+  // a presence response
+  if (!(source->payload && source->payload->type == PAYLOAD_TYPE_PRESENCE)) {
+    C2J_SET_STRING_IF_NOT_NULL_RETURN(env, *destination, source, resourceUri);
+
+    // vendor options are not set
+  }
+  return std::string();
+}
+/*
 Local<Object> js_OCClientResponse(OCClientResponse *response) {
   Local<Object> returnValue = Nan::New<Object>();
 
@@ -70,3 +96,4 @@ Local<Object> js_OCClientResponse(OCClientResponse *response) {
 
   return returnValue;
 }
+*/
