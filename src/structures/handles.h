@@ -71,12 +71,16 @@ class JSHandle {
     return std::string();
   }
 
-  static std::string Destroy(napi_env env, jsType *cData) {
+  static std::string Destroy(napi_env env, jsType *cData, napi_value jsHandle = nullptr) {
     if (cData->callback) {
       NAPI_CALL_RETURN(napi_reference_release(env, cData->callback, nullptr));
     }
     if (cData->self) {
+	  if (!jsHandle) {
+	    NAPI_CALL_RETURN(napi_get_reference_value(env, cData->self, &jsHandle));
+	  }
       NAPI_CALL_RETURN(napi_reference_release(env, cData->self, nullptr));
+	  NAPI_CALL_RETURN(napi_wrap(env, jsHandle, nullptr, nullptr, nullptr));
     }
     delete cData;
     return std::string();
@@ -85,7 +89,7 @@ class JSHandle {
   static std::string Destroy(napi_env env, napi_value jsHandle) {
     jsType *cData;
     HELPER_CALL_RETURN(Get(env, jsHandle, &cData));
-    HELPER_CALL_RETURN(Destroy(env, cData));
+    HELPER_CALL_RETURN(Destroy(env, cData, jsHandle));
     return std::string();
   }
 
