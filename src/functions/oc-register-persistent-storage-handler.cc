@@ -17,27 +17,65 @@
 // This file makes the assumption that a (Nan::Persistent<Value> *) pointer will
 // fit in a (FILE *) pointer
 
-#include <nan.h>
-
 #include "../common.h"
-#include "../structures/handles.h"
-#include "../structures/oc-payload.h"
 
 extern "C" {
-#include <ocpayload.h>
 #include <ocstack.h>
 }
 
 #include <limits.h>
 
+static napi_ref context = nullptr;
+static napi_ref jsOpen = nullptr;
+static napi_ref jsClose = nullptr;
+static napi_ref jsRead = nullptr;
+static napi_ref jsWrite = nullptr;
+static napi_ref jsUnlink = nullptr;
+
+static FILE *defaultOpen(const char *path, const char *mode) {
+  NapiHandleScope scope;
+
+  JS_ASSERT(jsOpen, "Callback for open() not found",
+    THROW_BODY(scope.env, nullptr));
+
+  FILE *failReturn = nullptr;
+  napi_value jsContext, jsCallback, jsReturnValue;
+  NAPI_CALL(napi_get_reference_value(scope.env, context, &jsContext),
+    THROW_BODY(scope.env, failReturn));
+  NAPI_CALL(napi_get_reference_value(scope.env, jsOpen, &jsCallback),
+    THROW_BODY(scope.env, failReturn));
+
+  napi_value arguments[2];
+  NAPI_CALL(napi_create_string_utf8(scope.env, path, strlen(path),
+    &arguments[0]), THROW_BODY(scope.env, failReturn));
+  NAPI_CALL(napi_create_string_utf8(scope.env, mode, strlen(mode),
+    &arguments[1]), THROW_BODY(scope.env, failReturn));
+  NAPI_CALL(napi_call_function(scope.env, jsContext, jsCallback, 2, arguments,
+                               &jsReturnValue),
+            THROW_BODY(scope.env, failReturn));
+
+  J2C_GET_VALUE_JS(int32_t, cResult, scope.env, jsReturnValue, napi_number,
+    "open() return value", int32, int32_t, THROW_BODY(scope.env, failReturn));
+
+  return ((FILE *)(cResult < 0 ? nullptr : new int32_t(cResult)));
+}
+
+static size_t defaultRead(void *ptr, size_t size, size_t count, FILE *stream) {
+  NapiHandleScope scope;
+
+  JS_ASSERT(jsRead, "Callback for read() not found", THROW_BODY(scope.env, 0));
+
+  size_t failReturn = 0;
+  napi_value jsContext, jsCallback, jsReturnValue;
+  NAPI_CALL(napi_get_reference_value(scope.env, context, &jsContext),
+    THROW_BODY(scope.env, failReturn));
+}
+/*
 #define THROW_IF_EXCEEDS_UINT32_MAX(prefix, sizeAsSizeT, returnValue) \
   if ((sizeAsSizeT) > UINT32_MAX) {                                   \
     Nan::ThrowRangeError(prefix ": request exceeds UINT32_MAX");      \
     return (returnValue);                                             \
   }
-
-using namespace v8;
-using namespace node;
 
 static Nan::Persistent<Object> *context = 0;
 static Nan::Callback *callbackFor_open = 0;
@@ -176,3 +214,4 @@ NAN_METHOD(bind_OCRegisterPersistentStorageHandler) {
 
   info.GetReturnValue().Set(Nan::New((int)result));
 }
+*/

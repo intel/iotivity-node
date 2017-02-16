@@ -29,39 +29,35 @@ extern "C" {
 }
 
 static void deleteCallback(void *data) {
-  ENTER_C_CALLBACK;
-
-  HELPER_CALL_THROW(env, JSOCDoHandle::Destroy(env, (JSOCDoHandle *)data));
-
-  EXIT_C_CALLBACK();
+  NapiHandleScope scope;
+  HELPER_CALL_THROW(scope.env, JSOCDoHandle::Destroy(scope.env, (JSOCDoHandle *)data));
 }
 
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle, OCClientResponse *clientResponse) {
-  ENTER_C_CALLBACK;
-
+  NapiHandleScope scope;
   OCStackApplicationResult failReturn = OC_STACK_KEEP_TRANSACTION;
 
   JSOCDoHandle *cData = (JSOCDoHandle *)context;
   napi_value jsContext, jsCallback, jsReturnValue;
-  NAPI_CALL(napi_get_null(env, &jsContext), THROW_BODY(env, failReturn));
-  NAPI_CALL(napi_get_reference_value(env, cData->callback, &jsCallback),
-            THROW_BODY(env, failReturn));
+  NAPI_CALL(napi_get_null(scope.env, &jsContext), THROW_BODY(scope.env, failReturn));
+  NAPI_CALL(napi_get_reference_value(scope.env, cData->callback, &jsCallback),
+            THROW_BODY(scope.env, failReturn));
 
   napi_value arguments[2];
-  NAPI_CALL(napi_get_reference_value(env, cData->self, &arguments[0]),
-            THROW_BODY(env, failReturn));
-  HELPER_CALL(js_OCClientResponse(env, clientResponse, &arguments[1]),
-              THROW_BODY(env, failReturn));
-  NAPI_CALL(napi_call_function(env, jsContext, jsCallback, 2, arguments,
+  NAPI_CALL(napi_get_reference_value(scope.env, cData->self, &arguments[0]),
+            THROW_BODY(scope.env, failReturn));
+  HELPER_CALL(js_OCClientResponse(scope.env, clientResponse, &arguments[1]),
+              THROW_BODY(scope.env, failReturn));
+  NAPI_CALL(napi_call_function(scope.env, jsContext, jsCallback, 2, arguments,
                                &jsReturnValue),
-            THROW_BODY(env, failReturn));
+            THROW_BODY(scope.env, failReturn));
 
-  J2C_GET_VALUE_JS(OCStackApplicationResult, cResult, env, jsReturnValue,
+  J2C_GET_VALUE_JS(OCStackApplicationResult, cResult, scope.env, jsReturnValue,
                    napi_number, "OCDoResource response callback return value",
-                   uint32, uint32_t, THROW_BODY(env, failReturn));
+                   uint32, uint32_t, THROW_BODY(scope.env, failReturn));
 
-  EXIT_C_CALLBACK(cResult);
+  return cResult;
 }
 
 NAPI_METHOD(bind_OCDoResource) {

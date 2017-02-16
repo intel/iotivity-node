@@ -23,7 +23,7 @@
 
 static napi_env global__env = nullptr;
 
-napi_env napi_get_env() { return global__env; }
+napi_env napi_get_init_env() { return global__env; }
 
 NAPI_MODULE_INIT(Init) {
   global__env = env;

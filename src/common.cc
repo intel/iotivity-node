@@ -41,3 +41,11 @@ std::string c_ArrayFromBytes(napi_env env, napi_value array,
   }
   return std::string();
 }
+
+NapiHandleScope::NapiHandleScope() : env(napi_get_init_env()) {
+  NAPI_CALL(napi_open_handle_scope(env, &scope), abort());
+}
+
+NapiHandleScope::~NapiHandleScope() {
+  NAPI_CALL_THROW(env, napi_close_handle_scope(env, scope));
+}

@@ -195,6 +195,7 @@
 				"src/common.cc",
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
+				"src/functions/oc-register-persistent-storage-handler.cc",
 				"src/functions/simple.cc",
 				"src/main.cc",
 				"src/structures/handles.cc",

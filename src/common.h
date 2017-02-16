@@ -40,6 +40,11 @@
     }                                 \
   } while (0)
 
+#define JS_ASSERT(condition, message, ...) \
+  RESULT_CALL(if(!((condition))) { \
+    __resultingStatus = std::string() + message + "\n"; \
+  }, __VA_ARGS__)
+
 #define NAPI_CALL(theCall, ...)                                       \
   RESULT_CALL(                                                        \
       napi_status __napiStatus = theCall;                             \
@@ -295,17 +300,15 @@
     NAPI_CALL_THROW((env), napi_set_return_value((env), (info), __jsResult)); \
   } while (0)
 
-#define ENTER_C_CALLBACK         \
-  napi_handle_scope scope;       \
-  napi_env env = napi_get_env(); \
-  NAPI_CALL(napi_open_handle_scope(env, &scope), abort())
+class NapiHandleScope {
+  napi_handle_scope scope;
+ public:
+  napi_env env;
+  NapiHandleScope();
+  ~NapiHandleScope();
+};
 
-#define EXIT_C_CALLBACK(returnValue)               \
-  NAPI_CALL(napi_close_handle_scope((env), scope), \
-            THROW_BODY((env), returnValue));       \
-  return returnValue
-
-napi_env napi_get_env();
+napi_env napi_get_init_env();
 std::string js_ArrayFromBytes(napi_env env, unsigned char *bytes,
                               uint32_t length, napi_value *array);
 std::string c_ArrayFromBytes(napi_env env, napi_value array,
