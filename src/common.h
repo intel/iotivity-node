@@ -69,13 +69,14 @@
   napi_valuetype varName;                            \
   NAPI_CALL(napi_get_type_of_value((env), (value), &varName), __VA_ARGS__);
 
-#define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, message, ...) \
-  RESULT_CALL(                                                       \
-      DECLARE_VALUE_TYPE(theType, (env), value, __VA_ARGS__);        \
-      if (theType != (typecheck)) {                                  \
-        __resultingStatus =                                          \
-            std::string() + message + " is not a " #typecheck " (" + std::to_string(theType) + ")\n";  \
-      },                                                             \
+#define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, message, ...)          \
+  RESULT_CALL(                                                                \
+      DECLARE_VALUE_TYPE(theType, (env), value, __VA_ARGS__);                 \
+      if (theType != (typecheck)) {                                           \
+        __resultingStatus = std::string() + message + " is not a " #typecheck \
+                                                      " (" +                  \
+                            std::to_string(theType) + ")\n";                  \
+      },                                                                      \
       __VA_ARGS__)
 
 #define J2C_GET_PROPERTY_JS(varName, env, source, name, ...)        \
@@ -247,7 +248,7 @@
   HELPER_CALL(theCall, THROW_BODY((env), ))
 
 #define J2C_VALIDATE_VALUE_TYPE_THROW(env, value, typecheck, message) \
-  J2C_VALIDATE_VALUE_TYPE((env), (value), typecheck, message,       \
+  J2C_VALIDATE_VALUE_TYPE((env), (value), typecheck, message,         \
                           THROW_BODY((env), ))
 
 #define J2C_GET_ARGUMENTS(env, info, count)                                  \

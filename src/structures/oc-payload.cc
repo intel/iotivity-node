@@ -15,18 +15,108 @@
  */
 
 #include "oc-payload.h"
-#include <nan.h>
-#include "../common.h"
-#include "handles.h"
-#include "oc-device-info.h"
-#include "oc-platform-info.h"
 
 extern "C" {
 #include <ocpayload.h>
 #include <string.h>
 }
 
-using namespace v8;
+#define C2J_SET_LL_PROPERTY(env, destination, source, name, type, createItem) \
+  if ((source)->name) {                                                       \
+    C2J_SET_PROPERTY_CALL_RETURN((env), (destination), #name, {               \
+      uint32_t index;                                                         \
+      type current;                                                           \
+      napi_value item;                                                        \
+      NAPI_CALL_RETURN(napi_create_array((env), &jsValue));                   \
+      for (index = 0, current = (source)->name; current;                      \
+           index++, current = current->next) {                                \
+        createItem;                                                           \
+        NAPI_CALL_RETURN(napi_set_element(env, jsValue, index, item));        \
+      }                                                                       \
+    });                                                                       \
+  }
+
+static std::string js_OCResourcePayload(napi_env env,
+                                        OCResourcePayload *payload,
+                                        napi_value *destination) {
+  NAPI_CALL_RETURN(napi_create_object(env, destination));
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, *destination, payload, uri);
+
+  C2J_SET_LL_PROPERTY(env, *destination, payload, types, OCStringLL *,
+                      NAPI_CALL_RETURN(napi_create_string_utf8(
+                          env, current->value, strlen(current->value), &item)));
+
+  C2J_SET_LL_PROPERTY(env, *destination, payload, interfaces, OCStringLL *,
+                      NAPI_CALL_RETURN(napi_create_string_utf8(
+                          env, current->value, strlen(current->value), &item)));
+
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, payload, bitmap);
+
+  C2J_SET_PROPERTY_RETURN(env, *destination, "secure", boolean,
+                          payload->secure);
+
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, payload, port);
+  return std::string();
+}
+
+static std::string js_OCDiscoveryPayload(napi_env env,
+                                         OCDiscoveryPayload *payload,
+                                         napi_value destination) {
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, sid);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, baseURI);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, name);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, uri);
+
+  C2J_SET_LL_PROPERTY(env, destination, payload, type, OCStringLL *,
+                      NAPI_CALL_RETURN(napi_create_string_utf8(
+                          env, current->value, strlen(current->value), &item)));
+
+  C2J_SET_LL_PROPERTY(env, destination, payload, iface, OCStringLL *,
+                      NAPI_CALL_RETURN(napi_create_string_utf8(
+                          env, current->value, strlen(current->value), &item)));
+
+  C2J_SET_LL_PROPERTY(
+      env, destination, payload, resources, OCResourcePayload *,
+      HELPER_CALL_RETURN(js_OCResourcePayload(env, current, &item)));
+
+  // ignore "next"
+  return std::string();
+}
+
+std::string js_OCPayload(napi_env env, OCPayload *payload, napi_value *result) {
+  NAPI_CALL_RETURN(napi_create_object(env, result));
+  C2J_SET_PROPERTY_RETURN(env, *result, "type", number,
+                          ((double)(payload->type)));
+  switch (payload->type) {
+    case PAYLOAD_TYPE_DISCOVERY:
+      HELPER_CALL_RETURN(
+          js_OCDiscoveryPayload(env, (OCDiscoveryPayload *)payload, *result));
+      break;
+    /*
+        case PAYLOAD_TYPE_REPRESENTATION:
+          return js_OCRepPayload((OCRepPayload *)payload);
+
+        case PAYLOAD_TYPE_DEVICE:
+          return js_OCDevicePayload((OCDevicePayload *)payload);
+
+        case PAYLOAD_TYPE_PLATFORM:
+          return js_OCPlatformPayload((OCPlatformPayload *)payload);
+
+        case PAYLOAD_TYPE_PRESENCE:
+          return js_OCPresencePayload((OCPresencePayload *)payload);
+
+        case PAYLOAD_TYPE_SECURITY:
+          return js_OCSecurityPayload((OCSecurityPayload *)payload);
+    */
+
+    case PAYLOAD_TYPE_INVALID:
+    default:
+      break;
+  }
+  return std::string();
+}
+
+/*
 
 static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload);
 static Local<Object> js_OCRepPayload(OCRepPayload *payload);
@@ -778,3 +868,4 @@ bool c_OCPayload(Local<Object> jsPayload, OCPayload **p_payload) {
   }
   return true;
 }
+*/
