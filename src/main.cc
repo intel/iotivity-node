@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
+#include <nan.h>
 #include <node_api_helpers.h>
 #include <node_jsvmapi.h>
 #include "constants.h"

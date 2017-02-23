@@ -40,10 +40,12 @@
     }                                 \
   } while (0)
 
-#define JS_ASSERT(condition, message, ...) \
-  RESULT_CALL(if(!((condition))) { \
-    __resultingStatus = std::string() + message + "\n"; \
-  }, __VA_ARGS__)
+#define JS_ASSERT(condition, message, ...)                  \
+  RESULT_CALL(                                              \
+      if (!((condition))) {                                 \
+        __resultingStatus = std::string() + message + "\n"; \
+      },                                                    \
+      __VA_ARGS__)
 
 #define NAPI_CALL(theCall, ...)                                       \
   RESULT_CALL(                                                        \
@@ -72,7 +74,7 @@
       DECLARE_VALUE_TYPE(theType, (env), value, __VA_ARGS__);        \
       if (theType != (typecheck)) {                                  \
         __resultingStatus =                                          \
-            std::string() + message + " is not a " #typecheck "\n";  \
+            std::string() + message + " is not a " #typecheck " (" + std::to_string(theType) + ")\n";  \
       },                                                             \
       __VA_ARGS__)
 
@@ -245,7 +247,7 @@
   HELPER_CALL(theCall, THROW_BODY((env), ))
 
 #define J2C_VALIDATE_VALUE_TYPE_THROW(env, value, typecheck, message) \
-  J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck), message,       \
+  J2C_VALIDATE_VALUE_TYPE((env), (value), typecheck, message,       \
                           THROW_BODY((env), ))
 
 #define J2C_GET_ARGUMENTS(env, info, count)                                  \
@@ -284,6 +286,9 @@
   C2J_SET_PROPERTY_JS((env), (destination), (name), (jsValue),     \
                       THROW_BODY((env), ))
 
+#define J2C_GET_PROPERTY_JS_THROW(varName, env, source, name) \
+  J2C_GET_PROPERTY_JS(varName, env, source, name, THROW_BODY((env), ))
+
 #define C2J_SET_PROPERTY_THROW(env, destination, name, type, ...)        \
   do {                                                                   \
     napi_value __jsValue;                                                \
@@ -302,6 +307,7 @@
 
 class NapiHandleScope {
   napi_handle_scope scope;
+
  public:
   napi_env env;
   NapiHandleScope();

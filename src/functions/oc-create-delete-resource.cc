@@ -32,14 +32,16 @@ static OCEntityHandlerResult defaultEntityHandler(
 
   JSOCResourceHandle *cData = (JSOCResourceHandle *)data;
   napi_value jsContext, jsCallback, jsReturnValue;
-  NAPI_CALL(napi_get_null(scope.env, &jsContext), THROW_BODY(scope.env, failReturn));
+  NAPI_CALL(napi_get_null(scope.env, &jsContext),
+            THROW_BODY(scope.env, failReturn));
   NAPI_CALL(napi_get_reference_value(scope.env, cData->callback, &jsCallback),
             THROW_BODY(scope.env, failReturn));
 
   napi_value arguments[2];
   NAPI_CALL(napi_create_number(scope.env, (double)flag, &arguments[0]),
             THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(napi_get_null(scope.env, &arguments[1]), THROW_BODY(scope.env, failReturn));
+  NAPI_CALL(napi_get_null(scope.env, &arguments[1]),
+            THROW_BODY(scope.env, failReturn));
   NAPI_CALL(napi_call_function(scope.env, jsContext, jsCallback, 2, arguments,
                                &jsReturnValue),
             THROW_BODY(scope.env, failReturn));
@@ -101,7 +103,7 @@ NAPI_METHOD(bind_OCBindResourceHandler) {
 
   JSOCResourceHandle *cData;
   HELPER_CALL_THROW(env, JSOCResourceHandle::Get(env, arguments[0], &cData));
-  NAPI_CALL_THROW(env, napi_reference_release(env, cData->callback, nullptr));
+  NAPI_CALL_THROW(env, napi_delete_reference(env, cData->callback));
   NAPI_CALL_THROW(
       env, napi_create_reference(env, arguments[1], 1, &(cData->callback)));
 
