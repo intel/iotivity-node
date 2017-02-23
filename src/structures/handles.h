@@ -80,6 +80,8 @@ class JSHandle {
       if (!jsHandle) {
         NAPI_CALL_RETURN(napi_get_reference_value(env, cData->self, &jsHandle));
       }
+      C2J_SET_PROPERTY_RETURN(env, jsHandle, "stale", string_utf8, "stale",
+                              strlen("stale"));
       NAPI_CALL_RETURN(napi_delete_reference(env, cData->self));
       NAPI_CALL_RETURN(napi_wrap(env, jsHandle, nullptr, nullptr, nullptr));
     }
