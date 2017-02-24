@@ -106,7 +106,7 @@ async.series( [
 				callback();
 				return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 			},
-			null, 0 );
+			null );
 		if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
 			callback( "OCDoResource(get): " + result );
 		}
@@ -139,7 +139,7 @@ async.series( [
 			function() {
 				return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 			},
-			null, 0 );
+			null );
 		if ( result !== iotivity.OCStackResult.OC_STACK_OK ) {
 			callback( "OCDoResource(get): " + result );
 		}
