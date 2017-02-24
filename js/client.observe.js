@@ -62,7 +62,7 @@ iotivity.OCDoResource(
 					iotivity.OCCancel(
 						handle,
 						iotivity.OCQualityOfService.OC_HIGH_QOS,
-						[] );
+						null );
 					return iotivity.OCStackApplicationResult
 						.OC_STACK_DELETE_TRANSACTION;
 				} else {
