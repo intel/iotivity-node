@@ -19,6 +19,7 @@
 #include "../common.h"
 #include "../structures.h"
 #include "../structures/handles.h"
+#include "entity-handler.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -26,31 +27,7 @@ extern "C" {
 
 static OCEntityHandlerResult defaultEntityHandler(
     OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *data) {
-  NapiHandleScope scope;
-
-  OCEntityHandlerResult failReturn = OC_EH_ERROR;
-
-  JSOCResourceHandle *cData = (JSOCResourceHandle *)data;
-  napi_value jsContext, jsCallback, jsReturnValue;
-  NAPI_CALL(napi_get_null(scope.env, &jsContext),
-            THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(napi_get_reference_value(scope.env, cData->callback, &jsCallback),
-            THROW_BODY(scope.env, failReturn));
-
-  napi_value arguments[2];
-  NAPI_CALL(napi_create_number(scope.env, (double)flag, &arguments[0]),
-            THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(napi_get_null(scope.env, &arguments[1]),
-            THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(napi_call_function(scope.env, jsContext, jsCallback, 2, arguments,
-                               &jsReturnValue),
-            THROW_BODY(scope.env, failReturn));
-
-  J2C_GET_VALUE_JS(OCEntityHandlerResult, cResult, scope.env, jsReturnValue,
-                   napi_number, "entity handler return value", uint32, uint32_t,
-                   THROW_BODY(scope.env, failReturn));
-
-  return cResult;
+  EH_BODY(flag, request, nullptr, ((JSOCResourceHandle *)data)->callback);
 }
 
 NAPI_METHOD(bind_OCCreateResource) {

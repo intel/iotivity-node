@@ -16,58 +16,42 @@
 
 #include "../common.h"
 #include "../structures.h"
+#include "entity-handler.h"
 
 extern "C" {
 #include <ocstack.h>
 #include <stdlib.h>
 }
 
-using namespace v8;
-
-Nan::Callback *g_currentCallback = 0;
+static napi_ref g_currentCallback = 0;
 
 static OCEntityHandlerResult defaultDeviceEntityHandler(
     OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, char *uri,
-    void *context) {
-  Local<Value> jsCallbackArguments[3] = {
-      Nan::New(flag), js_OCEntityHandlerRequest(request),
-      (uri ? Nan::New<Value>((Handle<String>)Nan::New(uri).ToLocalChecked())
-           : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()))};
-
-  Local<Value> returnValue =
-      ((Nan::Callback *)context)->Call(3, jsCallbackArguments);
-
-  VALIDATE_VALUE_TYPE(returnValue, IsUint32,
-                      "OCDeviceEntityHandler return value", );
-
-  return (OCEntityHandlerResult)(Nan::To<uint32_t>(returnValue).FromJust());
+	void *context) {
+  EH_BODY(flag, request, uri, ((napi_ref)context));
 }
 
-NAN_METHOD(bind_OCSetDefaultDeviceEntityHandler) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 0, IsFunction);
+NAPI_METHOD(bind_OCSetDefaultDeviceEntityHandler) {
+  J2C_GET_ARGUMENTS(env, info, 1);
+  DECLARE_VALUE_TYPE(handlerType, env, arguments[0], THROW_BODY(env, ));
 
   OCDeviceEntityHandler newHandler = 0;
-  Nan::Callback *newCallback = 0, *callbackToDelete = 0;
-
-  if (info[0]->IsFunction()) {
-    newCallback = new Nan::Callback(Local<Function>::Cast(info[0]));
-    newHandler = defaultDeviceEntityHandler;
+  napi_ref newCallback = 0, callbackToDelete = 0;
+  if (handlerType == napi_function) {
+    NAPI_CALL_THROW(env, napi_create_reference(env, arguments[0], 1,
+	                                           &newCallback));
+	newHandler = defaultDeviceEntityHandler;
   }
-
   OCStackResult result =
-      OCSetDefaultDeviceEntityHandler(newHandler, (void *)newCallback);
-
+    OCSetDefaultDeviceEntityHandler(newHandler, (void *)newCallback);
   if (result == OC_STACK_OK) {
     callbackToDelete = g_currentCallback;
-    g_currentCallback = newCallback;
+	g_currentCallback = newCallback;
   } else {
     callbackToDelete = newCallback;
   }
-
   if (callbackToDelete) {
-    delete callbackToDelete;
+    NAPI_CALL_THROW(env, napi_delete_reference(env, callbackToDelete));
   }
-
-  info.GetReturnValue().Set(Nan::New(result));
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
