@@ -106,7 +106,7 @@
 #define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...) \
   RESULT_CALL(                                                            \
       DECLARE_VALUE_TYPE(valueType, env, (source), __VA_ARGS__);          \
-      if (nullOk && valueType == napi_null) {                             \
+      if (nullOk && (valueType == napi_null || valueType == napi_undefined)) {                             \
         (destination) = nullptr;                                          \
       } else if (valueType == napi_string) {                              \
         int cString__length;                                              \
@@ -150,7 +150,7 @@
 #define J2C_VALIDATE_IS_ARRAY(env, theValue, nullOk, message, ...)            \
   RESULT_CALL(                                                                \
       DECLARE_VALUE_TYPE(jsType, (env), theValue, __VA_ARGS__);               \
-      if (!((nullOk) && jsType == napi_null)) {                               \
+      if (!((nullOk) && (jsType == napi_null || jsType == napi_undefined))) { \
         bool isArray;                                                         \
         NAPI_CALL(napi_is_array((env), (theValue), &isArray), __VA_ARGS__);   \
         if (!isArray) {                                                       \

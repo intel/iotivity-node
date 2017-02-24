@@ -77,7 +77,7 @@ static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
     (*previous)->next = 0;
   }
 
-  *destination = *(local.get());
+  *destination = *(local.release());
   return std::string();
 }
 
