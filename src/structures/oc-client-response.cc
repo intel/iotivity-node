@@ -37,9 +37,11 @@ std::string js_OCClientResponse(napi_env env, OCClientResponse *source,
         HELPER_CALL_RETURN(js_OCDevAddr(env, source->addr, &jsValue)));
   }
 
-  C2J_SET_PROPERTY_CALL_RETURN(
-      env, *destination, "payload",
-      HELPER_CALL_RETURN(js_OCPayload(env, source->payload, &jsValue)));
+  if (source->payload) {
+    C2J_SET_PROPERTY_CALL_RETURN(
+        env, *destination, "payload",
+        HELPER_CALL_RETURN(js_OCPayload(env, source->payload, &jsValue)));
+  }
 
   C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, connType);
 

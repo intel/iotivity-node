@@ -38,13 +38,15 @@ extern "C" {
   }
 
 #define C2J_SET_STRING_LL_PROPERTY(env, destination, source, name) \
-  C2J_SET_LL_PROPERTY((env), (destination), (source), name, OCStringLL *, \
-    NAPI_CALL_RETURN(napi_create_string_utf8((env), current->value, strlen(current->value), &item)));
+  C2J_SET_LL_PROPERTY(                                             \
+      (env), (destination), (source), name, OCStringLL *,          \
+      NAPI_CALL_RETURN(napi_create_string_utf8(                    \
+          (env), current->value, strlen(current->value), &item)));
 
-#define SET_TYPES_INTERFACES(env, destination, source, typeField,   \
-                             interfaceField)                        \
+#define SET_TYPES_INTERFACES(env, destination, source, typeField,        \
+                             interfaceField)                             \
   C2J_SET_STRING_LL_PROPERTY((env), (destination), (source), typeField); \
-  C2J_SET_STRING_LL_PROPERTY((env), (destination), (source), interfaceField); \
+  C2J_SET_STRING_LL_PROPERTY((env), (destination), (source), interfaceField);
 
 static std::string js_OCResourcePayload(napi_env env,
                                         OCResourcePayload *payload,
@@ -97,10 +99,20 @@ std::string js_OCDevicePayload(napi_env env, OCDevicePayload *payload,
 std::string js_OCPlatformPayload(napi_env env, OCPlatformPayload *payload,
                                  napi_value destination) {
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, uri);
-  C2J_SET_PROPERTY_CALL_RETURN(env, destination, "info",
-    HELPER_CALL_RETURN(js_OCPlatformInfo(env, &(payload->info), &jsValue)));
+  C2J_SET_PROPERTY_CALL_RETURN(
+      env, destination, "info",
+      HELPER_CALL_RETURN(js_OCPlatformInfo(env, &(payload->info), &jsValue)));
   C2J_SET_STRING_LL_PROPERTY(env, destination, payload, rt);
   C2J_SET_STRING_LL_PROPERTY(env, destination, payload, interfaces);
+  return std::string();
+}
+
+std::string js_OCPresencePayload(napi_env env, OCPresencePayload *payload,
+                                 napi_value destination) {
+  C2J_SET_NUMBER_MEMBER_RETURN(env, destination, payload, sequenceNumber);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, destination, payload, maxAge);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, destination, payload, trigger);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, resourceType);
   return std::string();
 }
 
@@ -123,18 +135,15 @@ std::string js_OCPayload(napi_env env, OCPayload *payload, napi_value *result) {
       HELPER_CALL_RETURN(
           js_OCPlatformPayload(env, (OCPlatformPayload *)payload, *result));
       break;
+
+    case PAYLOAD_TYPE_PRESENCE:
+      HELPER_CALL_RETURN(
+          js_OCPresencePayload(env, (OCPresencePayload *)payload, *result));
+      break;
+
     /*
         case PAYLOAD_TYPE_REPRESENTATION:
           return js_OCRepPayload((OCRepPayload *)payload);
-
-        case PAYLOAD_TYPE_DEVICE:
-          return js_OCDevicePayload((OCDevicePayload *)payload);
-
-        case PAYLOAD_TYPE_PLATFORM:
-          return js_OCPlatformPayload((OCPlatformPayload *)payload);
-
-        case PAYLOAD_TYPE_PRESENCE:
-          return js_OCPresencePayload((OCPresencePayload *)payload);
 
         case PAYLOAD_TYPE_SECURITY:
           return js_OCSecurityPayload((OCSecurityPayload *)payload);
