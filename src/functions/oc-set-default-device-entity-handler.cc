@@ -27,7 +27,7 @@ static napi_ref g_currentCallback = 0;
 
 static OCEntityHandlerResult defaultDeviceEntityHandler(
     OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, char *uri,
-	void *context) {
+    void *context) {
   EH_BODY(flag, request, uri, ((napi_ref)context));
 }
 
@@ -38,15 +38,15 @@ NAPI_METHOD(bind_OCSetDefaultDeviceEntityHandler) {
   OCDeviceEntityHandler newHandler = 0;
   napi_ref newCallback = 0, callbackToDelete = 0;
   if (handlerType == napi_function) {
-    NAPI_CALL_THROW(env, napi_create_reference(env, arguments[0], 1,
-	                                           &newCallback));
-	newHandler = defaultDeviceEntityHandler;
+    NAPI_CALL_THROW(env,
+                    napi_create_reference(env, arguments[0], 1, &newCallback));
+    newHandler = defaultDeviceEntityHandler;
   }
   OCStackResult result =
-    OCSetDefaultDeviceEntityHandler(newHandler, (void *)newCallback);
+      OCSetDefaultDeviceEntityHandler(newHandler, (void *)newCallback);
   if (result == OC_STACK_OK) {
     callbackToDelete = g_currentCallback;
-	g_currentCallback = newCallback;
+    g_currentCallback = newCallback;
   } else {
     callbackToDelete = newCallback;
   }

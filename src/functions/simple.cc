@@ -76,9 +76,8 @@ NAPI_METHOD(bind_OCGetNumberOfResources) {
   J2C_GET_ARGUMENTS(env, info, 1);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "receptacle");
 
-  OCStackResult result;
   uint8_t resourceCount;
-  result = OCGetNumberOfResources(&resourceCount);
+  OCStackResult result = OCGetNumberOfResources(&resourceCount);
 
   if (result == OC_STACK_OK) {
     C2J_SET_PROPERTY_THROW(env, arguments[0], "count", number,
@@ -86,4 +85,9 @@ NAPI_METHOD(bind_OCGetNumberOfResources) {
   }
 
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
+}
+
+NAPI_METHOD(bind_OCGetServerInstanceIDString) {
+  const char *uuid = OCGetServerInstanceIDString();
+  C2J_SET_RETURN_VALUE(env, info, string_utf8, uuid, strlen(uuid));
 }

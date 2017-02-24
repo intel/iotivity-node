@@ -24,16 +24,15 @@ extern "C" {
 #include "../common.h"
 
 std::string entityHandler(napi_env env, OCEntityHandlerFlag flag,
-                          OCEntityHandlerRequest *request,
-						  char *uri,
-						  napi_ref callback,
-						  OCEntityHandlerResult *result);
+                          OCEntityHandlerRequest *request, char *uri,
+                          napi_ref callback, OCEntityHandlerResult *result);
 
-#define EH_BODY(flag, request, uri, callback) \
-  NapiHandleScope scope; \
-  OCEntityHandlerResult result = OC_EH_ERROR; \
-  HELPER_CALL(entityHandler(scope.env, (flag), (request), (uri), (callback), &result), \
-    THROW_BODY(scope.env, result)); \
+#define EH_BODY(flag, request, uri, callback)                                  \
+  NapiHandleScope scope;                                                       \
+  OCEntityHandlerResult result = OC_EH_ERROR;                                  \
+  HELPER_CALL(                                                                 \
+      entityHandler(scope.env, (flag), (request), (uri), (callback), &result), \
+      THROW_BODY(scope.env, result));                                          \
   return result;
 
 #endif /* ndef _ENTITI_HANDLER_H_ */

@@ -103,33 +103,33 @@
   J2C_ASSIGN_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
                       getterSuffix, jsParameterType, __VA_ARGS__);
 
-#define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...) \
-  RESULT_CALL(                                                            \
-      DECLARE_VALUE_TYPE(valueType, env, (source), __VA_ARGS__);          \
-      if (nullOk && (valueType == napi_null || valueType == napi_undefined)) {                             \
-        (destination) = nullptr;                                          \
-      } else if (valueType == napi_string) {                              \
-        int cString__length;                                              \
-        NAPI_CALL(napi_get_value_string_utf8_length((env), (source),      \
-                                                    &cString__length),    \
-                  __VA_ARGS__);                                           \
-        std::unique_ptr<char> cString(new char[cString__length + 1]());   \
-        if (cString.get()) {                                              \
-          int bytesWritten;                                               \
-          NAPI_CALL(                                                      \
-              napi_get_value_string_utf8((env), (source), cString.get(),  \
-                                         cString__length, &bytesWritten), \
-              __VA_ARGS__);                                               \
-          (destination) = cString.release();                              \
-        } else {                                                          \
-          __resultingStatus = std::string("") +                           \
-                              "Failed to allocate memory for" + message + \
-                              "\n";                                       \
-        }                                                                 \
-      } else {                                                            \
-        __resultingStatus =                                               \
-            (std::string("") + message + " is not a string\n");           \
-      },                                                                  \
+#define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...)      \
+  RESULT_CALL(                                                                 \
+      DECLARE_VALUE_TYPE(valueType, env, (source), __VA_ARGS__);               \
+      if (nullOk && (valueType == napi_null || valueType == napi_undefined)) { \
+        (destination) = nullptr;                                               \
+      } else if (valueType == napi_string) {                                   \
+        int cString__length;                                                   \
+        NAPI_CALL(napi_get_value_string_utf8_length((env), (source),           \
+                                                    &cString__length),         \
+                  __VA_ARGS__);                                                \
+        std::unique_ptr<char> cString(new char[cString__length + 1]());        \
+        if (cString.get()) {                                                   \
+          int bytesWritten;                                                    \
+          NAPI_CALL(                                                           \
+              napi_get_value_string_utf8((env), (source), cString.get(),       \
+                                         cString__length, &bytesWritten),      \
+              __VA_ARGS__);                                                    \
+          (destination) = cString.release();                                   \
+        } else {                                                               \
+          __resultingStatus = std::string("") +                                \
+                              "Failed to allocate memory for" + message +      \
+                              "\n";                                            \
+        }                                                                      \
+      } else {                                                                 \
+        __resultingStatus =                                                    \
+            (std::string("") + message + " is not a string\n");                \
+      },                                                                       \
       __VA_ARGS__)
 
 #define J2C_GET_STRING(env, destination, source, nullOk, name, ...)   \
@@ -298,12 +298,11 @@
     C2J_SET_PROPERTY_JS_THROW((env), (destination), name, __jsValue);    \
   } while (0)
 
-#define C2J_SET_RETURN_VALUE(env, info, type, ...)                            \
-  do {                                                                        \
-    napi_value __jsResult;                                                    \
-    NAPI_CALL_THROW((env),                                                    \
-                    napi_create_##type((env), __VA_ARGS__, &__jsResult));     \
-    NAPI_CALL_THROW((env), napi_set_return_value((env), (info), __jsResult)); \
+#define C2J_SET_RETURN_VALUE(env, info, type, ...)                             \
+  do {                                                                         \
+    napi_value jsResult;                                                       \
+    NAPI_CALL_THROW((env), napi_create_##type((env), __VA_ARGS__, &jsResult)); \
+    NAPI_CALL_THROW((env), napi_set_return_value((env), (info), jsResult));    \
   } while (0)
 
 class NapiHandleScope {
