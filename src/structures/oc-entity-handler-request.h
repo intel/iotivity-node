@@ -22,6 +22,8 @@ extern "C" {
 #include <ocstack.h>
 }
 
-std::string js_OCEntityHandlerRequest(napi_env env, OCEntityHandlerRequest *request, napi_value *result);
+std::string js_OCEntityHandlerRequest(napi_env env,
+                                      OCEntityHandlerRequest *request,
+                                      napi_value *result);
 
 #endif /* __IOTIVITY_NODE_STRUCTURES_H__ */

@@ -68,8 +68,7 @@ NAPI_METHOD(bind_OCInit) {
                          uint32, uint32_t);
   J2C_GET_VALUE_JS_THROW(OCMode, mode, env, arguments[2], napi_number, "mode",
                          uint32, uint32_t);
-  C2J_SET_RETURN_VALUE(env, info, number,
-                       ((double)OCInit(ip, port, mode)));
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)OCInit(ip, port, mode)));
 }
 
 NAPI_METHOD(bind_OCGetNumberOfResources) {

@@ -47,16 +47,13 @@
       },                                                    \
       __VA_ARGS__)
 
-#define NAPI_CALL(theCall, ...)                                       \
-  RESULT_CALL(                                                        \
-      napi_status __napiStatus = theCall;                             \
-      if (!(__napiStatus == napi_ok ||                                \
-            __napiStatus == napi_pending_exception)) {                \
-        __resultingStatus =                                           \
-            (std::string(napi_get_last_error_info()->error_message) + \
-             std::string("\n"));                                      \
-      },                                                              \
-      __VA_ARGS__)
+#define NAPI_CALL(theCall, ...)                                        \
+  do {                                                                 \
+    napi_status status = theCall;                                      \
+    JS_ASSERT((status == napi_ok || status == napi_pending_exception), \
+              std::string(napi_get_last_error_info()->error_message),  \
+              __VA_ARGS__);                                            \
+  } while (0)
 
 #define HELPER_CALL(theCall, ...) \
   RESULT_CALL(__resultingStatus = theCall, __VA_ARGS__)
@@ -69,24 +66,24 @@
   napi_valuetype varName;                            \
   NAPI_CALL(napi_get_type_of_value((env), (value), &varName), __VA_ARGS__);
 
-#define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, message, ...)          \
-  RESULT_CALL(                                                                \
-      DECLARE_VALUE_TYPE(theType, (env), value, __VA_ARGS__);                 \
-      if (theType != (typecheck)) {                                           \
-        __resultingStatus = std::string() + message + " is not a " #typecheck \
-                                                      " (" +                  \
-                            std::to_string(theType) + ")\n";                  \
-      },                                                                      \
-      __VA_ARGS__)
+#define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, message, ...)   \
+  do {                                                                 \
+    DECLARE_VALUE_TYPE(theType, (env), value, __VA_ARGS__);            \
+    JS_ASSERT(theType == (typecheck),                                  \
+              std::string() + message + " is not a " #typecheck " (" + \
+                  std::to_string(theType) + ")",                       \
+              __VA_ARGS__);                                            \
+  } while (0)
 
-#define J2C_ASSIGN_PROPERTY_JS(env, source, name, destination, ...) \
-  do { \
-    DECLARE_PROPERTY(jsName, (env), name, __VA_ARGS__); \
-	NAPI_CALL(napi_get_property((env), (source), jsName, (destination)), __VA_ARGS__); \
-  } while(0)
+#define J2C_ASSIGN_PROPERTY_JS(env, source, name, destination, ...)      \
+  do {                                                                   \
+    DECLARE_PROPERTY(jsName, (env), name, __VA_ARGS__);                  \
+    NAPI_CALL(napi_get_property((env), (source), jsName, (destination)), \
+              __VA_ARGS__);                                              \
+  } while (0)
 
-#define J2C_GET_PROPERTY_JS(varName, env, source, name, ...)        \
-  napi_value varName;                                               \
+#define J2C_GET_PROPERTY_JS(varName, env, source, name, ...) \
+  napi_value varName;                                        \
   J2C_ASSIGN_PROPERTY_JS((env), (source), (name), &varName, __VA_ARGS__)
 
 #define J2C_ASSIGN_VALUE_JS(cType, destination, env, source, jsType, message, \
@@ -105,34 +102,29 @@
   J2C_ASSIGN_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
                       getterSuffix, jsParameterType, __VA_ARGS__);
 
-#define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...)      \
-  RESULT_CALL(                                                                 \
-      DECLARE_VALUE_TYPE(valueType, env, (source), __VA_ARGS__);               \
-      if (nullOk && (valueType == napi_null || valueType == napi_undefined)) { \
-        (destination) = nullptr;                                               \
-      } else if (valueType == napi_string) {                                   \
-        int cString__length;                                                   \
-        NAPI_CALL(napi_get_value_string_utf8_length((env), (source),           \
-                                                    &cString__length),         \
-                  __VA_ARGS__);                                                \
-        std::unique_ptr<char> cString(new char[cString__length + 1]());        \
-        if (cString.get()) {                                                   \
-          int bytesWritten;                                                    \
-          NAPI_CALL(                                                           \
-              napi_get_value_string_utf8((env), (source), cString.get(),       \
-                                         cString__length, &bytesWritten),      \
-              __VA_ARGS__);                                                    \
-          (destination) = cString.release();                                   \
-        } else {                                                               \
-          __resultingStatus = std::string("") +                                \
-                              "Failed to allocate memory for" + message +      \
-                              "\n";                                            \
-        }                                                                      \
-      } else {                                                                 \
-        __resultingStatus =                                                    \
-            (std::string("") + message + " is not a string\n");                \
-      },                                                                       \
-      __VA_ARGS__)
+#define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...)     \
+  do {                                                                        \
+    DECLARE_VALUE_TYPE(valueType, env, (source), __VA_ARGS__);                \
+    if (nullOk && (valueType == napi_null || valueType == napi_undefined)) {  \
+      (destination) = nullptr;                                                \
+    } else {                                                                  \
+      JS_ASSERT((valueType == napi_string),                                   \
+                std::string("") + message + " is not a string", __VA_ARGS__); \
+      int cString__length;                                                    \
+      NAPI_CALL(napi_get_value_string_utf8_length((env), (source),            \
+                                                  &cString__length),          \
+                __VA_ARGS__);                                                 \
+      std::unique_ptr<char> cString(new char[cString__length + 1]());         \
+      JS_ASSERT(cString.get(),                                                \
+                std::string("") + "Failed to allocate memory for" + message,  \
+                __VA_ARGS__);                                                 \
+      int bytesWritten;                                                       \
+      NAPI_CALL(napi_get_value_string_utf8((env), (source), cString.get(),    \
+                                           cString__length, &bytesWritten),   \
+                __VA_ARGS__);                                                 \
+      (destination) = cString.release();                                      \
+    }                                                                         \
+  } while (0)
 
 #define J2C_GET_STRING(env, destination, source, nullOk, name, ...)   \
   do {                                                                \
@@ -142,10 +134,10 @@
                       #destination "." name, __VA_ARGS__);            \
   } while (0)
 
-#define J2C_GET_STRING_TRACKED_JS(varName, env, source, nullOk, message, ...) \
-  std::unique_ptr<char> __##varName##__tracker;                              \
-  char *varName = nullptr;                                                   \
-  J2C_GET_STRING_JS((env), varName, (source), (nullOk), message, __VA_ARGS__);      \
+#define J2C_GET_STRING_TRACKED_JS(varName, env, source, nullOk, message, ...)  \
+  std::unique_ptr<char> __##varName##__tracker;                                \
+  char *varName = nullptr;                                                     \
+  J2C_GET_STRING_JS((env), varName, (source), (nullOk), message, __VA_ARGS__); \
   __##varName##__tracker.reset(varName);
 
 #define C2J_SET_PROPERTY_JS(env, destination, name, jsValue, ...)         \
@@ -155,17 +147,16 @@
               __VA_ARGS__);                                               \
   } while (0)
 
-#define J2C_VALIDATE_IS_ARRAY(env, theValue, nullOk, message, ...)            \
-  RESULT_CALL(                                                                \
-      DECLARE_VALUE_TYPE(jsType, (env), theValue, __VA_ARGS__);               \
-      if (!((nullOk) && (jsType == napi_null || jsType == napi_undefined))) { \
-        bool isArray;                                                         \
-        NAPI_CALL(napi_is_array((env), (theValue), &isArray), __VA_ARGS__);   \
-        if (!isArray) {                                                       \
-          __resultingStatus = std::string() + message + " is not an array\n"; \
-        }                                                                     \
-      },                                                                      \
-      __VA_ARGS__)
+#define J2C_VALIDATE_IS_ARRAY(env, theValue, nullOk, message, ...)          \
+  do {                                                                      \
+    DECLARE_VALUE_TYPE(jsType, (env), theValue, __VA_ARGS__);               \
+    if (!((nullOk) && (jsType == napi_null || jsType == napi_undefined))) { \
+      bool isArray;                                                         \
+      NAPI_CALL(napi_is_array((env), (theValue), &isArray), __VA_ARGS__);   \
+      JS_ASSERT(isArray, std::string() + message + " is not an array",      \
+                __VA_ARGS__);                                               \
+    }                                                                       \
+  } while (0)
 
 // Macros used in helpers - they cause the function to return a std::string
 
@@ -177,7 +168,8 @@
   HELPER_CALL(theCall, return FAIL_STATUS_RETURN)
 
 #define J2C_ASSIGN_PROPERTY_JS_RETURN(env, source, name, destination) \
-  J2C_ASSIGN_PROPERTY_JS((env), (source), (name), (destination), return FAIL_STATUS_RETURN)
+  J2C_ASSIGN_PROPERTY_JS((env), (source), (name), (destination),      \
+                         return FAIL_STATUS_RETURN)
 
 #define J2C_GET_PROPERTY_JS_RETURN(varName, env, source, name) \
   J2C_GET_PROPERTY_JS(varName, env, source, name, return FAIL_STATUS_RETURN)
@@ -247,8 +239,10 @@
                             (source)->name, strlen((source)->name));      \
   }
 
-#define J2C_GET_STRING_TRACKED_JS_RETURN(varName, env, source, nullOk, message) \
-  J2C_GET_STRING_TRACKED_JS(varName, (env), (source), (nullOk), message, return FAIL_STATUS_RETURN)
+#define J2C_GET_STRING_TRACKED_JS_RETURN(varName, env, source, nullOk,   \
+                                         message)                        \
+  J2C_GET_STRING_TRACKED_JS(varName, (env), (source), (nullOk), message, \
+                            return FAIL_STATUS_RETURN)
 
 // Macros used in bindings - they cause the function to throw and return void
 
@@ -288,7 +282,8 @@
                     THROW_BODY((env), ))
 
 #define J2C_GET_STRING_TRACKED_JS_THROW(varName, env, source, nullOk, message) \
-  J2C_GET_STRING_TRACKED_JS(varName, (env), (source), (nullOk), message, THROW_BODY((env), ))
+  J2C_GET_STRING_TRACKED_JS(varName, (env), (source), (nullOk), message,       \
+                            THROW_BODY((env), ))
 
 #define J2C_VALIDATE_IS_ARRAY_THROW(env, theValue, nullOk, message) \
   J2C_VALIDATE_IS_ARRAY((env), (theValue), (nullOk), message,       \

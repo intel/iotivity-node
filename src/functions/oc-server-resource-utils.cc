@@ -29,10 +29,10 @@ std::string returnNull(napi_env env, napi_callback_info info) {
   return std::string();
 }
 
-#define FIRST_ARGUMENT_IS_HANDLE(argc) \
-  J2C_GET_ARGUMENTS(env, info, argc); \
-  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle"); \
-  JSOCResourceHandle *cData; \
+#define FIRST_ARGUMENT_IS_HANDLE(argc)                                        \
+  J2C_GET_ARGUMENTS(env, info, argc);                                         \
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");    \
+  JSOCResourceHandle *cData;                                                  \
   HELPER_CALL_THROW(env, JSOCResourceHandle::Get(env, arguments[0], &cData)); \
   JS_ASSERT(cData, "handle is invalid", THROW_BODY(env, ));
 
@@ -51,37 +51,40 @@ NAPI_METHOD(bind_OCGetResourceProperties) {
   C2J_SET_RETURN_VALUE(env, info, number, OCGetResourceProperties(cData->data));
 }
 
-#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE \
-  FIRST_ARGUMENT_IS_HANDLE(2); \
+#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE                           \
+  FIRST_ARGUMENT_IS_HANDLE(2);                                           \
   J2C_GET_VALUE_JS_THROW(uint8_t, index, env, arguments[1], napi_number, \
                          "index", uint32, uint32_t)
 
-static std::string returnResourceHandle(napi_env env, napi_callback_info info, OCResourceHandle handle) {
+static std::string returnResourceHandle(napi_env env, napi_callback_info info,
+                                        OCResourceHandle handle) {
   if (handle) {
     napi_ref existingHandle = JSOCResourceHandle::handles[handle];
     if (!existingHandle) {
-	  return std::string("JS handle not found for native handle");
-	}
-	napi_value jsHandle;
-	NAPI_CALL_RETURN(napi_get_reference_value(env, existingHandle, &jsHandle));
-	NAPI_CALL_RETURN(napi_set_return_value(env, info, jsHandle));
+      return std::string("JS handle not found for native handle");
+    }
+    napi_value jsHandle;
+    NAPI_CALL_RETURN(napi_get_reference_value(env, existingHandle, &jsHandle));
+    NAPI_CALL_RETURN(napi_set_return_value(env, info, jsHandle));
   }
   return std::string();
 }
 
 NAPI_METHOD(bind_OCGetResourceHandleFromCollection) {
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE;
-  HELPER_CALL_THROW(env, returnResourceHandle(env, info,
-    OCGetResourceHandleFromCollection(cData->data, index)));
+  HELPER_CALL_THROW(
+      env, returnResourceHandle(env, info, OCGetResourceHandleFromCollection(
+                                               cData->data, index)));
 }
 
-#define GET_STRING_FROM_RESOURCE_BY_INDEX(api) \
-  RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE; \
-  const char *theString = api(cData->data, index); \
-  if (theString) { \
-    C2J_SET_RETURN_VALUE(env, info, string_utf8, theString, strlen(theString)); \
-  } else { \
-    HELPER_CALL_THROW(env, returnNull(env, info)); \
+#define GET_STRING_FROM_RESOURCE_BY_INDEX(api)              \
+  RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE;                   \
+  const char *theString = api(cData->data, index);          \
+  if (theString) {                                          \
+    C2J_SET_RETURN_VALUE(env, info, string_utf8, theString, \
+                         strlen(theString));                \
+  } else {                                                  \
+    HELPER_CALL_THROW(env, returnNull(env, info));          \
   }
 
 NAPI_METHOD(bind_OCGetResourceTypeName) {

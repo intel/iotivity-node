@@ -25,7 +25,7 @@ extern "C" {
 static std::string c_OCRepPayload(napi_env env, napi_value source,
                                   OCRepPayload **destination);
 static std::string js_OCRepPayload(napi_env env, OCRepPayload *payload,
-                            napi_value destination);
+                                   napi_value destination);
 
 #define C2J_SET_LL_PROPERTY(env, destination, source, name, type, createItem) \
   if ((source)->name) {                                                       \
@@ -53,40 +53,47 @@ static std::string js_OCRepPayload(napi_env env, OCRepPayload *payload,
   C2J_SET_STRING_LL_PROPERTY((env), (destination), (source), typeField); \
   C2J_SET_STRING_LL_PROPERTY((env), (destination), (source), interfaceField);
 
-#define CREATE_SINGLE_ITEM(env, destination, source, fieldSuffix) \
-  switch((source)->type) { \
-    case OCREP_PROP_NULL: \
-      NAPI_CALL_RETURN(napi_get_null(env, &(destination))); \
-      break; \
-    case OCREP_PROP_INT: \
-      NAPI_CALL_RETURN(napi_create_number(env, (double)((source)->i##fieldSuffix), &(destination))); \
-      break; \
-    case OCREP_PROP_DOUBLE: \
-      NAPI_CALL_RETURN(napi_create_number(env, (source)->d##fieldSuffix, &(destination))); \
-      break; \
-    case OCREP_PROP_BOOL: \
-      NAPI_CALL_RETURN(napi_create_boolean(env, (source)->b##fieldSuffix, &(destination))); \
-      break; \
-    case OCREP_PROP_STRING: \
-      if (!((source)->str##fieldSuffix)) { \
-        continue; \
-      } \
-      NAPI_CALL_RETURN(napi_create_string_utf8(env, (source)->str##fieldSuffix, strlen((source)->str##fieldSuffix), &(destination))); \
-      break; \
-    case OCREP_PROP_BYTE_STRING: \
-      if ((source)->ocByteStr##fieldSuffix.len == 0 || !((source)->ocByteStr##fieldSuffix.bytes)) { \
-        continue; \
-      } \
-      NAPI_CALL_RETURN(napi_create_buffer_copy(env, \
-        (char *)((source)->ocByteStr##fieldSuffix.bytes), (source)->ocByteStr##fieldSuffix.len, \
-        &(destination))); \
-      break; \
-    case OCREP_PROP_OBJECT: \
-      NAPI_CALL_RETURN(napi_create_object(env, &(destination))); \
-      HELPER_CALL_RETURN(js_OCRepPayload(env, (source)->obj##fieldSuffix, (destination))); \
-      break; \
-    default: \
-      continue; \
+#define CREATE_SINGLE_ITEM(env, destination, source, fieldSuffix)              \
+  switch ((source)->type) {                                                    \
+    case OCREP_PROP_NULL:                                                      \
+      NAPI_CALL_RETURN(napi_get_null(env, &(destination)));                    \
+      break;                                                                   \
+    case OCREP_PROP_INT:                                                       \
+      NAPI_CALL_RETURN(napi_create_number(                                     \
+          env, (double)((source)->i##fieldSuffix), &(destination)));           \
+      break;                                                                   \
+    case OCREP_PROP_DOUBLE:                                                    \
+      NAPI_CALL_RETURN(                                                        \
+          napi_create_number(env, (source)->d##fieldSuffix, &(destination)));  \
+      break;                                                                   \
+    case OCREP_PROP_BOOL:                                                      \
+      NAPI_CALL_RETURN(                                                        \
+          napi_create_boolean(env, (source)->b##fieldSuffix, &(destination))); \
+      break;                                                                   \
+    case OCREP_PROP_STRING:                                                    \
+      if (!((source)->str##fieldSuffix)) {                                     \
+        continue;                                                              \
+      }                                                                        \
+      NAPI_CALL_RETURN(napi_create_string_utf8(                                \
+          env, (source)->str##fieldSuffix, strlen((source)->str##fieldSuffix), \
+          &(destination)));                                                    \
+      break;                                                                   \
+    case OCREP_PROP_BYTE_STRING:                                               \
+      if ((source)->ocByteStr##fieldSuffix.len == 0 ||                         \
+          !((source)->ocByteStr##fieldSuffix.bytes)) {                         \
+        continue;                                                              \
+      }                                                                        \
+      NAPI_CALL_RETURN(napi_create_buffer_copy(                                \
+          env, (char *)((source)->ocByteStr##fieldSuffix.bytes),               \
+          (source)->ocByteStr##fieldSuffix.len, &(destination)));              \
+      break;                                                                   \
+    case OCREP_PROP_OBJECT:                                                    \
+      NAPI_CALL_RETURN(napi_create_object(env, &(destination)));               \
+      HELPER_CALL_RETURN(                                                      \
+          js_OCRepPayload(env, (source)->obj##fieldSuffix, (destination)));    \
+      break;                                                                   \
+    default:                                                                   \
+      continue;                                                                \
   }
 
 static std::string js_OCRepPayloadValueArray(napi_env env,
@@ -94,22 +101,21 @@ static std::string js_OCRepPayloadValueArray(napi_env env,
                                              size_t *sharedDataIndex,
                                              int dimensionIndex,
                                              napi_value *destination) {
-  NAPI_CALL_RETURN(napi_create_array_with_length(env,
-    array->dimensions[dimensionIndex], destination));
+  NAPI_CALL_RETURN(napi_create_array_with_length(
+      env, array->dimensions[dimensionIndex], destination));
   uint32_t index;
   size_t dataIndex;
   napi_value currentValue = nullptr;
 
   for (index = 0; index < (uint32_t)(array->dimensions[dimensionIndex]);
        index++, currentValue = nullptr) {
-
     // If this is not the lowest dimension, fill with arrays
     if (dimensionIndex < MAX_REP_ARRAY_DEPTH - 1 &&
-         array->dimensions[dimensionIndex + 1] > 0) {
-      HELPER_CALL_RETURN(js_OCRepPayloadValueArray(env, array, sharedDataIndex,
-        dimensionIndex + 1, &currentValue));
+        array->dimensions[dimensionIndex + 1] > 0) {
+      HELPER_CALL_RETURN(js_OCRepPayloadValueArray(
+          env, array, sharedDataIndex, dimensionIndex + 1, &currentValue));
 
-    // Otherwise this is a leaf dimension so fill with values
+      // Otherwise this is a leaf dimension so fill with values
     } else {
       dataIndex = (*sharedDataIndex)++;
       CREATE_SINGLE_ITEM(env, currentValue, array, Array[dataIndex]);
@@ -121,7 +127,7 @@ static std::string js_OCRepPayloadValueArray(napi_env env,
 }
 
 static std::string js_OCRepPayload(napi_env env, OCRepPayload *payload,
-                            napi_value destination) {
+                                   napi_value destination) {
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, uri);
   SET_TYPES_INTERFACES(env, destination, payload, types, interfaces);
   if (payload->values) {
@@ -129,11 +135,12 @@ static std::string js_OCRepPayload(napi_env env, OCRepPayload *payload,
     OCRepPayloadValue *current;
     napi_value currentValue;
     NAPI_CALL_RETURN(napi_create_object(env, &values));
-    for (current = payload->values; current; current = current->next, currentValue = nullptr) {
+    for (current = payload->values; current;
+         current = current->next, currentValue = nullptr) {
       if (current->type == OCREP_PROP_ARRAY) {
         size_t dataIndex = 0;
-        HELPER_CALL_RETURN(js_OCRepPayloadValueArray(env, &(current->arr),
-          &dataIndex, 0, &currentValue));
+        HELPER_CALL_RETURN(js_OCRepPayloadValueArray(
+            env, &(current->arr), &dataIndex, 0, &currentValue));
       } else {
         CREATE_SINGLE_ITEM(env, currentValue, current, );
       }
@@ -190,7 +197,7 @@ static std::string js_OCDiscoveryPayload(napi_env env,
 }
 
 static std::string js_OCDevicePayload(napi_env env, OCDevicePayload *payload,
-                               napi_value destination) {
+                                      napi_value destination) {
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, sid);
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, deviceName);
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, specVersion);
@@ -202,8 +209,9 @@ static std::string js_OCDevicePayload(napi_env env, OCDevicePayload *payload,
   return std::string();
 }
 
-static std::string js_OCPlatformPayload(napi_env env, OCPlatformPayload *payload,
-                                 napi_value destination) {
+static std::string js_OCPlatformPayload(napi_env env,
+                                        OCPlatformPayload *payload,
+                                        napi_value destination) {
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, uri);
   C2J_SET_PROPERTY_CALL_RETURN(
       env, destination, "info",
@@ -255,7 +263,9 @@ std::string js_OCPayload(napi_env env, OCPayload *payload, napi_value *result) {
   return std::string();
 }
 
-static std::string addStrings(napi_env env, napi_value source, OCRepPayload *destination, const char *name, bool(*api)(OCRepPayload *, const char *)) {
+static std::string addStrings(napi_env env, napi_value source,
+                              OCRepPayload *destination, const char *name,
+                              bool (*api)(OCRepPayload *, const char *)) {
   J2C_GET_PROPERTY_JS_RETURN(ll, env, source, name);
   DECLARE_VALUE_TYPE(llType, env, ll, return FAIL_STATUS_RETURN);
 
@@ -273,264 +283,273 @@ static std::string addStrings(napi_env env, napi_value source, OCRepPayload *des
   NAPI_CALL_RETURN(napi_get_array_length(env, ll, &length));
   for (index = 0; index < length; index++) {
     napi_value item;
-	NAPI_CALL_RETURN(napi_get_element(env, ll, index, &item));
-	itemMessage = message + "[" + std::to_string(index) + "]";
-	J2C_GET_STRING_JS_RETURN(env, strItem, item, false, itemMessage);
-	tracker.reset(strItem);
-	if (!api(destination, strItem)) {
-	  return LOCAL_MESSAGE(std::string("Failed to set ") + itemMessage);
-	} else {
-	  tracker.release();
-	}
+    NAPI_CALL_RETURN(napi_get_element(env, ll, index, &item));
+    itemMessage = message + "[" + std::to_string(index) + "]";
+    J2C_GET_STRING_JS_RETURN(env, strItem, item, false, itemMessage);
+    tracker.reset(strItem);
+    if (!api(destination, strItem)) {
+      return LOCAL_MESSAGE(std::string("Failed to set ") + itemMessage);
+    } else {
+      tracker.release();
+    }
   }
 }
 
-static std::string c_OCRepPayload(napi_env env, napi_value source, OCRepPayload **destination) {
+static std::string c_OCRepPayload(napi_env env, napi_value source,
+                                  OCRepPayload **destination) {
   uint32_t index, length;
 
-  std::unique_ptr<OCRepPayload, void (*)(OCRepPayload *)>
-    payload(OCRepPayloadCreate(), OCRepPayloadDestroy);
+  std::unique_ptr<OCRepPayload, void (*)(OCRepPayload *)> payload(
+      OCRepPayloadCreate(), OCRepPayloadDestroy);
 
   // reppayload.uri
   J2C_GET_PROPERTY_JS_RETURN(jsUri, env, source, "uri");
   J2C_GET_STRING_TRACKED_JS_RETURN(uri, env, jsUri, true, "payload.uri");
   if (uri) {
     if (!OCRepPayloadSetUri(payload.get(), uri)) {
-	  return std::string("Failed to set payload.uri");
-	}
+      return std::string("Failed to set payload.uri");
+    }
   }
 
   // reppayload.types
   HELPER_CALL_RETURN(addStrings(env, source, payload.get(), "types",
-    OCRepPayloadAddResourceType));
+                                OCRepPayloadAddResourceType));
 
   // reppayload.interfaces
   HELPER_CALL_RETURN(addStrings(env, source, payload.get(), "interfaces",
-    OCRepPayloadAddInterface));
+                                OCRepPayloadAddInterface));
 
   J2C_GET_PROPERTY_JS_RETURN(jsValues, env, source, "values");
   DECLARE_VALUE_TYPE(jsValuesType, env, jsValues, return FAIL_STATUS_RETURN);
   if (!(jsValuesType == napi_null || jsValuesType == napi_undefined)) {
     J2C_VALIDATE_VALUE_TYPE_RETURN(env, jsValues, napi_object,
-	  "payload.values");
-	napi_value propertyNames;
-	std::unique_ptr<char> tracker;
-	std::string msg;
-	char *propName;
-	uint32_t index, length;
-	napi_value jsKey;
-	napi_value jsValue;
-	napi_valuetype jsValueType;
-	double doubleValue;
-	int64_t intValue;
-	bool boolValue;
-	char *strValue;
-	NAPI_CALL_RETURN(napi_get_propertynames(env, jsValues, &propertyNames));
+                                   "payload.values");
+    napi_value propertyNames;
+    std::unique_ptr<char> tracker;
+    std::string msg;
+    char *propName;
+    uint32_t index, length;
+    napi_value jsKey;
+    napi_value jsValue;
+    napi_valuetype jsValueType;
+    double doubleValue;
+    int64_t intValue;
+    bool boolValue;
+    char *strValue;
+    NAPI_CALL_RETURN(napi_get_propertynames(env, jsValues, &propertyNames));
 
     // We can assume propertyNames is an array
-	NAPI_CALL_RETURN(napi_get_array_length(env, propertyNames, &length));
-	for (index = 0; index < length; index++) {
-	  NAPI_CALL_RETURN(napi_get_element(env, propertyNames, index, &jsKey));
-	  msg = std::string("payload.values item[") + std::to_string(index) + "]";
-	  J2C_GET_STRING_JS_RETURN(env, propName, jsKey, false, msg);
-	  tracker.reset(propName);
-	  J2C_ASSIGN_PROPERTY_JS_RETURN(env, jsValues, propName, &jsValue);
-	  NAPI_CALL_RETURN(napi_get_type_of_value(env, jsValue, &jsValueType));
-	  msg = std::string("payload.values[\"") + propName + "\"]";
-	  if (jsValueType == napi_null) {
-	    if (!OCRepPayloadSetNull(payload.get(), propName)) {
-		  return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
-		}
-	  } else if (jsValueType == napi_boolean) {
-	    NAPI_CALL_RETURN(napi_get_value_bool(env, jsValue, &boolValue));
-		if (!OCRepPayloadSetPropBool(payload.get(), propName, boolValue)) {
-		  return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
-		}
-	  } else if (jsValueType == napi_number) {
-	    NAPI_CALL_RETURN(napi_get_value_double(env, jsValue, &doubleValue));
-		intValue = (int64_t)doubleValue;
+    NAPI_CALL_RETURN(napi_get_array_length(env, propertyNames, &length));
+    for (index = 0; index < length; index++) {
+      NAPI_CALL_RETURN(napi_get_element(env, propertyNames, index, &jsKey));
+      msg = std::string("payload.values item[") + std::to_string(index) + "]";
+      J2C_GET_STRING_JS_RETURN(env, propName, jsKey, false, msg);
+      tracker.reset(propName);
+      J2C_ASSIGN_PROPERTY_JS_RETURN(env, jsValues, propName, &jsValue);
+      NAPI_CALL_RETURN(napi_get_type_of_value(env, jsValue, &jsValueType));
+      msg = std::string("payload.values[\"") + propName + "\"]";
+      if (jsValueType == napi_null) {
+        if (!OCRepPayloadSetNull(payload.get(), propName)) {
+          return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
+        }
+      } else if (jsValueType == napi_boolean) {
+        NAPI_CALL_RETURN(napi_get_value_bool(env, jsValue, &boolValue));
+        if (!OCRepPayloadSetPropBool(payload.get(), propName, boolValue)) {
+          return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
+        }
+      } else if (jsValueType == napi_number) {
+        NAPI_CALL_RETURN(napi_get_value_double(env, jsValue, &doubleValue));
+        intValue = (int64_t)doubleValue;
 
         // It's exactly an integer
-		if (intValue == doubleValue) {
-		  if (!OCRepPayloadSetPropInt(payload.get(), propName, intValue)) {
-		    return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
-		  }
-
-        // It's a double
-		} else {
-		  if (!OCRepPayloadSetPropDouble(payload.get(), propName,
-		      doubleValue)) {
-		    return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
-		  }
-		}
-	  } else if (jsValueType == napi_string) {
-	    J2C_GET_STRING_JS_RETURN(env, strValue, jsValue, false, msg);
-		
-	  }
-	}
-  }
-/*
-  // reppayload.values
-  if (jsPayload->Has(Nan::New("values").ToLocalChecked())) {
-    Local<Value> values =
-        Nan::Get(jsPayload, Nan::New("values").ToLocalChecked())
-            .ToLocalChecked();
-    VALIDATE_VALUE_TYPE(values, IsObject, "reppayload.values", goto fail);
-    Local<Object> valuesObject = Local<Object>::Cast(values);
-    Local<Array> keys = Nan::GetPropertyNames(valuesObject).ToLocalChecked();
-    length = keys->Length();
-    for (index = 0; index < length; index++) {
-      Local<Value> value =
-          Nan::Get(valuesObject,
-                   Nan::Get(keys, index).ToLocalChecked()->ToString())
-              .ToLocalChecked();
-      if (value->IsNull()) {
-        String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
-        if (!OCRepPayloadSetNull(payload, (const char *)*name)) {
-          Nan::ThrowError("reppayload: Failed to set null property");
-          goto fail;
-        }
-      } else if (value->IsUint32()) {
-        String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
-        if (!OCRepPayloadSetPropInt(
-                payload, (const char *)*name,
-                (int64_t)Nan::To<uint32_t>(value).FromJust())) {
-          Nan::ThrowError("reppayload: Failed to set integer property");
-          goto fail;
-        }
-      } else if (value->IsNumber()) {
-        String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
-        if (!OCRepPayloadSetPropDouble(payload, (const char *)*name,
-                                       Nan::To<double>(value).FromJust())) {
-          Nan::ThrowError("reppayload: Failed to set floating point property");
-          goto fail;
-        }
-      } else if (value->IsBoolean()) {
-        String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
-        if (!OCRepPayloadSetPropBool(payload, (const char *)*name,
-                                     Nan::To<bool>(value).FromJust())) {
-          Nan::ThrowError("reppayload: Failed to set boolean property");
-          goto fail;
-        }
-      } else if (value->IsString()) {
-        String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
-        String::Utf8Value stringValue(value);
-        if (!OCRepPayloadSetPropString(payload, (const char *)*name,
-                                       (const char *)*stringValue)) {
-          Nan::ThrowError("reppayload: Failed to set string property");
-          goto fail;
-        }
-      } else if (value->IsArray()) {
-        size_t dimensions[MAX_REP_ARRAY_DEPTH] = {0};
-        bool typeEstablished = false;
-        OCRepPayloadPropType arrayType;
-        Local<Array> array = Local<Array>::Cast(value);
-        if (!validateRepPayloadArray(array, &typeEstablished, &arrayType,
-                                     dimensions, 0)) {
-          goto fail;
-        }
-
-        if (dimensions[0] > 0) {
-          void *flatArray;
-
-          if (!flattenArray(array, &flatArray, dimensions, arrayType)) {
-            goto fail;
+        if (intValue == doubleValue) {
+          if (!OCRepPayloadSetPropInt(payload.get(), propName, intValue)) {
+            return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
           }
 
-          String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
-          switch (arrayType) {
-            case OCREP_PROP_INT:
-              if (!OCRepPayloadSetIntArray(payload, (const char *)*name,
-                                           (const int64_t *)flatArray,
-                                           dimensions)) {
-                Nan::ThrowError(
-                    "reppayload: Failed to set integer array property");
-                goto fail;
-              }
-              break;
-
-            case OCREP_PROP_DOUBLE:
-              if (!OCRepPayloadSetDoubleArray(payload, (const char *)*name,
-                                              (const double *)flatArray,
-                                              dimensions)) {
-                Nan::ThrowError(
-                    "reppayload: Failed to set double array property");
-                goto fail;
-              }
-              break;
-
-            case OCREP_PROP_BOOL:
-              if (!OCRepPayloadSetBoolArray(payload, (const char *)*name,
-                                            (const bool *)flatArray,
-                                            dimensions)) {
-                Nan::ThrowError(
-                    "reppayload: Failed to set boolean array property");
-                goto fail;
-              }
-              break;
-
-            case OCREP_PROP_STRING:
-              if (!OCRepPayloadSetStringArray(payload, (const char *)*name,
-                                              (const char **)flatArray,
-                                              dimensions)) {
-                Nan::ThrowError(
-                    "reppayload: Failed to set string array property");
-                goto fail;
-              }
-              break;
-
-            case OCREP_PROP_OBJECT:
-              if (!OCRepPayloadSetPropObjectArray(
-                      payload, (const char *)*name,
-                      (const OCRepPayload **)flatArray, dimensions)) {
-                Nan::ThrowError(
-                    "reppayload: Failed to set object array property");
-                goto fail;
-              }
-              break;
-
-            default:
-              break;
-          }
-        }
-      } else if (value->IsObject()) {
-        OCRepPayload *child_payload = 0;
-
-        if (c_OCRepPayload(Nan::To<Object>(value).ToLocalChecked(),
-                           &child_payload)) {
-          String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
-          if (!OCRepPayloadSetPropObjectAsOwner(payload, (const char *)*name,
-                                                child_payload)) {
-            Nan::ThrowError("reppayload: Failed to set object property");
-            goto fail;
-          }
+          // It's a double
         } else {
-          goto fail;
+          if (!OCRepPayloadSetPropDouble(payload.get(), propName,
+                                         doubleValue)) {
+            return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
+          }
         }
+      } else if (jsValueType == napi_string) {
+        J2C_GET_STRING_JS_RETURN(env, strValue, jsValue, false, msg);
       }
     }
   }
+  /*
+    // reppayload.values
+    if (jsPayload->Has(Nan::New("values").ToLocalChecked())) {
+      Local<Value> values =
+          Nan::Get(jsPayload, Nan::New("values").ToLocalChecked())
+              .ToLocalChecked();
+      VALIDATE_VALUE_TYPE(values, IsObject, "reppayload.values", goto fail);
+      Local<Object> valuesObject = Local<Object>::Cast(values);
+      Local<Array> keys = Nan::GetPropertyNames(valuesObject).ToLocalChecked();
+      length = keys->Length();
+      for (index = 0; index < length; index++) {
+        Local<Value> value =
+            Nan::Get(valuesObject,
+                     Nan::Get(keys, index).ToLocalChecked()->ToString())
+                .ToLocalChecked();
+        if (value->IsNull()) {
+          String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
+          if (!OCRepPayloadSetNull(payload, (const char *)*name)) {
+            Nan::ThrowError("reppayload: Failed to set null property");
+            goto fail;
+          }
+        } else if (value->IsUint32()) {
+          String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
+          if (!OCRepPayloadSetPropInt(
+                  payload, (const char *)*name,
+                  (int64_t)Nan::To<uint32_t>(value).FromJust())) {
+            Nan::ThrowError("reppayload: Failed to set integer property");
+            goto fail;
+          }
+        } else if (value->IsNumber()) {
+          String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
+          if (!OCRepPayloadSetPropDouble(payload, (const char *)*name,
+                                         Nan::To<double>(value).FromJust())) {
+            Nan::ThrowError("reppayload: Failed to set floating point
+    property");
+            goto fail;
+          }
+        } else if (value->IsBoolean()) {
+          String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
+          if (!OCRepPayloadSetPropBool(payload, (const char *)*name,
+                                       Nan::To<bool>(value).FromJust())) {
+            Nan::ThrowError("reppayload: Failed to set boolean property");
+            goto fail;
+          }
+        } else if (value->IsString()) {
+          String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
+          String::Utf8Value stringValue(value);
+          if (!OCRepPayloadSetPropString(payload, (const char *)*name,
+                                         (const char *)*stringValue)) {
+            Nan::ThrowError("reppayload: Failed to set string property");
+            goto fail;
+          }
+        } else if (value->IsArray()) {
+          size_t dimensions[MAX_REP_ARRAY_DEPTH] = {0};
+          bool typeEstablished = false;
+          OCRepPayloadPropType arrayType;
+          Local<Array> array = Local<Array>::Cast(value);
+          if (!validateRepPayloadArray(array, &typeEstablished, &arrayType,
+                                       dimensions, 0)) {
+            goto fail;
+          }
 
-  if (jsPayload->Has(Nan::New("next").ToLocalChecked())) {
-    Local<Value> next =
-        Nan::Get(jsPayload, Nan::New("next").ToLocalChecked()).ToLocalChecked();
-    VALIDATE_VALUE_TYPE(next, IsObject, "reppayload.next", goto fail);
-    OCRepPayload *next_payload = 0;
-    if (!c_OCRepPayload(Nan::To<Object>(next).ToLocalChecked(),
-                        &next_payload)) {
-      goto fail;
+          if (dimensions[0] > 0) {
+            void *flatArray;
+
+            if (!flattenArray(array, &flatArray, dimensions, arrayType)) {
+              goto fail;
+            }
+
+            String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
+            switch (arrayType) {
+              case OCREP_PROP_INT:
+                if (!OCRepPayloadSetIntArray(payload, (const char *)*name,
+                                             (const int64_t *)flatArray,
+                                             dimensions)) {
+                  Nan::ThrowError(
+                      "reppayload: Failed to set integer array property");
+                  goto fail;
+                }
+                break;
+
+              case OCREP_PROP_DOUBLE:
+                if (!OCRepPayloadSetDoubleArray(payload, (const char *)*name,
+                                                (const double *)flatArray,
+                                                dimensions)) {
+                  Nan::ThrowError(
+                      "reppayload: Failed to set double array property");
+                  goto fail;
+                }
+                break;
+
+              case OCREP_PROP_BOOL:
+                if (!OCRepPayloadSetBoolArray(payload, (const char *)*name,
+                                              (const bool *)flatArray,
+                                              dimensions)) {
+                  Nan::ThrowError(
+                      "reppayload: Failed to set boolean array property");
+                  goto fail;
+                }
+                break;
+
+              case OCREP_PROP_STRING:
+                if (!OCRepPayloadSetStringArray(payload, (const char *)*name,
+                                                (const char **)flatArray,
+                                                dimensions)) {
+                  Nan::ThrowError(
+                      "reppayload: Failed to set string array property");
+                  goto fail;
+                }
+                break;
+
+              case OCREP_PROP_OBJECT:
+                if (!OCRepPayloadSetPropObjectArray(
+                        payload, (const char *)*name,
+                        (const OCRepPayload **)flatArray, dimensions)) {
+                  Nan::ThrowError(
+                      "reppayload: Failed to set object array property");
+                  goto fail;
+                }
+                break;
+
+              default:
+                break;
+            }
+          }
+        } else if (value->IsObject()) {
+          OCRepPayload *child_payload = 0;
+
+          if (c_OCRepPayload(Nan::To<Object>(value).ToLocalChecked(),
+                             &child_payload)) {
+            String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
+            if (!OCRepPayloadSetPropObjectAsOwner(payload, (const char *)*name,
+                                                  child_payload)) {
+              Nan::ThrowError("reppayload: Failed to set object property");
+              goto fail;
+            }
+          } else {
+            goto fail;
+          }
+        }
+      }
     }
-    OCRepPayloadAppend(payload, next_payload);
-  }
-*/
+
+    if (jsPayload->Has(Nan::New("next").ToLocalChecked())) {
+      Local<Value> next =
+          Nan::Get(jsPayload,
+    Nan::New("next").ToLocalChecked()).ToLocalChecked();
+      VALIDATE_VALUE_TYPE(next, IsObject, "reppayload.next", goto fail);
+      OCRepPayload *next_payload = 0;
+      if (!c_OCRepPayload(Nan::To<Object>(next).ToLocalChecked(),
+                          &next_payload)) {
+        goto fail;
+      }
+      OCRepPayloadAppend(payload, next_payload);
+    }
+  */
   *destination = payload.release();
   return std::string();
 }
 
-std::string c_OCPayload(napi_env env, napi_value source, OCPayload **destination) {
+std::string c_OCPayload(napi_env env, napi_value source,
+                        OCPayload **destination) {
+  DECLARE_VALUE_TYPE(jsType, env, source, return FAIL_STATUS_RETURN);
+  if (jsType == napi_null || jsType == napi_undefined) {
+    *destination = nullptr;
+    return std::string();
+  }
+
   J2C_GET_PROPERTY_JS_RETURN(jsPayloadType, env, source, "type");
-  J2C_GET_VALUE_JS_RETURN(OCPayloadType, payloadType, env, jsPayloadType, napi_number,
-    "payload.type", uint32, uint32_t);
+  J2C_GET_VALUE_JS_RETURN(OCPayloadType, payloadType, env, jsPayloadType,
+                          napi_number, "payload.type", uint32, uint32_t);
 
   if (payloadType != PAYLOAD_TYPE_REPRESENTATION) {
     return LOCAL_MESSAGE("Non-representation payload not supported");

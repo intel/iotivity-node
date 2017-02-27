@@ -36,10 +36,10 @@ class JSHandle {
   std::string Init(napi_env env, napi_value _callback, napi_value _self) {
     if (_callback) {
       NAPI_CALL_RETURN(napi_create_reference(env, _callback, 1, &callback));
-	}
+    }
     if (_self) {
       NAPI_CALL_RETURN(napi_create_reference(env, _self, 1, &self));
-	}
+    }
     return std::string();
   }
 
