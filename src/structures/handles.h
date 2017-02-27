@@ -17,6 +17,8 @@
 #ifndef __IOTIVITY_NODE_HANDLES_H__
 #define __IOTIVITY_NODE_HANDLES_H__
 
+#include <map>
+
 #include "../common.h"
 extern "C" {
 #include <ocstack.h>
@@ -124,6 +126,7 @@ class JSOCResourceHandle
     : public JSHandle<JSOCResourceHandle, OCResourceHandle> {
  public:
   static const char *jsClassName() { return "OCResourceHandle"; }
+  static std::map<OCResourceHandle, napi_ref> handles;
 };
 
 std::string InitHandles(napi_env env);

@@ -24,6 +24,8 @@ std::string InitHandles(napi_env env) {
   return std::string();
 }
 
+std::map<OCResourceHandle, napi_ref> JSOCResourceHandle::handles;
+
 /*
 #include <nan.h>
 #include "../common.h"

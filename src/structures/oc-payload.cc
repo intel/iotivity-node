@@ -22,6 +22,9 @@ extern "C" {
 #include <string.h>
 }
 
+static std::string js_OCRepPayload(napi_env env, OCRepPayload *payload,
+                            napi_value destination);
+
 #define C2J_SET_LL_PROPERTY(env, destination, source, name, type, createItem) \
   if ((source)->name) {                                                       \
     C2J_SET_PROPERTY_CALL_RETURN((env), (destination), #name, {               \
@@ -47,6 +50,107 @@ extern "C" {
                              interfaceField)                             \
   C2J_SET_STRING_LL_PROPERTY((env), (destination), (source), typeField); \
   C2J_SET_STRING_LL_PROPERTY((env), (destination), (source), interfaceField);
+
+#define CREATE_SINGLE_ITEM(env, destination, source, fieldSuffix) \
+  switch((source)->type) { \
+    case OCREP_PROP_NULL: \
+      NAPI_CALL_RETURN(napi_get_null(env, &(destination))); \
+      break; \
+    case OCREP_PROP_INT: \
+      NAPI_CALL_RETURN(napi_create_number(env, (double)((source)->i##fieldSuffix), &(destination))); \
+      break; \
+    case OCREP_PROP_DOUBLE: \
+      NAPI_CALL_RETURN(napi_create_number(env, (source)->d##fieldSuffix, &(destination))); \
+      break; \
+    case OCREP_PROP_BOOL: \
+      NAPI_CALL_RETURN(napi_create_boolean(env, (source)->b##fieldSuffix, &(destination))); \
+      break; \
+    case OCREP_PROP_STRING: \
+      if (!((source)->str##fieldSuffix)) { \
+        continue; \
+      } \
+      NAPI_CALL_RETURN(napi_create_string_utf8(env, (source)->str##fieldSuffix, strlen((source)->str##fieldSuffix), &(destination))); \
+      break; \
+    case OCREP_PROP_BYTE_STRING: \
+      if ((source)->ocByteStr##fieldSuffix.len == 0 || !((source)->ocByteStr##fieldSuffix.bytes)) { \
+        continue; \
+      } \
+      NAPI_CALL_RETURN(napi_create_buffer_copy(env, \
+        (char *)((source)->ocByteStr##fieldSuffix.bytes), (source)->ocByteStr##fieldSuffix.len, \
+        &(destination))); \
+      break; \
+    case OCREP_PROP_OBJECT: \
+      NAPI_CALL_RETURN(napi_create_object(env, &(destination))); \
+      HELPER_CALL_RETURN(js_OCRepPayload(env, (source)->obj##fieldSuffix, (destination))); \
+      break; \
+    default: \
+      continue; \
+  }
+
+static std::string js_OCRepPayloadValueArray(napi_env env,
+                                             OCRepPayloadValueArray *array,
+                                             size_t *sharedDataIndex,
+                                             int dimensionIndex,
+                                             napi_value *destination) {
+  NAPI_CALL_RETURN(napi_create_array_with_length(env,
+    array->dimensions[dimensionIndex], destination));
+  uint32_t index;
+  size_t dataIndex;
+  napi_value currentValue = nullptr;
+
+  for (index = 0; index < (uint32_t)(array->dimensions[dimensionIndex]);
+       index++, currentValue = nullptr) {
+
+    // If this is not the lowest dimension, fill with arrays
+    if (dimensionIndex < MAX_REP_ARRAY_DEPTH - 1 &&
+         array->dimensions[dimensionIndex + 1] > 0) {
+      HELPER_CALL_RETURN(js_OCRepPayloadValueArray(env, array, sharedDataIndex,
+        dimensionIndex + 1, &currentValue));
+
+    // Otherwise this is a leaf dimension so fill with values
+    } else {
+      dataIndex = (*sharedDataIndex)++;
+      CREATE_SINGLE_ITEM(env, currentValue, array, Array[dataIndex]);
+    }
+    NAPI_CALL_RETURN(napi_set_element(env, *destination, index, currentValue));
+  }
+
+  return std::string();
+}
+
+static std::string js_OCRepPayload(napi_env env, OCRepPayload *payload,
+                            napi_value destination) {
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, uri);
+  SET_TYPES_INTERFACES(env, destination, payload, types, interfaces);
+  if (payload->values) {
+    napi_value values;
+    OCRepPayloadValue *current;
+    napi_value currentValue;
+    NAPI_CALL_RETURN(napi_create_object(env, &values));
+    for (current = payload->values; current; current = current->next, currentValue = nullptr) {
+      if (current->type == OCREP_PROP_ARRAY) {
+        size_t dataIndex = 0;
+        HELPER_CALL_RETURN(js_OCRepPayloadValueArray(env, &(current->arr),
+          &dataIndex, 0, &currentValue));
+      } else {
+        CREATE_SINGLE_ITEM(env, currentValue, current, );
+      }
+      C2J_SET_PROPERTY_JS_RETURN(env, destination, current->name, currentValue);
+    }
+  }
+
+  // ignore "next"
+  return std::string();
+}
+
+std::string js_OCPresencePayload(napi_env env, OCPresencePayload *payload,
+                                 napi_value destination) {
+  C2J_SET_NUMBER_MEMBER_RETURN(env, destination, payload, sequenceNumber);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, destination, payload, maxAge);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, destination, payload, trigger);
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, resourceType);
+  return std::string();
+}
 
 static std::string js_OCResourcePayload(napi_env env,
                                         OCResourcePayload *payload,
@@ -83,7 +187,7 @@ static std::string js_OCDiscoveryPayload(napi_env env,
   return std::string();
 }
 
-std::string js_OCDevicePayload(napi_env env, OCDevicePayload *payload,
+static std::string js_OCDevicePayload(napi_env env, OCDevicePayload *payload,
                                napi_value destination) {
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, sid);
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, deviceName);
@@ -96,7 +200,7 @@ std::string js_OCDevicePayload(napi_env env, OCDevicePayload *payload,
   return std::string();
 }
 
-std::string js_OCPlatformPayload(napi_env env, OCPlatformPayload *payload,
+static std::string js_OCPlatformPayload(napi_env env, OCPlatformPayload *payload,
                                  napi_value destination) {
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, uri);
   C2J_SET_PROPERTY_CALL_RETURN(
@@ -104,15 +208,6 @@ std::string js_OCPlatformPayload(napi_env env, OCPlatformPayload *payload,
       HELPER_CALL_RETURN(js_OCPlatformInfo(env, &(payload->info), &jsValue)));
   C2J_SET_STRING_LL_PROPERTY(env, destination, payload, rt);
   C2J_SET_STRING_LL_PROPERTY(env, destination, payload, interfaces);
-  return std::string();
-}
-
-std::string js_OCPresencePayload(napi_env env, OCPresencePayload *payload,
-                                 napi_value destination) {
-  C2J_SET_NUMBER_MEMBER_RETURN(env, destination, payload, sequenceNumber);
-  C2J_SET_NUMBER_MEMBER_RETURN(env, destination, payload, maxAge);
-  C2J_SET_NUMBER_MEMBER_RETURN(env, destination, payload, trigger);
-  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, destination, payload, resourceType);
   return std::string();
 }
 
@@ -141,10 +236,12 @@ std::string js_OCPayload(napi_env env, OCPayload *payload, napi_value *result) {
           js_OCPresencePayload(env, (OCPresencePayload *)payload, *result));
       break;
 
-    /*
-        case PAYLOAD_TYPE_REPRESENTATION:
-          return js_OCRepPayload((OCRepPayload *)payload);
+    case PAYLOAD_TYPE_REPRESENTATION:
+      HELPER_CALL_RETURN(
+          js_OCRepPayload(env, (OCRepPayload *)payload, *result));
+      break;
 
+    /*
         case PAYLOAD_TYPE_SECURITY:
           return js_OCSecurityPayload((OCSecurityPayload *)payload);
     */
@@ -157,19 +254,6 @@ std::string js_OCPayload(napi_env env, OCPayload *payload, napi_value *result) {
 }
 
 /*
-
-static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload);
-static Local<Object> js_OCRepPayload(OCRepPayload *payload);
-
-static Local<Value> stringOrUndefined(char *str) {
-  return (str ? Nan::New<Value>((Handle<String>)Nan::New(str).ToLocalChecked())
-              : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
-}
-
-static Local<Value> objectOrUndefined(OCRepPayload *payload) {
-  return (payload ? Nan::New<Value>((Handle<Object>)js_OCRepPayload(payload))
-                  : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
-}
 
 static Local<Array> createPayloadValueArrayRecursively(
     OCRepPayloadValueArray *array, size_t *p_dataIndex, int dimensionIndex) {
@@ -211,6 +295,19 @@ static Local<Array> createPayloadValueArrayRecursively(
   }
 
   return returnValue;
+}
+
+static bool c_OCRepPayload(Local<Object> jsPayload, OCRepPayload **p_payload);
+static Local<Object> js_OCRepPayload(OCRepPayload *payload);
+
+static Local<Value> stringOrUndefined(char *str) {
+  return (str ? Nan::New<Value>((Handle<String>)Nan::New(str).ToLocalChecked())
+              : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
+}
+
+static Local<Value> objectOrUndefined(OCRepPayload *payload) {
+  return (payload ? Nan::New<Value>((Handle<Object>)js_OCRepPayload(payload))
+                  : Nan::New<Value>((Handle<Primitive>)Nan::Undefined()));
 }
 
 static Local<Array> js_OCRepPayloadValueArray(OCRepPayloadValueArray *array) {
