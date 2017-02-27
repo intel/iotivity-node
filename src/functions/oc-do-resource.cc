@@ -18,6 +18,7 @@
 #include "../structures/handles.h"
 #include "../structures/oc-client-response.h"
 #include "../structures/oc-dev-addr.h"
+#include "../structures/oc-payload.h"
 extern "C" {
 #include <ocpayload.h>
 #include <ocstack.h>
@@ -62,8 +63,8 @@ NAPI_METHOD(bind_OCDoResource) {
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
   J2C_GET_VALUE_JS_THROW(OCMethod, method, env, arguments[1], napi_number,
                          "method", uint32, uint32_t);
-  J2C_GET_STRING_ARGUMENT_THROW(requestUri, env, arguments[2], false,
-                                "requestUri");
+  J2C_GET_STRING_TRACKED_JS_THROW(requestUri, env, arguments[2], false,
+                                  "requestUri");
 
   OCDevAddr localAddr;
   OCDevAddr *destination = nullptr;
@@ -76,6 +77,7 @@ NAPI_METHOD(bind_OCDoResource) {
   }
 
   OCPayload *payload = nullptr;
+  HELPER_CALL_THROW(env, c_OCPayload(env, arguments[4], &payload));
 
   J2C_GET_VALUE_JS_THROW(OCConnectivityType, connectivityType, env,
                          arguments[5], napi_number, "connectivityType", uint32,

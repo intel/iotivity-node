@@ -33,9 +33,9 @@ NAPI_METHOD(bind_OCCreateResource) {
   J2C_GET_ARGUMENTS(env, info, 6);
 
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
-  J2C_GET_STRING_ARGUMENT_THROW(type, env, arguments[1], false, "type");
-  J2C_GET_STRING_ARGUMENT_THROW(iface, env, arguments[2], false, "interface");
-  J2C_GET_STRING_ARGUMENT_THROW(uri, env, arguments[3], false, "uri");
+  J2C_GET_STRING_TRACKED_JS_THROW(type, env, arguments[1], false, "type");
+  J2C_GET_STRING_TRACKED_JS_THROW(iface, env, arguments[2], false, "interface");
+  J2C_GET_STRING_TRACKED_JS_THROW(uri, env, arguments[3], false, "uri");
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[4], napi_function, "callback");
   J2C_GET_VALUE_JS_THROW(OCResourceProperty, properties, env, arguments[5],
                          napi_number, "properties", uint32, uint32_t);

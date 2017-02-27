@@ -24,5 +24,6 @@ extern "C" {
 }
 
 std::string js_OCPayload(napi_env env, OCPayload *payload, napi_value *result);
+std::string c_OCPayload(napi_env env, napi_value source, OCPayload **destination);
 
 #endif /* __IOTIVITY_NODE_OCCLIENTRESPONSE_H__ */

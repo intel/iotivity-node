@@ -63,13 +63,13 @@ NAPI_METHOD(bind_OCSetPlatformInfo) {
 
 NAPI_METHOD(bind_OCInit) {
   J2C_GET_ARGUMENTS(env, info, 3);
-  J2C_GET_STRING_ARGUMENT_THROW(ipAddress, env, arguments[0], true, "address");
+  J2C_GET_STRING_TRACKED_JS_THROW(ip, env, arguments[0], true, "address");
   J2C_GET_VALUE_JS_THROW(uint16_t, port, env, arguments[1], napi_number, "port",
                          uint32, uint32_t);
   J2C_GET_VALUE_JS_THROW(OCMode, mode, env, arguments[2], napi_number, "mode",
                          uint32, uint32_t);
   C2J_SET_RETURN_VALUE(env, info, number,
-                       ((double)OCInit(ipAddress, port, mode)));
+                       ((double)OCInit(ip, port, mode)));
 }
 
 NAPI_METHOD(bind_OCGetNumberOfResources) {
