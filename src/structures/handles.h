@@ -34,8 +34,12 @@ class JSHandle {
   napi_ref self;
 
   std::string Init(napi_env env, napi_value _callback, napi_value _self) {
-    NAPI_CALL_RETURN(napi_create_reference(env, _callback, 1, &callback));
-    NAPI_CALL_RETURN(napi_create_reference(env, _self, 1, &self));
+    if (_callback) {
+      NAPI_CALL_RETURN(napi_create_reference(env, _callback, 1, &callback));
+	}
+    if (_self) {
+      NAPI_CALL_RETURN(napi_create_reference(env, _self, 1, &self));
+	}
     return std::string();
   }
 
@@ -120,6 +124,11 @@ class JSHandle {
 class JSOCDoHandle : public JSHandle<JSOCDoHandle, OCDoHandle> {
  public:
   static const char *jsClassName() { return "OCDoHandle"; }
+};
+
+class JSOCRequestHandle : public JSHandle<JSOCRequestHandle, OCRequestHandle> {
+ public:
+  static const char *jsClassName() { return "OCRequestHandle"; }
 };
 
 class JSOCResourceHandle

@@ -17,13 +17,11 @@
 #ifndef __IOTIVITY_NODE_STRUCTURES_H__
 #define __IOTIVITY_NODE_STRUCTURES_H__
 
-#include <v8.h>
-
+#include "common.h"
 extern "C" {
 #include <ocstack.h>
 }
 
-v8::Local<v8::Object> js_OCEntityHandlerRequest(
-    OCEntityHandlerRequest *request);
+std::string js_OCEntityHandlerRequest(napi_env env, OCEntityHandlerRequest *request, napi_value *result);
 
 #endif /* __IOTIVITY_NODE_STRUCTURES_H__ */

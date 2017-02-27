@@ -17,7 +17,6 @@
 #include <map>
 
 #include "../common.h"
-#include "../structures.h"
 #include "../structures/handles.h"
 #include "entity-handler.h"
 

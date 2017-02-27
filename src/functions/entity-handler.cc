@@ -15,6 +15,7 @@
  */
 
 #include "entity-handler.h"
+#include "../structures/oc-entity-handler-request.h"
 
 std::string entityHandler(napi_env env, OCEntityHandlerFlag flag,
                           OCEntityHandlerRequest *request, char *uri,
@@ -26,7 +27,7 @@ std::string entityHandler(napi_env env, OCEntityHandlerFlag flag,
 
   napi_value arguments[3];
   NAPI_CALL_RETURN(napi_create_number(env, (double)flag, &arguments[0]));
-  NAPI_CALL_RETURN(napi_get_null(env, &arguments[1]));
+  HELPER_CALL_RETURN(js_OCEntityHandlerRequest(env, request, &arguments[1]));
   if (uri) {
     NAPI_CALL_RETURN(
         napi_create_string_utf8(env, uri, strlen(uri), &arguments[2]));

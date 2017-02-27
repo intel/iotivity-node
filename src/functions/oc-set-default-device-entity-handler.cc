@@ -15,7 +15,6 @@
  */
 
 #include "../common.h"
-#include "../structures.h"
 #include "entity-handler.h"
 
 extern "C" {

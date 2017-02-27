@@ -205,6 +205,7 @@
 				"src/structures/oc-client-response.cc",
 				"src/structures/oc-dev-addr.cc",
 				"src/structures/oc-device-info.cc",
+				"src/structures/oc-entity-handler-request.cc",
 				"src/structures/oc-identity.cc",
 				"src/structures/oc-payload.cc",
 				"src/structures/oc-platform-info.cc"
