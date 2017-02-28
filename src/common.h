@@ -102,6 +102,24 @@
   J2C_ASSIGN_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
                       getterSuffix, jsParameterType, __VA_ARGS__);
 
+#define J2C_ASSIGN_STRING_JS(env, destination, source, message, ...) \
+  do { \
+    int length;                                                    \
+    NAPI_CALL(napi_get_value_string_utf8_length((env), (source),            \
+                                                &length),          \
+              __VA_ARGS__);                                                 \
+    std::unique_ptr<char> cString(new char[length + 1]());         \
+    JS_ASSERT(cString.get(),                                                \
+              std::string("") + "Failed to allocate memory for" + message,  \
+              __VA_ARGS__);                                                 \
+    int bytesWritten;                                                       \
+    NAPI_CALL(napi_get_value_string_utf8((env), (source), cString.get(),    \
+                                           length, &bytesWritten),   \
+              __VA_ARGS__);                                                 \
+    (destination) = cString.release();                                     \
+  } while(0) \
+
+
 #define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...)     \
   do {                                                                        \
     DECLARE_VALUE_TYPE(valueType, env, (source), __VA_ARGS__);                \
@@ -110,19 +128,7 @@
     } else {                                                                  \
       JS_ASSERT((valueType == napi_string),                                   \
                 std::string("") + message + " is not a string", __VA_ARGS__); \
-      int cString__length;                                                    \
-      NAPI_CALL(napi_get_value_string_utf8_length((env), (source),            \
-                                                  &cString__length),          \
-                __VA_ARGS__);                                                 \
-      std::unique_ptr<char> cString(new char[cString__length + 1]());         \
-      JS_ASSERT(cString.get(),                                                \
-                std::string("") + "Failed to allocate memory for" + message,  \
-                __VA_ARGS__);                                                 \
-      int bytesWritten;                                                       \
-      NAPI_CALL(napi_get_value_string_utf8((env), (source), cString.get(),    \
-                                           cString__length, &bytesWritten),   \
-                __VA_ARGS__);                                                 \
-      (destination) = cString.release();                                      \
+      J2C_ASSIGN_STRING_JS((env), (destination), (source), message, __VA_ARGS__); \
     }                                                                         \
   } while (0)
 
@@ -167,6 +173,9 @@
 #define HELPER_CALL_RETURN(theCall) \
   HELPER_CALL(theCall, return FAIL_STATUS_RETURN)
 
+#define DECLARE_VALUE_TYPE_RETURN(varName, env, value) \
+  DECLARE_VALUE_TYPE(varName, (env), (value), return FAIL_STATUS_RETURN)
+
 #define J2C_ASSIGN_PROPERTY_JS_RETURN(env, source, name, destination) \
   J2C_ASSIGN_PROPERTY_JS((env), (source), (name), (destination),      \
                          return FAIL_STATUS_RETURN)
@@ -185,6 +194,9 @@
 #define J2C_GET_STRING_RETURN(env, destination, source, nullOk, name) \
   J2C_GET_STRING((env), (destination), (source), (nullOk), name,      \
                  return FAIL_STATUS_RETURN)
+
+#define J2C_ASSIGN_STRING_JS_RETURN(env, destination, source, message) \
+  J2C_ASSIGN_STRING_JS((env), (destination), (source), message, return FAIL_STATUS_RETURN)
 
 #define J2C_GET_STRING_JS_RETURN(env, destination, source, nullOk, message) \
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,      \

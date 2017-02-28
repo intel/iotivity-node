@@ -208,7 +208,9 @@
 				"src/structures/oc-entity-handler-request.cc",
 				"src/structures/oc-identity.cc",
 				"src/structures/oc-payload.cc",
-				"src/structures/oc-platform-info.cc"
+				"src/structures/oc-platform-info.cc",
+				"src/structures/oc-rep-payload/to-c.cc",
+				"src/structures/oc-rep-payload/to-js.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
 		}
