@@ -38,13 +38,14 @@ std::string js_OCEntityHandlerRequest(napi_env env,
     }
     C2J_SET_PROPERTY_CALL_RETURN(
         env, *result, "resource",
-        HELPER_CALL_RETURN(napi_get_reference_value(env, jsRef, &jsValue)));
+        NAPI_CALL_RETURN(napi_get_reference_value(env, jsRef, &jsValue)));
   }
 
   if (request->requestHandle) {
     napi_value jsHandle;
     JSOCRequestHandle *cData;
     HELPER_CALL_RETURN(JSOCRequestHandle::New(env, &jsHandle, &cData));
+    cData->data = request->requestHandle;
     HELPER_CALL_RETURN(cData->Init(env, nullptr, jsHandle));
     C2J_SET_PROPERTY_JS_RETURN(env, *result, "requestHandle", jsHandle);
   } else {

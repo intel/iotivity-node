@@ -144,9 +144,9 @@ std::string c_OCPayload(napi_env env, napi_value source,
     return std::string();
   }
 
-  J2C_GET_PROPERTY_JS_RETURN(jsPayloadType, env, source, "type");
-  J2C_GET_VALUE_JS_RETURN(OCPayloadType, payloadType, env, jsPayloadType,
-                          napi_number, "payload.type", uint32, uint32_t);
+  J2C_DECLARE_PROPERTY_JS_RETURN(jsPayloadType, env, source, "type");
+  J2C_DECLARE_VALUE_JS_RETURN(OCPayloadType, payloadType, env, jsPayloadType,
+                              napi_number, "payload.type", uint32, uint32_t);
 
   if (payloadType != PAYLOAD_TYPE_REPRESENTATION) {
     return LOCAL_MESSAGE("Payload other than representation not supported");

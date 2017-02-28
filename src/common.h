@@ -23,30 +23,33 @@
 #include <memory>
 #include <string>
 
+// A line that looks like a stack frame from a JS exception
 #define SOURCE_LOCATION                                        \
   (std::string("    at ") + std::string(__func__) +            \
    std::string(" (" __FILE__ ":") + std::to_string(__LINE__) + \
    std::string(")\n"))
 
+// The top of what looks like a JS exception, but with native addresses
 #define LOCAL_MESSAGE(message) \
   (std::string("") + message + "\n" + SOURCE_LOCATION)
 
-#define RESULT_CALL(theCall, ...)     \
-  do {                                \
-    std::string __resultingStatus;    \
-    theCall;                          \
-    if (!__resultingStatus.empty()) { \
-      __VA_ARGS__;                    \
-    }                                 \
+// Appends a frame to what looks like a JS exception. __resultingStatus is a
+// variable that carries the stack trace information. Most of the time
+// __VA_ARGS__ is either a return statement or a throw followed by a void
+// return. Both refer to __resultingStatus.
+#define FAIL_STATUS (__resultingStatus + SOURCE_LOCATION)
+
+// Goes down the bail-with-stack-trace-like-string path if the condition fails.
+#define JS_ASSERT(condition, message, ...)                \
+  do {                                                    \
+    std::string __resultingStatus;                        \
+    if (!((condition))) {                                 \
+      __resultingStatus = std::string() + message + "\n"; \
+      __VA_ARGS__;                                        \
+    }                                                     \
   } while (0)
 
-#define JS_ASSERT(condition, message, ...)                  \
-  RESULT_CALL(                                              \
-      if (!((condition))) {                                 \
-        __resultingStatus = std::string() + message + "\n"; \
-      },                                                    \
-      __VA_ARGS__)
-
+// Converts a non-napi_ok status to a string that looks like an exception.
 #define NAPI_CALL(theCall, ...)                                        \
   do {                                                                 \
     napi_status status = theCall;                                      \
@@ -55,8 +58,15 @@
               __VA_ARGS__);                                            \
   } while (0)
 
-#define HELPER_CALL(theCall, ...) \
-  RESULT_CALL(__resultingStatus = theCall, __VA_ARGS__)
+// Bails if a helper returns a non-empty std::string. The __VA_ARGS__ either
+// append the frame info or throw a JS exception.
+#define HELPER_CALL(theCall, ...)            \
+  do {                                       \
+    std::string __resultingStatus = theCall; \
+    if (!__resultingStatus.empty()) {        \
+      __VA_ARGS__;                           \
+    }                                        \
+  } while (0)
 
 #define DECLARE_PROPERTY(varName, env, value, ...) \
   napi_propertyname varName;                       \
@@ -82,8 +92,8 @@
               __VA_ARGS__);                                              \
   } while (0)
 
-#define J2C_GET_PROPERTY_JS(varName, env, source, name, ...) \
-  napi_value varName;                                        \
+#define J2C_DECLARE_PROPERTY_JS(varName, env, source, name, ...) \
+  napi_value varName;                                            \
   J2C_ASSIGN_PROPERTY_JS((env), (source), (name), &varName, __VA_ARGS__)
 
 #define J2C_ASSIGN_VALUE_JS(cType, destination, env, source, jsType, message, \
@@ -96,29 +106,27 @@
     (destination) = (cType)fromJSValue;                                       \
   } while (0)
 
-#define J2C_GET_VALUE_JS(cType, variableName, env, source, jsType, message,  \
-                         getterSuffix, jsParameterType, ...)                 \
+#define J2C_DECLARE_VALUE_JS(cType, variableName, env, source, jsType,       \
+                             message, getterSuffix, jsParameterType, ...)    \
   cType variableName;                                                        \
   J2C_ASSIGN_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
                       getterSuffix, jsParameterType, __VA_ARGS__);
 
-#define J2C_ASSIGN_STRING_JS(env, destination, source, message, ...) \
-  do { \
-    int length;                                                    \
-    NAPI_CALL(napi_get_value_string_utf8_length((env), (source),            \
-                                                &length),          \
-              __VA_ARGS__);                                                 \
-    std::unique_ptr<char> cString(new char[length + 1]());         \
-    JS_ASSERT(cString.get(),                                                \
-              std::string("") + "Failed to allocate memory for" + message,  \
-              __VA_ARGS__);                                                 \
-    int bytesWritten;                                                       \
-    NAPI_CALL(napi_get_value_string_utf8((env), (source), cString.get(),    \
-                                           length, &bytesWritten),   \
-              __VA_ARGS__);                                                 \
+#define J2C_ASSIGN_STRING_JS(env, destination, source, message, ...)       \
+  do {                                                                     \
+    int length;                                                            \
+    NAPI_CALL(napi_get_value_string_utf8_length((env), (source), &length), \
+              __VA_ARGS__);                                                \
+    std::unique_ptr<char> cString(new char[length + 1]());                 \
+    JS_ASSERT(cString.get(),                                               \
+              std::string("") + "Failed to allocate memory for" + message, \
+              __VA_ARGS__);                                                \
+    int bytesWritten;                                                      \
+    NAPI_CALL(napi_get_value_string_utf8((env), (source), cString.get(),   \
+                                         length, &bytesWritten),           \
+              __VA_ARGS__);                                                \
     (destination) = cString.release();                                     \
-  } while(0) \
-
+  } while (0)
 
 #define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...)     \
   do {                                                                        \
@@ -128,16 +136,17 @@
     } else {                                                                  \
       JS_ASSERT((valueType == napi_string),                                   \
                 std::string("") + message + " is not a string", __VA_ARGS__); \
-      J2C_ASSIGN_STRING_JS((env), (destination), (source), message, __VA_ARGS__); \
+      J2C_ASSIGN_STRING_JS((env), (destination), (source), message,           \
+                           __VA_ARGS__);                                      \
     }                                                                         \
   } while (0)
 
-#define J2C_GET_STRING(env, destination, source, nullOk, name, ...)   \
-  do {                                                                \
-    (destination) = nullptr;                                          \
-    J2C_GET_PROPERTY_JS(jsValue, (env), (source), name, __VA_ARGS__); \
-    J2C_GET_STRING_JS((env), (destination), jsValue, (nullOk),        \
-                      #destination "." name, __VA_ARGS__);            \
+#define J2C_GET_STRING(env, destination, source, nullOk, name, ...)       \
+  do {                                                                    \
+    (destination) = nullptr;                                              \
+    J2C_DECLARE_PROPERTY_JS(jsValue, (env), (source), name, __VA_ARGS__); \
+    J2C_GET_STRING_JS((env), (destination), jsValue, (nullOk),            \
+                      #destination "." name, __VA_ARGS__);                \
   } while (0)
 
 #define J2C_GET_STRING_TRACKED_JS(varName, env, source, nullOk, message, ...)  \
@@ -166,69 +175,62 @@
 
 // Macros used in helpers - they cause the function to return a std::string
 
-#define FAIL_STATUS_RETURN (__resultingStatus + SOURCE_LOCATION)
+#define RETURN_FAIL return FAIL_STATUS
 
-#define NAPI_CALL_RETURN(theCall) NAPI_CALL(theCall, return FAIL_STATUS_RETURN)
+#define NAPI_CALL_RETURN(theCall) NAPI_CALL(theCall, RETURN_FAIL)
 
-#define HELPER_CALL_RETURN(theCall) \
-  HELPER_CALL(theCall, return FAIL_STATUS_RETURN)
+#define HELPER_CALL_RETURN(theCall) HELPER_CALL(theCall, RETURN_FAIL)
 
 #define DECLARE_VALUE_TYPE_RETURN(varName, env, value) \
-  DECLARE_VALUE_TYPE(varName, (env), (value), return FAIL_STATUS_RETURN)
+  DECLARE_VALUE_TYPE(varName, (env), (value), RETURN_FAIL)
 
 #define J2C_ASSIGN_PROPERTY_JS_RETURN(env, source, name, destination) \
-  J2C_ASSIGN_PROPERTY_JS((env), (source), (name), (destination),      \
-                         return FAIL_STATUS_RETURN)
+  J2C_ASSIGN_PROPERTY_JS((env), (source), (name), (destination), RETURN_FAIL)
 
-#define J2C_GET_PROPERTY_JS_RETURN(varName, env, source, name) \
-  J2C_GET_PROPERTY_JS(varName, env, source, name, return FAIL_STATUS_RETURN)
+#define J2C_DECLARE_PROPERTY_JS_RETURN(varName, env, source, name) \
+  J2C_DECLARE_PROPERTY_JS(varName, env, source, name, RETURN_FAIL)
 
 #define J2C_VALIDATE_VALUE_TYPE_RETURN(env, value, typecheck, message) \
-  J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck), message,        \
-                          return FAIL_STATUS_RETURN)
+  J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck), message, RETURN_FAIL)
 
 #define J2C_VALIDATE_IS_ARRAY_RETURN(env, theValue, nullOk, message) \
-  J2C_VALIDATE_IS_ARRAY((env), (theValue), (nullOk), message,        \
-                        return FAIL_STATUS_RETURN)
+  J2C_VALIDATE_IS_ARRAY((env), (theValue), (nullOk), message, RETURN_FAIL)
 
 #define J2C_GET_STRING_RETURN(env, destination, source, nullOk, name) \
-  J2C_GET_STRING((env), (destination), (source), (nullOk), name,      \
-                 return FAIL_STATUS_RETURN)
+  J2C_GET_STRING((env), (destination), (source), (nullOk), name, RETURN_FAIL)
 
 #define J2C_ASSIGN_STRING_JS_RETURN(env, destination, source, message) \
-  J2C_ASSIGN_STRING_JS((env), (destination), (source), message, return FAIL_STATUS_RETURN)
+  J2C_ASSIGN_STRING_JS((env), (destination), (source), message, RETURN_FAIL)
 
 #define J2C_GET_STRING_JS_RETURN(env, destination, source, nullOk, message) \
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,      \
-                    return FAIL_STATUS_RETURN)
+                    RETURN_FAIL)
 
-#define J2C_GET_VALUE_JS_RETURN(cType, variableName, env, source, jsType, \
-                                message, getterSuffix, jsParameterType)   \
-  J2C_GET_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
-                   getterSuffix, jsParameterType, return FAIL_STATUS_RETURN)
+#define J2C_DECLARE_VALUE_JS_RETURN(cType, variableName, env, source, jsType, \
+                                    message, getterSuffix, jsParameterType)   \
+  J2C_DECLARE_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
+                       getterSuffix, jsParameterType, RETURN_FAIL)
 
 #define J2C_ASSIGN_VALUE_JS_RETURN(cType, destination, env, source, jsType, \
                                    message, getterSuffix, jsParameterType)  \
   J2C_ASSIGN_VALUE_JS(cType, destination, env, source, jsType, message,     \
-                      getterSuffix, jsParameterType,                        \
-                      return FAIL_STATUS_RETURN)
+                      getterSuffix, jsParameterType, RETURN_FAIL)
 
 #define J2C_ASSIGN_MEMBER_VALUE_RETURN(env, destination, source, cType, name, \
                                        jsType, message, getterSuffix,         \
                                        jsParameterType)                       \
   do {                                                                        \
-    J2C_GET_PROPERTY_JS_RETURN(jsValue, (env), (source), #name);              \
+    J2C_DECLARE_PROPERTY_JS_RETURN(jsValue, (env), (source), #name);          \
     J2C_ASSIGN_VALUE_JS(cType, (destination)->name, (env), jsValue, jsType,   \
                         std::string() + message + "." + #name, getterSuffix,  \
-                        jsParameterType, return FAIL_STATUS_RETURN);          \
+                        jsParameterType, RETURN_FAIL);                        \
   } while (0)
 
 #define J2C_ASSIGN_MEMBER_STRING_RETURN(env, destination, source, name) \
   J2C_GET_STRING_RETURN((env), (destination)->name, source, true, #name)
 
 #define C2J_SET_PROPERTY_JS_RETURN(env, destination, name, jsValue) \
-  C2J_SET_PROPERTY_JS((env), (destination), name, (jsValue),        \
-                      return FAIL_STATUS_RETURN)
+  C2J_SET_PROPERTY_JS((env), (destination), name, (jsValue), RETURN_FAIL)
 
 #define C2J_SET_PROPERTY_CALL_RETURN(env, destination, name, call)   \
   do {                                                               \
@@ -254,12 +256,12 @@
 #define J2C_GET_STRING_TRACKED_JS_RETURN(varName, env, source, nullOk,   \
                                          message)                        \
   J2C_GET_STRING_TRACKED_JS(varName, (env), (source), (nullOk), message, \
-                            return FAIL_STATUS_RETURN)
+                            RETURN_FAIL)
 
 // Macros used in bindings - they cause the function to throw and return void
 
-#define THROW_BODY(env, returnValue)                   \
-  napi_throw_error((env), FAIL_STATUS_RETURN.c_str()); \
+#define THROW_BODY(env, returnValue)            \
+  napi_throw_error((env), FAIL_STATUS.c_str()); \
   return returnValue;
 
 #define NAPI_CALL_THROW(env, theCall) NAPI_CALL(theCall, THROW_BODY((env), ))
@@ -284,10 +286,10 @@
   napi_value arguments[count];                                               \
   NAPI_CALL_THROW((env), napi_get_cb_args((env), (info), arguments, (count)));
 
-#define J2C_GET_VALUE_JS_THROW(cType, variableName, env, source, jsType,  \
-                               message, getterSuffix, jsParameterType)    \
-  J2C_GET_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
-                   getterSuffix, jsParameterType, THROW_BODY((env), ))
+#define J2C_DECLARE_VALUE_JS_THROW(cType, variableName, env, source, jsType,  \
+                                   message, getterSuffix, jsParameterType)    \
+  J2C_DECLARE_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
+                       getterSuffix, jsParameterType, THROW_BODY((env), ))
 
 #define J2C_GET_STRING_JS_THROW(env, destination, source, nullOk, message) \
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,     \
@@ -305,8 +307,8 @@
   C2J_SET_PROPERTY_JS((env), (destination), (name), (jsValue),     \
                       THROW_BODY((env), ))
 
-#define J2C_GET_PROPERTY_JS_THROW(varName, env, source, name) \
-  J2C_GET_PROPERTY_JS(varName, env, source, name, THROW_BODY((env), ))
+#define J2C_DECLARE_PROPERTY_JS_THROW(varName, env, source, name) \
+  J2C_DECLARE_PROPERTY_JS(varName, env, source, name, THROW_BODY((env), ))
 
 #define C2J_SET_PROPERTY_THROW(env, destination, name, type, ...)        \
   do {                                                                   \

@@ -51,9 +51,10 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
                                &jsReturnValue),
             THROW_BODY(scope.env, failReturn));
 
-  J2C_GET_VALUE_JS(OCStackApplicationResult, cResult, scope.env, jsReturnValue,
-                   napi_number, "OCDoResource response callback return value",
-                   uint32, uint32_t, THROW_BODY(scope.env, failReturn));
+  J2C_DECLARE_VALUE_JS(OCStackApplicationResult, cResult, scope.env,
+                       jsReturnValue, napi_number,
+                       "OCDoResource response callback return value", uint32,
+                       uint32_t, THROW_BODY(scope.env, failReturn));
 
   return cResult;
 }
@@ -61,8 +62,8 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
 NAPI_METHOD(bind_OCDoResource) {
   J2C_GET_ARGUMENTS(env, info, 9);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
-  J2C_GET_VALUE_JS_THROW(OCMethod, method, env, arguments[1], napi_number,
-                         "method", uint32, uint32_t);
+  J2C_DECLARE_VALUE_JS_THROW(OCMethod, method, env, arguments[1], napi_number,
+                             "method", uint32, uint32_t);
   J2C_GET_STRING_TRACKED_JS_THROW(requestUri, env, arguments[2], false,
                                   "requestUri");
 
@@ -79,11 +80,11 @@ NAPI_METHOD(bind_OCDoResource) {
   OCPayload *payload = nullptr;
   HELPER_CALL_THROW(env, c_OCPayload(env, arguments[4], &payload));
 
-  J2C_GET_VALUE_JS_THROW(OCConnectivityType, connectivityType, env,
-                         arguments[5], napi_number, "connectivityType", uint32,
-                         uint32_t);
-  J2C_GET_VALUE_JS_THROW(OCQualityOfService, qos, env, arguments[6],
-                         napi_number, "qos", uint32, uint32_t);
+  J2C_DECLARE_VALUE_JS_THROW(OCConnectivityType, connectivityType, env,
+                             arguments[5], napi_number, "connectivityType",
+                             uint32, uint32_t);
+  J2C_DECLARE_VALUE_JS_THROW(OCQualityOfService, qos, env, arguments[6],
+                             napi_number, "qos", uint32, uint32_t);
 
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[7], napi_function, "callback");
 
@@ -118,8 +119,8 @@ NAPI_METHOD(bind_OCCancel) {
   HELPER_CALL_THROW(env, JSOCDoHandle::Get(env, arguments[0], &cData));
   JS_ASSERT(cData, "Native handle is invalid", THROW_BODY(env, ));
 
-  J2C_GET_VALUE_JS_THROW(OCQualityOfService, qos, env, arguments[1],
-                         napi_number, "qos", uint32, uint32_t);
+  J2C_DECLARE_VALUE_JS_THROW(OCQualityOfService, qos, env, arguments[1],
+                             napi_number, "qos", uint32, uint32_t);
 
   // header options ignored
   C2J_SET_RETURN_VALUE(env, info, number,

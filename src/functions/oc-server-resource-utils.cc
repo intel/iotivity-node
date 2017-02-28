@@ -51,10 +51,10 @@ NAPI_METHOD(bind_OCGetResourceProperties) {
   C2J_SET_RETURN_VALUE(env, info, number, OCGetResourceProperties(cData->data));
 }
 
-#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE                           \
-  FIRST_ARGUMENT_IS_HANDLE(2);                                           \
-  J2C_GET_VALUE_JS_THROW(uint8_t, index, env, arguments[1], napi_number, \
-                         "index", uint32, uint32_t)
+#define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE                               \
+  FIRST_ARGUMENT_IS_HANDLE(2);                                               \
+  J2C_DECLARE_VALUE_JS_THROW(uint8_t, index, env, arguments[1], napi_number, \
+                             "index", uint32, uint32_t)
 
 static std::string returnResourceHandle(napi_env env, napi_callback_info info,
                                         OCResourceHandle handle) {

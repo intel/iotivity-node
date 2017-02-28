@@ -57,9 +57,9 @@ static FILE *defaultOpen(const char *path, const char *mode) {
                                &jsReturnValue),
             THROW_BODY(scope.env, failReturn));
 
-  J2C_GET_VALUE_JS(int32_t, cResult, scope.env, jsReturnValue, napi_number,
-                   "open() return value", int32, int32_t,
-                   THROW_BODY(scope.env, failReturn));
+  J2C_DECLARE_VALUE_JS(int32_t, cResult, scope.env, jsReturnValue, napi_number,
+                       "open() return value", int32, int32_t,
+                       THROW_BODY(scope.env, failReturn));
 
   return ((FILE *)(cResult < 0 ? nullptr : new int32_t(cResult)));
 }
@@ -89,9 +89,9 @@ static size_t readWrite(void *ptr, size_t size, size_t count, FILE *stream,
                                &jsReturnValue),
             THROW_BODY(scope.env, failReturn));
 
-  J2C_GET_VALUE_JS(size_t, cResult, scope.env, jsReturnValue, napi_number,
-                   std::string(operation) + "() return value", uint32, uint32_t,
-                   THROW_BODY(scope.env, failReturn));
+  J2C_DECLARE_VALUE_JS(size_t, cResult, scope.env, jsReturnValue, napi_number,
+                       std::string(operation) + "() return value", uint32,
+                       uint32_t, THROW_BODY(scope.env, failReturn));
 
   return cResult;
 }
@@ -114,9 +114,9 @@ static size_t defaultWrite(const void *ptr, size_t size, size_t count,
   NAPI_CALL(napi_call_function(scope.env, jsContext, jsCallback, 1, arguments, \
                                &jsReturnValue),                                \
             THROW_BODY(scope.env, failReturn));                                \
-  J2C_GET_VALUE_JS(int, cResult, scope.env, jsReturnValue, napi_number,        \
-                   "close() return value", int32, int32_t,                     \
-                   THROW_BODY(scope.env, failReturn));
+  J2C_DECLARE_VALUE_JS(int, cResult, scope.env, jsReturnValue, napi_number,    \
+                       "close() return value", int32, int32_t,                 \
+                       THROW_BODY(scope.env, failReturn));
 
 static int defaultClose(FILE *stream) {
   CLOSE_UNLINK(jsClose, "close", number, (double)*((int32_t *)stream));
@@ -137,10 +137,10 @@ static int defaultUnlink(const char *path) {
   }                                                                \
   NAPI_CALL_THROW(env, napi_create_reference(env, (local), 1, &(reference)));
 
-#define GET_AND_VALIDATE(varNameSuffix, env, source, name)                  \
-  J2C_GET_PROPERTY_JS_THROW(local##varNameSuffix, (env), (source), name);   \
-  J2C_VALIDATE_VALUE_TYPE_THROW((env), local##varNameSuffix, napi_function, \
-                                "handler." name);                           \
+#define GET_AND_VALIDATE(varNameSuffix, env, source, name)                    \
+  J2C_DECLARE_PROPERTY_JS_THROW(local##varNameSuffix, (env), (source), name); \
+  J2C_VALIDATE_VALUE_TYPE_THROW((env), local##varNameSuffix, napi_function,   \
+                                "handler." name);                             \
   UPDATE_REFERENCE(env, js##varNameSuffix, local##varNameSuffix)
 
 static OCPersistentStorage storage = {defaultOpen, defaultRead, defaultWrite,

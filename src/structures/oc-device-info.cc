@@ -49,7 +49,7 @@ void delete_OCDeviceInfo(OCDeviceInfo *info) {
 static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
                                              const char *propertyName,
                                              OCStringLL **destination) {
-  J2C_GET_PROPERTY_JS_RETURN(sourceValue, env, source, propertyName);
+  J2C_DECLARE_PROPERTY_JS_RETURN(sourceValue, env, source, propertyName);
   J2C_VALIDATE_IS_ARRAY_RETURN(env, sourceValue, false,
                                std::string("device info ") + propertyName);
 

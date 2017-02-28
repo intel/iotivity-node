@@ -27,6 +27,7 @@ class FlatArray {
   OCRepPayloadPropType arrayType;
   size_t totalElements;
   bool typeEstablished;
+
  public:
   FlatArray();
   ~FlatArray();
@@ -40,22 +41,22 @@ FlatArray::~FlatArray() {
   size_t index;
   if (data) {
     for (index = 0; index < totalElements; index++) {
-	  switch(arrayType) {
-	    case OCREP_PROP_STRING:
-		case OCREP_PROP_BYTE_STRING:
-		  free(((char **)data)[index]);
-		  break;
+      switch (arrayType) {
+        case OCREP_PROP_STRING:
+        case OCREP_PROP_BYTE_STRING:
+          free(((char **)data)[index]);
+          break;
 
         case OCREP_PROP_OBJECT:
-		  OCRepPayloadDestroy(((OCRepPayload **)data)[index]);
-		  break;
+          OCRepPayloadDestroy(((OCRepPayload **)data)[index]);
+          break;
 
         default:
-		  index = totalElements;
-		  break;
-	  }
-	}
-	free(data);
+          index = totalElements;
+          break;
+      }
+    }
+    free(data);
   }
   release();
 }
@@ -72,34 +73,34 @@ std::string FlatArray::fill(napi_env env, napi_value array, int *p_index) {
 
   for (uint32_t localIndex = 0; localIndex < length; localIndex++) {
     NAPI_CALL_RETURN(napi_get_element(env, array, localIndex, &member));
-	NAPI_CALL_RETURN(napi_is_array(env, member, &isArray));
+    NAPI_CALL_RETURN(napi_is_array(env, member, &isArray));
     if (isArray) {
-	  HELPER_CALL_RETURN(fill(env, member, p_index));
+      HELPER_CALL_RETURN(fill(env, member, p_index));
     } else {
       switch (arrayType) {
         case OCREP_PROP_INT:
-		  NAPI_CALL_RETURN(napi_get_value_int64(env, member,
-			&(((int64_t *)data)[(*p_index)++])));
+          NAPI_CALL_RETURN(napi_get_value_int64(
+              env, member, &(((int64_t *)data)[(*p_index)++])));
           break;
 
         case OCREP_PROP_DOUBLE:
-		  NAPI_CALL_RETURN(napi_get_value_double(env, member,
-		    &(((double *)data)[(*p_index)++])));
+          NAPI_CALL_RETURN(napi_get_value_double(
+              env, member, &(((double *)data)[(*p_index)++])));
           break;
 
         case OCREP_PROP_BOOL:
-          NAPI_CALL_RETURN(napi_get_value_bool(env, member,
-		    &(((bool *)data)[(*p_index)++])));
+          NAPI_CALL_RETURN(napi_get_value_bool(
+              env, member, &(((bool *)data)[(*p_index)++])));
           break;
 
         case OCREP_PROP_STRING:
-		  J2C_ASSIGN_STRING_JS_RETURN(env, (((char **)data)[(*p_index)++]),
-		    member, "string member");
+          J2C_ASSIGN_STRING_JS_RETURN(env, (((char **)data)[(*p_index)++]),
+                                      member, "string member");
           break;
 
         case OCREP_PROP_OBJECT:
-		  HELPER_CALL_RETURN(c_OCRepPayload(env, member,
-		    &(((OCRepPayload **)data)[(*p_index)++])));
+          HELPER_CALL_RETURN(c_OCRepPayload(
+              env, member, &(((OCRepPayload **)data)[(*p_index)++])));
           break;
 
         // The validation should prevent these from occurring
@@ -122,15 +123,22 @@ std::string FlatArray::flatten(napi_env env, napi_value array) {
   }
 
   size_t neededAmount =
-      (arrayType == OCREP_PROP_INT ? sizeof(uint64_t) :
-	  arrayType == OCREP_PROP_DOUBLE ? sizeof(double) :
-	  arrayType == OCREP_PROP_BOOL ? sizeof(bool) :
-	  arrayType == OCREP_PROP_STRING ? sizeof(char *) :
-	  arrayType == OCREP_PROP_OBJECT ? sizeof(OCRepPayload *) :
+      (arrayType == OCREP_PROP_INT
+           ? sizeof(uint64_t)
+           : arrayType == OCREP_PROP_DOUBLE
+                 ? sizeof(double)
+                 : arrayType == OCREP_PROP_BOOL
+                       ? sizeof(bool)
+                       : arrayType == OCREP_PROP_STRING
+                             ? sizeof(char *)
+                             : arrayType == OCREP_PROP_OBJECT
+                                   ? sizeof(OCRepPayload *)
+                                   :
 
-       // The validation ensures that the
-       // array type is always valid
-       0) * totalElements;
+                                   // The validation ensures that the
+                                   // array type is always valid
+                                   0) *
+      totalElements;
 
   data = malloc(neededAmount);
   if (!data) {
@@ -146,29 +154,27 @@ std::string FlatArray::flatten(napi_env env, napi_value array) {
 
 // Convert the type of the Javascript value to OCRepPayloadPropType, but only
 // for those types that may appear in arrays. Throw an exception otherwise.
-static std::string jsTypeToOCArrayType(napi_env env,
-                                       napi_value value,
-									   OCRepPayloadPropType *p_type) {
-
+static std::string jsTypeToOCArrayType(napi_env env, napi_value value,
+                                       OCRepPayloadPropType *p_type) {
   DECLARE_VALUE_TYPE_RETURN(valueType, env, value);
 
   if (valueType == napi_number) {
     double doubleValue;
-	NAPI_CALL_RETURN(napi_get_value_double(env, value, &doubleValue));
-	*p_type = ((doubleValue == ((int64_t)doubleValue)) ?
-	  OCREP_PROP_INT : OCREP_PROP_DOUBLE);
+    NAPI_CALL_RETURN(napi_get_value_double(env, value, &doubleValue));
+    *p_type = ((doubleValue == ((int64_t)doubleValue)) ? OCREP_PROP_INT
+                                                       : OCREP_PROP_DOUBLE);
   } else if (valueType == napi_boolean) {
     *p_type = OCREP_PROP_BOOL;
   } else if (valueType == napi_string) {
     *p_type = OCREP_PROP_STRING;
   } else if (valueType == napi_object) {
     bool typecheck;
-	NAPI_CALL_RETURN(napi_is_buffer(env, value, &typecheck));
-	if (typecheck) {
-	  *p_type = OCREP_PROP_BYTE_STRING;
-	} else {
-	  *p_type = OCREP_PROP_OBJECT;
-	}
+    NAPI_CALL_RETURN(napi_is_buffer(env, value, &typecheck));
+    if (typecheck) {
+      *p_type = OCREP_PROP_BYTE_STRING;
+    } else {
+      *p_type = OCREP_PROP_OBJECT;
+    }
   } else {
     return LOCAL_MESSAGE("Value type not allowed in rep payload");
   }
@@ -176,28 +182,29 @@ static std::string jsTypeToOCArrayType(napi_env env,
   return std::string();
 }
 
-#define SET_ARRAY(setter, payload, name, typeName, description) \
-  if (!OCRepPayloadSet##setter##ArrayAsOwner((payload), (name), (typeName *)data, dimensions)) { \
-    return LOCAL_MESSAGE("Failed to set " description " array property"); \
-  } \
+#define SET_ARRAY(setter, payload, name, typeName, description)               \
+  if (!OCRepPayloadSet##setter##ArrayAsOwner((payload), (name),               \
+                                             (typeName *)data, dimensions)) { \
+    return LOCAL_MESSAGE("Failed to set " description " array property");     \
+  }                                                                           \
   break;
 
 std::string FlatArray::addToPayload(OCRepPayload *payload, const char *name) {
   switch (arrayType) {
     case OCREP_PROP_INT:
-	  SET_ARRAY(Int, payload, name, int64_t, "integer");
+      SET_ARRAY(Int, payload, name, int64_t, "integer");
 
     case OCREP_PROP_DOUBLE:
-	  SET_ARRAY(Double, payload, name, double, "double");
+      SET_ARRAY(Double, payload, name, double, "double");
 
     case OCREP_PROP_BOOL:
-	  SET_ARRAY(Bool, payload, name, bool, "boolean");
+      SET_ARRAY(Bool, payload, name, bool, "boolean");
 
     case OCREP_PROP_STRING:
-	  SET_ARRAY(String, payload, name, char*, "string");
+      SET_ARRAY(String, payload, name, char *, "string");
 
     case OCREP_PROP_OBJECT:
-	  SET_ARRAY(PropObject, payload, name, OCRepPayload*, "object");
+      SET_ARRAY(PropObject, payload, name, OCRepPayload *, "object");
 
     default:
       break;
@@ -220,10 +227,10 @@ std::string FlatArray::addToPayload(OCRepPayload *payload, const char *name) {
 // and the function returns true. Otherwise, it throws an exception and returns
 // false.
 static std::string validateArray(napi_env env, napi_value array,
-                                           bool *p_typeEstablished,
-										   OCRepPayloadPropType *p_arrayType,
-										   size_t dimensions[MAX_REP_ARRAY_DEPTH],
-                                           int index) {
+                                 bool *p_typeEstablished,
+                                 OCRepPayloadPropType *p_arrayType,
+                                 size_t dimensions[MAX_REP_ARRAY_DEPTH],
+                                 int index) {
   if (index >= MAX_REP_ARRAY_DEPTH) {
     return LOCAL_MESSAGE("Rep payload array has too many dimensions");
   }
@@ -233,36 +240,37 @@ static std::string validateArray(napi_env env, napi_value array,
 
   if (length > 0) {
     napi_value arrayValue;
-	NAPI_CALL_RETURN(napi_get_element(env, array, 0, &arrayValue));
-	bool isArray;
-	NAPI_CALL_RETURN(napi_is_array(env, arrayValue, &isArray));
+    NAPI_CALL_RETURN(napi_get_element(env, array, 0, &arrayValue));
+    bool isArray;
+    NAPI_CALL_RETURN(napi_is_array(env, arrayValue, &isArray));
     if (isArray) {
       uint32_t child_length;
-	  NAPI_CALL_RETURN(napi_get_array_length(env, arrayValue, &child_length));
+      NAPI_CALL_RETURN(napi_get_array_length(env, arrayValue, &child_length));
       for (uint32_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
-	    napi_value member;
-		NAPI_CALL_RETURN(napi_get_element(env, arrayValue, arrayIndex, &member));
-		bool memberIsArray;
-		NAPI_CALL_RETURN(napi_is_array(env, member, &memberIsArray));
+        napi_value member;
+        NAPI_CALL_RETURN(
+            napi_get_element(env, arrayValue, arrayIndex, &member));
+        bool memberIsArray;
+        NAPI_CALL_RETURN(napi_is_array(env, member, &memberIsArray));
         if (!memberIsArray) {
           return LOCAL_MESSAGE("Rep payload array is heterogeneous");
         }
 
         bool child_established = false;
         OCRepPayloadPropType child_type;
-		uint32_t memberLength;
-		NAPI_CALL_RETURN(napi_get_array_length(env, member, &memberLength));
+        uint32_t memberLength;
+        NAPI_CALL_RETURN(napi_get_array_length(env, member, &memberLength));
         if (memberLength != child_length) {
-		  return LOCAL_MESSAGE(
-		    "Rep payload array contains child arrays of different lengths");
+          return LOCAL_MESSAGE(
+              "Rep payload array contains child arrays of different lengths");
         }
-		HELPER_CALL_RETURN(validateArray(env, member, &child_established,
-		                            &child_type, dimensions, index + 1));
+        HELPER_CALL_RETURN(validateArray(env, member, &child_established,
+                                         &child_type, dimensions, index + 1));
 
         // Reconcile array types
         if (*p_typeEstablished) {
           if (!child_established || child_type != (*p_arrayType)) {
-		    return LOCAL_MESSAGE("Rep payload array is heterogeneous");
+            return LOCAL_MESSAGE("Rep payload array is heterogeneous");
           }
         } else {
           if (child_established) {
@@ -278,7 +286,7 @@ static std::string validateArray(napi_env env, napi_value array,
 
       if (*p_typeEstablished) {
         if (valueType != (*p_arrayType)) {
-		  return LOCAL_MESSAGE("Rep payload array is heterogeneous");
+          return LOCAL_MESSAGE("Rep payload array is heterogeneous");
         }
       } else {
         *p_typeEstablished = true;
@@ -286,10 +294,10 @@ static std::string validateArray(napi_env env, napi_value array,
       }
 
       for (size_t arrayIndex = 1; arrayIndex < length; arrayIndex++) {
-	    NAPI_CALL_RETURN(napi_get_element(env, array, arrayIndex, &arrayValue));
-		HELPER_CALL_RETURN(jsTypeToOCArrayType(env, arrayValue, &valueType));
+        NAPI_CALL_RETURN(napi_get_element(env, array, arrayIndex, &arrayValue));
+        HELPER_CALL_RETURN(jsTypeToOCArrayType(env, arrayValue, &valueType));
         if (valueType != (*p_arrayType)) {
-		  return LOCAL_MESSAGE("Rep payload array is heterogeneous");
+          return LOCAL_MESSAGE("Rep payload array is heterogeneous");
         }
       }
     }
@@ -300,7 +308,8 @@ static std::string validateArray(napi_env env, napi_value array,
 }
 
 std::string FlatArray::from(napi_env env, napi_value array) {
-  HELPER_CALL_RETURN(validateArray(env, array, &typeEstablished, &arrayType, dimensions, 0));
+  HELPER_CALL_RETURN(
+      validateArray(env, array, &typeEstablished, &arrayType, dimensions, 0));
 
   if (dimensions[0] > 0) {
     HELPER_CALL_RETURN(flatten(env, array));
@@ -318,31 +327,30 @@ void FlatArray::release() {
 static std::string addStrings(napi_env env, napi_value source,
                               OCRepPayload *destination, const char *name,
                               bool (*api)(OCRepPayload *, const char *)) {
-  J2C_GET_PROPERTY_JS_RETURN(ll, env, source, name);
+  J2C_DECLARE_PROPERTY_JS_RETURN(ll, env, source, name);
   DECLARE_VALUE_TYPE_RETURN(llType, env, ll);
 
   if (!(llType == napi_undefined || llType == napi_null)) {
+    std::string message = std::string("payload.") + name;
+    std::string itemMessage;
+    std::unique_ptr<char> tracker;
+    char *strItem;
 
-	  std::string message = std::string("payload.") + name;
-	  std::string itemMessage;
-	  std::unique_ptr<char> tracker;
-	  char *strItem;
-
-	  J2C_VALIDATE_IS_ARRAY_RETURN(env, ll, true, message);
-	  uint32_t length, index;
-	  NAPI_CALL_RETURN(napi_get_array_length(env, ll, &length));
-	  for (index = 0; index < length; index++) {
-    	napi_value item;
-    	NAPI_CALL_RETURN(napi_get_element(env, ll, index, &item));
-    	itemMessage = message + "[" + std::to_string(index) + "]";
-    	J2C_GET_STRING_JS_RETURN(env, strItem, item, false, itemMessage);
-    	tracker.reset(strItem);
-    	if (!api(destination, strItem)) {
-    	  return LOCAL_MESSAGE(std::string("Failed to set ") + itemMessage);
-    	} else {
-    	  tracker.release();
-    	}
-	  }
+    J2C_VALIDATE_IS_ARRAY_RETURN(env, ll, true, message);
+    uint32_t length, index;
+    NAPI_CALL_RETURN(napi_get_array_length(env, ll, &length));
+    for (index = 0; index < length; index++) {
+      napi_value item;
+      NAPI_CALL_RETURN(napi_get_element(env, ll, index, &item));
+      itemMessage = message + "[" + std::to_string(index) + "]";
+      J2C_GET_STRING_JS_RETURN(env, strItem, item, false, itemMessage);
+      tracker.reset(strItem);
+      if (!api(destination, strItem)) {
+        return LOCAL_MESSAGE(std::string("Failed to set ") + itemMessage);
+      } else {
+        tracker.release();
+      }
+    }
   }
 
   return std::string();
@@ -354,7 +362,7 @@ std::string c_OCRepPayload(napi_env env, napi_value source,
       OCRepPayloadCreate(), OCRepPayloadDestroy);
 
   // reppayload.uri
-  J2C_GET_PROPERTY_JS_RETURN(jsUri, env, source, "uri");
+  J2C_DECLARE_PROPERTY_JS_RETURN(jsUri, env, source, "uri");
   J2C_GET_STRING_TRACKED_JS_RETURN(uri, env, jsUri, true, "payload.uri");
   if (uri) {
     if (!OCRepPayloadSetUri(payload.get(), uri)) {
@@ -370,7 +378,7 @@ std::string c_OCRepPayload(napi_env env, napi_value source,
   HELPER_CALL_RETURN(addStrings(env, source, payload.get(), "interfaces",
                                 OCRepPayloadAddInterface));
 
-  J2C_GET_PROPERTY_JS_RETURN(jsValues, env, source, "values");
+  J2C_DECLARE_PROPERTY_JS_RETURN(jsValues, env, source, "values");
   DECLARE_VALUE_TYPE_RETURN(jsValuesType, env, jsValues);
   if (!(jsValuesType == napi_null || jsValuesType == napi_undefined)) {
     J2C_VALIDATE_VALUE_TYPE_RETURN(env, jsValues, napi_object,
@@ -387,7 +395,7 @@ std::string c_OCRepPayload(napi_env env, napi_value source,
     int64_t intValue;
     bool boolValue;
     char *strValue;
-	std::unique_ptr<char> strValueTracker;
+    std::unique_ptr<char> strValueTracker;
     NAPI_CALL_RETURN(napi_get_propertynames(env, jsValues, &propertyNames));
 
     // We can assume propertyNames is an array
@@ -427,38 +435,39 @@ std::string c_OCRepPayload(napi_env env, napi_value source,
           }
         }
       } else if (jsValueType == napi_string) {
-	    J2C_ASSIGN_STRING_JS_RETURN(env, strValue, jsValue, msg);
-		strValueTracker.reset(strValue);
-		if (OCRepPayloadSetPropStringAsOwner(payload.get(), propName, strValue)) {
-		  strValueTracker.release();
-		} else {
-		  return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
-		}
+        J2C_ASSIGN_STRING_JS_RETURN(env, strValue, jsValue, msg);
+        strValueTracker.reset(strValue);
+        if (OCRepPayloadSetPropStringAsOwner(payload.get(), propName,
+                                             strValue)) {
+          strValueTracker.release();
+        } else {
+          return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
+        }
       } else if (jsValueType == napi_object) {
-	    OCRepPayload *childPayload;
-		bool isArray;
-		NAPI_CALL_RETURN(napi_is_array(env, jsValue, &isArray));
-		if (isArray) {
-		  FlatArray flatArray;
-		  HELPER_CALL_RETURN(flatArray.from(env, jsValue));
-		  HELPER_CALL_RETURN(flatArray.addToPayload(payload.get(), propName));
-		  flatArray.release();
+        OCRepPayload *childPayload;
+        bool isArray;
+        NAPI_CALL_RETURN(napi_is_array(env, jsValue, &isArray));
+        if (isArray) {
+          FlatArray flatArray;
+          HELPER_CALL_RETURN(flatArray.from(env, jsValue));
+          HELPER_CALL_RETURN(flatArray.addToPayload(payload.get(), propName));
+          flatArray.release();
 
           // TODO: What is this? Can it go?
-		  // String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
+          // String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
 
-		} else {
-  		  HELPER_CALL_RETURN(c_OCRepPayload(env, jsValue, &childPayload));
-		  std::unique_ptr<OCRepPayload, void (*)(OCRepPayload *)>
-		  trackChildPayload(childPayload, OCRepPayloadDestroy);
-		  if (OCRepPayloadSetPropObjectAsOwner(payload.get(), propName,
-		      childPayload)) {
-		    trackChildPayload.release();
-		  } else {
-		    return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
-		  }
-		}
-	  }
+        } else {
+          HELPER_CALL_RETURN(c_OCRepPayload(env, jsValue, &childPayload));
+          std::unique_ptr<OCRepPayload, void (*)(OCRepPayload *)>
+              trackChildPayload(childPayload, OCRepPayloadDestroy);
+          if (OCRepPayloadSetPropObjectAsOwner(payload.get(), propName,
+                                               childPayload)) {
+            trackChildPayload.release();
+          } else {
+            return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
+          }
+        }
+      }
     }
   }
   /*

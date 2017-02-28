@@ -133,9 +133,23 @@ class JSOCRequestHandle : public JSHandle<JSOCRequestHandle, OCRequestHandle> {
 
 class JSOCResourceHandle
     : public JSHandle<JSOCResourceHandle, OCResourceHandle> {
+  typedef JSHandle<JSOCResourceHandle, OCResourceHandle> super;
+
  public:
   static const char *jsClassName() { return "OCResourceHandle"; }
   static std::map<OCResourceHandle, napi_ref> handles;
+  std::string Init(napi_env env, napi_value _callback, napi_value _self) {
+    HELPER_CALL_RETURN(super::Init(env, _callback, _self));
+    handles[data] = self;
+    return std::string();
+  }
+  static std::string Destroy(napi_env env, JSOCResourceHandle *cData,
+                             napi_value jsHandle = nullptr) {
+    OCResourceHandle handle = cData->data;
+    HELPER_CALL_RETURN(super::Destroy(env, cData, jsHandle));
+    handles.erase(handle);
+    return std::string();
+  }
 };
 
 std::string InitHandles(napi_env env);
