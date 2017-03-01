@@ -35,25 +35,6 @@ NAPI_METHOD(bind_OCDoResponse) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
 /*
-NAN_METHOD(bind_OCDoResponse) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-
-  OCEntityHandlerResponse response;
-  OCStackResult result;
-
-  if (!c_OCEntityHandlerResponse(Nan::To<Object>(info[0]).ToLocalChecked(),
-                                 &response)) {
-    return;
-  }
-
-  result = OCDoResponse(&response);
-  if (response.payload) {
-    OCPayloadDestroy(response.payload);
-  }
-  info.GetReturnValue().Set(Nan::New(result));
-}
-
 NAN_METHOD(bind_OCNotifyAllObservers) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);

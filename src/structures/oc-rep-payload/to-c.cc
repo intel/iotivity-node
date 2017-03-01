@@ -31,9 +31,8 @@ class FlatArray {
  public:
   FlatArray();
   ~FlatArray();
-  std::string addToPayload(OCRepPayload *payload, const char *propName);
+  std::string copyToPayload(OCRepPayload *payload, const char *propName);
   std::string from(napi_env env, napi_value source);
-  void release();
 };
 
 FlatArray::FlatArray() : data(nullptr), dimensions() {}
@@ -58,7 +57,6 @@ FlatArray::~FlatArray() {
     }
     free(data);
   }
-  release();
 }
 
 // Fill the array
@@ -116,6 +114,7 @@ std::string FlatArray::fill(napi_env env, napi_value array, int *p_index) {
 }
 
 std::string FlatArray::flatten(napi_env env, napi_value array) {
+  totalElements = 1;
   for (size_t dimensionIndex = 0;
        dimensionIndex < MAX_REP_ARRAY_DEPTH && dimensions[dimensionIndex] > 0;
        dimensionIndex++) {
@@ -183,13 +182,13 @@ static std::string jsTypeToOCArrayType(napi_env env, napi_value value,
 }
 
 #define SET_ARRAY(setter, payload, name, typeName, description)               \
-  if (!OCRepPayloadSet##setter##ArrayAsOwner((payload), (name),               \
-                                             (typeName *)data, dimensions)) { \
+  if (!OCRepPayloadSet##setter##Array((payload), (name),               \
+                                             (const typeName *)data, dimensions)) { \
     return LOCAL_MESSAGE("Failed to set " description " array property");     \
   }                                                                           \
   break;
 
-std::string FlatArray::addToPayload(OCRepPayload *payload, const char *name) {
+std::string FlatArray::copyToPayload(OCRepPayload *payload, const char *name) {
   switch (arrayType) {
     case OCREP_PROP_INT:
       SET_ARRAY(Int, payload, name, int64_t, "integer");
@@ -243,28 +242,34 @@ static std::string validateArray(napi_env env, napi_value array,
     NAPI_CALL_RETURN(napi_get_element(env, array, 0, &arrayValue));
     bool isArray;
     NAPI_CALL_RETURN(napi_is_array(env, arrayValue, &isArray));
+
+    // The first item is an array
     if (isArray) {
+
+      // Establish the length of the first child array
       uint32_t child_length;
       NAPI_CALL_RETURN(napi_get_array_length(env, arrayValue, &child_length));
+
+      // Examine all the children
       for (uint32_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
-        napi_value member;
         NAPI_CALL_RETURN(
-            napi_get_element(env, arrayValue, arrayIndex, &member));
-        bool memberIsArray;
-        NAPI_CALL_RETURN(napi_is_array(env, member, &memberIsArray));
-        if (!memberIsArray) {
+            napi_get_element(env, array, arrayIndex, &arrayValue));
+        NAPI_CALL_RETURN(napi_is_array(env, arrayValue, &isArray));
+
+        // One of the children is not an array
+        if (!isArray) {
           return LOCAL_MESSAGE("Rep payload array is heterogeneous");
         }
 
         bool child_established = false;
         OCRepPayloadPropType child_type;
         uint32_t memberLength;
-        NAPI_CALL_RETURN(napi_get_array_length(env, member, &memberLength));
+        NAPI_CALL_RETURN(napi_get_array_length(env, arrayValue, &memberLength));
         if (memberLength != child_length) {
           return LOCAL_MESSAGE(
               "Rep payload array contains child arrays of different lengths");
         }
-        HELPER_CALL_RETURN(validateArray(env, member, &child_established,
+        HELPER_CALL_RETURN(validateArray(env, arrayValue, &child_established,
                                          &child_type, dimensions, index + 1));
 
         // Reconcile array types
@@ -279,9 +284,12 @@ static std::string validateArray(napi_env env, napi_value array,
           }
         }
       }
+
+    // The first item is not an array
     } else {
       OCRepPayloadPropType valueType;
 
+      // Establish the type of the first item
       HELPER_CALL_RETURN(jsTypeToOCArrayType(env, arrayValue, &valueType));
 
       if (*p_typeEstablished) {
@@ -293,6 +301,7 @@ static std::string validateArray(napi_env env, napi_value array,
         *p_arrayType = valueType;
       }
 
+      // Make sure the rest of the items are of the same type
       for (size_t arrayIndex = 1; arrayIndex < length; arrayIndex++) {
         NAPI_CALL_RETURN(napi_get_element(env, array, arrayIndex, &arrayValue));
         HELPER_CALL_RETURN(jsTypeToOCArrayType(env, arrayValue, &valueType));
@@ -316,12 +325,6 @@ std::string FlatArray::from(napi_env env, napi_value array) {
   }
 
   return std::string();
-}
-
-void FlatArray::release() {
-  data = nullptr;
-  totalElements = 0;
-  typeEstablished = false;
 }
 
 static std::string addStrings(napi_env env, napi_value source,
@@ -450,8 +453,7 @@ std::string c_OCRepPayload(napi_env env, napi_value source,
         if (isArray) {
           FlatArray flatArray;
           HELPER_CALL_RETURN(flatArray.from(env, jsValue));
-          HELPER_CALL_RETURN(flatArray.addToPayload(payload.get(), propName));
-          flatArray.release();
+          HELPER_CALL_RETURN(flatArray.copyToPayload(payload.get(), propName));
 
           // TODO: What is this? Can it go?
           // String::Utf8Value name(Nan::Get(keys, index).ToLocalChecked());
