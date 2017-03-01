@@ -149,7 +149,7 @@ static OCPersistentStorage storage = {defaultOpen, defaultRead, defaultWrite,
 NAPI_METHOD(bind_OCRegisterPersistentStorageHandler) {
   bool callNative = !context;
 
-  J2C_GET_ARGUMENTS(env, info, 1);
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handler");
   GET_AND_VALIDATE(Open, env, arguments[0], "open");
   GET_AND_VALIDATE(Read, env, arguments[0], "read");

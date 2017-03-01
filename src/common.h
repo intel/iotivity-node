@@ -273,7 +273,7 @@
   J2C_VALIDATE_VALUE_TYPE((env), (value), typecheck, message,         \
                           THROW_BODY((env), ))
 
-#define J2C_GET_ARGUMENTS(env, info, count)                                  \
+#define J2C_DECLARE_ARGUMENTS(env, info, count)                              \
   do {                                                                       \
     int length;                                                              \
     NAPI_CALL_THROW((env), napi_get_cb_args_length((env), (info), &length)); \

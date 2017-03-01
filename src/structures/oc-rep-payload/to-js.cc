@@ -53,8 +53,8 @@
       break;                                                                   \
     case OCREP_PROP_OBJECT:                                                    \
       NAPI_CALL_RETURN(napi_create_object(env, &(destination)));               \
-  C2J_SET_PROPERTY_RETURN(env, (destination), "type", number, \
-                          ((double)(PAYLOAD_TYPE_REPRESENTATION))); \
+      C2J_SET_PROPERTY_RETURN(env, (destination), "type", number,              \
+                              ((double)(PAYLOAD_TYPE_REPRESENTATION)));        \
       HELPER_CALL_RETURN(                                                      \
           js_OCRepPayload(env, (source)->obj##fieldSuffix, (destination)));    \
       break;                                                                   \

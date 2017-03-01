@@ -31,7 +31,7 @@ NAPI_METHOD(bind_OCProcess) {
 }
 
 NAPI_METHOD(bind_OCStartPresence) {
-  J2C_GET_ARGUMENTS(env, info, 1);
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
 
   J2C_DECLARE_VALUE_JS_THROW(uint32_t, ttl, env, arguments[0], napi_number,
                              "ttl", uint32, uint32_t);
@@ -44,7 +44,7 @@ NAPI_METHOD(bind_OCStopPresence) {
 }
 
 #define INFO_SETTER(cType, description, api)                                  \
-  J2C_GET_ARGUMENTS(env, info, 1);                                            \
+  J2C_DECLARE_ARGUMENTS(env, info, 1);                                        \
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, description); \
                                                                               \
   auto devInfo = std::unique_ptr<cType, void (*)(cType *)>(new_##cType(),     \
@@ -62,7 +62,7 @@ NAPI_METHOD(bind_OCSetPlatformInfo) {
 }
 
 NAPI_METHOD(bind_OCInit) {
-  J2C_GET_ARGUMENTS(env, info, 3);
+  J2C_DECLARE_ARGUMENTS(env, info, 3);
   J2C_GET_STRING_TRACKED_JS_THROW(ip, env, arguments[0], true, "address");
   J2C_DECLARE_VALUE_JS_THROW(uint16_t, port, env, arguments[1], napi_number,
                              "port", uint32, uint32_t);
@@ -72,7 +72,7 @@ NAPI_METHOD(bind_OCInit) {
 }
 
 NAPI_METHOD(bind_OCGetNumberOfResources) {
-  J2C_GET_ARGUMENTS(env, info, 1);
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "receptacle");
 
   uint8_t resourceCount;

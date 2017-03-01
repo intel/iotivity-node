@@ -30,7 +30,7 @@ std::string returnNull(napi_env env, napi_callback_info info) {
 }
 
 #define FIRST_ARGUMENT_IS_HANDLE(argc)                                        \
-  J2C_GET_ARGUMENTS(env, info, argc);                                         \
+  J2C_DECLARE_ARGUMENTS(env, info, argc);                                     \
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");    \
   JSOCResourceHandle *cData;                                                  \
   HELPER_CALL_THROW(env, JSOCResourceHandle::Get(env, arguments[0], &cData)); \

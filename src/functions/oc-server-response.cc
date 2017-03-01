@@ -25,7 +25,7 @@ extern "C" {
 }
 
 NAPI_METHOD(bind_OCDoResponse) {
-  J2C_GET_ARGUMENTS(env, info, 1);
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "response");
   OCEntityHandlerResponse resp;
   HELPER_CALL_THROW(env, c_OCEntityHandlerResponse(env, arguments[0], &resp));

@@ -181,11 +181,11 @@ static std::string jsTypeToOCArrayType(napi_env env, napi_value value,
   return std::string();
 }
 
-#define SET_ARRAY(setter, payload, name, typeName, description)               \
-  if (!OCRepPayloadSet##setter##Array((payload), (name),               \
-                                             (const typeName *)data, dimensions)) { \
-    return LOCAL_MESSAGE("Failed to set " description " array property");     \
-  }                                                                           \
+#define SET_ARRAY(setter, payload, name, typeName, description)              \
+  if (!OCRepPayloadSet##setter##Array((payload), (name),                     \
+                                      (const typeName *)data, dimensions)) { \
+    return LOCAL_MESSAGE("Failed to set " description " array property");    \
+  }                                                                          \
   break;
 
 std::string FlatArray::copyToPayload(OCRepPayload *payload, const char *name) {
@@ -245,15 +245,13 @@ static std::string validateArray(napi_env env, napi_value array,
 
     // The first item is an array
     if (isArray) {
-
       // Establish the length of the first child array
       uint32_t child_length;
       NAPI_CALL_RETURN(napi_get_array_length(env, arrayValue, &child_length));
 
       // Examine all the children
       for (uint32_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
-        NAPI_CALL_RETURN(
-            napi_get_element(env, array, arrayIndex, &arrayValue));
+        NAPI_CALL_RETURN(napi_get_element(env, array, arrayIndex, &arrayValue));
         NAPI_CALL_RETURN(napi_is_array(env, arrayValue, &isArray));
 
         // One of the children is not an array
@@ -285,7 +283,7 @@ static std::string validateArray(napi_env env, napi_value array,
         }
       }
 
-    // The first item is not an array
+      // The first item is not an array
     } else {
       OCRepPayloadPropType valueType;
 

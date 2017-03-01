@@ -31,7 +31,7 @@ static OCEntityHandlerResult defaultDeviceEntityHandler(
 }
 
 NAPI_METHOD(bind_OCSetDefaultDeviceEntityHandler) {
-  J2C_GET_ARGUMENTS(env, info, 1);
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
   DECLARE_VALUE_TYPE(handlerType, env, arguments[0], THROW_BODY(env, ));
 
   OCDeviceEntityHandler newHandler = 0;

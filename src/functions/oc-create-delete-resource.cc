@@ -30,7 +30,7 @@ static OCEntityHandlerResult defaultEntityHandler(
 }
 
 NAPI_METHOD(bind_OCCreateResource) {
-  J2C_GET_ARGUMENTS(env, info, 6);
+  J2C_DECLARE_ARGUMENTS(env, info, 6);
 
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
   J2C_GET_STRING_TRACKED_JS_THROW(type, env, arguments[1], false, "type");
@@ -56,7 +56,7 @@ NAPI_METHOD(bind_OCCreateResource) {
 }
 
 NAPI_METHOD(bind_OCDeleteResource) {
-  J2C_GET_ARGUMENTS(env, info, 1);
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
 
   JSOCResourceHandle *cData;
@@ -72,7 +72,7 @@ NAPI_METHOD(bind_OCDeleteResource) {
 
 // This is not really a binding since it only replaces the JS entity handler
 NAPI_METHOD(bind_OCBindResourceHandler) {
-  J2C_GET_ARGUMENTS(env, info, 2);
+  J2C_DECLARE_ARGUMENTS(env, info, 2);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_function,
                                 "entity handler");
@@ -85,6 +85,7 @@ NAPI_METHOD(bind_OCBindResourceHandler) {
 
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OC_STACK_OK));
 }
+
 /*
 NAN_METHOD(bind_OCBindResourceHandler) {
   VALIDATE_ARGUMENT_COUNT(info, 2);
