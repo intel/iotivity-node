@@ -17,6 +17,7 @@
 #include <nan.h>
 #include "../common.h"
 #include "../structures/handles.h"
+#include "oc-server-resource-utils.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -28,13 +29,6 @@ std::string returnNull(napi_env env, napi_callback_info info) {
   NAPI_CALL_RETURN(napi_set_return_value(env, info, napiNull));
   return std::string();
 }
-
-#define FIRST_ARGUMENT_IS_HANDLE(argc)                                        \
-  J2C_DECLARE_ARGUMENTS(env, info, argc);                                     \
-  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");    \
-  JSOCResourceHandle *cData;                                                  \
-  HELPER_CALL_THROW(env, JSOCResourceHandle::Get(env, arguments[0], &cData)); \
-  JS_ASSERT(cData, "handle is invalid", THROW_BODY(env, ));
 
 NAPI_METHOD(bind_OCGetResourceUri) {
   FIRST_ARGUMENT_IS_HANDLE(1);
@@ -95,22 +89,33 @@ NAPI_METHOD(bind_OCGetResourceInterfaceName) {
   GET_STRING_FROM_RESOURCE_BY_INDEX(OCGetResourceInterfaceName);
 }
 
-/*
-#define RETURN_RESOURCE_HANDLE(handle)                            \
-  do {                                                            \
-    OCResourceHandle localHandle = (handle);                      \
-    if (localHandle) {                                            \
-      if (JSOCResourceHandle::handles[localHandle]->IsEmpty()) {  \
-        Nan::ThrowError("JS handle not found for native handle"); \
-        return;                                                   \
-      }                                                           \
-      info.GetReturnValue().Set(                                  \
-          Nan::New(*(JSOCResourceHandle::handles[localHandle]))); \
-    } else {                                                      \
-      info.GetReturnValue().Set(Nan::Null());                     \
-    }                                                             \
-  } while (0)
+NAPI_METHOD(bind_OCGetResourceHandle) {
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
+  J2C_DECLARE_VALUE_JS_THROW(uint8_t, index, env, arguments[0], napi_number,
+                             "index", uint32, uint32_t);
+  HELPER_CALL_THROW(env, returnResourceHandle(env, info,
+                                              OCGetResourceHandle(index)));
+}
 
+#define GET_COUNT_FROM_RESOURCE(api) \
+  FIRST_ARGUMENT_IS_HANDLE(2) \
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_object, "count"); \
+  uint8_t count = 0; \
+  OCStackResult result = api(cData->data, &count); \
+  if (result == OC_STACK_OK) { \
+    C2J_SET_PROPERTY_THROW(env, arguments[1], "count", number, (double)count); \
+  } \
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
+
+NAPI_METHOD(bind_OCGetNumberOfResourceInterfaces) {
+  GET_COUNT_FROM_RESOURCE(OCGetNumberOfResourceInterfaces);
+}
+
+NAPI_METHOD(bind_OCGetNumberOfResourceTypes) {
+  GET_COUNT_FROM_RESOURCE(OCGetNumberOfResourceTypes);
+}
+
+/*
 #define RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE()             \
   VALIDATE_ARGUMENT_COUNT(info, 2);                          \
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                 \
@@ -130,14 +135,6 @@ NAN_METHOD(bind_OCGetResourceUri) {
     info.GetReturnValue().Set(Nan::Null());
   }
 }
-NAN_METHOD(bind_OCGetResourceHandle) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
-
-  RETURN_RESOURCE_HANDLE(
-      OCGetResourceHandle((uint8_t)(Nan::To<uint32_t>(info[0]).FromJust())));
-}
-
 #define GET_STRING_COUNT(api)                                                 \
   do {                                                                        \
     VALIDATE_ARGUMENT_COUNT(info, 2);                                         \
@@ -168,36 +165,6 @@ NAN_METHOD(bind_OCGetNumberOfResourceInterfaces) {
 
 NAN_METHOD(bind_OCGetNumberOfResourceTypes) {
   GET_STRING_COUNT(OCGetNumberOfResourceTypes);
-}
-
-#define RETURN_RESOURCE_HANDLE(handle)                            \
-  do {                                                            \
-    OCResourceHandle localHandle = (handle);                      \
-    if (localHandle) {                                            \
-      if (JSOCResourceHandle::handles[localHandle]->IsEmpty()) {  \
-        Nan::ThrowError("JS handle not found for native handle"); \
-        return;                                                   \
-      }                                                           \
-      info.GetReturnValue().Set(                                  \
-          Nan::New(*(JSOCResourceHandle::handles[localHandle]))); \
-    } else {                                                      \
-      info.GetReturnValue().Set(Nan::Null());                     \
-    }                                                             \
-  } while (0)
-
-NAN_METHOD(bind_OCGetResourceHandle) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
-
-  RETURN_RESOURCE_HANDLE(
-      OCGetResourceHandle((uint8_t)(Nan::To<uint32_t>(info[0]).FromJust())));
-}
-
-NAN_METHOD(bind_OCGetResourceHandleFromCollection) {
-  RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE();
-
-  RETURN_RESOURCE_HANDLE(OCGetResourceHandleFromCollection(
-      callbackInfo->handle, Nan::To<uint32_t>(info[1]).FromJust()));
 }
 
 #define GET_STRING_FROM_RESOURCE_BY_INDEX_BOILERPLATE(apiFunction)  \
