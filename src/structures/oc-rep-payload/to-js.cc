@@ -108,8 +108,9 @@ std::string js_OCRepPayload(napi_env env, OCRepPayload *payload,
       } else {
         CREATE_SINGLE_ITEM(env, currentValue, current, );
       }
-      C2J_SET_PROPERTY_JS_RETURN(env, destination, current->name, currentValue);
+      C2J_SET_PROPERTY_JS_RETURN(env, values, current->name, currentValue);
     }
+    C2J_SET_PROPERTY_JS_RETURN(env, destination, "values", values);
   }
 
   // ignore "next"

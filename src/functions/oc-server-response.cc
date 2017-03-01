@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <nan.h>
-
 #include "../common.h"
 #include "../structures/handles.h"
 #include "../structures/oc-entity-handler-response.h"
@@ -26,8 +24,17 @@ extern "C" {
 #include <ocstack.h>
 }
 
-using namespace v8;
-
+NAPI_METHOD(bind_OCDoResponse) {
+  J2C_GET_ARGUMENTS(env, info, 1);
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "response");
+  OCEntityHandlerResponse resp;
+  HELPER_CALL_THROW(env, c_OCEntityHandlerResponse(env, arguments[0], &resp));
+  std::unique_ptr<OCPayload, void (*)(OCPayload *)> payloadTracker(
+      resp.payload, OCPayloadDestroy);
+  OCStackResult result = OCDoResponse(&resp);
+  C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
+}
+/*
 NAN_METHOD(bind_OCDoResponse) {
   VALIDATE_ARGUMENT_COUNT(info, 1);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
@@ -114,3 +121,4 @@ NAN_METHOD(bind_OCNotifyListOfObservers) {
 free:
   free(c_observations);
 }
+*/

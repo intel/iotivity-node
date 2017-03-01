@@ -15,11 +15,9 @@
  */
 
 #include "oc-entity-handler-response.h"
-#include <nan.h>
 #include "../common.h"
 #include "handles.h"
 #include "oc-dev-addr.h"
-#include "oc-header-option-array.h"
 #include "oc-payload.h"
 
 extern "C" {
@@ -27,8 +25,58 @@ extern "C" {
 #include <string.h>
 }
 
-using namespace v8;
+std::string c_OCEntityHandlerResponse(napi_env env, napi_value value,
+                                      OCEntityHandlerResponse *response) {
+  // requestHandle
+  J2C_DECLARE_PROPERTY_JS_RETURN(requestHandle, env, value, "requestHandle");
+  JSOCRequestHandle *cRequestData;
+  HELPER_CALL_RETURN(JSOCRequestHandle::Get(env, requestHandle, &cRequestData));
+  response->requestHandle = cRequestData->data;
 
+  // resourceHandle
+  response->resourceHandle = nullptr;
+  J2C_DECLARE_PROPERTY_JS_RETURN(resourceHandle, env, value, "resourceHandle");
+  DECLARE_VALUE_TYPE(resHandleType, env, resourceHandle, RETURN_FAIL);
+  if (!(resHandleType == napi_null || resHandleType == napi_undefined)) {
+    JSOCResourceHandle *cResData;
+    HELPER_CALL_RETURN(JSOCResourceHandle::Get(env, resourceHandle, &cResData));
+    response->resourceHandle = cResData->data;
+  }
+
+  // ehResult
+  J2C_ASSIGN_MEMBER_VALUE_RETURN((env), response, value, OCEntityHandlerResult,
+                                 ehResult, napi_number, "response", uint32,
+                                 uint32_t);
+
+  // header options are ignored
+  response->numSendVendorSpecificHeaderOptions = 0;
+
+  // resourceUri
+  J2C_DECLARE_PROPERTY_JS_RETURN(resourceUri, env, value, "resourceUri");
+  J2C_VALIDATE_VALUE_TYPE_RETURN(env, resourceUri, napi_string,
+                                 "response.resourceUri");
+  int len;
+  NAPI_CALL_RETURN(napi_get_value_string_utf8_length(env, resourceUri, &len));
+  JS_ASSERT(len <= MAX_URI_LENGTH,
+            "length of response.resourceUri exceeds MAX_URI_LENGTH",
+            RETURN_FAIL);
+  char *cResourceUri;
+  J2C_GET_STRING_JS_RETURN(env, cResourceUri, resourceUri, false,
+                           "response.resourceUri");
+  strncpy(response->resourceUri, cResourceUri, MAX_URI_LENGTH);
+  free(cResourceUri);
+
+  // persistent buffer flag is ignored
+  response->persistentBufferFlag = false;
+
+  // payload
+  // This is the only deep property so we set it last.
+  J2C_DECLARE_PROPERTY_JS_RETURN(jsPayload, env, value, "payload");
+  HELPER_CALL_RETURN(c_OCPayload(env, jsPayload, &(response->payload)));
+
+  return std::string();
+}
+/*
 bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
                                OCEntityHandlerResponse *p_response) {
   OCEntityHandlerResponse response = {
@@ -123,3 +171,4 @@ free:
   OCPayloadDestroy(response.payload);
   return false;
 }
+*/
