@@ -32,7 +32,6 @@ NAPI_MODULE_INIT(Init) {
   HELPER_CALL_THROW(env, InitEnums(env, exports));
   HELPER_CALL_THROW(env, InitConstants(env, exports));
   HELPER_CALL_THROW(env, InitFunctions(env, exports));
-  HELPER_CALL_THROW(env, InitHandles(env));
 }
 
 NODE_MODULE_ABI(iotivity, Init)

@@ -18,12 +18,6 @@
 
 NAPI_METHOD(JSHandle_constructor) {}
 
-std::string InitHandles(napi_env env) {
-  HELPER_CALL_RETURN(JSOCDoHandle::InitClass(env));
-  HELPER_CALL_RETURN(JSOCResourceHandle::InitClass(env));
-  return std::string();
-}
-
 std::map<OCResourceHandle, napi_ref> JSOCResourceHandle::handles;
 
 /*

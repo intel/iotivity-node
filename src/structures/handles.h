@@ -33,6 +33,8 @@ class JSHandle {
   napi_ref callback;
   napi_ref self;
 
+  JSHandle() : callback(nullptr), self(nullptr) {}
+
   std::string Init(napi_env env, napi_value _callback, napi_value _self) {
     if (_callback) {
       NAPI_CALL_RETURN(napi_create_reference(env, _callback, 1, &callback));
@@ -49,8 +51,6 @@ class JSHandle {
     NAPI_CALL_RETURN(
         napi_new_instance(env, theConstructor, 0, nullptr, jsValue));
     auto nativeData = std::unique_ptr<jsType>(new jsType);
-    nativeData->self = nullptr;
-    nativeData->callback = nullptr;
     NAPI_CALL_RETURN(
         napi_wrap(env, *jsValue, nativeData.get(), nullptr, nullptr));
     *cData = nativeData.release();
@@ -150,7 +150,5 @@ class JSOCResourceHandle
     return std::string();
   }
 };
-
-std::string InitHandles(napi_env env);
 
 #endif /* __IOTIVITY_NODE_HANDLES_H__ */
