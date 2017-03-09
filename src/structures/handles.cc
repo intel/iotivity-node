@@ -16,7 +16,7 @@
 
 #include "handles.h"
 
-NAPI_METHOD(JSHandle_constructor) {}
+void JSHandle_constructor(napi_env env, napi_callback_info info) {}
 
 std::map<OCResourceHandle, napi_ref> JSOCResourceHandle::handles;
 

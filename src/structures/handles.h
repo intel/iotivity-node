@@ -24,7 +24,7 @@ extern "C" {
 #include <ocstack.h>
 }
 
-NAPI_METHOD(JSHandle_constructor);
+void JSHandle_constructor(napi_env env, napi_callback_info info);
 
 template <class jsType, typename T>
 class JSHandle {

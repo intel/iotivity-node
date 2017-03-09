@@ -22,15 +22,15 @@ extern "C" {
 #include <ocstack.h>
 }
 
-NAPI_METHOD(bind_OCStop) {
+void bind_OCStop(napi_env env, napi_callback_info info) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OCStop()));
 }
 
-NAPI_METHOD(bind_OCProcess) {
+void bind_OCProcess(napi_env env, napi_callback_info info) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OCProcess()));
 }
 
-NAPI_METHOD(bind_OCStartPresence) {
+void bind_OCStartPresence(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 1);
 
   J2C_DECLARE_VALUE_JS_THROW(uint32_t, ttl, env, arguments[0], napi_number,
@@ -39,7 +39,7 @@ NAPI_METHOD(bind_OCStartPresence) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OCStartPresence(ttl)));
 }
 
-NAPI_METHOD(bind_OCStopPresence) {
+void bind_OCStopPresence(napi_env env, napi_callback_info info) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OCStopPresence()));
 }
 
@@ -53,15 +53,15 @@ NAPI_METHOD(bind_OCStopPresence) {
                                                                               \
   C2J_SET_RETURN_VALUE(env, info, number, ((double)api(*(devInfo.get()))));
 
-NAPI_METHOD(bind_OCSetDeviceInfo) {
+void bind_OCSetDeviceInfo(napi_env env, napi_callback_info info) {
   INFO_SETTER(OCDeviceInfo, "device info", OCSetDeviceInfo);
 }
 
-NAPI_METHOD(bind_OCSetPlatformInfo) {
+void bind_OCSetPlatformInfo(napi_env env, napi_callback_info info) {
   INFO_SETTER(OCPlatformInfo, "platform info", OCSetPlatformInfo);
 }
 
-NAPI_METHOD(bind_OCInit) {
+void bind_OCInit(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 3);
   J2C_GET_STRING_TRACKED_JS_THROW(ip, env, arguments[0], true, "address");
   J2C_DECLARE_VALUE_JS_THROW(uint16_t, port, env, arguments[1], napi_number,
@@ -71,7 +71,7 @@ NAPI_METHOD(bind_OCInit) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OCInit(ip, port, mode)));
 }
 
-NAPI_METHOD(bind_OCGetNumberOfResources) {
+void bind_OCGetNumberOfResources(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 1);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "receptacle");
 
@@ -86,7 +86,7 @@ NAPI_METHOD(bind_OCGetNumberOfResources) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
 
-NAPI_METHOD(bind_OCGetServerInstanceIDString) {
+void bind_OCGetServerInstanceIDString(napi_env env, napi_callback_info info) {
   const char *uuid = OCGetServerInstanceIDString();
   C2J_SET_RETURN_VALUE(env, info, string_utf8, uuid, strlen(uuid));
 }

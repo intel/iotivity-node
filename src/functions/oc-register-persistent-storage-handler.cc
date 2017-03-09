@@ -146,7 +146,8 @@ static int defaultUnlink(const char *path) {
 static OCPersistentStorage storage = {defaultOpen, defaultRead, defaultWrite,
                                       defaultClose, defaultUnlink};
 
-NAPI_METHOD(bind_OCRegisterPersistentStorageHandler) {
+void bind_OCRegisterPersistentStorageHandler(napi_env env,
+                                             napi_callback_info info) {
   bool callNative = !context;
 
   J2C_DECLARE_ARGUMENTS(env, info, 1);

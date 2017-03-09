@@ -35,8 +35,8 @@ class FlatArray {
   std::string from(napi_env env, napi_value source);
 };
 
-FlatArray::FlatArray() : data(nullptr), dimensions(), totalElements(0),
-    typeEstablished(false) {}
+FlatArray::FlatArray()
+    : data(nullptr), dimensions(), totalElements(0), typeEstablished(false) {}
 FlatArray::~FlatArray() {
   size_t index;
   if (data) {

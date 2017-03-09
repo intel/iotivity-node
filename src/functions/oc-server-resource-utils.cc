@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+#include "oc-server-resource-utils.h"
 #include <nan.h>
 #include "../common.h"
 #include "../structures/handles.h"
-#include "oc-server-resource-utils.h"
 
 extern "C" {
 #include <ocstack.h>
@@ -30,7 +30,7 @@ std::string returnNull(napi_env env, napi_callback_info info) {
   return std::string();
 }
 
-NAPI_METHOD(bind_OCGetResourceUri) {
+void bind_OCGetResourceUri(napi_env env, napi_callback_info info) {
   FIRST_ARGUMENT_IS_HANDLE(1);
   const char *uri = OCGetResourceUri(cData->data);
   if (uri) {
@@ -40,7 +40,7 @@ NAPI_METHOD(bind_OCGetResourceUri) {
   }
 }
 
-NAPI_METHOD(bind_OCGetResourceProperties) {
+void bind_OCGetResourceProperties(napi_env env, napi_callback_info info) {
   FIRST_ARGUMENT_IS_HANDLE(1);
   C2J_SET_RETURN_VALUE(env, info, number, OCGetResourceProperties(cData->data));
 }
@@ -64,7 +64,8 @@ static std::string returnResourceHandle(napi_env env, napi_callback_info info,
   return std::string();
 }
 
-NAPI_METHOD(bind_OCGetResourceHandleFromCollection) {
+void bind_OCGetResourceHandleFromCollection(napi_env env,
+                                            napi_callback_info info) {
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE;
   HELPER_CALL_THROW(
       env, returnResourceHandle(env, info, OCGetResourceHandleFromCollection(
@@ -81,37 +82,38 @@ NAPI_METHOD(bind_OCGetResourceHandleFromCollection) {
     HELPER_CALL_THROW(env, returnNull(env, info));          \
   }
 
-NAPI_METHOD(bind_OCGetResourceTypeName) {
+void bind_OCGetResourceTypeName(napi_env env, napi_callback_info info) {
   GET_STRING_FROM_RESOURCE_BY_INDEX(OCGetResourceTypeName);
 }
 
-NAPI_METHOD(bind_OCGetResourceInterfaceName) {
+void bind_OCGetResourceInterfaceName(napi_env env, napi_callback_info info) {
   GET_STRING_FROM_RESOURCE_BY_INDEX(OCGetResourceInterfaceName);
 }
 
-NAPI_METHOD(bind_OCGetResourceHandle) {
+void bind_OCGetResourceHandle(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 1);
   J2C_DECLARE_VALUE_JS_THROW(uint8_t, index, env, arguments[0], napi_number,
                              "index", uint32, uint32_t);
-  HELPER_CALL_THROW(env, returnResourceHandle(env, info,
-                                              OCGetResourceHandle(index)));
+  HELPER_CALL_THROW(
+      env, returnResourceHandle(env, info, OCGetResourceHandle(index)));
 }
 
-#define GET_COUNT_FROM_RESOURCE(api) \
-  FIRST_ARGUMENT_IS_HANDLE(2) \
-  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_object, "count"); \
-  uint8_t count = 0; \
-  OCStackResult result = api(cData->data, &count); \
-  if (result == OC_STACK_OK) { \
+#define GET_COUNT_FROM_RESOURCE(api)                                           \
+  FIRST_ARGUMENT_IS_HANDLE(2)                                                  \
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_object, "count");      \
+  uint8_t count = 0;                                                           \
+  OCStackResult result = api(cData->data, &count);                             \
+  if (result == OC_STACK_OK) {                                                 \
     C2J_SET_PROPERTY_THROW(env, arguments[1], "count", number, (double)count); \
-  } \
+  }                                                                            \
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 
-NAPI_METHOD(bind_OCGetNumberOfResourceInterfaces) {
+void bind_OCGetNumberOfResourceInterfaces(napi_env env,
+                                          napi_callback_info info) {
   GET_COUNT_FROM_RESOURCE(OCGetNumberOfResourceInterfaces);
 }
 
-NAPI_METHOD(bind_OCGetNumberOfResourceTypes) {
+void bind_OCGetNumberOfResourceTypes(napi_env env, napi_callback_info info) {
   GET_COUNT_FROM_RESOURCE(OCGetNumberOfResourceTypes);
 }
 

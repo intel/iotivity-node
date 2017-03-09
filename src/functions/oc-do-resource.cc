@@ -59,7 +59,7 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
   return cResult;
 }
 
-NAPI_METHOD(bind_OCDoResource) {
+void bind_OCDoResource(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 9);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
   J2C_DECLARE_VALUE_JS_THROW(OCMethod, method, env, arguments[1], napi_number,
@@ -109,7 +109,7 @@ NAPI_METHOD(bind_OCDoResource) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
 
-NAPI_METHOD(bind_OCCancel) {
+void bind_OCCancel(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 3);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_number, "qos");
   J2C_VALIDATE_IS_ARRAY_THROW(env, arguments[2], true, "header options");

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <node_api_helpers.h>
-
 #include "enums.h"
 
 extern "C" {

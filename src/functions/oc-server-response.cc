@@ -25,7 +25,7 @@ extern "C" {
 #include <ocstack.h>
 }
 
-NAPI_METHOD(bind_OCDoResponse) {
+void bind_OCDoResponse(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 1);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "response");
   OCEntityHandlerResponse resp;
@@ -36,8 +36,7 @@ NAPI_METHOD(bind_OCDoResponse) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
 
-NAPI_METHOD(bind_OCNotifyListOfObservers) {
-
+void bind_OCNotifyListOfObservers(napi_env env, napi_callback_info info) {
   // handle
   FIRST_ARGUMENT_IS_HANDLE(4);
 
@@ -49,29 +48,30 @@ NAPI_METHOD(bind_OCNotifyListOfObservers) {
   std::unique_ptr<OCObservationId> observers(new OCObservationId[obsCount]());
   for (index = 0; index < obsCount; index++) {
     NAPI_CALL_THROW(env, napi_get_element(env, arguments[1], index, &jsObsId));
-    J2C_ASSIGN_VALUE_JS(OCObservationId, observers.get()[index], env, jsObsId,
-                        napi_number, std::string("observation id[") +
-					    std::to_string(index) + "]", uint32, uint32_t,
-                        THROW_BODY(env, ));
+    J2C_ASSIGN_VALUE_JS(
+        OCObservationId, observers.get()[index], env, jsObsId, napi_number,
+        std::string("observation id[") + std::to_string(index) + "]", uint32,
+        uint32_t, THROW_BODY(env, ));
   }
 
   // payload
   OCRepPayload *payload = nullptr;
-  std::unique_ptr<OCRepPayload, void (*)(OCRepPayload *)>
-  payloadTracker(nullptr, OCRepPayloadDestroy);
+  std::unique_ptr<OCRepPayload, void (*)(OCRepPayload *)> payloadTracker(
+      nullptr, OCRepPayloadDestroy);
   DECLARE_VALUE_TYPE(payloadType, env, arguments[2], THROW_BODY(env, ));
   if (!(payloadType == napi_null || payloadType == napi_undefined)) {
     HELPER_CALL_THROW(env, c_OCRepPayload(env, arguments[2], &payload));
-	payloadTracker.reset(payload);
+    payloadTracker.reset(payload);
   }
 
   // qos
   J2C_DECLARE_VALUE_JS_THROW(OCQualityOfService, qos, env, arguments[3],
                              napi_number, "qos", uint32, uint32_t);
 
-  C2J_SET_RETURN_VALUE(env, info, number,
-    ((double)OCNotifyListOfObservers(cData->data, observers.get(),
-	                                 (uint8_t)obsCount, payload, qos)));
+  C2J_SET_RETURN_VALUE(
+      env, info, number,
+      ((double)OCNotifyListOfObservers(cData->data, observers.get(),
+                                       (uint8_t)obsCount, payload, qos)));
 }
 /*
 NAN_METHOD(bind_OCNotifyAllObservers) {

@@ -30,7 +30,7 @@ static OCEntityHandlerResult defaultEntityHandler(
   EH_BODY(flag, request, nullptr, ((JSOCResourceHandle *)data)->callback);
 }
 
-NAPI_METHOD(bind_OCCreateResource) {
+void bind_OCCreateResource(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 6);
 
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
@@ -56,7 +56,7 @@ NAPI_METHOD(bind_OCCreateResource) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
 
-NAPI_METHOD(bind_OCDeleteResource) {
+void bind_OCDeleteResource(napi_env env, napi_callback_info info) {
   FIRST_ARGUMENT_IS_HANDLE(1);
 
   OCStackResult result = OCDeleteResource(cData->data);
@@ -68,7 +68,7 @@ NAPI_METHOD(bind_OCDeleteResource) {
 }
 
 // This is not really a binding since it only replaces the JS entity handler
-NAPI_METHOD(bind_OCBindResourceHandler) {
+void bind_OCBindResourceHandler(napi_env env, napi_callback_info info) {
   FIRST_ARGUMENT_IS_HANDLE(2);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_function,
                                 "entity handler");
@@ -80,38 +80,39 @@ NAPI_METHOD(bind_OCBindResourceHandler) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)OC_STACK_OK));
 }
 
-#define BIND_STRING_TO_RESOURCE(api, message) \
-  FIRST_ARGUMENT_IS_HANDLE(2); \
+#define BIND_STRING_TO_RESOURCE(api, message)                              \
+  FIRST_ARGUMENT_IS_HANDLE(2);                                             \
   J2C_GET_STRING_TRACKED_JS_THROW(item, env, arguments[1], true, message); \
   C2J_SET_RETURN_VALUE(env, info, number, (double)api(cData->data, item));
 
-
-NAPI_METHOD(bind_OCBindResourceTypeToResource) {
+void bind_OCBindResourceTypeToResource(napi_env env, napi_callback_info info) {
   BIND_STRING_TO_RESOURCE(OCBindResourceTypeToResource, "resource type");
 }
 
-NAPI_METHOD(bind_OCBindResourceInterfaceToResource) {
+void bind_OCBindResourceInterfaceToResource(napi_env env,
+                                            napi_callback_info info) {
   BIND_STRING_TO_RESOURCE(OCBindResourceInterfaceToResource, "interface");
 }
 
 // This is not actually a binding. We get the resource handler from the
 // JS handle.
-NAPI_METHOD(bind_OCGetResourceHandler) {
+void bind_OCGetResourceHandler(napi_env env, napi_callback_info info) {
   FIRST_ARGUMENT_IS_HANDLE(1);
   napi_value jsCB;
   NAPI_CALL_THROW(env, napi_get_reference_value(env, cData->callback, &jsCB));
   NAPI_CALL_THROW(env, napi_set_return_value(env, info, jsCB));
 }
 
-#define BIND_UNBIND_RESOURCE(api) \
-  FIRST_ARGUMENT_IS_HANDLE(2); \
+#define BIND_UNBIND_RESOURCE(api)                                    \
+  FIRST_ARGUMENT_IS_HANDLE(2);                                       \
   DECLARE_HANDLE_DATA(childData, env, arguments[1], "child handle"); \
-  C2J_SET_RETURN_VALUE(env, info, number, (double)api(cData->data, childData->data));
+  C2J_SET_RETURN_VALUE(env, info, number,                            \
+                       (double)api(cData->data, childData->data));
 
-NAPI_METHOD(bind_OCBindResource) {
+void bind_OCBindResource(napi_env env, napi_callback_info info) {
   BIND_UNBIND_RESOURCE(OCBindResource);
 }
 
-NAPI_METHOD(bind_OCUnBindResource) {
+void bind_OCUnBindResource(napi_env env, napi_callback_info info) {
   BIND_UNBIND_RESOURCE(OCUnBindResource);
 }

@@ -37,7 +37,7 @@ function getMethods( topPath ) {
 									.replace( /\r/g, "" )
 									.split( "\n" ),
 								function( line ) {
-									var match = line.match( /^NAPI_METHOD\s*[(]\s*bind_([^)]*)*/ );
+									var match = line.match( /^void\s+bind_([^(]+)/ );
 									if ( match && match.length > 1 ) {
 										return match[ 1 ].replace( /\s/g, "" );
 									}
@@ -58,7 +58,7 @@ fs.writeFileSync( protosH, [
 	""
 ]
 .concat( _.map( methods, function( item ) {
-	return "NAPI_METHOD(bind_" + item + ");";
+	return "void bind_" + item + "(napi_env env, napi_callback_info info);";
 } ) )
 .concat( [
 	"",

@@ -30,7 +30,8 @@ static OCEntityHandlerResult defaultDeviceEntityHandler(
   EH_BODY(flag, request, uri, ((napi_ref)context));
 }
 
-NAPI_METHOD(bind_OCSetDefaultDeviceEntityHandler) {
+void bind_OCSetDefaultDeviceEntityHandler(napi_env env,
+                                          napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 1);
   DECLARE_VALUE_TYPE(handlerType, env, arguments[0], THROW_BODY(env, ));
 

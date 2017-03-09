@@ -17,14 +17,16 @@
 #ifndef _IOTIVITY_NODE_OC_SERVER_RESOURCE_UTILS_H_
 #define _IOTIVITY_NODE_OC_SERVER_RESOURCE_UTILS_H_
 
-#define DECLARE_HANDLE_DATA(varName, env, source, message) \
-  J2C_VALIDATE_VALUE_TYPE_THROW((env), (source), napi_object, message); \
-  JSOCResourceHandle *varName; \
-  HELPER_CALL_THROW((env), JSOCResourceHandle::Get((env), (source), &varName)); \
-  JS_ASSERT(varName, std::string() + message + " is invalid", THROW_BODY(env, ));
+#define DECLARE_HANDLE_DATA(varName, env, source, message)               \
+  J2C_VALIDATE_VALUE_TYPE_THROW((env), (source), napi_object, message);  \
+  JSOCResourceHandle *varName;                                           \
+  HELPER_CALL_THROW((env),                                               \
+                    JSOCResourceHandle::Get((env), (source), &varName)); \
+  JS_ASSERT(varName, std::string() + message + " is invalid",            \
+            THROW_BODY(env, ));
 
-#define FIRST_ARGUMENT_IS_HANDLE(argc)                                        \
-  J2C_DECLARE_ARGUMENTS(env, info, argc);                                     \
+#define FIRST_ARGUMENT_IS_HANDLE(argc)    \
+  J2C_DECLARE_ARGUMENTS(env, info, argc); \
   DECLARE_HANDLE_DATA(cData, env, arguments[0], "handle");
 
 #endif /* ndef _IOTIVITY_NODE_OC_SERVER_RESOURCE_UTILS_H_ */

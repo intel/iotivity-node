@@ -17,11 +17,11 @@
 #ifndef __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 #define __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 
-#include <node_api_helpers.h>
 #include <stdlib.h>
 #include <string.h>
 #include <memory>
 #include <string>
+#include <node_jsvmapi.h>
 
 // A line that looks like a stack frame from a JS exception
 #define SOURCE_LOCATION                                        \

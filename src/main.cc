@@ -15,7 +15,6 @@
  */
 
 #include <nan.h>
-#include <node_api_helpers.h>
 #include <node_jsvmapi.h>
 #include <stdio.h>
 #include "constants.h"
@@ -27,7 +26,7 @@ static napi_env global__env = nullptr;
 
 napi_env napi_get_init_env() { return global__env; }
 
-NAPI_MODULE_INIT(Init) {
+void Init(napi_env env, napi_value exports, napi_value module) {
   global__env = env;
   HELPER_CALL_THROW(env, InitEnums(env, exports));
   HELPER_CALL_THROW(env, InitConstants(env, exports));
