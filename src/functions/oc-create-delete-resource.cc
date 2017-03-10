@@ -27,7 +27,8 @@ extern "C" {
 
 static OCEntityHandlerResult defaultEntityHandler(
     OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *data) {
-  EH_BODY(flag, request, nullptr, ((JSOCResourceHandle *)data)->callback);
+  JSOCResourceHandle *cData = (JSOCResourceHandle *)data;
+  EH_BODY(cData->env, flag, request, nullptr, cData->callback);
 }
 
 void bind_OCCreateResource(napi_env env, napi_callback_info info) {

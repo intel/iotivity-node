@@ -32,8 +32,9 @@ class JSHandle {
   T data;
   napi_ref callback;
   napi_ref self;
+  napi_env env;
 
-  JSHandle() : callback(nullptr), self(nullptr) {}
+  JSHandle() : callback(nullptr), self(nullptr), env(nullptr) {}
 
   std::string Init(napi_env env, napi_value _callback, napi_value _self) {
     if (_callback) {
@@ -45,15 +46,16 @@ class JSHandle {
     return std::string();
   }
 
-  static std::string New(napi_env env, napi_value *jsValue, jsType **cData) {
+  static std::string New(napi_env _env, napi_value *jsValue, jsType **cData) {
     napi_value theConstructor;
-    HELPER_CALL_RETURN(InitClass(env, &theConstructor));
+    HELPER_CALL_RETURN(InitClass(_env, &theConstructor));
     NAPI_CALL_RETURN(
-        napi_new_instance(env, theConstructor, 0, nullptr, jsValue));
+        napi_new_instance(_env, theConstructor, 0, nullptr, jsValue));
     auto nativeData = std::unique_ptr<jsType>(new jsType);
     NAPI_CALL_RETURN(
-        napi_wrap(env, *jsValue, nativeData.get(), nullptr, nullptr));
+        napi_wrap(_env, *jsValue, nativeData.get(), nullptr, nullptr));
     *cData = nativeData.release();
+	(*cData)->env = _env;
     return std::string();
   }
 

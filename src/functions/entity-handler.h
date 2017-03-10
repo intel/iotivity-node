@@ -27,12 +27,12 @@ std::string entityHandler(napi_env env, OCEntityHandlerFlag flag,
                           OCEntityHandlerRequest *request, char *uri,
                           napi_ref callback, OCEntityHandlerResult *result);
 
-#define EH_BODY(flag, request, uri, callback)                                  \
-  NapiHandleScope scope;                                                       \
+#define EH_BODY(env, flag, request, uri, callback)                                  \
   OCEntityHandlerResult result = OC_EH_ERROR;                                  \
+  DECLARE_HANDLE_SCOPE(scope, ((env)), result); \
   HELPER_CALL(                                                                 \
-      entityHandler(scope.env, (flag), (request), (uri), (callback), &result), \
-      THROW_BODY(scope.env, result));                                          \
+      entityHandler((env), (flag), (request), (uri), (callback), &result), \
+      THROW_BODY((env), result));                                          \
   return result;
 
 #endif /* ndef _ENTITI_HANDLER_H_ */

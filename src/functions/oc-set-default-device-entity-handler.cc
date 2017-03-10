@@ -22,12 +22,13 @@ extern "C" {
 #include <stdlib.h>
 }
 
-static napi_ref g_currentCallback = 0;
+static napi_ref g_currentCallback = nullptr;
+static napi_env g_currentEnv = nullptr;
 
 static OCEntityHandlerResult defaultDeviceEntityHandler(
     OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, char *uri,
     void *context) {
-  EH_BODY(flag, request, uri, ((napi_ref)context));
+  EH_BODY(g_currentEnv, flag, request, uri, ((napi_ref)context));
 }
 
 void bind_OCSetDefaultDeviceEntityHandler(napi_env env,
@@ -47,6 +48,7 @@ void bind_OCSetDefaultDeviceEntityHandler(napi_env env,
   if (result == OC_STACK_OK) {
     callbackToDelete = g_currentCallback;
     g_currentCallback = newCallback;
+	g_currentEnv = env;
   } else {
     callbackToDelete = newCallback;
   }

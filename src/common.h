@@ -330,11 +330,15 @@ class NapiHandleScope {
 
  public:
   napi_env env;
-  NapiHandleScope();
+  std::string open();
+  NapiHandleScope(napi_env _env);
   ~NapiHandleScope();
 };
 
-napi_env napi_get_init_env();
+#define DECLARE_HANDLE_SCOPE(varName, env, ...) \
+  NapiHandleScope varName((env)); \
+  HELPER_CALL(varName.open(), THROW_BODY((env), __VA_ARGS__));
+
 std::string js_ArrayFromBytes(napi_env env, unsigned char *bytes,
                               uint32_t length, napi_value *array);
 std::string c_ArrayFromBytes(napi_env env, napi_value array,

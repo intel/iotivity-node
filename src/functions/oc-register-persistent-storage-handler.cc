@@ -28,6 +28,7 @@ static napi_ref jsClose = nullptr;
 static napi_ref jsRead = nullptr;
 static napi_ref jsWrite = nullptr;
 static napi_ref jsUnlink = nullptr;
+static napi_env contextEnv = nullptr;
 
 static void noopDeleter(void *) {}
 
@@ -42,8 +43,8 @@ static void noopDeleter(void *) {}
   napi_value arguments[argc]
 
 static FILE *defaultOpen(const char *path, const char *mode) {
-  NapiHandleScope scope;
   FILE *failReturn = nullptr;
+  DECLARE_HANDLE_SCOPE(scope, contextEnv, failReturn);
 
   STORAGE_PREAMBLE(jsOpen, "open()", failReturn, 2);
 
@@ -66,8 +67,8 @@ static FILE *defaultOpen(const char *path, const char *mode) {
 
 static size_t readWrite(void *ptr, size_t size, size_t count, FILE *stream,
                         const char *operation, napi_ref method) {
-  NapiHandleScope scope;
   size_t failReturn = 0;
+  DECLARE_HANDLE_SCOPE(scope, contextEnv, failReturn);
 
   size_t totalSize = size * count;
   JS_ASSERT(totalSize <= UINT32_MAX,
@@ -106,8 +107,8 @@ static size_t defaultWrite(const void *ptr, size_t size, size_t count,
 }
 
 #define CLOSE_UNLINK(method, message, suffix, ...)                             \
-  NapiHandleScope scope;                                                       \
   int failReturn = -1;                                                         \
+  DECLARE_HANDLE_SCOPE(scope, contextEnv, failReturn); \
   STORAGE_PREAMBLE((method), message "()", failReturn, 1);                     \
   NAPI_CALL(napi_create_##suffix(scope.env, __VA_ARGS__, &arguments[0]),       \
             THROW_BODY(scope.env, failReturn));                                \
@@ -158,6 +159,7 @@ void bind_OCRegisterPersistentStorageHandler(napi_env env,
   GET_AND_VALIDATE(Close, env, arguments[0], "close");
   GET_AND_VALIDATE(Unlink, env, arguments[0], "unlink");
   UPDATE_REFERENCE(env, context, arguments[0]);
+  contextEnv = env;
 
   OCStackResult result = OC_STACK_OK;
   if (callNative) {

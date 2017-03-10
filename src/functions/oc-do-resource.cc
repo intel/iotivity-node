@@ -25,17 +25,17 @@ extern "C" {
 }
 
 static void deleteCallback(void *data) {
-  NapiHandleScope scope;
-  HELPER_CALL_THROW(scope.env,
-                    JSOCDoHandle::Destroy(scope.env, (JSOCDoHandle *)data));
+  JSOCDoHandle *cData = (JSOCDoHandle *)data;
+  DECLARE_HANDLE_SCOPE(scope, cData->env, );
+  HELPER_CALL_THROW(scope.env, JSOCDoHandle::Destroy(scope.env, cData));
 }
 
 static OCStackApplicationResult defaultOCClientResponseHandler(
     void *context, OCDoHandle, OCClientResponse *clientResponse) {
-  NapiHandleScope scope;
-  OCStackApplicationResult failReturn = OC_STACK_KEEP_TRANSACTION;
-
   JSOCDoHandle *cData = (JSOCDoHandle *)context;
+  OCStackApplicationResult failReturn = OC_STACK_KEEP_TRANSACTION;
+  DECLARE_HANDLE_SCOPE(scope, cData->env, failReturn);
+
   napi_value jsContext, jsCallback, jsReturnValue;
   NAPI_CALL(napi_get_null(scope.env, &jsContext),
             THROW_BODY(scope.env, failReturn));
