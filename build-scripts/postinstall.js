@@ -42,6 +42,7 @@ if ( !isDependency ) {
 // Purge any and all files not needed after building
 shelljs.rm( "-rf",
 	path.join( repoPaths.root, "binding.gyp" ),
+	path.join( repoPaths.root, ".gitattributes" ),
 	path.join( repoPaths.root, "node_modules", "nan" ),
 	path.join( repoPaths.root, "node_modules", ".bin" ),
 	path.join( repoPaths.root, "build-scripts" ),
