@@ -21,7 +21,7 @@
 
 #define SET_FUNCTION(env, destination, functionName)                     \
   C2J_SET_PROPERTY_RETURN((env), (destination), #functionName, function, \
-                          bind_##functionName, 0)
+                          #functionName, bind_##functionName, 0)
 
 std::string InitFunctions(napi_env env, napi_value exports);
 

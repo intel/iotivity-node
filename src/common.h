@@ -69,8 +69,8 @@
   } while (0)
 
 #define DECLARE_PROPERTY(varName, env, value, ...) \
-  napi_propertyname varName;                       \
-  NAPI_CALL(napi_property_name((env), value, &varName), __VA_ARGS__)
+  napi_value varName; \
+  NAPI_CALL(napi_create_string_utf8((env), (value), strlen((value)), &varName), __VA_ARGS__);
 
 #define DECLARE_VALUE_TYPE(varName, env, value, ...) \
   napi_valuetype varName;                            \
