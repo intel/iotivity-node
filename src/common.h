@@ -23,6 +23,8 @@
 #include <string>
 #include <node_jsvmapi.h>
 
+#define PENDING_EXCEPTION "Pending exception"
+
 // A line that looks like a stack frame from a JS exception
 #define SOURCE_LOCATION                                        \
   (std::string("    at ") + std::string(__func__) +            \
@@ -53,9 +55,13 @@
 #define NAPI_CALL(theCall, ...)                                        \
   do {                                                                 \
     napi_status status = theCall;                                      \
-    JS_ASSERT((status == napi_ok || status == napi_pending_exception), \
-              std::string(napi_get_last_error_info()->error_message),  \
-              __VA_ARGS__);                                            \
+    if (status != napi_ok) { \
+	  std::string __resultingStatus = std::string( \
+	    (status == napi_pending_exception) \
+		  ? PENDING_EXCEPTION \
+		  : napi_get_last_error_info()->error_message); \
+      __VA_ARGS__; \
+	} \
   } while (0)
 
 // Bails if a helper returns a non-empty std::string. The __VA_ARGS__ either
@@ -175,7 +181,10 @@
 
 // Macros used in helpers - they cause the function to return a std::string
 
-#define RETURN_FAIL return FAIL_STATUS
+#define RETURN_FAIL \
+  return (strcmp(__resultingStatus.c_str(), PENDING_EXCEPTION) \
+    ? __resultingStatus \
+	: FAIL_STATUS)
 
 #define NAPI_CALL_RETURN(theCall) NAPI_CALL(theCall, RETURN_FAIL)
 
@@ -261,7 +270,9 @@
 // Macros used in bindings - they cause the function to throw and return void
 
 #define THROW_BODY(env, returnValue)            \
-  napi_throw_error((env), FAIL_STATUS.c_str()); \
+  if (strcmp(__resultingStatus.c_str(), PENDING_EXCEPTION)) { \
+    napi_throw_error((env), FAIL_STATUS.c_str()); \
+  } \
   return returnValue;
 
 #define NAPI_CALL_THROW(env, theCall) NAPI_CALL(theCall, THROW_BODY((env), ))
@@ -277,11 +288,7 @@
   do {                                                                       \
     int length;                                                              \
     NAPI_CALL_THROW((env), napi_get_cb_args_length((env), (info), &length)); \
-    if (length != (count)) {                                                 \
-      napi_throw_error(                                                      \
-          (env), LOCAL_MESSAGE("expected " #count " arguments").c_str());    \
-      return;                                                                \
-    }                                                                        \
+    JS_ASSERT((length == (count)), "expected " #count " arguments", THROW_BODY((env), )); \
   } while (0);                                                               \
   napi_value arguments[count];                                               \
   NAPI_CALL_THROW((env), napi_get_cb_args((env), (info), arguments, (count)));
