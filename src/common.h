@@ -17,11 +17,11 @@
 #ifndef __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 #define __IOTIVITY_NODE_FUNCTIONS_INTERNAL_H__
 
+#include <node_api.h>
 #include <stdlib.h>
 #include <string.h>
 #include <memory>
 #include <string>
-#include <node_jsvmapi.h>
 
 #define PENDING_EXCEPTION "Pending exception"
 
@@ -52,16 +52,17 @@
   } while (0)
 
 // Converts a non-napi_ok status to a string that looks like an exception.
-#define NAPI_CALL(theCall, ...)                                        \
-  do {                                                                 \
-    napi_status status = theCall;                                      \
-    if (status != napi_ok) { \
-	  std::string __resultingStatus = std::string( \
-	    (status == napi_pending_exception) \
-		  ? PENDING_EXCEPTION \
-		  : napi_get_last_error_info()->error_message); \
-      __VA_ARGS__; \
-	} \
+#define NAPI_CALL(env, theCall, ...)                                       \
+  do {                                                                     \
+    napi_status status = theCall;                                          \
+    if (status != napi_ok) {                                               \
+      const napi_extended_error_info *error_info = 0;                      \
+      napi_get_last_error_info((env), &error_info);                        \
+      std::string __resultingStatus = std::string(                         \
+          (status == napi_pending_exception) ? PENDING_EXCEPTION           \
+                                             : error_info->error_message); \
+      __VA_ARGS__;                                                         \
+    }                                                                      \
   } while (0)
 
 // Bails if a helper returns a non-empty std::string. The __VA_ARGS__ either
@@ -74,13 +75,15 @@
     }                                        \
   } while (0)
 
-#define DECLARE_PROPERTY(varName, env, value, ...) \
-  napi_value varName; \
-  NAPI_CALL(napi_create_string_utf8((env), (value), strlen((value)), &varName), __VA_ARGS__);
+#define DECLARE_PROPERTY(varName, env, value, ...)                          \
+  napi_value varName;                                                       \
+  NAPI_CALL((env), napi_create_string_utf8((env), (value), strlen((value)), \
+                                           &varName),                       \
+            __VA_ARGS__);
 
 #define DECLARE_VALUE_TYPE(varName, env, value, ...) \
   napi_valuetype varName;                            \
-  NAPI_CALL(napi_get_type_of_value((env), (value), &varName), __VA_ARGS__);
+  NAPI_CALL((env), napi_typeof((env), (value), &varName), __VA_ARGS__);
 
 #define J2C_VALIDATE_VALUE_TYPE(env, value, typecheck, message, ...)   \
   do {                                                                 \
@@ -94,7 +97,8 @@
 #define J2C_ASSIGN_PROPERTY_JS(env, source, name, destination, ...)      \
   do {                                                                   \
     DECLARE_PROPERTY(jsName, (env), name, __VA_ARGS__);                  \
-    NAPI_CALL(napi_get_property((env), (source), jsName, (destination)), \
+    NAPI_CALL((env),                                                     \
+              napi_get_property((env), (source), jsName, (destination)), \
               __VA_ARGS__);                                              \
   } while (0)
 
@@ -107,7 +111,8 @@
   do {                                                                        \
     jsParameterType fromJSValue;                                              \
     J2C_VALIDATE_VALUE_TYPE((env), (source), (jsType), message, __VA_ARGS__); \
-    NAPI_CALL(napi_get_value_##getterSuffix((env), (source), &fromJSValue),   \
+    NAPI_CALL((env),                                                          \
+              napi_get_value_##getterSuffix((env), (source), &fromJSValue),   \
               __VA_ARGS__);                                                   \
     (destination) = (cType)fromJSValue;                                       \
   } while (0)
@@ -118,20 +123,22 @@
   J2C_ASSIGN_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
                       getterSuffix, jsParameterType, __VA_ARGS__);
 
-#define J2C_ASSIGN_STRING_JS(env, destination, source, message, ...)       \
-  do {                                                                     \
-    int length;                                                            \
-    NAPI_CALL(napi_get_value_string_utf8_length((env), (source), &length), \
-              __VA_ARGS__);                                                \
-    std::unique_ptr<char> cString(new char[length + 1]());                 \
-    JS_ASSERT(cString.get(),                                               \
-              std::string("") + "Failed to allocate memory for" + message, \
-              __VA_ARGS__);                                                \
-    int bytesWritten;                                                      \
-    NAPI_CALL(napi_get_value_string_utf8((env), (source), cString.get(),   \
-                                         length, &bytesWritten),           \
-              __VA_ARGS__);                                                \
-    (destination) = cString.release();                                     \
+#define J2C_ASSIGN_STRING_JS(env, destination, source, message, ...)         \
+  do {                                                                       \
+    size_t length;                                                           \
+    NAPI_CALL((env), napi_get_value_string_utf8((env), (source), nullptr, 0, \
+                                                &length),                    \
+              __VA_ARGS__);                                                  \
+    std::unique_ptr<char> cString(new char[length + 1]());                   \
+    JS_ASSERT(cString.get(),                                                 \
+              std::string("") + "Failed to allocate memory for" + message,   \
+              __VA_ARGS__);                                                  \
+    size_t bytesWritten;                                                     \
+    NAPI_CALL((env),                                                         \
+              napi_get_value_string_utf8((env), (source), cString.get(),     \
+                                         length, &bytesWritten),             \
+              __VA_ARGS__);                                                  \
+    (destination) = cString.release();                                       \
   } while (0)
 
 #define J2C_GET_STRING_JS(env, destination, source, nullOk, message, ...)     \
@@ -164,7 +171,8 @@
 #define C2J_SET_PROPERTY_JS(env, destination, name, jsValue, ...)         \
   do {                                                                    \
     DECLARE_PROPERTY(jsName, env, name, __VA_ARGS__);                     \
-    NAPI_CALL(napi_set_property((env), (destination), jsName, (jsValue)), \
+    NAPI_CALL((env),                                                      \
+              napi_set_property((env), (destination), jsName, (jsValue)), \
               __VA_ARGS__);                                               \
   } while (0)
 
@@ -173,7 +181,8 @@
     DECLARE_VALUE_TYPE(jsType, (env), theValue, __VA_ARGS__);               \
     if (!((nullOk) && (jsType == napi_null || jsType == napi_undefined))) { \
       bool isArray;                                                         \
-      NAPI_CALL(napi_is_array((env), (theValue), &isArray), __VA_ARGS__);   \
+      NAPI_CALL((env), napi_is_array((env), (theValue), &isArray),          \
+                __VA_ARGS__);                                               \
       JS_ASSERT(isArray, std::string() + message + " is not an array",      \
                 __VA_ARGS__);                                               \
     }                                                                       \
@@ -181,12 +190,12 @@
 
 // Macros used in helpers - they cause the function to return a std::string
 
-#define RETURN_FAIL \
+#define RETURN_FAIL                                            \
   return (strcmp(__resultingStatus.c_str(), PENDING_EXCEPTION) \
-    ? __resultingStatus \
-	: FAIL_STATUS)
+              ? __resultingStatus                              \
+              : FAIL_STATUS)
 
-#define NAPI_CALL_RETURN(theCall) NAPI_CALL(theCall, RETURN_FAIL)
+#define NAPI_CALL_RETURN(env, theCall) NAPI_CALL((env), theCall, RETURN_FAIL)
 
 #define HELPER_CALL_RETURN(theCall) HELPER_CALL(theCall, RETURN_FAIL)
 
@@ -251,7 +260,8 @@
 #define C2J_SET_PROPERTY_RETURN(env, destination, name, type, ...) \
   C2J_SET_PROPERTY_CALL_RETURN(                                    \
       (env), (destination), name,                                  \
-      NAPI_CALL_RETURN(napi_create_##type((env), __VA_ARGS__, &jsValue)))
+      NAPI_CALL_RETURN((env),                                      \
+                       napi_create_##type((env), __VA_ARGS__, &jsValue)))
 
 #define C2J_SET_NUMBER_MEMBER_RETURN(env, destination, source, name) \
   C2J_SET_PROPERTY_RETURN((env), (destination), #name, number, (source)->name)
@@ -269,53 +279,59 @@
 
 // Macros used in bindings - they cause the function to throw and return void
 
-#define THROW_BODY(env, returnValue)            \
+#define THROW_BODY(env, returnValue)                          \
   if (strcmp(__resultingStatus.c_str(), PENDING_EXCEPTION)) { \
-    napi_throw_error((env), FAIL_STATUS.c_str()); \
-  } \
+    napi_throw_error((env), FAIL_STATUS.c_str());             \
+  }                                                           \
   return returnValue;
 
-#define NAPI_CALL_THROW(env, theCall) NAPI_CALL(theCall, THROW_BODY((env), ))
+#define NAPI_CALL_THROW(env, theCall) \
+  NAPI_CALL((env), theCall, THROW_BODY((env), 0))
 
 #define HELPER_CALL_THROW(env, theCall) \
-  HELPER_CALL(theCall, THROW_BODY((env), ))
+  HELPER_CALL(theCall, THROW_BODY((env), 0))
 
 #define J2C_VALIDATE_VALUE_TYPE_THROW(env, value, typecheck, message) \
   J2C_VALIDATE_VALUE_TYPE((env), (value), typecheck, message,         \
-                          THROW_BODY((env), ))
+                          THROW_BODY((env), 0))
 
-#define J2C_DECLARE_ARGUMENTS(env, info, count)                              \
-  do {                                                                       \
-    int length;                                                              \
-    NAPI_CALL_THROW((env), napi_get_cb_args_length((env), (info), &length)); \
-    JS_ASSERT((length == (count)), "expected " #count " arguments", THROW_BODY((env), )); \
-  } while (0);                                                               \
-  napi_value arguments[count];                                               \
-  NAPI_CALL_THROW((env), napi_get_cb_args((env), (info), arguments, (count)));
+#define J2C_DECLARE_ARGUMENTS(env, info, count)                                \
+  do {                                                                         \
+    size_t length;                                                             \
+    NAPI_CALL_THROW((env), napi_get_cb_info((env), (info), &length, 0, 0, 0)); \
+    JS_ASSERT((length == (count)), "expected " #count " arguments",            \
+              THROW_BODY((env), 0));                                           \
+  } while (0);                                                                 \
+  napi_value arguments[count];                                                 \
+  do {                                                                         \
+    size_t length = (count);                                                   \
+    NAPI_CALL_THROW(                                                           \
+        (env), napi_get_cb_info((env), (info), &(length), arguments, 0, 0));   \
+  } while (0)
 
 #define J2C_DECLARE_VALUE_JS_THROW(cType, variableName, env, source, jsType,  \
                                    message, getterSuffix, jsParameterType)    \
   J2C_DECLARE_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
-                       getterSuffix, jsParameterType, THROW_BODY((env), ))
+                       getterSuffix, jsParameterType, THROW_BODY((env), 0))
 
 #define J2C_GET_STRING_JS_THROW(env, destination, source, nullOk, message) \
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,     \
-                    THROW_BODY((env), ))
+                    THROW_BODY((env), 0))
 
 #define J2C_GET_STRING_TRACKED_JS_THROW(varName, env, source, nullOk, message) \
   J2C_GET_STRING_TRACKED_JS(varName, (env), (source), (nullOk), message,       \
-                            THROW_BODY((env), ))
+                            THROW_BODY((env), 0))
 
 #define J2C_VALIDATE_IS_ARRAY_THROW(env, theValue, nullOk, message) \
   J2C_VALIDATE_IS_ARRAY((env), (theValue), (nullOk), message,       \
-                        THROW_BODY((env), ))
+                        THROW_BODY((env), 0))
 
 #define C2J_SET_PROPERTY_JS_THROW(env, destination, name, jsValue) \
   C2J_SET_PROPERTY_JS((env), (destination), (name), (jsValue),     \
-                      THROW_BODY((env), ))
+                      THROW_BODY((env), 0))
 
 #define J2C_DECLARE_PROPERTY_JS_THROW(varName, env, source, name) \
-  J2C_DECLARE_PROPERTY_JS(varName, env, source, name, THROW_BODY((env), ))
+  J2C_DECLARE_PROPERTY_JS(varName, env, source, name, THROW_BODY((env), 0))
 
 #define C2J_SET_PROPERTY_THROW(env, destination, name, type, ...)        \
   do {                                                                   \
@@ -329,7 +345,7 @@
   do {                                                                         \
     napi_value jsResult;                                                       \
     NAPI_CALL_THROW((env), napi_create_##type((env), __VA_ARGS__, &jsResult)); \
-    NAPI_CALL_THROW((env), napi_set_return_value((env), (info), jsResult));    \
+    return jsResult;                                                           \
   } while (0)
 
 class NapiHandleScope {
@@ -343,7 +359,7 @@ class NapiHandleScope {
 };
 
 #define DECLARE_HANDLE_SCOPE(varName, env, ...) \
-  NapiHandleScope varName((env)); \
+  NapiHandleScope varName((env));               \
   HELPER_CALL(varName.open(), THROW_BODY((env), __VA_ARGS__));
 
 std::string js_ArrayFromBytes(napi_env env, unsigned char *bytes,

@@ -25,7 +25,7 @@ var generateSpawn = function( spawnFinal ) {
 		commandLine[ 2 ] = grunt.option( "ci" ) ?
 			path.dirname( require.resolve( "iotivity-node" ) ) :
 			packageRoot;
-		return spawnFinal( interpreter, commandLine );
+		return spawnFinal( interpreter, [ "--napi-modules" ].concat( commandLine ) );
 	};
 };
 var plain = {

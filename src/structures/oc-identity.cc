@@ -30,7 +30,7 @@ std::string js_OCIdentity(napi_env env, OCIdentity *source,
 std::string c_OCIdentity(napi_env env, napi_value source,
                          OCIdentity *destination) {
   uint32_t length;
-  NAPI_CALL_RETURN(napi_get_array_length(env, source, &length));
+  NAPI_CALL_RETURN(env, napi_get_array_length(env, source, &length));
   if (length > MAX_IDENTITY_SIZE) {
     return LOCAL_MESSAGE("array length " + std::to_string(length) +
                          " exceeds MAX_IDENTITY_SIZE(" +

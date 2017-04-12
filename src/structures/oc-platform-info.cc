@@ -23,7 +23,7 @@ extern "C" {
 std::string js_OCPlatformInfo(napi_env env, OCPlatformInfo *info,
                               napi_value *destination) {
   napi_value jsInfo;
-  NAPI_CALL_RETURN(napi_create_object(env, &jsInfo));
+  NAPI_CALL_RETURN(env, napi_create_object(env, &jsInfo));
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, platformID);
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, manufacturerName);
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, jsInfo, info, manufacturerUrl);

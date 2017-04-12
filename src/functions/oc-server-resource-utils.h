@@ -23,7 +23,7 @@
   HELPER_CALL_THROW((env),                                               \
                     JSOCResourceHandle::Get((env), (source), &varName)); \
   JS_ASSERT(varName, std::string() + message + " is invalid",            \
-            THROW_BODY(env, ));
+            THROW_BODY(env, 0));
 
 #define FIRST_ARGUMENT_IS_HANDLE(argc)    \
   J2C_DECLARE_ARGUMENTS(env, info, argc); \

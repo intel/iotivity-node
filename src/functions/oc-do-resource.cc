@@ -27,7 +27,8 @@ extern "C" {
 static void deleteCallback(void *data) {
   JSOCDoHandle *cData = (JSOCDoHandle *)data;
   DECLARE_HANDLE_SCOPE(scope, cData->env, );
-  HELPER_CALL_THROW(scope.env, JSOCDoHandle::Destroy(scope.env, cData));
+  HELPER_CALL(JSOCDoHandle::Destroy(scope.env, cData),
+              THROW_BODY(cData->env, ));
 }
 
 static OCStackApplicationResult defaultOCClientResponseHandler(
@@ -37,18 +38,20 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
   DECLARE_HANDLE_SCOPE(scope, cData->env, failReturn);
 
   napi_value jsContext, jsCallback, jsReturnValue;
-  NAPI_CALL(napi_get_null(scope.env, &jsContext),
+  NAPI_CALL(cData->env, napi_get_null(scope.env, &jsContext),
             THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(napi_get_reference_value(scope.env, cData->callback, &jsCallback),
+  NAPI_CALL(cData->env,
+            napi_get_reference_value(scope.env, cData->callback, &jsCallback),
             THROW_BODY(scope.env, failReturn));
 
   napi_value arguments[2];
-  NAPI_CALL(napi_get_reference_value(scope.env, cData->self, &arguments[0]),
+  NAPI_CALL(cData->env,
+            napi_get_reference_value(scope.env, cData->self, &arguments[0]),
             THROW_BODY(scope.env, failReturn));
   HELPER_CALL(js_OCClientResponse(scope.env, clientResponse, &arguments[1]),
               THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(napi_call_function(scope.env, jsContext, jsCallback, 2, arguments,
-                               &jsReturnValue),
+  NAPI_CALL(cData->env, napi_call_function(scope.env, jsContext, jsCallback, 2,
+                                           arguments, &jsReturnValue),
             THROW_BODY(scope.env, failReturn));
 
   J2C_DECLARE_VALUE_JS(OCStackApplicationResult, cResult, scope.env,
@@ -59,7 +62,7 @@ static OCStackApplicationResult defaultOCClientResponseHandler(
   return cResult;
 }
 
-void bind_OCDoResource(napi_env env, napi_callback_info info) {
+napi_value bind_OCDoResource(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 9);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
   J2C_DECLARE_VALUE_JS_THROW(OCMethod, method, env, arguments[1], napi_number,
@@ -69,7 +72,7 @@ void bind_OCDoResource(napi_env env, napi_callback_info info) {
 
   OCDevAddr localAddr;
   OCDevAddr *destination = nullptr;
-  DECLARE_VALUE_TYPE(addrType, env, arguments[3], THROW_BODY(env, ));
+  DECLARE_VALUE_TYPE(addrType, env, arguments[3], THROW_BODY(env, 0));
   if (addrType != napi_null) {
     J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[3], napi_object,
                                   "destination");
@@ -109,7 +112,7 @@ void bind_OCDoResource(napi_env env, napi_callback_info info) {
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 }
 
-void bind_OCCancel(napi_env env, napi_callback_info info) {
+napi_value bind_OCCancel(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 3);
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_number, "qos");
   J2C_VALIDATE_IS_ARRAY_THROW(env, arguments[2], true, "header options");
@@ -117,7 +120,7 @@ void bind_OCCancel(napi_env env, napi_callback_info info) {
   JSOCDoHandle *cData;
   J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
   HELPER_CALL_THROW(env, JSOCDoHandle::Get(env, arguments[0], &cData));
-  JS_ASSERT(cData, "Native handle is invalid", THROW_BODY(env, ));
+  JS_ASSERT(cData, "Native handle is invalid", THROW_BODY(env, 0));
 
   J2C_DECLARE_VALUE_JS_THROW(OCQualityOfService, qos, env, arguments[1],
                              napi_number, "qos", uint32, uint32_t);

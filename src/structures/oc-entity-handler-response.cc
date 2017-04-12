@@ -55,8 +55,9 @@ std::string c_OCEntityHandlerResponse(napi_env env, napi_value value,
   J2C_DECLARE_PROPERTY_JS_RETURN(resourceUri, env, value, "resourceUri");
   J2C_VALIDATE_VALUE_TYPE_RETURN(env, resourceUri, napi_string,
                                  "response.resourceUri");
-  int len;
-  NAPI_CALL_RETURN(napi_get_value_string_utf8_length(env, resourceUri, &len));
+  size_t len;
+  NAPI_CALL_RETURN(
+      env, napi_get_value_string_utf8(env, resourceUri, nullptr, 0, &len));
   JS_ASSERT(len <= MAX_URI_LENGTH,
             "length of response.resourceUri exceeds MAX_URI_LENGTH",
             RETURN_FAIL);

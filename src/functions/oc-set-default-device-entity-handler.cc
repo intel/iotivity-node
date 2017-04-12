@@ -31,10 +31,10 @@ static OCEntityHandlerResult defaultDeviceEntityHandler(
   EH_BODY(g_currentEnv, flag, request, uri, ((napi_ref)context));
 }
 
-void bind_OCSetDefaultDeviceEntityHandler(napi_env env,
-                                          napi_callback_info info) {
+napi_value bind_OCSetDefaultDeviceEntityHandler(napi_env env,
+                                                napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 1);
-  DECLARE_VALUE_TYPE(handlerType, env, arguments[0], THROW_BODY(env, ));
+  DECLARE_VALUE_TYPE(handlerType, env, arguments[0], THROW_BODY(env, 0));
 
   OCDeviceEntityHandler newHandler = 0;
   napi_ref newCallback = 0, callbackToDelete = 0;
@@ -48,7 +48,7 @@ void bind_OCSetDefaultDeviceEntityHandler(napi_env env,
   if (result == OC_STACK_OK) {
     callbackToDelete = g_currentCallback;
     g_currentCallback = newCallback;
-	g_currentEnv = env;
+    g_currentEnv = env;
   } else {
     callbackToDelete = newCallback;
   }

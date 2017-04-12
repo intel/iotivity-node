@@ -24,7 +24,7 @@ extern "C" {
 #include <ocstack.h>
 }
 
-void JSHandle_constructor(napi_env env, napi_callback_info info);
+napi_value JSHandle_constructor(napi_env env, napi_callback_info info);
 
 template <class jsType, typename T>
 class JSHandle {
@@ -38,10 +38,11 @@ class JSHandle {
 
   std::string Init(napi_env env, napi_value _callback, napi_value _self) {
     if (_callback) {
-      NAPI_CALL_RETURN(napi_create_reference(env, _callback, 1, &callback));
+      NAPI_CALL_RETURN(env,
+                       napi_create_reference(env, _callback, 1, &callback));
     }
     if (_self) {
-      NAPI_CALL_RETURN(napi_create_reference(env, _self, 1, &self));
+      NAPI_CALL_RETURN(env, napi_create_reference(env, _self, 1, &self));
     }
     return std::string();
   }
@@ -50,18 +51,18 @@ class JSHandle {
     napi_value theConstructor;
     HELPER_CALL_RETURN(InitClass(_env, &theConstructor));
     NAPI_CALL_RETURN(
-        napi_new_instance(_env, theConstructor, 0, nullptr, jsValue));
+        _env, napi_new_instance(_env, theConstructor, 0, nullptr, jsValue));
     auto nativeData = std::unique_ptr<jsType>(new jsType);
-    NAPI_CALL_RETURN(
-        napi_wrap(_env, *jsValue, nativeData.get(), nullptr, nullptr));
+    NAPI_CALL_RETURN(_env, napi_wrap(_env, *jsValue, nativeData.get(), nullptr,
+                                     nullptr, nullptr));
     *cData = nativeData.release();
-	(*cData)->env = _env;
+    (*cData)->env = _env;
     return std::string();
   }
 
   static std::string Get(napi_env env, napi_value jsValue, jsType **cData) {
     napi_valuetype theType;
-    NAPI_CALL_RETURN(napi_get_type_of_value(env, jsValue, &theType));
+    NAPI_CALL_RETURN(env, napi_typeof(env, jsValue, &theType));
     if (theType != napi_object) {
       return LOCAL_MESSAGE("Not an object");
     }
@@ -69,12 +70,12 @@ class JSHandle {
     HELPER_CALL_RETURN(InitClass(env, &jsConstructor));
     bool isInstanceOf;
     NAPI_CALL_RETURN(
-        napi_instanceof(env, jsValue, jsConstructor, &isInstanceOf));
+        env, napi_instanceof(env, jsValue, jsConstructor, &isInstanceOf));
     if (!isInstanceOf) {
       return LOCAL_MESSAGE("Not an object of type OCDoHandle");
     }
     void *nativeDataRaw;
-    NAPI_CALL_RETURN(napi_unwrap(env, jsValue, &nativeDataRaw));
+    NAPI_CALL_RETURN(env, napi_unwrap(env, jsValue, &nativeDataRaw));
     *cData = (jsType *)nativeDataRaw;
     return std::string();
   }
@@ -82,15 +83,19 @@ class JSHandle {
   static std::string Destroy(napi_env env, jsType *cData,
                              napi_value jsHandle = nullptr) {
     if (cData->callback) {
-      NAPI_CALL_RETURN(napi_delete_reference(env, cData->callback));
+      NAPI_CALL_RETURN(env, napi_delete_reference(env, cData->callback));
     }
     if (cData->self) {
       if (!jsHandle) {
-        NAPI_CALL_RETURN(napi_get_reference_value(env, cData->self, &jsHandle));
+        NAPI_CALL_RETURN(env,
+                         napi_get_reference_value(env, cData->self, &jsHandle));
       }
-      C2J_SET_PROPERTY_RETURN(env, jsHandle, "stale", boolean, true);
-      NAPI_CALL_RETURN(napi_delete_reference(env, cData->self));
-      NAPI_CALL_RETURN(napi_wrap(env, jsHandle, nullptr, nullptr, nullptr));
+      C2J_SET_PROPERTY_CALL_RETURN(
+          env, jsHandle, "stale",
+          NAPI_CALL_RETURN(env, napi_get_boolean(env, true, &jsValue)));
+      NAPI_CALL_RETURN(env, napi_delete_reference(env, cData->self));
+      NAPI_CALL_RETURN(
+          env, napi_wrap(env, jsHandle, nullptr, nullptr, nullptr, nullptr));
     }
     delete cData;
     return std::string();
@@ -108,15 +113,15 @@ class JSHandle {
     static napi_ref localConstructor = nullptr;
     if (!localConstructor) {
       napi_value constructorValue;
-      NAPI_CALL_RETURN(napi_define_class(env, jsType::jsClassName(),
-                                         JSHandle_constructor, nullptr, 0,
-                                         nullptr, &constructorValue));
-      NAPI_CALL_RETURN(
-          napi_create_reference(env, constructorValue, 1, &localConstructor));
+      NAPI_CALL_RETURN(env, napi_define_class(env, jsType::jsClassName(),
+                                              JSHandle_constructor, nullptr, 0,
+                                              nullptr, &constructorValue));
+      NAPI_CALL_RETURN(env, napi_create_reference(env, constructorValue, 1,
+                                                  &localConstructor));
     }
     if (theConstructor) {
       NAPI_CALL_RETURN(
-          napi_get_reference_value(env, localConstructor, theConstructor));
+          env, napi_get_reference_value(env, localConstructor, theConstructor));
     }
     return std::string();
   }

@@ -37,15 +37,16 @@ std::string js_OCPresencePayload(napi_env env, OCPresencePayload *payload,
 static std::string js_OCResourcePayload(napi_env env,
                                         OCResourcePayload *payload,
                                         napi_value *destination) {
-  NAPI_CALL_RETURN(napi_create_object(env, destination));
+  NAPI_CALL_RETURN(env, napi_create_object(env, destination));
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, *destination, payload, uri);
 
   SET_TYPES_INTERFACES(env, *destination, payload, types, interfaces);
 
   C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, payload, bitmap);
 
-  C2J_SET_PROPERTY_RETURN(env, *destination, "secure", boolean,
-                          payload->secure);
+  C2J_SET_PROPERTY_CALL_RETURN(
+      env, *destination, "secure",
+      NAPI_CALL_RETURN(env, napi_get_boolean(env, payload->secure, &jsValue)));
 
   C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, payload, port);
   return std::string();
@@ -95,7 +96,7 @@ static std::string js_OCPlatformPayload(napi_env env,
 }
 
 std::string js_OCPayload(napi_env env, OCPayload *payload, napi_value *result) {
-  NAPI_CALL_RETURN(napi_create_object(env, result));
+  NAPI_CALL_RETURN(env, napi_create_object(env, result));
   C2J_SET_PROPERTY_RETURN(env, *result, "type", number,
                           ((double)(payload->type)));
   switch (payload->type) {

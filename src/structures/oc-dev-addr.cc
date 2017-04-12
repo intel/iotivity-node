@@ -46,7 +46,7 @@ std::string c_OCDevAddr(napi_env env, napi_value source,
 
 std::string js_OCDevAddr(napi_env env, OCDevAddr *source,
                          napi_value *destination) {
-  NAPI_CALL_RETURN(napi_create_object(env, destination));
+  NAPI_CALL_RETURN(env, napi_create_object(env, destination));
   C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, adapter);
   C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, flags);
   C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, ifindex);

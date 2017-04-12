@@ -22,18 +22,19 @@ std::string entityHandler(napi_env env, OCEntityHandlerFlag flag,
                           napi_ref callback, OCEntityHandlerResult *result) {
   *result = OC_EH_ERROR;
   napi_value jsContext, jsCallback, jsReturnValue;
-  NAPI_CALL_RETURN(napi_get_null(env, &jsContext));
-  NAPI_CALL_RETURN(napi_get_reference_value(env, callback, &jsCallback));
+  NAPI_CALL_RETURN(env, napi_get_null(env, &jsContext));
+  NAPI_CALL_RETURN(env, napi_get_reference_value(env, callback, &jsCallback));
 
   napi_value arguments[3];
-  NAPI_CALL_RETURN(napi_create_number(env, (double)flag, &arguments[0]));
+  NAPI_CALL_RETURN(env, napi_create_number(env, (double)flag, &arguments[0]));
   HELPER_CALL_RETURN(js_OCEntityHandlerRequest(env, request, &arguments[1]));
   if (uri) {
     NAPI_CALL_RETURN(
-        napi_create_string_utf8(env, uri, strlen(uri), &arguments[2]));
+        env, napi_create_string_utf8(env, uri, strlen(uri), &arguments[2]));
   }
 
-  NAPI_CALL_RETURN(napi_call_function(env, jsContext, jsCallback, (uri ? 3 : 2),
+  NAPI_CALL_RETURN(env,
+                   napi_call_function(env, jsContext, jsCallback, (uri ? 3 : 2),
                                       arguments, &jsReturnValue));
 
   J2C_ASSIGN_VALUE_JS_RETURN(OCEntityHandlerResult, *result, env, jsReturnValue,

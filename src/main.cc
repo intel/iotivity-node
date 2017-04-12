@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-#include <nan.h>
-#include <node_jsvmapi.h>
+#include <node_api.h>
 #include <stdio.h>
 #include "constants.h"
 #include "enums.h"
 #include "functions.h"
 #include "structures/handles.h"
 
-void Init(napi_env env, napi_value exports, napi_value module) {
-  HELPER_CALL_THROW(env, InitEnums(env, exports));
-  HELPER_CALL_THROW(env, InitConstants(env, exports));
-  HELPER_CALL_THROW(env, InitFunctions(env, exports));
+void Init(napi_env env, napi_value exports, napi_value module, void *) {
+  HELPER_CALL(InitEnums(env, exports), THROW_BODY(env, ));
+  HELPER_CALL(InitConstants(env, exports), THROW_BODY(env, ));
+  HELPER_CALL(InitFunctions(env, exports), THROW_BODY(env, ));
 }
 
-NODE_MODULE_ABI(iotivity, Init)
+NAPI_MODULE(iotivity, Init)

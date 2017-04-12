@@ -27,7 +27,8 @@ var childArguments = [ "-e",
 		"process.exit( 0 );"
 	];
 
-var theChild = require( "child_process" ).spawn( "node", childArguments )
+var theChild = require( "child_process" )
+	.spawn( "node", [ "--napi-modules" ].concat( childArguments ) )
 	.on( "exit", function( code, signal ) {
 		utils.assert( "strictEqual", code, 0, "require() from interactive shell succeeded" );
 		utils.assert( "strictEqual", signal, null,

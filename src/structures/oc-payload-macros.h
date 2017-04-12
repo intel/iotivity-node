@@ -23,11 +23,11 @@
       uint32_t index;                                                         \
       type current;                                                           \
       napi_value item;                                                        \
-      NAPI_CALL_RETURN(napi_create_array((env), &jsValue));                   \
+      NAPI_CALL_RETURN((env), napi_create_array((env), &jsValue));            \
       for (index = 0, current = (source)->name; current;                      \
            index++, current = current->next) {                                \
         createItem;                                                           \
-        NAPI_CALL_RETURN(napi_set_element(env, jsValue, index, item));        \
+        NAPI_CALL_RETURN((env), napi_set_element(env, jsValue, index, item)); \
       }                                                                       \
     });                                                                       \
   }
@@ -35,8 +35,9 @@
 #define C2J_SET_STRING_LL_PROPERTY(env, destination, source, name) \
   C2J_SET_LL_PROPERTY(                                             \
       (env), (destination), (source), name, OCStringLL *,          \
-      NAPI_CALL_RETURN(napi_create_string_utf8(                    \
-          (env), current->value, strlen(current->value), &item)));
+      NAPI_CALL_RETURN(                                            \
+          (env), napi_create_string_utf8((env), current->value,    \
+                                         strlen(current->value), &item)));
 
 #define SET_TYPES_INTERFACES(env, destination, source, typeField,        \
                              interfaceField)                             \

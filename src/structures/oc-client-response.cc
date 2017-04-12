@@ -25,7 +25,7 @@ extern "C" {
 
 std::string js_OCClientResponse(napi_env env, OCClientResponse *source,
                                 napi_value *destination) {
-  NAPI_CALL_RETURN(napi_create_object(env, destination));
+  NAPI_CALL_RETURN(env, napi_create_object(env, destination));
 
   C2J_SET_PROPERTY_CALL_RETURN(
       env, *destination, "devAddr",

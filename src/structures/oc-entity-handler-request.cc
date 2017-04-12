@@ -27,7 +27,7 @@ extern "C" {
 std::string js_OCEntityHandlerRequest(napi_env env,
                                       OCEntityHandlerRequest *request,
                                       napi_value *result) {
-  NAPI_CALL_RETURN(napi_create_object(env, result));
+  NAPI_CALL_RETURN(env, napi_create_object(env, result));
 
   // The resource may be null if the request refers to a non-existing resource
   // and is being passed to the default device entity handler
@@ -38,7 +38,7 @@ std::string js_OCEntityHandlerRequest(napi_env env,
     }
     C2J_SET_PROPERTY_CALL_RETURN(
         env, *result, "resource",
-        NAPI_CALL_RETURN(napi_get_reference_value(env, jsRef, &jsValue)));
+        NAPI_CALL_RETURN(env, napi_get_reference_value(env, jsRef, &jsValue)));
   }
 
   if (request->requestHandle) {
@@ -51,7 +51,7 @@ std::string js_OCEntityHandlerRequest(napi_env env,
   } else {
     C2J_SET_PROPERTY_CALL_RETURN(
         env, *result, "requestHandle",
-        NAPI_CALL_RETURN(napi_get_null(env, &jsValue)));
+        NAPI_CALL_RETURN(env, napi_get_null(env, &jsValue)));
   }
 
   C2J_SET_NUMBER_MEMBER_RETURN(env, *result, request, method);
@@ -61,7 +61,7 @@ std::string js_OCEntityHandlerRequest(napi_env env,
   C2J_SET_STRING_IF_NOT_NULL_RETURN(env, *result, request, query);
 
   napi_value jsObsInfo;
-  NAPI_CALL_RETURN(napi_create_object(env, &jsObsInfo));
+  NAPI_CALL_RETURN(env, napi_create_object(env, &jsObsInfo));
   C2J_SET_NUMBER_MEMBER_RETURN(env, jsObsInfo, &(request->obsInfo), action);
   C2J_SET_NUMBER_MEMBER_RETURN(env, jsObsInfo, &(request->obsInfo), obsId);
   C2J_SET_PROPERTY_JS_RETURN(env, *result, "obsInfo", jsObsInfo);

@@ -23,24 +23,24 @@ extern "C" {
 #include <ocstack.h>
 }
 
-std::string returnNull(napi_env env, napi_callback_info info) {
-  napi_value napiNull;
-  NAPI_CALL_RETURN(napi_get_null(env, &napiNull));
-  NAPI_CALL_RETURN(napi_set_return_value(env, info, napiNull));
-  return std::string();
-}
+#define RETURN_NULL(env)                                     \
+  do {                                                       \
+    napi_value napiNull;                                     \
+    NAPI_CALL_THROW((env), napi_get_null((env), &napiNull)); \
+    return napiNull;                                         \
+  } while (0)
 
-void bind_OCGetResourceUri(napi_env env, napi_callback_info info) {
+napi_value bind_OCGetResourceUri(napi_env env, napi_callback_info info) {
   FIRST_ARGUMENT_IS_HANDLE(1);
   const char *uri = OCGetResourceUri(cData->data);
   if (uri) {
     C2J_SET_RETURN_VALUE(env, info, string_utf8, uri, strlen(uri));
   } else {
-    HELPER_CALL_THROW(env, returnNull(env, info));
+    RETURN_NULL(env);
   }
 }
 
-void bind_OCGetResourceProperties(napi_env env, napi_callback_info info) {
+napi_value bind_OCGetResourceProperties(napi_env env, napi_callback_info info) {
   FIRST_ARGUMENT_IS_HANDLE(1);
   C2J_SET_RETURN_VALUE(env, info, number, OCGetResourceProperties(cData->data));
 }
@@ -50,26 +50,27 @@ void bind_OCGetResourceProperties(napi_env env, napi_callback_info info) {
   J2C_DECLARE_VALUE_JS_THROW(uint8_t, index, env, arguments[1], napi_number, \
                              "index", uint32, uint32_t)
 
-static std::string returnResourceHandle(napi_env env, napi_callback_info info,
-                                        OCResourceHandle handle) {
-  if (handle) {
-    napi_ref existingHandle = JSOCResourceHandle::handles[handle];
-    if (!existingHandle) {
-      return std::string("JS handle not found for native handle");
-    }
-    napi_value jsHandle;
-    NAPI_CALL_RETURN(napi_get_reference_value(env, existingHandle, &jsHandle));
-    NAPI_CALL_RETURN(napi_set_return_value(env, info, jsHandle));
-  }
-  return std::string();
-}
+#define RETURN_RESOURCE_HANDLE(env, handle)                                 \
+  do {                                                                      \
+    OCResourceHandle localHandle = (handle);                                \
+    if (localHandle) {                                                      \
+      napi_ref existingHandle = JSOCResourceHandle::handles[localHandle];   \
+      JS_ASSERT(existingHandle, "JS handle not found for native handle",    \
+                THROW_BODY((env), 0));                                      \
+      napi_value jsHandle;                                                  \
+      NAPI_CALL_THROW(                                                      \
+          env, napi_get_reference_value((env), existingHandle, &jsHandle)); \
+      return jsHandle;                                                      \
+    } else {                                                                \
+      return 0;                                                             \
+    }                                                                       \
+  } while (0)
 
-void bind_OCGetResourceHandleFromCollection(napi_env env,
-                                            napi_callback_info info) {
+napi_value bind_OCGetResourceHandleFromCollection(napi_env env,
+                                                  napi_callback_info info) {
   RESOURCE_BY_INDEX_ACCESSOR_BOILERPLATE;
-  HELPER_CALL_THROW(
-      env, returnResourceHandle(env, info, OCGetResourceHandleFromCollection(
-                                               cData->data, index)));
+  RETURN_RESOURCE_HANDLE(env,
+                         OCGetResourceHandleFromCollection(cData->data, index));
 }
 
 #define GET_STRING_FROM_RESOURCE_BY_INDEX(api)              \
@@ -79,23 +80,23 @@ void bind_OCGetResourceHandleFromCollection(napi_env env,
     C2J_SET_RETURN_VALUE(env, info, string_utf8, theString, \
                          strlen(theString));                \
   } else {                                                  \
-    HELPER_CALL_THROW(env, returnNull(env, info));          \
+    RETURN_NULL(env);                                       \
   }
 
-void bind_OCGetResourceTypeName(napi_env env, napi_callback_info info) {
+napi_value bind_OCGetResourceTypeName(napi_env env, napi_callback_info info) {
   GET_STRING_FROM_RESOURCE_BY_INDEX(OCGetResourceTypeName);
 }
 
-void bind_OCGetResourceInterfaceName(napi_env env, napi_callback_info info) {
+napi_value bind_OCGetResourceInterfaceName(napi_env env,
+                                           napi_callback_info info) {
   GET_STRING_FROM_RESOURCE_BY_INDEX(OCGetResourceInterfaceName);
 }
 
-void bind_OCGetResourceHandle(napi_env env, napi_callback_info info) {
+napi_value bind_OCGetResourceHandle(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 1);
   J2C_DECLARE_VALUE_JS_THROW(uint8_t, index, env, arguments[0], napi_number,
                              "index", uint32, uint32_t);
-  HELPER_CALL_THROW(
-      env, returnResourceHandle(env, info, OCGetResourceHandle(index)));
+  RETURN_RESOURCE_HANDLE(env, OCGetResourceHandle(index));
 }
 
 #define GET_COUNT_FROM_RESOURCE(api)                                           \
@@ -108,12 +109,13 @@ void bind_OCGetResourceHandle(napi_env env, napi_callback_info info) {
   }                                                                            \
   C2J_SET_RETURN_VALUE(env, info, number, ((double)result));
 
-void bind_OCGetNumberOfResourceInterfaces(napi_env env,
-                                          napi_callback_info info) {
+napi_value bind_OCGetNumberOfResourceInterfaces(napi_env env,
+                                                napi_callback_info info) {
   GET_COUNT_FROM_RESOURCE(OCGetNumberOfResourceInterfaces);
 }
 
-void bind_OCGetNumberOfResourceTypes(napi_env env, napi_callback_info info) {
+napi_value bind_OCGetNumberOfResourceTypes(napi_env env,
+                                           napi_callback_info info) {
   GET_COUNT_FROM_RESOURCE(OCGetNumberOfResourceTypes);
 }
 

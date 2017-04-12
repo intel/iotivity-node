@@ -54,7 +54,7 @@ static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
                                std::string("device info ") + propertyName);
 
   uint32_t index, length;
-  NAPI_CALL_RETURN(napi_get_array_length(env, sourceValue, &length));
+  NAPI_CALL_RETURN(env, napi_get_array_length(env, sourceValue, &length));
 
   auto local = std::unique_ptr<OCStringLL *, void (*)(OCStringLL **)>(
       new OCStringLL *(0), [](OCStringLL **ll) {
@@ -71,7 +71,8 @@ static std::string c_StringArrayFromProperty(napi_env env, napi_value source,
       return LOCAL_MESSAGE("Failed to allocate " + propertyName + " list item");
     }
 
-    NAPI_CALL_RETURN(napi_get_element(env, sourceValue, index, &jsItemValue));
+    NAPI_CALL_RETURN(env,
+                     napi_get_element(env, sourceValue, index, &jsItemValue));
     J2C_GET_STRING_JS_RETURN(env, ((*previous)->value), jsItemValue, false,
                              "device info " + propertyName + " list item");
     (*previous)->next = 0;

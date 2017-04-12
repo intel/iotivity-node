@@ -55,7 +55,7 @@ function spawnOne( assert, options ) {
 		.concat( [ process.argv[ 2 ] ] );
 
 	theChild = childProcess.spawn(
-		"node", commandLine, {
+		"node", [ "--napi-modules" ].concat( commandLine ), {
 			stdio: [ process.stdin, "pipe", process.stderr, "ipc" ]
 		} );
 	runningProcesses.push( theChild );

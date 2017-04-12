@@ -68,28 +68,31 @@ std::string FlatArray::fill(napi_env env, napi_value array, int *p_index) {
   bool isArray;
   uint32_t length;
   napi_value member;
-  NAPI_CALL_RETURN(napi_get_array_length(env, array, &length));
+  NAPI_CALL_RETURN(env, napi_get_array_length(env, array, &length));
 
   for (uint32_t localIndex = 0; localIndex < length; localIndex++) {
-    NAPI_CALL_RETURN(napi_get_element(env, array, localIndex, &member));
-    NAPI_CALL_RETURN(napi_is_array(env, member, &isArray));
+    NAPI_CALL_RETURN(env, napi_get_element(env, array, localIndex, &member));
+    NAPI_CALL_RETURN(env, napi_is_array(env, member, &isArray));
     if (isArray) {
       HELPER_CALL_RETURN(fill(env, member, p_index));
     } else {
       switch (arrayType) {
         case OCREP_PROP_INT:
-          NAPI_CALL_RETURN(napi_get_value_int64(
-              env, member, &(((int64_t *)data)[(*p_index)++])));
+          NAPI_CALL_RETURN(
+              env, napi_get_value_int64(env, member,
+                                        &(((int64_t *)data)[(*p_index)++])));
           break;
 
         case OCREP_PROP_DOUBLE:
-          NAPI_CALL_RETURN(napi_get_value_double(
-              env, member, &(((double *)data)[(*p_index)++])));
+          NAPI_CALL_RETURN(
+              env, napi_get_value_double(env, member,
+                                         &(((double *)data)[(*p_index)++])));
           break;
 
         case OCREP_PROP_BOOL:
-          NAPI_CALL_RETURN(napi_get_value_bool(
-              env, member, &(((bool *)data)[(*p_index)++])));
+          NAPI_CALL_RETURN(
+              env, napi_get_value_bool(env, member,
+                                       &(((bool *)data)[(*p_index)++])));
           break;
 
         case OCREP_PROP_STRING:
@@ -160,7 +163,7 @@ static std::string jsTypeToOCArrayType(napi_env env, napi_value value,
 
   if (valueType == napi_number) {
     double doubleValue;
-    NAPI_CALL_RETURN(napi_get_value_double(env, value, &doubleValue));
+    NAPI_CALL_RETURN(env, napi_get_value_double(env, value, &doubleValue));
     *p_type = ((doubleValue == ((int64_t)doubleValue)) ? OCREP_PROP_INT
                                                        : OCREP_PROP_DOUBLE);
   } else if (valueType == napi_boolean) {
@@ -169,7 +172,7 @@ static std::string jsTypeToOCArrayType(napi_env env, napi_value value,
     *p_type = OCREP_PROP_STRING;
   } else if (valueType == napi_object) {
     bool typecheck;
-    NAPI_CALL_RETURN(napi_is_buffer(env, value, &typecheck));
+    NAPI_CALL_RETURN(env, napi_is_buffer(env, value, &typecheck));
     if (typecheck) {
       *p_type = OCREP_PROP_BYTE_STRING;
     } else {
@@ -236,24 +239,26 @@ static std::string validateArray(napi_env env, napi_value array,
   }
 
   uint32_t length;
-  NAPI_CALL_RETURN(napi_get_array_length(env, array, &length));
+  NAPI_CALL_RETURN(env, napi_get_array_length(env, array, &length));
 
   if (length > 0) {
     napi_value arrayValue;
-    NAPI_CALL_RETURN(napi_get_element(env, array, 0, &arrayValue));
+    NAPI_CALL_RETURN(env, napi_get_element(env, array, 0, &arrayValue));
     bool isArray;
-    NAPI_CALL_RETURN(napi_is_array(env, arrayValue, &isArray));
+    NAPI_CALL_RETURN(env, napi_is_array(env, arrayValue, &isArray));
 
     // The first item is an array
     if (isArray) {
       // Establish the length of the first child array
       uint32_t child_length;
-      NAPI_CALL_RETURN(napi_get_array_length(env, arrayValue, &child_length));
+      NAPI_CALL_RETURN(env,
+                       napi_get_array_length(env, arrayValue, &child_length));
 
       // Examine all the children
       for (uint32_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
-        NAPI_CALL_RETURN(napi_get_element(env, array, arrayIndex, &arrayValue));
-        NAPI_CALL_RETURN(napi_is_array(env, arrayValue, &isArray));
+        NAPI_CALL_RETURN(env,
+                         napi_get_element(env, array, arrayIndex, &arrayValue));
+        NAPI_CALL_RETURN(env, napi_is_array(env, arrayValue, &isArray));
 
         // One of the children is not an array
         if (!isArray) {
@@ -263,7 +268,8 @@ static std::string validateArray(napi_env env, napi_value array,
         bool child_established = false;
         OCRepPayloadPropType child_type;
         uint32_t memberLength;
-        NAPI_CALL_RETURN(napi_get_array_length(env, arrayValue, &memberLength));
+        NAPI_CALL_RETURN(env,
+                         napi_get_array_length(env, arrayValue, &memberLength));
         if (memberLength != child_length) {
           return LOCAL_MESSAGE(
               "Rep payload array contains child arrays of different lengths");
@@ -302,7 +308,8 @@ static std::string validateArray(napi_env env, napi_value array,
 
       // Make sure the rest of the items are of the same type
       for (size_t arrayIndex = 1; arrayIndex < length; arrayIndex++) {
-        NAPI_CALL_RETURN(napi_get_element(env, array, arrayIndex, &arrayValue));
+        NAPI_CALL_RETURN(env,
+                         napi_get_element(env, array, arrayIndex, &arrayValue));
         HELPER_CALL_RETURN(jsTypeToOCArrayType(env, arrayValue, &valueType));
         if (valueType != (*p_arrayType)) {
           return LOCAL_MESSAGE("Rep payload array is heterogeneous");
@@ -340,10 +347,10 @@ static std::string addStrings(napi_env env, napi_value source,
 
     J2C_VALIDATE_IS_ARRAY_RETURN(env, ll, true, message);
     uint32_t length, index;
-    NAPI_CALL_RETURN(napi_get_array_length(env, ll, &length));
+    NAPI_CALL_RETURN(env, napi_get_array_length(env, ll, &length));
     for (index = 0; index < length; index++) {
       napi_value item;
-      NAPI_CALL_RETURN(napi_get_element(env, ll, index, &item));
+      NAPI_CALL_RETURN(env, napi_get_element(env, ll, index, &item));
       itemMessage = message + "[" + std::to_string(index) + "]";
       J2C_GET_STRING_JS_RETURN(env, strItem, item, false, itemMessage);
       tracker.reset(strItem);
@@ -398,29 +405,32 @@ std::string c_OCRepPayload(napi_env env, napi_value source,
     bool boolValue;
     char *strValue;
     std::unique_ptr<char> strValueTracker;
-    NAPI_CALL_RETURN(napi_get_propertynames(env, jsValues, &propertyNames));
+    NAPI_CALL_RETURN(env,
+                     napi_get_property_names(env, jsValues, &propertyNames));
 
     // We can assume propertyNames is an array
-    NAPI_CALL_RETURN(napi_get_array_length(env, propertyNames, &length));
+    NAPI_CALL_RETURN(env, napi_get_array_length(env, propertyNames, &length));
     for (index = 0; index < length; index++) {
-      NAPI_CALL_RETURN(napi_get_element(env, propertyNames, index, &jsKey));
+      NAPI_CALL_RETURN(env,
+                       napi_get_element(env, propertyNames, index, &jsKey));
       msg = std::string("payload.values item[") + std::to_string(index) + "]";
       J2C_GET_STRING_JS_RETURN(env, propName, jsKey, false, msg);
       propNameTracker.reset(propName);
       J2C_ASSIGN_PROPERTY_JS_RETURN(env, jsValues, propName, &jsValue);
-      NAPI_CALL_RETURN(napi_get_type_of_value(env, jsValue, &jsValueType));
+      NAPI_CALL_RETURN(env, napi_typeof(env, jsValue, &jsValueType));
       msg = std::string("payload.values[\"") + propName + "\"]";
       if (jsValueType == napi_null) {
         if (!OCRepPayloadSetNull(payload.get(), propName)) {
           return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
         }
       } else if (jsValueType == napi_boolean) {
-        NAPI_CALL_RETURN(napi_get_value_bool(env, jsValue, &boolValue));
+        NAPI_CALL_RETURN(env, napi_get_value_bool(env, jsValue, &boolValue));
         if (!OCRepPayloadSetPropBool(payload.get(), propName, boolValue)) {
           return LOCAL_MESSAGE(std::string("Failed to set ") + msg);
         }
       } else if (jsValueType == napi_number) {
-        NAPI_CALL_RETURN(napi_get_value_double(env, jsValue, &doubleValue));
+        NAPI_CALL_RETURN(env,
+                         napi_get_value_double(env, jsValue, &doubleValue));
         intValue = (int64_t)doubleValue;
 
         // It's exactly an integer
@@ -448,7 +458,7 @@ std::string c_OCRepPayload(napi_env env, napi_value source,
       } else if (jsValueType == napi_object) {
         OCRepPayload *childPayload;
         bool isArray;
-        NAPI_CALL_RETURN(napi_is_array(env, jsValue, &isArray));
+        NAPI_CALL_RETURN(env, napi_is_array(env, jsValue, &isArray));
         if (isArray) {
           FlatArray flatArray;
           HELPER_CALL_RETURN(flatArray.from(env, jsValue));

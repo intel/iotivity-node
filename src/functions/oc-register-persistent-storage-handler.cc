@@ -30,15 +30,17 @@ static napi_ref jsWrite = nullptr;
 static napi_ref jsUnlink = nullptr;
 static napi_env contextEnv = nullptr;
 
-static void noopDeleter(void *) {}
+static void noopDeleter(napi_env env, void *, void *) {}
 
 #define STORAGE_PREAMBLE(method, message, failReturn, argc)                  \
   JS_ASSERT((method), std::string("Callback for ") + message + " not found", \
             THROW_BODY(scope.env, (failReturn)));                            \
   napi_value jsContext, jsCallback, jsReturnValue;                           \
-  NAPI_CALL(napi_get_reference_value(scope.env, context, &jsContext),        \
+  NAPI_CALL(contextEnv,                                                      \
+            napi_get_reference_value(scope.env, context, &jsContext),        \
             THROW_BODY(scope.env, (failReturn)));                            \
-  NAPI_CALL(napi_get_reference_value(scope.env, (method), &jsCallback),      \
+  NAPI_CALL(contextEnv,                                                      \
+            napi_get_reference_value(scope.env, (method), &jsCallback),      \
             THROW_BODY(scope.env, (failReturn)));                            \
   napi_value arguments[argc]
 
@@ -48,14 +50,14 @@ static FILE *defaultOpen(const char *path, const char *mode) {
 
   STORAGE_PREAMBLE(jsOpen, "open()", failReturn, 2);
 
-  NAPI_CALL(
-      napi_create_string_utf8(scope.env, path, strlen(path), &arguments[0]),
-      THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(
-      napi_create_string_utf8(scope.env, mode, strlen(mode), &arguments[1]),
-      THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(napi_call_function(scope.env, jsContext, jsCallback, 2, arguments,
-                               &jsReturnValue),
+  NAPI_CALL(contextEnv, napi_create_string_utf8(scope.env, path, strlen(path),
+                                                &arguments[0]),
+            THROW_BODY(scope.env, failReturn));
+  NAPI_CALL(contextEnv, napi_create_string_utf8(scope.env, mode, strlen(mode),
+                                                &arguments[1]),
+            THROW_BODY(scope.env, failReturn));
+  NAPI_CALL(contextEnv, napi_call_function(scope.env, jsContext, jsCallback, 2,
+                                           arguments, &jsReturnValue),
             THROW_BODY(scope.env, failReturn));
 
   J2C_DECLARE_VALUE_JS(int32_t, cResult, scope.env, jsReturnValue, napi_number,
@@ -77,17 +79,20 @@ static size_t readWrite(void *ptr, size_t size, size_t count, FILE *stream,
 
   STORAGE_PREAMBLE(method, std::string(operation) + "()", failReturn, 3);
 
-  NAPI_CALL(napi_create_external_buffer(scope.env, totalSize, (char *)ptr,
-                                        noopDeleter, &arguments[0]),
+  NAPI_CALL(contextEnv,
+            napi_create_external_buffer(scope.env, totalSize, (char *)ptr,
+                                        noopDeleter, nullptr, &arguments[0]),
             THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(napi_create_number(scope.env, (double)totalSize, &arguments[1]),
+  NAPI_CALL(contextEnv,
+            napi_create_number(scope.env, (double)totalSize, &arguments[1]),
             THROW_BODY(scope.env, failReturn));
-  NAPI_CALL(napi_create_number(scope.env, ((double)(*((int32_t *)stream))),
+  NAPI_CALL(contextEnv,
+            napi_create_number(scope.env, ((double)(*((int32_t *)stream))),
                                &arguments[2]),
             THROW_BODY(scope.env, failReturn));
 
-  NAPI_CALL(napi_call_function(scope.env, jsContext, jsCallback, 3, arguments,
-                               &jsReturnValue),
+  NAPI_CALL(contextEnv, napi_call_function(scope.env, jsContext, jsCallback, 3,
+                                           arguments, &jsReturnValue),
             THROW_BODY(scope.env, failReturn));
 
   J2C_DECLARE_VALUE_JS(size_t, cResult, scope.env, jsReturnValue, napi_number,
@@ -106,17 +111,18 @@ static size_t defaultWrite(const void *ptr, size_t size, size_t count,
   return readWrite((void *)ptr, size, count, stream, "write", jsWrite);
 }
 
-#define CLOSE_UNLINK(method, message, suffix, ...)                             \
-  int failReturn = -1;                                                         \
-  DECLARE_HANDLE_SCOPE(scope, contextEnv, failReturn); \
-  STORAGE_PREAMBLE((method), message "()", failReturn, 1);                     \
-  NAPI_CALL(napi_create_##suffix(scope.env, __VA_ARGS__, &arguments[0]),       \
-            THROW_BODY(scope.env, failReturn));                                \
-  NAPI_CALL(napi_call_function(scope.env, jsContext, jsCallback, 1, arguments, \
-                               &jsReturnValue),                                \
-            THROW_BODY(scope.env, failReturn));                                \
-  J2C_DECLARE_VALUE_JS(int, cResult, scope.env, jsReturnValue, napi_number,    \
-                       "close() return value", int32, int32_t,                 \
+#define CLOSE_UNLINK(method, message, suffix, ...)                           \
+  int failReturn = -1;                                                       \
+  DECLARE_HANDLE_SCOPE(scope, contextEnv, failReturn);                       \
+  STORAGE_PREAMBLE((method), message "()", failReturn, 1);                   \
+  NAPI_CALL(contextEnv,                                                      \
+            napi_create_##suffix(scope.env, __VA_ARGS__, &arguments[0]),     \
+            THROW_BODY(scope.env, failReturn));                              \
+  NAPI_CALL(contextEnv, napi_call_function(scope.env, jsContext, jsCallback, \
+                                           1, arguments, &jsReturnValue),    \
+            THROW_BODY(scope.env, failReturn));                              \
+  J2C_DECLARE_VALUE_JS(int, cResult, scope.env, jsReturnValue, napi_number,  \
+                       "close() return value", int32, int32_t,               \
                        THROW_BODY(scope.env, failReturn));
 
 static int defaultClose(FILE *stream) {
@@ -147,8 +153,8 @@ static int defaultUnlink(const char *path) {
 static OCPersistentStorage storage = {defaultOpen, defaultRead, defaultWrite,
                                       defaultClose, defaultUnlink};
 
-void bind_OCRegisterPersistentStorageHandler(napi_env env,
-                                             napi_callback_info info) {
+napi_value bind_OCRegisterPersistentStorageHandler(napi_env env,
+                                                   napi_callback_info info) {
   bool callNative = !context;
 
   J2C_DECLARE_ARGUMENTS(env, info, 1);
