@@ -3,7 +3,7 @@
 		"externalOCTBStack": "<!(node -p \"( process.env.OCTBSTACK_CFLAGS && process.env.OCTBSTACK_LIBS ) ? 'true' : 'false';\")",
 		"internalOCTBStack_include_dirs": [
 			"<(module_root_dir)/iotivity-installed/include"
-		],
+		]
 	},
 
 	"target_defaults": {
@@ -213,6 +213,15 @@
 				"src/structures/oc-platform-info.cc",
 				"src/structures/oc-rep-payload/to-c.cc",
 				"src/structures/oc-rep-payload/to-js.cc"
+			],
+			"conditions": [
+
+				# Potentially external N-API
+				[ "'<!(node -p \"!!process.version.match(/^v8/)\")'=='false'", {
+					"defines+": [ "EXTERNAL_NAPI" ],
+					"include_dirs+": [ "src/n-api" ],
+					"sources+": [ "src/n-api/node_api.cc" ]
+				} ]
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
 		}
