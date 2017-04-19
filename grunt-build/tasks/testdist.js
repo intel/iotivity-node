@@ -23,10 +23,6 @@ var _ = {
 
 var allowedStructure = {
 	"iotivity-installed": {
-		"bin": [
-			{ "json2cbor": "required" },
-			{ "json2cbor.exe": "required" }
-		],
 		"lib": "required"
 	},
 	"CONTRIBUTING.md": "required",
