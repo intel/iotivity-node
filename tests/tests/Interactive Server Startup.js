@@ -28,9 +28,7 @@ var childArguments = [ "-e",
 	];
 
 var theChild = require( "child_process" )
-	.spawn( "node",
-		( process.version.match( /^v8/ ) ? [ "--napi-modules" ] : [] )
-			.concat( childArguments ) )
+	.spawn( "node", childArguments )
 	.on( "exit", function( code, signal ) {
 		utils.assert( "strictEqual", code, 0, "require() from interactive shell succeeded" );
 		utils.assert( "strictEqual", signal, null,
