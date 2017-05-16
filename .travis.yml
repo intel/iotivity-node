@@ -19,29 +19,25 @@ matrix:
           - uuid-dev
           - g++-4.8
 
-    - env: NODE_VERSION=lts/argon TEST_SCRIPT=test
-      os: osx
-      osx_image: xcode8.2
-
     - env: NODE_VERSION=lts/boron TEST_SCRIPT=test
       os: linux
       addons: *buildpackages
 
-    - env: NODE_VERSION=lts/boron TEST_SCRIPT=test
-      os: osx
-      osx_image: xcode8.2
-
     - env: NODE_VERSION=stable TEST_SCRIPT=test
       os: linux
       addons: *buildpackages
-
-    - env: NODE_VERSION=stable TEST_SCRIPT=test
-      os: osx
-      osx_image: xcode8.2
 
     - env: NODE_VERSION=7 TEST_SCRIPT=test
       os: linux
       addons: *buildpackages
+
+    - env: NODE_VERSION=lts/boron TEST_SCRIPT=test
+      os: osx
+      osx_image: xcode8.2
+
+    - env: NODE_VERSION=stable TEST_SCRIPT=test
+      os: osx
+      osx_image: xcode8.2
 
     - env: NODE_VERSION=7 TEST_SCRIPT=test
       os: osx
