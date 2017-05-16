@@ -218,16 +218,11 @@
 				"src/structures/oc-rep-payload/to-c.cc",
 				"src/structures/oc-rep-payload/to-js.cc"
 			],
-			"conditions": [
-
-				# Potentially external N-API
-				[ "'<!(node -p \"!!process.version.match(/^v8/)\")'=='false'", {
-					"defines+": [ "EXTERNAL_NAPI" ],
-					"include_dirs+": [ "src/n-api" ],
-					"sources+": [ "src/n-api/node_api.cc" ]
-				} ]
-			],
-			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
+			"include_dirs+": [ "<!@(node -p \"require('node-addon-api').include\")" ],
+			"dependencies": [
+				"csdk", "generateconstants", "generateenums", "generatefunctions",
+				"<!(node -p \"require('node-addon-api').gyp\")"
+			]
 		}
 	]
 }
