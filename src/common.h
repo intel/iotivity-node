@@ -136,7 +136,7 @@
     size_t bytesWritten;                                                     \
     NAPI_CALL((env),                                                         \
               napi_get_value_string_utf8((env), (source), cString.get(),     \
-                                         length, &bytesWritten),             \
+                                         length + 1, &bytesWritten),         \
               __VA_ARGS__);                                                  \
     (destination) = cString.release();                                       \
   } while (0)
