@@ -70,8 +70,20 @@ ocfRunner.defaultCallbacks.log = ( function( originalLog ) {
 } )( ocfRunner.defaultCallbacks.log );
 
 return {
-	plain: { client: plain, server: plain, single: plain },
-	coverage: { client: coverage, server: coverage, single: coverage }
+	plain: {
+		api: "ocf",
+		apiVersion: "oic1.1.0-0",
+		client: plain,
+		server: plain,
+		single: plain
+	},
+	coverage: {
+		api: "ocf",
+		apiVersion: "oic1.1.0-0",
+		client: coverage,
+		server: coverage,
+		single: coverage
+	}
 };
 
 };

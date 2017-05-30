@@ -20,11 +20,11 @@ grunt.registerTask( "default", [ "test" ] );
 
 grunt.registerTask( "test", [ "lint" ]
 	.concat( grunt.option( "ci" ) ? [ "testdist" ] : [] )
-	.concat( [ "testsuite", "iot-js-api-ocf:plain" ] ) );
+	.concat( [ "testsuite", "iot-js-api:plain" ] ) );
 
 grunt.registerTask( "format", [ "esformatter", "clangformat" ] );
 
-grunt.registerTask( "coverage", [ "clean:coverage", "iot-js-api-ocf:coverage", "makeReport" ] );
+grunt.registerTask( "coverage", [ "clean:coverage", "iot-js-api:coverage", "makeReport" ] );
 
 grunt.registerTask( "publish-coverage", [ "coverage", "coveralls:coverage" ] );
 
