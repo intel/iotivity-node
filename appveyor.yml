@@ -6,7 +6,7 @@ shallow_clone: true
 environment:
   matrix:
     - nodejs_version: "6"
-    - nodejs_version: ""
+    - nodejs_version: "7"
 
 matrix:
   fast_finish: true
