@@ -16,7 +16,7 @@ var path = require( "path" );
 var fs = require( "fs" );
 var shelljs = require( "shelljs" );
 var repoPaths = require( "./helpers/repo-paths" );
-var addonAbsoluteName = require( "bindings" )( "iotivity" ).path;
+var addonAbsoluteName = require( "bindings" )( { bindings: "iotivity", path: true } );
 var addonAbsolutePath = path.dirname( addonAbsoluteName );
 var addonName = path.basename( addonAbsoluteName );
 
@@ -44,9 +44,11 @@ if ( !isDependency ) {
 
 // Purge intermediate build files but leave the addon where it is
 shelljs.mv( addonAbsoluteName, repoPaths.root );
+shelljs.mv( path.join( addonAbsolutePath, "octbstack.dll" ), repoPaths.root );
 shelljs.rm( "-rf", path.join( repoPaths.root, "build" ) );
 shelljs.mkdir( "-p", addonAbsolutePath );
 shelljs.mv( path.join( repoPaths.root, addonName ), addonAbsolutePath );
+shelljs.mv( path.join( repoPaths.root, "octbstack.dll" ), addonAbsolutePath );
 
 // Purge any and all files not needed after building
 shelljs.rm( "-rf",

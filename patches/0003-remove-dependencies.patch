@@ -1,0 +1,87 @@
+diff --git a/SConstruct b/SConstruct
+index 38bf323..ed2b173 100644
+--- a/SConstruct
++++ b/SConstruct
+@@ -53,36 +53,6 @@ build_dir = env.get('BUILD_DIR')
+ # Build 'resource' sub-project
+ SConscript(build_dir + 'resource/SConscript')
+ 
+-if target_os not in ['arduino','darwin','ios', 'android', 'msys_nt', 'windows']:
+-	SConscript(build_dir + 'examples/OICMiddle/SConscript')
+-
+-java_build = None
+-if (env.get('BUILD_JAVA') == True  and env.get('JAVA_HOME') != None) or target_os == 'android':
+-        java_build = SConscript(build_dir + 'java/SConscript')
+-
+-# Build 'service' sub-project
+-service_build = SConscript(build_dir + 'service/SConscript')
+-
+-if (env.get('BUILD_JAVA') == True and env.get('JAVA_HOME') != None) or target_os == 'android':
+-        Depends(service_build, java_build)
+-
+-# Build "cloud" sub-project
+-SConscript(build_dir + 'cloud/SConscript')
+-
+-# Build "plugin interface" sub-project
+-SConscript(build_dir + 'plugins/SConscript')
+-
+-# Build "bridging" sub-project
+-SConscript(build_dir + 'bridging/SConscript')
+-
+ # Append targets information to the help information, to see help info, execute command line:
+ #     $ scon [options] -h
+ env.PrintTargets()
+-
+-# Print bin upload command line (arduino only)
+-if target_os == 'arduino':
+-	env.UploadHelp()
+-
+-# to install the generated pc file into custom prefix location
+-env.UserInstallTargetPCFile('iotivity.pc', 'iotivity.pc')
+-
+diff --git a/resource/SConscript b/resource/SConscript
+index 3ec5999..c111734 100644
+--- a/resource/SConscript
++++ b/resource/SConscript
+@@ -42,21 +42,3 @@ SConscript('csdk/SConscript')
+ if target_os not in ['arduino', 'darwin', 'ios']:
+     # Build liboc_logger
+     SConscript('oc_logger/SConscript')
+-
+-    # Build liboc
+-    SConscript('src/SConscript')
+-
+-if target_os in ['windows', 'linux']:
+-    # Build IoTivity Procedural Client API
+-    SConscript('IPCA/SConscript')
+-
+-if target_os not in ['arduino','darwin','ios','android']:
+-    # Build examples
+-    SConscript('examples/SConscript')
+-
+-if target_os in ['linux', 'windows', 'darwin', 'msys_nt']:
+-    if target_os == 'darwin':
+-        env.Command('#/out/darwin/iotivity-csdk.framework', None, '#/tools/darwin/mkfwk_osx.sh')
+-
+-    # Build C/C++ unit tests
+-    SConscript('unit_tests.scons')
+diff --git a/resource/csdk/resource-directory/SConscript b/resource/csdk/resource-directory/SConscript
+index af6d3ff..f05cefe 100755
+--- a/resource/csdk/resource-directory/SConscript
++++ b/resource/csdk/resource-directory/SConscript
+@@ -120,15 +120,3 @@ if 'CLIENT' in rd_mode:
+ if 'SERVER' in rd_mode:
+     rd_env.UserInstallTargetHeader('include/rd_server.h', 'resource', 'rd_server.h')
+     rd_env.UserInstallTargetHeader('include/rd_database.h', 'resource', 'rd_database.h')
+-
+-######################################################################
+-# Samples for the resource directory
+-######################################################################
+-if target_os in ['linux']:
+-    SConscript('samples/SConscript')
+-
+-######################################################################
+-# Build UnitTests of the Resource Directory
+-################################################ ######################
+-if target_os in ['linux']:
+-    SConscript('unittests/SConscript')

@@ -1,0 +1,39 @@
+diff --git a/extlibs/libcoap/SConscript b/extlibs/libcoap/SConscript
+index c16d433..8aa912d 100644
+--- a/extlibs/libcoap/SConscript
++++ b/extlibs/libcoap/SConscript
+@@ -317,7 +317,7 @@ else:
+     libcoap_src = glob.glob(os.path.join(libcoap_src_root, '*.c'))
+ 
+ if libcoap_env['CC'] == 'cl':
+-    libcoap_env.AppendUnique(CCFLAGS = ['/W4', '/WX'])
++    libcoap_env.AppendUnique(CCFLAGS = ['/W4'])
+ 
+ libcoap = libcoap_env.StaticLibrary('coap', libcoap_src, OBJPREFIX='libcoap_')
+ 
+diff --git a/resource/csdk/connectivity/SConscript b/resource/csdk/connectivity/SConscript
+index 6450bcf..b48beb8 100644
+--- a/resource/csdk/connectivity/SConscript
++++ b/resource/csdk/connectivity/SConscript
+@@ -18,7 +18,7 @@ print "BUILD_SAMPLE is %s" % build_sample
+ print "MQ flag is %s" % with_mq
+ 
+ if target_os in ['msys_nt', 'windows']:
+-    connectivity_env.AppendUnique(CCFLAGS=['/W4', '/WX'])
++    connectivity_env.AppendUnique(CCFLAGS=['/W4'])
+ 
+ targets_disallow_multitransport = ['arduino']
+ 
+diff --git a/resource/csdk/stack/SConscript b/resource/csdk/stack/SConscript
+index 0f64dc5..8f62ef3 100644
+--- a/resource/csdk/stack/SConscript
++++ b/resource/csdk/stack/SConscript
+@@ -118,7 +118,7 @@ if target_os in ['android', 'linux', 'tizen', 'msys_nt', 'windows']:
+ if target_os not in ['windows', 'msys_nt']:
+     liboctbstack_env.AppendUnique(LIBS = ['m'])
+ else:
+-    liboctbstack_env.AppendUnique(CCFLAGS=['/W4', '/WX'])
++    liboctbstack_env.AppendUnique(CCFLAGS=['/W4'])
+ 
+     # octbstack.def specifies the list of functions exported by octbstack.dll.
+     liboctbstack_env.Replace(WINDOWS_INSERT_DEF = ['1'])

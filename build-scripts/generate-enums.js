@@ -17,6 +17,9 @@ var path = require( "path" );
 var includePaths = require( "./helpers/header-paths" );
 var repoPaths = require( "./helpers/repo-paths" );
 
+// We don't generate bindings for these enums because they're not defined in our use case.
+var exceptions = [ "OCConnectUserPref_t" ];
+
 var startingBraceRegex = /^}\s*/;
 var closingBraceRegex = /^}/;
 
@@ -50,20 +53,26 @@ function parseFileForEnums( destination, fileName ) {
 					enumName = line
 						.replace( startingBraceRegex, "" )
 						.replace( /\s*;.*$/, "" );
-					enumList.push( "  SET_ENUM(target, " + enumName + ");" );
-					fs.writeFileSync( destination,
-						[
-							"static Local<Object> bind_" + enumName + "() {",
-							"  Local<Object> returnValue = Nan::New<Object>();"
-						].join( "\n" ) + "\n",
-						{ flag: "a" } );
+					if ( exceptions.indexOf( enumName ) < 0 ) {
+						enumList.push( "  SET_ENUM(target, " + enumName + ");" );
+						fs.writeFileSync( destination,
+							[
+								"static Local<Object> bind_" + enumName + "() {",
+								"  Local<Object> returnValue = Nan::New<Object>();"
+							].join( "\n" ) + "\n",
+							{ flag: "a" } );
+					}
 				} else if ( fields[ 0 ] !== "typedef" && fields[ 0 ] !== "{" ) {
-					fs.writeFileSync( destination, line, { flag: "a" } );
+					if ( exceptions.indexOf( enumName ) < 0 ) {
+						fs.writeFileSync( destination, line, { flag: "a" } );
+					}
 				}
 				if ( line.match( /;$/ ) ) {
 					print = false;
-					fs.writeFileSync( destination, output + "\n  return returnValue;\n}\n",
-						{ flag: "a" } );
+					if ( exceptions.indexOf( enumName ) < 0 ) {
+						fs.writeFileSync( destination, output + "\n  return returnValue;\n}\n",
+							{ flag: "a" } );
+					}
 					output = "";
 				}
 			}

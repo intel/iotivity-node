@@ -18,6 +18,7 @@ matrix:
           - libcurl4-openssl-dev
           - uuid-dev
           - g++-4.8
+          - libboost-all-dev
 
     - env: NODE_VERSION=lts/argon TEST_SCRIPT=test
       os: osx

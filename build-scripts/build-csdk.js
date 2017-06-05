@@ -44,6 +44,9 @@ function findBins( iotivityPath ) {
 			throw new Error( thePath + " is empty" );
 		}
 		thePath = path.join( thePath, entries[ 0 ] );
+		if ( entries[ 0 ] === "windows" ) {
+			index--;
+		}
 	}
 
 	return thePath;
@@ -168,7 +171,11 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 		{ cwd: tinycborPath } );
 
 	// Build
-	run( "scons", [ "SECURED=1" ]
+	run( "scons", [
+			"SECURED=1",
+			"RD_MODE=all",
+			"EXC_PROV_SUPPORT=1"
+		]
 		.concat( ( process.env.V === "1" || process.env.npm_config_verbose === "true" ) ?
 			[ "VERBOSE=True" ] : [] )
 		.concat( targetArch ?
@@ -205,7 +212,7 @@ shelljs.cp(
 	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocpresence.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocstackconfig.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocstack.h" ),
-	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "octypes.h" ),
+	path.join( repoPaths.iotivity, "resource", "csdk", "include", "octypes.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "iotivity_config.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "platform_features.h" ),
 	path.join( repoPaths.iotivity, "extlibs", "tinycbor", "tinycbor", "src", "cbor.h" ),

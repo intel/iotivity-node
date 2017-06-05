@@ -1,0 +1,158 @@
+diff --git a/resource/csdk/stack/include/internal/ocserverrequest.h b/resource/csdk/stack/include/internal/ocserverrequest.h
+index b40fd93..026ea55 100644
+--- a/resource/csdk/stack/include/internal/ocserverrequest.h
++++ b/resource/csdk/stack/include/internal/ocserverrequest.h
+@@ -103,7 +103,7 @@ typedef struct OCServerRequest
+     uint8_t requestComplete;
+ 
+     /** Node entry in red-black tree.*/
+-    RB_ENTRY(OCServerRequest) entry;
++    RBL_ENTRY(OCServerRequest) entry;
+ 
+     /** Flag indicating slow response.*/
+     uint8_t slowFlag;
+diff --git a/resource/csdk/stack/include/internal/tree.h b/resource/csdk/stack/include/internal/tree.h
+index 203ecfd..2151f49 100644
+--- a/resource/csdk/stack/include/internal/tree.h
++++ b/resource/csdk/stack/include/internal/tree.h
+@@ -745,6 +745,66 @@ name##_RB_MINMAX(struct name *head, int val)				\
+ 	    ((x) != NULL) && ((y) = name##_RB_PREV(x), 1);		\
+ 	     (x) = (y))
+ 
++#define RBL_ENTRY(type)							\
++struct {								\
++  RB_ENTRY(type) rb_entry;						\
++  struct type *next;							\
++  struct type *prev;							\
++}
++
++/* Main rbl operation.
++ * Just like rb, but links elm to existing tree node with the same key if found.
++ */
++#define	RBL_GENERATE(name, type, field, cmp)				\
++	RBL_GENERATE_INTERNAL(name, type, field, cmp,)
++#define	RBL_GENERATE_STATIC(name, type, field, cmp)			\
++	RBL_GENERATE_INTERNAL(name, type, field, cmp, __attribute__((__unused__)) static)
++#define RBL_GENERATE_INTERNAL(name, type, field, cmp, attr)		\
++RB_GENERATE_INTERNAL(name, type, field.rb_entry, (cmp), attr)		\
++									\
++attr struct type *							\
++name##_RBL_INSERT(struct name *head, struct type *elm)			\
++{									\
++  struct type *inserted = RB_INSERT(name, head, elm);			\
++  if (inserted && inserted != elm) {					\
++    elm->field.next = inserted->field.next;				\
++    if (elm->field.next) {						\
++      elm->field.next->field.prev = elm;				\
++    }									\
++    elm->field.prev = inserted;						\
++    if (elm->field.prev) {						\
++      elm->field.prev->field.next = elm;				\
++    }									\
++  }									\
++  return elm;								\
++}									\
++									\
++attr struct type *							\
++name##_RBL_REMOVE(struct name *head, struct type *elm)			\
++{									\
++  if (elm->field.prev) {						\
++									\
++    /* The element is somewhere down the linked list */			\
++    elm->field.prev->field.next = elm->field.next;			\
++    if (elm->field.next) {						\
++      elm->field.next->field.prev = elm->field.prev;			\
++    }									\
++  } else if (elm->field.next) {						\
++									\
++    /* The element is the head of the linked list and it has links */	\
++    elm->field.next->field.rb_entry = elm->field.rb_entry;		\
++    elm->field.next->field.prev = NULL;					\
++  } else {								\
++									\
++    /* The element is the head of the linked list without any links */	\
++    RB_REMOVE(name, head, elm);						\
++  }									\
++}
++
++#define RBL_INSERT(name, x, y)	name##_RBL_INSERT(x, y)
++
++#define RBL_REMOVE(name, x, y)	name##_RBL_REMOVE(x, y)
++
+ #ifdef _KERNEL
+ 
+ /*
+diff --git a/resource/csdk/stack/src/ocserverrequest.c b/resource/csdk/stack/src/ocserverrequest.c
+index d007710..60b8cbb 100644
+--- a/resource/csdk/stack/src/ocserverrequest.c
++++ b/resource/csdk/stack/src/ocserverrequest.c
+@@ -57,7 +57,7 @@ static int RBResponseTokenCmp(OCServerResponse *target, OCServerResponse *treeNo
+ }
+ 
+ RB_HEAD(ServerRequestTree, OCServerRequest) serverRequestTree = RB_INITIALIZER(&serverRequestTree);
+-RB_GENERATE(ServerRequestTree, OCServerRequest, entry, RBRequestTokenCmp)
++RBL_GENERATE(ServerRequestTree, OCServerRequest, entry, RBRequestTokenCmp)
+ RB_HEAD(ServerResponseTree, OCServerResponse) serverResponseTree =
+                                                             RB_INITIALIZER(&serverResponseTree);
+ RB_GENERATE(ServerResponseTree, OCServerResponse, entry, RBResponseTokenCmp)
+@@ -102,23 +102,6 @@ exit:
+ }
+ 
+ /**
+- * Delete a server request from the server request list
+- *
+- * @param serverRequest - server request to delete
+- */
+-static void DeleteServerRequest(OCServerRequest * serverRequest)
+-{
+-    if(serverRequest)
+-    {
+-        RB_REMOVE(ServerRequestTree, &serverRequestTree, serverRequest);
+-        OICFree(serverRequest->requestToken);
+-        OICFree(serverRequest);
+-        serverRequest = NULL;
+-        OIC_LOG(INFO, TAG, "Server Request Removed!!");
+-    }
+-}
+-
+-/**
+  * Delete a server response from the server response list
+  *
+  * @param serverResponse - server response to delete
+@@ -235,7 +218,7 @@ OCServerRequest * GetServerRequestUsingHandle (const OCServerRequest * handle)
+         return NULL;
+     }
+ 
+-    return GetServerRequestUsingToken(handle->requestToken, handle->tokenLength);
++    return (OCServerRequest *)handle;
+ }
+ 
+ /**
+@@ -349,7 +332,7 @@ OCStackResult AddServerRequest (OCServerRequest ** request, uint16_t coapID,
+ 
+     *request = serverRequest;
+ 
+-    RB_INSERT(ServerRequestTree, &serverRequestTree, serverRequest);
++    RBL_INSERT(ServerRequestTree, &serverRequestTree, serverRequest);
+     OIC_LOG(INFO, TAG, "Server Request Added!!");
+     return OC_STACK_OK;
+ 
+@@ -422,13 +405,11 @@ void FindAndDeleteServerRequest(OCServerRequest * serverRequest)
+ {
+     if(serverRequest)
+     {
+-        OCServerRequest* out = NULL;
+-        out = RB_FIND(ServerRequestTree, &serverRequestTree, serverRequest);
+-
+-        if (out)
+-        {
+-            DeleteServerRequest(out);
+-        }
++        RBL_REMOVE(ServerRequestTree, &serverRequestTree, serverRequest);
++        OICFree(serverRequest->requestToken);
++        OICFree(serverRequest);
++        serverRequest = NULL;
++        OIC_LOG(INFO, TAG, "Server Request Removed");
+     }
+ }
+ 

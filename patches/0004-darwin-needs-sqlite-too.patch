@@ -1,0 +1,13 @@
+diff --git a/extlibs/sqlite3/SConscript b/extlibs/sqlite3/SConscript
+index 30e2184..c08fdda 100755
+--- a/extlibs/sqlite3/SConscript
++++ b/extlibs/sqlite3/SConscript
+@@ -11,7 +11,7 @@ sqlite_env = env.Clone()
+ target_os = sqlite_env.get('TARGET_OS')
+ src_dir = sqlite_env.get('SRC_DIR')
+ 
+-targets_need_sqlite = ['android', 'msys_nt', 'windows', 'ios']
++targets_need_sqlite = ['android', 'msys_nt', 'windows', 'ios', 'darwin']
+ sqlite_dir = src_dir + '/extlibs/sqlite3/'
+ sqlite_build_dir = src_dir + '/extlibs/sqlite3/sqlite-amalgamation-3081101/'
+ sqlite_zip_file = src_dir + '/extlibs/sqlite3/sqlite-amalgamation-3081101.zip'
