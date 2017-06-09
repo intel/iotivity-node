@@ -22,6 +22,12 @@ var _ = {
 };
 
 var allowedStructure = {
+	"build-scripts": {
+		"postinstall.js": "required",
+		"helpers": {
+			"repo-paths.js": "required"
+		}
+	},
 	"iotivity-installed": {
 		"lib": "required"
 	},
