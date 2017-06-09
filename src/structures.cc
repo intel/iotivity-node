@@ -45,13 +45,8 @@ Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
     }
   }
 
-  if (request->requestHandle) {
-    Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
-             JSOCRequestHandle::New(request->requestHandle));
-  } else {
-    Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
-             Nan::Null());
-  }
+  Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
+           Nan::New(request->requestHandle));
 
   SET_VALUE_ON_OBJECT(jsRequest, request, method, Number);
   SET_STRING_IF_NOT_NULL(jsRequest, request, query);

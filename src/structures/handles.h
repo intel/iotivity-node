@@ -70,11 +70,6 @@ class JSHandle {
   }
 };
 
-class JSOCRequestHandle : public JSHandle<JSOCRequestHandle, OCRequestHandle> {
- public:
-  static const char *jsClassName() { return "OCRequestHandle"; }
-};
-
 template <typename handleType>
 class CallbackInfo {
  public:

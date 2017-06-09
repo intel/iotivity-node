@@ -204,12 +204,10 @@
 				"src/structures/handles.cc",
 				"src/structures/oc-client-response.cc",
 				"src/structures/oc-dev-addr.cc",
-				"src/structures/oc-device-info.cc",
 				"src/structures/oc-entity-handler-response.cc",
 				"src/structures/oc-header-option-array.cc",
 				"src/structures/oc-identity.cc",
-				"src/structures/oc-payload.cc",
-				"src/structures/oc-platform-info.cc"
+				"src/structures/oc-payload.cc"
 			],
 			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
 		}

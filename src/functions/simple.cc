@@ -15,15 +15,29 @@
  */
 
 #include <nan.h>
+#include <string>
 #include "../common.h"
-#include "../structures/oc-device-info.h"
-#include "../structures/oc-platform-info.h"
 
 extern "C" {
 #include <ocstack.h>
 }
 
 using namespace v8;
+
+// From
+// http://stackoverflow.com/questions/34158318/are-there-some-v8-functions-to-create-a-c-v8date-object-from-a-string-like#answer-36200373
+Local<Date> dateFromString(const char *str) {
+  static Nan::Callback dateConstructor;
+  if (dateConstructor.IsEmpty()) {
+    Local<Date> date = Nan::New<Date>(0).ToLocalChecked();
+    dateConstructor.Reset(Local<Function>::Cast(
+        Nan::Get(date, Nan::New("constructor").ToLocalChecked())
+            .ToLocalChecked()));
+  }
+  Local<Value> jsString = Nan::New(str).ToLocalChecked();
+  return Local<Date>::Cast(
+      Nan::NewInstance(*dateConstructor, 1, &jsString).ToLocalChecked());
+}
 
 NAN_METHOD(bind_OCInit) {
   VALIDATE_ARGUMENT_COUNT(info, 3);
@@ -53,41 +67,6 @@ NAN_METHOD(bind_OCStopPresence) {
   info.GetReturnValue().Set(Nan::New(OCStopPresence()));
 }
 
-NAN_METHOD(bind_OCSetDeviceInfo) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-
-  OCDeviceInfo deviceInfo;
-
-  if (!c_OCDeviceInfo(Nan::To<Object>(info[0]).ToLocalChecked(), &deviceInfo)) {
-    return;
-  }
-
-  OCStackResult result = OCSetDeviceInfo(deviceInfo);
-
-  c_OCDeviceInfoFreeMembers(&deviceInfo);
-
-  info.GetReturnValue().Set(Nan::New(result));
-}
-
-NAN_METHOD(bind_OCSetPlatformInfo) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-
-  OCPlatformInfo platformInfo;
-
-  if (!c_OCPlatformInfo(Nan::To<Object>(info[0]).ToLocalChecked(),
-                        &platformInfo)) {
-    return;
-  }
-
-  OCStackResult result = OCSetPlatformInfo(platformInfo);
-
-  c_OCPlatformInfoFreeMembers(&platformInfo);
-
-  info.GetReturnValue().Set(Nan::New(result));
-}
-
 NAN_METHOD(bind_OCGetNumberOfResources) {
   VALIDATE_ARGUMENT_COUNT(info, 1);
   VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
@@ -112,4 +91,108 @@ NAN_METHOD(bind_OCGetServerInstanceIDString) {
 
   info.GetReturnValue().Set(idString ? (Nan::New(idString).ToLocalChecked())
                                      : Nan::EmptyString());
+}
+
+NAN_METHOD(bind_OCGetPropertyValue) {
+  VALIDATE_ARGUMENT_COUNT(info, 3);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
+  VALIDATE_ARGUMENT_TYPE(info, 2, IsObject);
+
+  String::Utf8Value propName(info[1]);
+  OCPayloadType payloadType =
+      (OCPayloadType)Nan::To<uint32_t>(info[0]).FromJust();
+  OCStackResult returnValue;
+  void *result = nullptr;
+
+  Local<Value> jsResult;
+
+  returnValue =
+      OCGetPropertyValue(payloadType, (const char *)*propName, &result);
+
+  if (returnValue == OC_STACK_OK) {
+    // string conditions
+    if ((payloadType == PAYLOAD_TYPE_DEVICE &&
+         !strcmp(*propName, OC_RSRVD_SPEC_VERSION)) ||
+        (payloadType == PAYLOAD_TYPE_DEVICE &&
+         !strcmp(*propName, OC_RSRVD_DEVICE_NAME)) ||
+        (payloadType == PAYLOAD_TYPE_PLATFORM &&
+         !strcmp(*propName, OC_RSRVD_MFG_URL)) ||
+        (payloadType == PAYLOAD_TYPE_PLATFORM &&
+         !strcmp(*propName, OC_RSRVD_MFG_NAME))) {
+      jsResult = Nan::New((char *)result).ToLocalChecked();
+
+      // string list conditions
+    } else if (payloadType == PAYLOAD_TYPE_DEVICE &&
+               !strcmp(*propName, OC_RSRVD_DATA_MODEL_VERSION)) {
+      jsResult = js_StringArray((OCStringLL *)result);
+
+      // date conditions
+    } else if ((payloadType == PAYLOAD_TYPE_PLATFORM &&
+                !strcmp(*propName, OC_RSRVD_MFG_DATE)) ||
+               (payloadType == PAYLOAD_TYPE_PLATFORM &&
+                !strcmp(*propName, OC_RSRVD_SYSTEM_TIME))) {
+      jsResult = dateFromString((const char *)result);
+    }
+
+    Nan::Set(Local<Object>::Cast(info[2]), Nan::New("value").ToLocalChecked(),
+             jsResult);
+  }
+  info.GetReturnValue().Set(Nan::New(returnValue));
+}
+
+NAN_METHOD(bind_OCSetPropertyValue) {
+  VALIDATE_ARGUMENT_COUNT(info, 3);
+  VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
+  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
+  if (!(info[2]->IsString() || info[2]->IsArray() || info[2]->IsDate())) {
+    return Nan::ThrowTypeError(
+        (std::string("Property value ") +
+         std::string((const char *)*String::Utf8Value(info[1])) +
+         std::string(" must be a string, an array, or a date"))
+            .c_str());
+  }
+
+  OCStackResult returnValue;
+
+  if (info[2]->IsString()) {
+    returnValue =
+        OCSetPropertyValue((OCPayloadType)Nan::To<uint32_t>(info[0]).FromJust(),
+                           (const char *)*String::Utf8Value(info[1]),
+                           (const void *)*String::Utf8Value(info[2]));
+  } else if (info[2]->IsArray()) {
+    OCStringLL *start = 0, *current = 0, *previous = 0;
+    Local<Array> jsList = Local<Array>::Cast(info[2]);
+    size_t index, length = jsList->Length();
+    for (index = 0; index < length; index++) {
+      current = new OCStringLL;
+      current->value = strdup((const char *)*String::Utf8Value(
+          Nan::Get(jsList, index).ToLocalChecked()));
+      current->next = 0;
+      if (previous) {
+        previous->next = current;
+      }
+      previous = current;
+      if (!start) {
+        start = previous;
+      }
+    }
+    returnValue = OCSetPropertyValue(
+        (OCPayloadType)Nan::To<uint32_t>(info[0]).FromJust(),
+        (const char *)*String::Utf8Value(info[1]), (const void *)start);
+    if (returnValue != OC_STACK_OK) {
+      for (current = start; start; current = start) {
+        free(current->value);
+        start = current->next;
+        delete current;
+      }
+    }
+  } else {
+    returnValue =
+        OCSetPropertyValue((OCPayloadType)Nan::To<uint32_t>(info[0]).FromJust(),
+                           (const char *)*String::Utf8Value(info[1]),
+                           (const char *)*String::Utf8Value(
+                               Nan::To<String>(info[2]).ToLocalChecked()));
+  }
+  info.GetReturnValue().Set(Nan::New(returnValue));
 }

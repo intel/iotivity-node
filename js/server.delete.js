@@ -24,16 +24,15 @@ console.log( "Starting OCF stack in server mode" );
 // Start iotivity and set up the processing loop
 iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
 
-iotivity.OCSetDeviceInfo( {
-	specVersion: "res.1.1.0",
-	dataModelVersions: [ "abc.0.0.1" ],
-	deviceName: "server.get",
-	types: []
-} );
-iotivity.OCSetPlatformInfo( {
-	platformID: "server.get.sample",
-	manufacturerName: "iotivity-node"
-} );
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
+	iotivity.OC_RSRVD_SPEC_VERSION, "res.1.1.0" );
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
+	iotivity.OC_RSRVD_DATA_MODEL_VERSION, [ "test.0.0.1" ] );
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
+	iotivity.OC_RSRVD_DEVICE_NAME, "server.delete" );
+
+iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_PLATFORM,
+	iotivity.OC_RSRVD_MFG_NAME, "iotivity-node" );
 
 intervalId = setInterval( function() {
 	iotivity.OCProcess();
@@ -61,9 +60,13 @@ iotivity.OCCreateResource(
 
 			console.log( "OCDeleteResource() has resulted in " + result );
 
+			if ( result === iotivity.OCStackResult.OC_STACK_OK ) {
+				handleReceptacle = null;
+			}
+
 			iotivity.OCDoResponse( {
 				requestHandle: request.requestHandle,
-				resourceHandle: request.resource,
+				resourceHandle: null,
 				ehResult: result ?
 					iotivity.OCEntityHandlerResult.OC_EH_ERROR :
 					iotivity.OCEntityHandlerResult.OC_EH_RESOURCE_DELETED,
@@ -88,7 +91,9 @@ process.on( "SIGINT", function() {
 
 	// Tear down the processing loop and stop iotivity
 	clearInterval( intervalId );
-	iotivity.OCDeleteResource( handleReceptacle.handle );
+	if ( handleReceptacle ) {
+		iotivity.OCDeleteResource( handleReceptacle.handle );
+	}
 	iotivity.OCStop();
 
 	// Exit
