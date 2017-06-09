@@ -22,6 +22,18 @@ var _ = {
 };
 
 var allowedStructure = {
+	"build": [
+		{
+			"Release": {
+				"iotivity.node": "required"
+			}
+		},
+		{
+			"Debug": {
+				"iotivity.node": "required"
+			}
+		}
+	],
 	"build-scripts": {
 		"postinstall.js": "required",
 		"helpers": {
