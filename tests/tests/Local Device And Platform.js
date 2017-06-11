@@ -54,13 +54,12 @@ testProperty( "spec version", "PAYLOAD_TYPE_DEVICE", "OC_RSRVD_SPEC_VERSION",
 testProperty( "manufacturer name", "PAYLOAD_TYPE_PLATFORM", "OC_RSRVD_MFG_NAME",
 	[ "Abra", "Cadabra", "Csiribu", "Csiriba", "Simsalabim" ][ Math.round( Math.random() * 4 ) ] );
 
-// string list properties
 testProperty( "data model version", "PAYLOAD_TYPE_DEVICE", "OC_RSRVD_DATA_MODEL_VERSION", [
 	"res." +
 	Math.round( Math.random() * 9 ) + "." +
 	Math.round( Math.random() * 9 ) + "." +
 	Math.round( Math.random() * 9 )
-] );
+].join( "," ) );
 
 // date properties
 testProperty( "manufacture date", "PAYLOAD_TYPE_PLATFORM", "OC_RSRVD_MFG_DATE",

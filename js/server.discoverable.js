@@ -28,7 +28,7 @@ intervalId = setInterval( function() {
 iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
 	iotivity.OC_RSRVD_SPEC_VERSION, "res.1.1.0" );
 iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
-	iotivity.OC_RSRVD_DATA_MODEL_VERSION, [ "test.0.0.1" ] );
+	iotivity.OC_RSRVD_DATA_MODEL_VERSION, "test.0.0.1" );
 iotivity.OCSetPropertyValue( iotivity.OCPayloadType.PAYLOAD_TYPE_DEVICE,
 	iotivity.OC_RSRVD_DEVICE_NAME, "server.discoverable" );
 
