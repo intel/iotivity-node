@@ -38,9 +38,13 @@ bool c_OCEntityHandlerResponse(Local<Object> jsResponse,
   Local<Value> requestHandle =
       Nan::Get(jsResponse, Nan::New("requestHandle").ToLocalChecked())
           .ToLocalChecked();
-  VALIDATE_VALUE_TYPE(requestHandle, IsUint32,
-                      "entitiy handler response request handle", return false);
-  response.requestHandle = Nan::To<uint32_t>(requestHandle).FromJust();
+  VALIDATE_VALUE_TYPE(requestHandle, IsObject,
+                      "entity handler response request handle", return false);
+  response.requestHandle = JSOCRequestHandle::Resolve(
+      Nan::To<Object>(requestHandle).ToLocalChecked());
+  if (!response.requestHandle) {
+    return false;
+  }
 
   // resourceHandle
   response.resourceHandle = 0;
