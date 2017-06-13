@@ -22,7 +22,7 @@ console.log( JSON.stringify( { assertionCount: 22 } ) );
 // Init
 testUtils.stackOKOrDie( "OCInit", iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER ) );
 
-function testProperty( message, payloadType, property, value ) {
+function getAndSet( message, payloadType, property, value ) {
 	var result = {};
 	testUtils.stackOKOrDie( "Set " + message + " to " + JSON.stringify( value ),
 		iotivity.OCSetPropertyValue( iotivity.OCPayloadType[ payloadType ],
@@ -31,11 +31,11 @@ function testProperty( message, payloadType, property, value ) {
 		iotivity.OCGetPropertyValue( iotivity.OCPayloadType[ payloadType ],
 			iotivity[ property ], result ) );
 
-	if ( property === "OC_RSRVD_SYSTEM_TIME" ) {
-		console.error( result.value );
-	}
+	return result.value;
+}
 
-	testUtils.assert( "ok", isequal( result.value, value ),
+function testProperty( message, payloadType, property, value ) {
+	testUtils.assert( "ok", isequal( getAndSet( message, payloadType, property, value ), value ),
 		message + ": retrieved value is strictly equal to set value" );
 }
 
@@ -54,12 +54,15 @@ testProperty( "spec version", "PAYLOAD_TYPE_DEVICE", "OC_RSRVD_SPEC_VERSION",
 testProperty( "manufacturer name", "PAYLOAD_TYPE_PLATFORM", "OC_RSRVD_MFG_NAME",
 	[ "Abra", "Cadabra", "Csiribu", "Csiriba", "Simsalabim" ][ Math.round( Math.random() * 4 ) ] );
 
-testProperty( "data model version", "PAYLOAD_TYPE_DEVICE", "OC_RSRVD_DATA_MODEL_VERSION", [
-	"res." +
+var sampleDMV = "res." +
 	Math.round( Math.random() * 9 ) + "." +
 	Math.round( Math.random() * 9 ) + "." +
-	Math.round( Math.random() * 9 )
-].join( "," ) );
+	Math.round( Math.random() * 9 );
+var dmvSetResult = getAndSet( "data model version", "PAYLOAD_TYPE_DEVICE",
+	"OC_RSRVD_DATA_MODEL_VERSION", sampleDMV );
+
+testUtils.assert( "strictEqual", sampleDMV, dmvSetResult.join( "," ),
+	"data model version: retrieved value is strictly equal to set value" );
 
 // date properties
 testProperty( "manufacture date", "PAYLOAD_TYPE_PLATFORM", "OC_RSRVD_MFG_DATE",
