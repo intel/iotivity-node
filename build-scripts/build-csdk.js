@@ -165,7 +165,7 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 		.concat( sysVersion ?
 			[ "SYS_VERSION=" + sysVersion ] : [] )
 		.concat( process.env.npm_config_debug === "true" ?
-			[ "RELEASE=False" ] : [] )
+			[ "RELEASE=False", "LOGGING=False" ] : [] )
 		.concat(
 			[ "logger", "octbstack", "connectivity_abstraction", "coap", "c_common", "ocsrm",
 				"routingmanager"
