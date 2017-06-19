@@ -13,7 +13,10 @@
 // limitations under the License.
 
 var lightResource, device,
-	_ = require( "lodash" ),
+	_ = {
+		extend: require( "lodash.assignin" ),
+		each: require( "lodash.foreach" )
+	},
 	observerCount = 0,
 	sensor = require( "./mock-sensor" )();
 
