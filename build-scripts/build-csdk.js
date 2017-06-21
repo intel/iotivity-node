@@ -49,6 +49,27 @@ function findBins( iotivityPath ) {
 	return thePath;
 }
 
+// If the iotivity source tree is in place, we check for the specified
+// revision and remove the source tree if it fails to find. This makes
+// the script to install the correct version of iotivity always.
+function checkRevision() {
+	if ( !fs.existsSync( repoPaths.iotivity ) ) {
+		return false;
+	}
+
+	var status = spawnSync( "git", [ "show", csdkRevision ],
+		{ cwd: repoPaths.iotivity, shell: true } ).status;
+
+	if ( status !== 0 ) {
+		shelljs.rm( "-rf", path.join( repoPaths.generated ) );
+		shelljs.rm( "-rf", path.join( repoPaths.installPrefix ) );
+		shelljs.rm( "-rf", path.join( repoPaths.iotivity ) );
+		return false;
+	}
+
+	return true;
+}
+
 var binariesSource, installWinHeaders, tinycborPath,
 	userAgentParts, platform, localArch, targetArch, sysVersion;
 
@@ -79,7 +100,7 @@ var csdkRevision = process.env.CSDK_REVISION ||
 		.replace(  /^([^-]*-)pre-(.*$)/, "$2" );
 
 // We assume that, if the path is there, its contents are also ready to go
-if ( fs.existsSync( repoPaths.installPrefix ) ) {
+if ( checkRevision() && fs.existsSync( repoPaths.installPrefix ) ) {
 	return;
 }
 
