@@ -180,12 +180,11 @@ NAN_METHOD(bind_OCSetPropertyValue) {
     returnValue = OCSetPropertyValue(
         (OCPayloadType)Nan::To<uint32_t>(info[0]).FromJust(),
         (const char *)*String::Utf8Value(info[1]), (const void *)start);
-    if (returnValue != OC_STACK_OK) {
-      for (current = start; start; current = start) {
-        free(current->value);
-        start = current->next;
-        delete current;
-      }
+
+    for (current = start; start; current = start) {
+      free(current->value);
+      start = current->next;
+      delete current;
     }
   } else {
     returnValue =
