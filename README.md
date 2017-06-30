@@ -51,7 +51,7 @@ After installation using the steps above, you may want to run the iotivity-node 
 The file [appveyor.yml](./appveyor.yml) provides an example of the commands necessary for setting up a Windows environment, and the file [.travis.yml](./.travis.yml) provides an example of the commands necessary for setting up the Linux and OSX environments.
 
 ### In more detail:
-iotivity-node depends on [iotivity][] proper. It has been tested against [1.2.0][]. The above installation instructions cover the dependencies for both iotivity-node and iotivity.
+iotivity-node depends on [iotivity][] proper. It has been tested against [1.2.1][]. The above installation instructions cover the dependencies for both iotivity-node and iotivity.
 
 iotivity-node requires a compiler that implements the C++11 standard.
 
@@ -60,7 +60,7 @@ During compilation, iotivity-node downloads iotivity from its git repository, bu
 0. Grab a [snapshot][] of iotivity from its git repository and unpack it locally.
 0. Make sure a build toolchain, [scons][] (a build tool), and the headers for the above-mentioned library dependencies are installed. Your distribution should provide all these tools and libraries.
 0. `cd iotivity`
-0. If you're building against version 1.2.0 of iotivity on OSX or Windows, you will first need to apply all the downstream patches which iotivity-node provides in the `patches/` subdirectory except the patch which removes the boost dependency. The latter patch serves only to improve build time by eliminating the ability to build targets which require boost. You can apply the patches with `git apply <path-to-patch>`. All these patches except the boost elmination patch are on track to appear in later versions of iotivity, so they will disappear from later versions of iotivity-node.
+0. If you're building against version 1.2.1 of iotivity on OSX or Windows, you will first need to apply all the downstream patches which iotivity-node provides in the `patches/` subdirectory except the patch which removes the boost dependency. The latter patch serves only to improve build time by eliminating the ability to build targets which require boost. You can apply the patches with `git apply <path-to-patch>`. All these patches except the boost elmination patch are on track to appear in later versions of iotivity, so they will disappear from later versions of iotivity-node.
 0. scons has the concept of targets just like make. You can get a list of targets contained in the iotivity repository, as well as a listing of recognized build flags via `scons --help`. The only targets you need for the node.js bindings are `octbstack` and `json2cbor` if you are building in SECURED=1 mode. Thus, run `scons SECURED=1 json2cbor octbstack` to build these targets or `scons octbstack` if you do not require `SECURED=1` mode.
 
     On OSX you need more targets than just `octbstack` and `json2cbor` because on that platform iotivity does not build `octbstack` as a shared library, but rather as an archive. Thus, you need to build all targets that correspond to archives that go into the Linux `liboctbstack` shared library:
@@ -95,8 +95,8 @@ Make sure no firewall is running (or one is properly configured to allow iotivit
 
 [iotivity]: http://iotivity.org/
 [node]: https://nodejs.org/
-[1.2.0]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=1.2.0
-[snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=1.2.0;sf=tgz
+[1.2.1]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=tree;hb=1.2.1
+[snapshot]: https://gerrit.iotivity.org/gerrit/gitweb?p=iotivity.git;a=snapshot;h=1.2.1;sf=tgz
 [scons]: http://www.scons.org/
 [iotivity wiki]: https://wiki.iotivity.org/faq_s
 [video]: https://www.youtube.com/watch?v=95VTB_qgYfw
