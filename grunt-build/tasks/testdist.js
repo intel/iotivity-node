@@ -48,6 +48,7 @@ var allowedStructure = {
 		]
 	},
 	"CONTRIBUTING.md": "required",
+	"SECURITY.md": "required",
 	"AUTHORS.txt": "required",
 	"build": "required",
 	"lowlevel.js": "required",
