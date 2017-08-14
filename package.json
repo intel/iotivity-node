@@ -5,7 +5,9 @@
   "repository": "https://github.com/otcshare/iotivity-node/",
   "license": "Apache-2.0",
   "main": "index.js",
-  "engines": { "node": ">0.10" },
+  "engines": {
+    "node": ">0.10"
+  },
   "keywords": [
     "oic",
     "iotivity",
