@@ -47,6 +47,12 @@ matrix:
   - env: NODE_VERSION=stable TEST_SCRIPT=publish-coverage
     os: linux
     addons: *1
+  - env: NODE_VERSION=8.4.0 TEST_SCRIPT=test
+    os: linux
+    addons: *buildpackages
+  - env: NODE_VERSION=8.4.0 TEST_SCRIPT=test
+    os: osx
+    osx_image: xcode8.2
   allow_failures:
   - env: NODE_VERSION=stable TEST_SCRIPT=publish-coverage
     os: linux
@@ -76,7 +82,7 @@ install:
   fi
 - npm install --ignore-scripts
 script:
-- grunt "${TEST_SCRIPT}" --ci
+- NODE_OPTIONS=--napi-modules grunt "${TEST_SCRIPT}" --ci
 
 # Send a notification to chat.freenode.net#iotivity-node
 # The server#channel-name is encrypted so notifications are only sent from the

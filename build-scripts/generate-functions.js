@@ -37,7 +37,7 @@ function getMethods( topPath ) {
 									.replace( /\r/g, "" )
 									.split( "\n" ),
 								function( line ) {
-									var match = line.match( /^NAN_METHOD\s*[(]\s*bind_([^)]*)*/ );
+									var match = line.match( /^napi_value\s+bind_([^(]+)/ );
 									if ( match && match.length > 1 ) {
 										return match[ 1 ].replace( /\s/g, "" );
 									}
@@ -55,12 +55,10 @@ methods = getMethods( repoPaths.src );
 fs.writeFileSync( protosH, [
 	"#ifndef __IOTIVITY_NODE_FUNCTION_PROTOTYPES_H__",
 	"#define __IOTIVITY_NODE_FUNCTION_PROTOTYPES_H__",
-	"",
-	"#include <nan.h>",
 	""
 ]
 .concat( _.map( methods, function( item ) {
-	return "NAN_METHOD(bind_" + item + ");";
+	return "napi_value bind_" + item + "(napi_env env, napi_callback_info info);";
 } ) )
 .concat( [
 	"",
@@ -72,12 +70,13 @@ fs.writeFileSync( functionsCC, [
 	"#include \"../src/functions.h\"",
 	"#include \"function-prototypes.h\"",
 	"",
-	"NAN_MODULE_INIT(InitFunctions) {"
+	"std::string InitFunctions(napi_env env, napi_value exports) {"
 ]
 .concat( _.map( methods, function( item ) {
-	return "  SET_FUNCTION(target, " + item + ");";
+	return "  SET_FUNCTION(env, exports, " + item + ");";
 } ) )
 .concat( [
+	"  return std::string();",
 	"}\n"
 ] )
 .join( "\n" ) );

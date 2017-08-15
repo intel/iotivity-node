@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef __IOTIVITY_NODE_OCHEADEROPTION_ARRAY__
-#define __IOTIVITY_NODE_OCHEADEROPTION_ARRAY__
+#ifndef _IOTIVITY_NODE_OC_REP_PAYLOAD_TO_JS_H_
+#define _IOTIVITY_NODE_OC_REP_PAYLOAD_TO_JS_H_
 
-#include <v8.h>
+#include "../../common.h"
 extern "C" {
 #include <ocstack.h>
 }
 
-v8::Local<v8::Array> js_OCHeaderOption(OCHeaderOption *options,
-                                       uint8_t optionCount);
-bool c_OCHeaderOption(v8::Local<v8::Array> jsOptions, OCHeaderOption *p_options,
-                      uint8_t *p_optionCount);
+std::string js_OCRepPayload(napi_env env, OCRepPayload *payload,
+                            napi_value destination);
 
-#endif /* __IOTIVITY_NODE_OCHEADEROPTION_ARRAY__ */
+#endif /* ndef _IOTIVITY_NODE_OC_REP_PAYLOAD_TO_JS_H_ */

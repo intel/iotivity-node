@@ -43,8 +43,7 @@ function parseFileForConstants( fileName ) {
 
 								// Constants we don't want
 								fields[ 1 ] !== "OC_RSRVD_DEVICE_TTL" ) {
-							return "SET_CONSTANT_" +
-								( fields[ 2 ][ 0 ] === "\"" ? "STRING" : "NUMBER" ) +
+							return ( fields[ 2 ][ 0 ] === "\"" ? "string_utf8" : "double" ) +
 								" " + fields[ 1 ];
 						}
 					} )
@@ -54,40 +53,29 @@ function parseFileForConstants( fileName ) {
 			var fields = line.split( " " );
 			return [
 				"#ifdef " + fields[ 1 ],
-				"  " + fields[ 0 ] + "(target, " + fields[ 1 ] + ");",
+				"C2J_SET_PROPERTY_RETURN(" + ( [
+					"env",
+					"exports",
+					"\"" + fields[ 1 ] + "\"",
+					fields[ 0 ],
+					fields[ 1 ]
+				]
+				.concat( fields[ 0 ] === "string_utf8" ? [ "strlen(" + fields[ 1 ] + ")" ] : [] )
+				.join( ", " ) ) + ");",
 				"#endif /* def " + fields[ 1 ] + " */"
 			].join( "\n" ) + "\n";
-		} ).join( "\n" ) + "\n";
+		} ).join( "\n" );
 }
 
 var constantsCC = path.join( repoPaths.generated, "constants.cc" );
 
-fs.writeFileSync( constantsCC, "" );
-
-fs.writeFileSync( constantsCC,
+fs.writeFileSync( constantsCC, [
 	fs.readFileSync( path.join( repoPaths.src, "constants.cc.in" ), { encoding: "utf8" } ),
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC,
-	"NAN_MODULE_INIT(InitConstants) {\n",
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC,
-	"  // ocstackconfig.h: Stack configuration\n",
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC,
+	"std::string InitConstants(napi_env env, napi_value exports) {",
+	"  // ocstackconfig.h: Stack configuration",
 	parseFileForConstants( includePaths[ "ocstackconfig.h" ] ),
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC, "\n", { flag: "a" } );
-
-fs.writeFileSync( constantsCC,
-	"  // octypes.h: Definitions\n",
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC,
+	"  // octypes.h: Definitions",
 	parseFileForConstants( includePaths[ "octypes.h" ] ),
-	{ flag: "a" } );
-
-fs.writeFileSync( constantsCC, "}\n", { flag: "a" } );
+	"  return std::string();",
+	"}"
+].join( "\n" ) );

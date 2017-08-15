@@ -17,57 +17,121 @@
 #ifndef __IOTIVITY_NODE_HANDLES_H__
 #define __IOTIVITY_NODE_HANDLES_H__
 
-#include <nan.h>
 #include <map>
+#include <memory>
+
+#include "../common.h"
 extern "C" {
 #include <ocstack.h>
 }
 
-template <class jsName, typename handleType>
+napi_value JSHandle_constructor(napi_env env, napi_callback_info info);
+
+template <class jsType, typename T>
 class JSHandle {
-  static Nan::Persistent<v8::FunctionTemplate> &theTemplate() {
-    static Nan::Persistent<v8::FunctionTemplate> returnValue;
-
-    if (returnValue.IsEmpty()) {
-      v8::Local<v8::FunctionTemplate> theTemplate =
-          Nan::New<v8::FunctionTemplate>();
-      theTemplate->SetClassName(
-          Nan::New(jsName::jsClassName()).ToLocalChecked());
-      theTemplate->InstanceTemplate()->SetInternalFieldCount(1);
-      Nan::Set(Nan::GetFunction(theTemplate).ToLocalChecked(),
-               Nan::New("displayName").ToLocalChecked(),
-               Nan::New(jsName::jsClassName()).ToLocalChecked());
-      returnValue.Reset(theTemplate);
-    }
-    return returnValue;
-  }
-
  public:
-  static v8::Local<v8::Object> New(handleType data) {
-    v8::Local<v8::Object> returnValue =
-        Nan::NewInstance(
-            Nan::GetFunction(Nan::New(theTemplate())).ToLocalChecked())
-            .ToLocalChecked();
-    Nan::SetInternalFieldPointer(returnValue, 0, data);
+  T data;
+  napi_ref callback;
+  napi_ref self;
+  napi_env env;
 
-    return returnValue;
+  JSHandle() : callback(nullptr), self(nullptr), env(nullptr) {}
+
+  std::string Init(napi_env env, napi_value _callback, napi_value _self) {
+    if (_callback) {
+      NAPI_CALL_RETURN(env,
+                       napi_create_reference(env, _callback, 1, &callback));
+    }
+    if (_self) {
+      NAPI_CALL_RETURN(env, napi_create_reference(env, _self, 1, &self));
+    }
+    return std::string();
   }
 
-  // If the object is not of the expected type, or if the pointer inside the
-  // object has already been removed, then we must throw an error
-  static handleType Resolve(v8::Local<v8::Object> jsObject) {
-    handleType returnValue = 0;
-
-    if (Nan::New(theTemplate())->HasInstance(jsObject)) {
-      returnValue = (handleType)Nan::GetInternalFieldPointer(jsObject, 0);
-    }
-    if (!returnValue) {
-      Nan::ThrowTypeError(
-          (std::string("Object is not of type ") + jsName::jsClassName())
-              .c_str());
-    }
-    return returnValue;
+  static std::string New(napi_env _env, napi_value *jsValue, jsType **cData) {
+    napi_value theConstructor;
+    HELPER_CALL_RETURN(InitClass(_env, &theConstructor));
+    NAPI_CALL_RETURN(
+        _env, napi_new_instance(_env, theConstructor, 0, nullptr, jsValue));
+    auto nativeData = std::unique_ptr<jsType>(new jsType);
+    NAPI_CALL_RETURN(_env, napi_wrap(_env, *jsValue, nativeData.get(), nullptr,
+                                     nullptr, nullptr));
+    *cData = nativeData.release();
+    (*cData)->env = _env;
+    return std::string();
   }
+
+  static std::string Get(napi_env env, napi_value jsValue, jsType **cData) {
+    napi_valuetype theType;
+    NAPI_CALL_RETURN(env, napi_typeof(env, jsValue, &theType));
+    if (theType != napi_object) {
+      return LOCAL_MESSAGE("Not an object");
+    }
+    napi_value jsConstructor;
+    HELPER_CALL_RETURN(InitClass(env, &jsConstructor));
+    bool isInstanceOf;
+    NAPI_CALL_RETURN(
+        env, napi_instanceof(env, jsValue, jsConstructor, &isInstanceOf));
+    if (!isInstanceOf) {
+      return LOCAL_MESSAGE("Not an object of type OCDoHandle");
+    }
+    void *nativeDataRaw;
+    NAPI_CALL_RETURN(env, napi_unwrap(env, jsValue, &nativeDataRaw));
+    *cData = (jsType *)nativeDataRaw;
+    return std::string();
+  }
+
+  static std::string Destroy(napi_env env, jsType *cData,
+                             napi_value jsHandle = nullptr) {
+    if (cData->callback) {
+      NAPI_CALL_RETURN(env, napi_delete_reference(env, cData->callback));
+    }
+    if (cData->self) {
+      if (!jsHandle) {
+        NAPI_CALL_RETURN(env,
+                         napi_get_reference_value(env, cData->self, &jsHandle));
+      }
+      C2J_SET_PROPERTY_CALL_RETURN(
+          env, jsHandle, "stale",
+          NAPI_CALL_RETURN(env, napi_get_boolean(env, true, &jsValue)));
+      NAPI_CALL_RETURN(env, napi_delete_reference(env, cData->self));
+      NAPI_CALL_RETURN(
+          env, napi_wrap(env, jsHandle, nullptr, nullptr, nullptr, nullptr));
+    }
+    delete cData;
+    return std::string();
+  }
+
+  static std::string Destroy(napi_env env, napi_value jsHandle) {
+    jsType *cData;
+    HELPER_CALL_RETURN(Get(env, jsHandle, &cData));
+    HELPER_CALL_RETURN(Destroy(env, cData, jsHandle));
+    return std::string();
+  }
+
+  static std::string InitClass(napi_env env,
+                               napi_value *theConstructor = nullptr) {
+    static napi_ref localConstructor = nullptr;
+    if (!localConstructor) {
+      napi_value constructorValue;
+      NAPI_CALL_RETURN(env, napi_define_class(env, jsType::jsClassName(),
+                                              NAPI_AUTO_LENGTH,
+                                              JSHandle_constructor, nullptr, 0,
+                                              nullptr, &constructorValue));
+      NAPI_CALL_RETURN(env, napi_create_reference(env, constructorValue, 1,
+                                                  &localConstructor));
+    }
+    if (theConstructor) {
+      NAPI_CALL_RETURN(
+          env, napi_get_reference_value(env, localConstructor, theConstructor));
+    }
+    return std::string();
+  }
+};
+
+class JSOCDoHandle : public JSHandle<JSOCDoHandle, OCDoHandle> {
+ public:
+  static const char *jsClassName() { return "OCDoHandle"; }
 };
 
 class JSOCRequestHandle : public JSHandle<JSOCRequestHandle, OCRequestHandle> {
@@ -75,54 +139,25 @@ class JSOCRequestHandle : public JSHandle<JSOCRequestHandle, OCRequestHandle> {
   static const char *jsClassName() { return "OCRequestHandle"; }
 };
 
-template <typename handleType>
-class CallbackInfo {
- public:
-  handleType handle;
-  Nan::Callback callback;
-  Nan::Persistent<v8::Object> jsHandle;
-  v8::Local<v8::Object> Init(v8::Local<v8::Object> _jsHandle,
-                             v8::Local<v8::Function> jsCallback) {
-    callback.Reset(jsCallback);
-    jsHandle.Reset(_jsHandle);
-    return _jsHandle;
-  }
-  CallbackInfo() : handle(0) {}
-  virtual ~CallbackInfo() {
-    if (!jsHandle.IsEmpty()) {
-      v8::Local<v8::Object> theObject = Nan::New(jsHandle);
-      Nan::SetInternalFieldPointer(theObject, 0, 0);
-      Nan::DefineOwnProperty(
-          theObject, Nan::New("stale").ToLocalChecked(), Nan::New(true),
-          (v8::PropertyAttribute)(v8::ReadOnly | v8::DontDelete));
-      jsHandle.Reset();
-    }
-  }
-};
-
-#define JSCALLBACKHANDLE_RESOLVE(type, info, object, ...) \
-  do {                                                    \
-    info = type::Resolve((object));                       \
-    if (!info) {                                          \
-      return __VA_ARGS__;                                 \
-    }                                                     \
-  } while (0)
-
-class JSOCDoHandle : public JSHandle<JSOCDoHandle, CallbackInfo<OCDoHandle> *> {
- public:
-  static const char *jsClassName() { return "OCDoHandle"; }
-};
-
 class JSOCResourceHandle
-    : public JSHandle<JSOCResourceHandle, CallbackInfo<OCResourceHandle> *> {
+    : public JSHandle<JSOCResourceHandle, OCResourceHandle> {
+  typedef JSHandle<JSOCResourceHandle, OCResourceHandle> super;
+
  public:
   static const char *jsClassName() { return "OCResourceHandle"; }
-  static std::map<OCResourceHandle, Nan::Persistent<v8::Object> *> handles;
+  static std::map<OCResourceHandle, napi_ref> handles;
+  std::string Init(napi_env env, napi_value _callback, napi_value _self) {
+    HELPER_CALL_RETURN(super::Init(env, _callback, _self));
+    handles[data] = self;
+    return std::string();
+  }
+  static std::string Destroy(napi_env env, JSOCResourceHandle *cData,
+                             napi_value jsHandle = nullptr) {
+    OCResourceHandle handle = cData->data;
+    HELPER_CALL_RETURN(super::Destroy(env, cData, jsHandle));
+    handles.erase(handle);
+    return std::string();
+  }
 };
-
-v8::Local<v8::Array> jsArrayFromBytes(unsigned char *bytes, uint32_t length);
-
-bool fillCArrayFromJSArray(unsigned char *bytes, uint32_t length,
-                           v8::Local<v8::Array> array);
 
 #endif /* __IOTIVITY_NODE_HANDLES_H__ */

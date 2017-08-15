@@ -15,10 +15,7 @@
  */
 
 #include "oc-client-response.h"
-#include <nan.h>
-#include "../common.h"
 #include "oc-dev-addr.h"
-#include "oc-header-option-array.h"
 #include "oc-identity.h"
 #include "oc-payload.h"
 
@@ -26,47 +23,41 @@ extern "C" {
 #include <string.h>
 }
 
-using namespace v8;
+std::string js_OCClientResponse(napi_env env, OCClientResponse *source,
+                                napi_value *destination) {
+  NAPI_CALL_RETURN(env, napi_create_object(env, destination));
 
-Local<Object> js_OCClientResponse(OCClientResponse *response) {
-  Local<Object> returnValue = Nan::New<Object>();
+  C2J_SET_PROPERTY_CALL_RETURN(
+      env, *destination, "devAddr",
+      HELPER_CALL_RETURN(js_OCDevAddr(env, &(source->devAddr), &jsValue)));
 
-  // response.devAddr
-  Nan::Set(returnValue, Nan::New("devAddr").ToLocalChecked(),
-           js_OCDevAddr(&(response->devAddr)));
-
-  // response.addr
-  if (response->addr) {
-    Nan::Set(returnValue, Nan::New("addr").ToLocalChecked(),
-             js_OCDevAddr(response->addr));
+  if (source->addr) {
+    C2J_SET_PROPERTY_CALL_RETURN(
+        env, *destination, "addr",
+        HELPER_CALL_RETURN(js_OCDevAddr(env, source->addr, &jsValue)));
   }
 
-  // response.payload
-  if (response->payload) {
-    Nan::Set(returnValue, Nan::New("payload").ToLocalChecked(),
-             js_OCPayload(response->payload));
+  if (source->payload) {
+    C2J_SET_PROPERTY_CALL_RETURN(
+        env, *destination, "payload",
+        HELPER_CALL_RETURN(js_OCPayload(env, source->payload, &jsValue)));
   }
 
-  SET_VALUE_ON_OBJECT(returnValue, response, connType, Number);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, connType);
 
-  Nan::Set(returnValue, Nan::New("identity").ToLocalChecked(),
-           js_OCIdentity(&(response->identity)));
+  C2J_SET_PROPERTY_CALL_RETURN(
+      env, *destination, "identity",
+      HELPER_CALL_RETURN(js_OCIdentity(env, &(source->identity), &jsValue)));
 
-  SET_VALUE_ON_OBJECT(returnValue, response, result, Number);
-  SET_VALUE_ON_OBJECT(returnValue, response, sequenceNumber, Number);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, result);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, source, sequenceNumber);
 
   // FIXME - iotivity has a bug whereby these fields are left uninitialized in
   // a presence response
-  if (!(response->payload &&
-        response->payload->type == PAYLOAD_TYPE_PRESENCE)) {
-    SET_STRING_IF_NOT_NULL(returnValue, response, resourceUri);
+  if (!(source->payload && source->payload->type == PAYLOAD_TYPE_PRESENCE)) {
+    C2J_SET_STRING_IF_NOT_NULL_RETURN(env, *destination, source, resourceUri);
 
-    // response.rcvdVendorSpecificHeaderOptions
-    Nan::Set(returnValue,
-             Nan::New("rcvdVendorSpecificHeaderOptions").ToLocalChecked(),
-             js_OCHeaderOption(response->rcvdVendorSpecificHeaderOptions,
-                               response->numRcvdVendorSpecificHeaderOptions));
+    // vendor options are not set
   }
-
-  return returnValue;
+  return std::string();
 }

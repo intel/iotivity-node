@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-#include <string.h>
-#include "common.h"
+#ifndef _IOTIVITY_NODE_OC_REP_PAYLOAD_TO_C_H_
+#define _IOTIVITY_NODE_OC_REP_PAYLOAD_TO_C_H_
 
-// The rest of this file is generated
+#include "../../common.h"
+extern "C" {
+#include <ocstack.h>
+}
+
+std::string c_OCRepPayload(napi_env env, napi_value source,
+                           OCRepPayload **destination);
+
+#endif /* ndef _IOTIVITY_NODE_OC_REP_PAYLOAD_TO_C_H_ */
