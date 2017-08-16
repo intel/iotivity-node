@@ -78,14 +78,13 @@ install:
 - node --version
 - npm --version
 - npm install -g grunt-cli
-
-script:
 - >
   if test "x${TEST_SCRIPT}x" = "xtestx" -o "x${TEST_SCRIPT}x" = "xpublish-coveragex"; then
-    npm install -g "$(npm pack)"
-    npm link iotivity-node
+    npm install -g "$(npm pack)" && npm link iotivity-node
   fi
 - npm install --ignore-scripts
+
+script:
 - grunt "${TEST_SCRIPT}" --ci
 
 notifications:
