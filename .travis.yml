@@ -32,6 +32,14 @@ matrix:
       os: osx
       osx_image: xcode8.2
 
+    - env: NODE_VERSION=5.5.0 TEST_SCRIPT=test
+      os: linux
+      addons: *buildpackages
+
+    - env: NODE_VERSION=5.5.0 TEST_SCRIPT=test
+      os: osx
+      osx_image: xcode8.2
+
     - env: NODE_VERSION=stable TEST_SCRIPT=test
       os: linux
       addons: *buildpackages

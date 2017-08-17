@@ -21,15 +21,15 @@ var shelljs = require( "shelljs" );
 var os = require( "os" );
 
 function run( command, args, options ) {
-	var status;
+	var result;
 	options = options || {};
-	status = spawnSync( command, args, assignIn( {}, options, {
+	result = spawnSync( command, args, assignIn( {}, options, {
 		stdio: [ process.stdin, process.stdout, process.stderr ],
 		shell: true
-	} ) ).status;
+	} ) );
 
-	if ( status !== 0 ) {
-		process.exit( status );
+	if ( result.status !== 0 ) {
+		process.exit( result.status || 1 );
 	}
 }
 
@@ -170,24 +170,33 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 	run( "git", [ "checkout", "31c7f81d45d115d2007b1c881cbbd3a19618465c" ],
 		{ cwd: tinycborPath } );
 
-	// Build
-	run( "scons", [
-			"SECURED=1",
-			"RD_MODE=all",
-			"EXC_PROV_SUPPORT=1"
-		]
-		.concat( ( process.env.V === "1" || process.env.npm_config_verbose === "true" ) ?
-			[ "VERBOSE=True" ] : [] )
-		.concat( targetArch ?
-			[ "TARGET_ARCH=" + targetArch ] : [] )
-		.concat( sysVersion ?
-			[ "SYS_VERSION=" + sysVersion ] : [] )
-		.concat( process.env.npm_config_debug === "true" ?
-			[ "RELEASE=False", "LOGGING=False" ] : [] )
-		.concat(
-			[ "logger", "octbstack", "connectivity_abstraction", "coap", "c_common", "ocsrm",
-				"routingmanager", "json2cbor"
-			] ), { cwd: repoPaths.iotivity } );
+		// Build
+	var sconsCommand = "scons";
+	var sconsArguments = [
+		"SECURED=1",
+		"RD_MODE=all",
+		"EXC_PROV_SUPPORT=1"
+	]
+	.concat( ( process.env.V === "1" || process.env.npm_config_verbose === "true" ) ?
+		[ "VERBOSE=True" ] : [] )
+	.concat( targetArch ?
+		[ "TARGET_ARCH=" + targetArch ] : [] )
+	.concat( sysVersion ?
+		[ "SYS_VERSION=" + sysVersion ] : [] )
+	.concat( process.env.npm_config_debug === "true" ?
+		[ "RELEASE=False", "LOGGING=False" ] : [] )
+	.concat( [ "logger", "octbstack", "connectivity_abstraction", "coap", "c_common", "ocsrm",
+		"routingmanager", "json2cbor"
+	] );
+
+	// Node 5 on Windows seems unable to run batch files
+	if ( +process.version.split( "." )[ 0 ].substr( 1, 1 ) === 5 &&
+			process.platform === "win32" ) {
+		sconsCommand = "cmd";
+		sconsArguments = [ "/c", "scons" ].concat( sconsArguments );
+	}
+
+	run( sconsCommand, sconsArguments, { cwd: repoPaths.iotivity } );
 }
 
 // Where are the binaries?
