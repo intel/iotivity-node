@@ -1,0 +1,13 @@
+diff --git a/resource/csdk/logger/src/logger.c b/resource/csdk/logger/src/logger.c
+index afdcf49..825f22c 100644
+--- a/resource/csdk/logger/src/logger.c
++++ b/resource/csdk/logger/src/logger.c
+@@ -305,7 +305,7 @@ void OCLog(LogLevel level, const char * tag, const char * logStr)
+                ms = now.tv_usec * 1000;
+            }
+    #endif
+-           printf("%02d:%02d.%03d %s: %s: %s\n", min, sec, ms, LEVEL[level], tag, logStr);
++           fprintf(stderr, "%02d:%02d.%03d %s: %s: %s\n", min, sec, ms, LEVEL[level], tag, logStr);
+        }
+    #endif
+    }
