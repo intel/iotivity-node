@@ -21,7 +21,7 @@ install:
   - ps: Install-Product node $env:nodejs_version x64
   - pip install --egg scons
   - node --version
-  - npm -g install npm@next
+  - npm -g install npm@5.3.0
   - npm --version
   - npm install -g grunt-cli
 
