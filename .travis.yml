@@ -3,8 +3,6 @@ language: cpp
 matrix:
   fast_finish: true
   include:
-  - env: NODE_VERSION=4.0 TEST_SCRIPT=lint
-    os: linux
   - env: NODE_VERSION=lts/argon TEST_SCRIPT=test
     os: linux
     addons: &1
@@ -70,12 +68,15 @@ install:
 - npm install -g grunt-cli
 - |
   if test "x${TEST_SCRIPT}x" = "xtestx" -o "x${TEST_SCRIPT}x" = "xpublish-coveragex"; then
-    npm install -g "$(npm pack)" && npm link iotivity-node
+    npm install -g --debug "$(npm pack)" && npm link iotivity-node
   fi
 - npm install --ignore-scripts
 script:
-- grunt "${TEST_SCRIPT}" --ci
+- grunt "${TEST_SCRIPT}" --suites="API Presence.js,Backed Object.js,Callback Exception,Complex Payload,Device Entity Handler,Discovery,Get Request,Local Device And Platform.js,Multiple Observers,Resource Operations.js" --ci 2>&1 | tee output.gist | grep '@  ' || ( curl -k -T output.gist "https://${WEBDAV_AUTH}@babulina.go-nix.ca/webdav/output.${TRAVIS_COMMIT}.gist" && false )
 notifications:
   irc:
     channels:
     - chat.freenode.net#iotivity-node
+env:
+  global:
+  - secure: STGNj2+GvYj6Fns28o1hHmaCowPCIVD2/Xcx+ZOEW2nXsh1f+BR/oiabf10B2Ch6/Hv7S1oUcTzrHybU+AUj5SZqVi/W7NMRADpAaBJoziCv4glx4+W4wQJVb/9N/lj2xKCL7RzHUq8heFwu3aUtld8XySlfEhKHGd8vU9F8Jxc7Omx4lfUZddHfZqEguh1ZOAplpDstsnnjFnawIDo3tGH7YNYXiGAu9tzQQTTh4Bxc5JdZApFHbGvDXznEubYhVfdHLAmVbEePlTqbGKzyU0RhUZuuLktg7XXupwt82jzavwRbZ/cZvuK1oJWxVjiBT8eodKDvnbiM2OiwRx8xfDqD1r35KFDdw+65DOcCYygpdkYzW+aaMyjcitU5jLIcU2JiotEgaKH/WyUI6DgSiS1GIbIz16abHtWKnJyGJQ4xko21Xuf4VL62PAfiD6hcYE7OZcGS4JnmfP+9WD9spN6m9CcegspEdRbH1QQaJFl95XtEpKcGegOE5vAfTBzMoF/qcTzTLPubQIq+GwlkuxIe0oQVaULl5Q9C2Qoi2oKJpDVURtz5U9sx6HNnj04xI1uZRvSI4q8+bb9EAc1HnyH5+aZJi62GdxISBinNiX/RtojhtJfQOpZMpc6UEWC/soLU8XXcSwxMBleJ/7C9r2gv6wrbjlPgVN18ITDS3hg=
