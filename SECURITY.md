@@ -2,7 +2,10 @@
 
 Currently security is supported via resources that are marked as secure, and via an ACL file set up a priori. The high level bindings provide a persistent storage mechanism which iotivity uses to store ACLs. The mechanism works as follows:
 
-0. The sha256sum of the absolute path of the main script which was used to launch the node process is computed. For example, if the script is `/home/user/secure-door/secure-door-lock.js`, then the sha256sum will be `08417c1debd48131536fa8bc152d776c9e8949b639d1e0fa200b14d5f6c917c8`.
+0. The sha256sum of the absolute path of the main script which was used to launch the node process is computed. For example, if the script is `/home/user/secure-door/secure-door-lock.js`, then the sha256sum will be `08417c1debd48131536fa8bc152d776c9e8949b639d1e0fa200b14d5f6c917c8`. The sha256sum corresponding to the above script can be obtained with the following command:
+    ```
+    echo -n '/home/user/secure-door/secure-door-lock.js' | sha256sum
+    ```
 
 0. The directory `${HOME}/.iotivity-node/<sha256sum>` is created, where `<sha256sum>` is the checksum computed above.
 
