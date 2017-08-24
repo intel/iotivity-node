@@ -6,3 +6,4 @@ Zhiqiang Zhang <zhiqiang.zhang@intel.com>
 Zoltan Kis <zoltan.kis@intel.com>
 Hans Bakker <hansmbakker+github@gmail.com>
 Philippe Coval <philippe.coval@osg.samsung.com>
+Rami Alshafi <ramialshafi@gmail.com>
