@@ -53,19 +53,8 @@ diff -u \
 
     If <a name="version-number-structure"></a>you're building against a released version, set the version as that version. Otherwise, set the version to the next patchlevel release and append ```-pre-<commitid>``` where ```<commitid>``` is the commitid of the revision against which you're building. Add the suffix ```-n``` where ```n``` is a number starting at 0. This number represents the number of times the package has been released for a given version of iotivity. Examples of version numbers are ```0.8.0-5``` and ```0.8.1-pre-1057bc0fbad1a6fee15bad6e75f00dca5ec105ed-0```. Use the resulting version number in ```README.md``` as well as ```octbstack.pc.in```.
 0. Modify the references to the version in ```README.md``` and the platform info of the high-level servers located in ```js/```.
-0. Modify the value of the variable ```version``` in ```octbstack.pc.in```.
 0. Build and optionally install the new version of iotivity.
-0. If you haven't installed iotivity in the previous step, you must now export environment variables ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the next step needs them.
-0. If the ```CFLAGS``` and/or ```LIBS``` have changed, modify ```install.sh``` and/or ```octbstack.pc.in``` and make the same modifications in ```binding.gyp```.
-0. Test the build with both built-in iotivity and with iotivity via pkgconfig:
-
-    ```sh
-	nvm use 4.0 && git clean -x -d -f -f && npm run-script ci && \
-	nvm use 0.12 && git clean -x -d -f -f && npm run-script ci && \
-	nvm use 0.10 && git clean -x -d -f -f && npm run-script ci && \
-	nvm use 4.0 && git clean -x -d -f -f && ./dist.sh --testonly && \
-	nvm use 0.12 && git clean -x -d -f -f && ./dist.sh --testonly && \
-	nvm use 0.10 && git clean -x -d -f -f && ./dist.sh --testonly
-	```
+0. If you haven't installed iotivity in the previous step, you must now export environment variables. ```OCTBSTACK_CFLAGS``` and ```OCTBSTACK_LIBS```, because the next step needs them.
+0. Check iotivity's iotivity.pc and make sure all defines (like `ROUTING_EP` and `__WITH_DTLS__`) are the same in binding.gyp as they are in iotivity.pc.
 
 [jQuery]: http://contribute.jquery.org/style-guide/js/
