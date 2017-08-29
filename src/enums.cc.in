@@ -18,6 +18,11 @@
 
 #include "enums.h"
 
+// Symbol '__WITH_DTLS__' or '__WITH_TLS__' were defined while SECURED=1 in the SConscript
+#if SECURED==1
+#define __WITH_DTLS__ 1
+#endif
+
 extern "C" {
 #include <ocstack.h>
 }
