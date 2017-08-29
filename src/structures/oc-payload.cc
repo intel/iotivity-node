@@ -156,6 +156,34 @@ static Local<Object> js_OCRepPayload(OCRepPayload *payload) {
   return returnValue;
 }
 
+#define ADD_STRUCTURE_ARRAY(returnValue, payload, memberName, memberType)     \
+  do {                                                                        \
+    memberType *oneItem = 0;                                                  \
+    int counter = 0;                                                          \
+    for (counter = 0, oneItem = (payload)->memberName; oneItem;               \
+         oneItem = oneItem->next, counter++)                                  \
+      ;                                                                       \
+    Local<Array> jsArray = Nan::New<Array>(counter);                          \
+    for (counter = 0, oneItem = (payload)->memberName; oneItem;               \
+         oneItem = oneItem->next, counter++) {                                \
+      Nan::Set(jsArray, counter, js_##memberType(oneItem));                   \
+    }                                                                         \
+    Nan::Set((returnValue), Nan::New(#memberName).ToLocalChecked(), jsArray); \
+  } while (0)
+
+static Local<Object> js_OCEndpointPayload(OCEndpointPayload *payload) {
+  Local<Object> returnValue = Nan::New<Object>();
+
+  // payload.tps
+  SET_STRING_IF_NOT_NULL(returnValue, payload, tps);
+  SET_STRING_IF_NOT_NULL(returnValue, payload, addr);
+  SET_VALUE_ON_OBJECT(returnValue, payload, family, Number);
+  SET_VALUE_ON_OBJECT(returnValue, payload, port, Number);
+  SET_VALUE_ON_OBJECT(returnValue, payload, pri, Number);
+
+  return returnValue;
+}
+
 static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
   Local<Object> returnValue = Nan::New<Object>();
 
@@ -172,23 +200,10 @@ static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
   SET_VALUE_ON_OBJECT(returnValue, payload, secure, Boolean);
   SET_VALUE_ON_OBJECT(returnValue, payload, port, Number);
 
+  ADD_STRUCTURE_ARRAY(returnValue, payload, eps, OCEndpointPayload);
+
   return returnValue;
 }
-
-#define ADD_STRUCTURE_ARRAY(returnValue, payload, memberName, memberType)     \
-  do {                                                                        \
-    memberType *oneItem = 0;                                                  \
-    int counter = 0;                                                          \
-    for (counter = 0, oneItem = (payload)->memberName; oneItem;               \
-         oneItem = oneItem->next, counter++)                                  \
-      ;                                                                       \
-    Local<Array> jsArray = Nan::New<Array>(counter);                          \
-    for (counter = 0, oneItem = (payload)->memberName; oneItem;               \
-         oneItem = oneItem->next, counter++) {                                \
-      Nan::Set(jsArray, counter, js_##memberType(oneItem));                   \
-    }                                                                         \
-    Nan::Set((returnValue), Nan::New(#memberName).ToLocalChecked(), jsArray); \
-  } while (0)
 
 static Local<Object> js_OCDiscoveryPayload(OCDiscoveryPayload *payload) {
   Local<Object> returnValue = Nan::New<Object>();
