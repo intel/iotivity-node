@@ -190,6 +190,12 @@ static Local<Object> js_OCResourcePayload(OCResourcePayload *payload) {
   // payload.uri
   SET_STRING_IF_NOT_NULL(returnValue, payload, uri);
 
+  // payload.rel
+  SET_STRING_IF_NOT_NULL(returnValue, payload, rel);
+
+  // payload.anchor
+  SET_STRING_IF_NOT_NULL(returnValue, payload, anchor);
+
   // payload.types
   ADD_STRING_ARRAY(returnValue, payload, types);
 
