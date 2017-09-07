@@ -17,16 +17,18 @@ This project provides a Javascript API for [OCF][] functionality. The API follow
 ## Installation
 
 * On Linux and OSX
-  0. Make sure [node][] version 0.12 or later is up and running
+  0. Make sure [node][] version 0.12 or later is up and running. This means that
+			0. the command `node` runs node version 0.12 or later, and that
+			0. the directory in which the `node` binary can be found is listed in the `PATH` environment variable so that the command `node somescript.js` is enough to execute the script `somescript.js` using node version 0.12 or later.
   0. Install the following packages, which your distribution should provide:
       0. unzip, scons, git, and make
       0. Development headers for libuuid, and glib2
       0. A C compiler and a C++ compiler (gcc-5 or later)
-  0. Clone this repository
+  0. Clone this repository.
   0. cd `iotivity-node`
-  0. Run `npm install`
+  0. Run `npm install`.
 * On Windows ([video](https://www.youtube.com/watch?v=RgsZpv8IrWA))
-  0. Install [node][] 6.9.1 or later
+  0. Install [node][] 6.9.1 or later. As with Linux and OSX, make sure that node is called `node` and that it is on your `PATH`.
   0. In a PowerShell running as Administrator, run `npm install -g --production windows-build-tools`. This will install Python and the toolchain necessary for building iotivity-node. While this command runs, you can perform some of the following steps.
   0. Install [git][]
   0. Install [7-Zip][]
