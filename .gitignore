@@ -1,0 +1,8 @@
+build/
+generated/
+iotivity-installed/
+iotivity-native/
+node_modules/
+package-lock.json
+tests/results.lowlevel.json
+tests/results.ocf.json
