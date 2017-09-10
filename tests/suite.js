@@ -25,7 +25,7 @@ var QUnit,
 	fs = require( "fs" ),
 	path = require( "path" ),
 	uuid = require( "uuid" ),
-	preamble = require( "./preamble" ),
+	provision = require( "./provision" ),
 	runningProcesses = [],
 	getQUnit = function() {
 		if ( !QUnit ) {
@@ -54,9 +54,6 @@ function spawnOne( assert, options ) {
 
 		// What to put into require() to load iotivity-node
 		.concat( [ process.argv[ 2 ] ] );
-
-	// Create the preamble before spawning this child
-	preamble.apply( this, commandLine );
 
 	theChild = childProcess.spawn(
 		"node", commandLine, {
@@ -135,11 +132,15 @@ function spawnOne( assert, options ) {
 	return theChild;
 }
 
+function resolvePath( aPath ) {
+	return path.resolve( aPath );
+}
+
 function runTestSuites( files ) {
 	_.each( files, function( item ) {
 		var clientPathIndex,
-			clientPaths = glob.sync( path.join( item, "client*.js" ) ),
-			serverPaths = glob.sync( path.join( item, "server*.js" ) );
+			clientPaths = glob.sync( path.join( item, "client*.js" ) ).map( resolvePath ),
+			serverPaths = glob.sync( path.join( item, "server*.js" ) ).map( resolvePath );
 
 		if ( fs.lstatSync( item ).isFile() ) {
 			getQUnit().test( path.basename( item ).replace( /\.js$/, "" ), function( assert ) {
@@ -234,6 +235,13 @@ function runTestSuites( files ) {
 						}
 					}
 				};
+
+			provision( {
+				clientPaths: clientPaths,
+				serverPaths: serverPaths,
+				uuid: spawnOptions.uuid,
+				location: process.argv[ 2 ]
+			} );
 
 			// We run the servers first, because the servers have to be there before the clients
 			// can run. OTOH, the clients may initiate the termination of the test via a non-error
