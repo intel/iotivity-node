@@ -21,7 +21,7 @@ This project provides a Javascript API for [OCF][] functionality. The API follow
 			0. the command `node` runs node version 0.12 or later, and that
 			0. the directory in which the `node` binary can be found is listed in the `PATH` environment variable so that the command `node somescript.js` is enough to execute the script `somescript.js` using node version 0.12 or later.
   0. Install the following packages, which your distribution should provide:
-      0. unzip, scons, git, and make
+      0. unzip, scons (version 2.5.1), git, and make
       0. Development headers for libuuid, and glib2
       0. A C compiler and a C++ compiler (gcc-5 or later)
   0. Clone this repository.
@@ -39,7 +39,7 @@ This project provides a Javascript API for [OCF][] functionality. The API follow
       setx PATH "%PATH%;c:\Users\yourusernamehere\.windows-build-tools\python27;c:\Users\yourusernamehere\.windows-build-tools\python27\scripts;c:\Program Files\7-Zip"
       ```
   0. Close the command prompt and reopen it.
-  0. In the command prompt, run `pip install --egg scons` to install scons (a python package)
+  0. In the command prompt, run `pip install --egg "scons<3.0.0"` to install scons (a python package)
   0. Wait for the installation of the `windows-build-tools` to complete. Afterwards, you can perform the remaining steps.
   0. Clone this repository and the change directory into it
   0. Run `npm install` to build iotivity-node.

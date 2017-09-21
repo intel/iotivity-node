@@ -63,7 +63,8 @@ install:
 - npm install -g npm@^2.14.2
 - |
   if test "x${TRAVIS_OS_NAME}x" = "xosxx"; then
-    brew install scons
+    sudo easy_install pip
+    sudo pip install --egg 'scons<3.0.0'
   fi
 - node --version
 - npm --version

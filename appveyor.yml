@@ -19,7 +19,7 @@ matrix:
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
-  - pip install --egg scons
+  - pip install --egg "scons<3.0.0"
   - node --version
   - npm -g install npm@5.3.0
   - npm --version
