@@ -16,38 +16,41 @@ This project provides a Javascript API for [OCF][] functionality. The API follow
 
 ## Installation
 
-* On Linux and OSX
-  0. Make sure [node][] version 0.12 or later is up and running. This means that
-			0. the command `node` runs node version 0.12 or later, and that
-			0. the directory in which the `node` binary can be found is listed in the `PATH` environment variable so that the command `node somescript.js` is enough to execute the script `somescript.js` using node version 0.12 or later.
-  0. Install the following packages, which your distribution should provide:
-      0. unzip, scons (version 2.5.1), git, and make
-      0. Development headers for libuuid, and glib2
-      0. A C compiler and a C++ compiler (gcc-5 or later)
-  0. Clone this repository.
-  0. cd `iotivity-node`
-  0. Run `npm install`.
-* On Windows ([video](https://www.youtube.com/watch?v=RgsZpv8IrWA))
-  0. Install [node][] 6.9.1 or later. As with Linux and OSX, make sure that node is called `node` and that it is on your `PATH`.
-  0. In a PowerShell running as Administrator, run `npm install -g --production windows-build-tools`. This will install Python and the toolchain necessary for building iotivity-node. While this command runs, you can perform some of the following steps.
-  0. Install [git][]
-  0. Install [7-Zip][]
-  0. The installation of the `windows-build-tools` package eventually indicates that it has installed Python. After that message appears, you can perform some of the steps below.
-  0. In a command prompt, append the python folder, the python scripts folder, and the 7-Zip folder to your PATH. The paths you append are based on your Windows user name, so replace "yourusernamehere" in the example below with your actual Windows user name.
+* **On Linux and OSX**
+
+1. Make sure [node][] version 0.12 or later is up and running. This means that
+	1. the command `node` runs node version 0.12 or later, and that
+	1. the directory in which the `node` binary can be found is listed in the `PATH` environment variable so that the command `node somescript.js` is enough to execute `somescript.js` using node version 0.12 or later.
+1. Install the following packages, which your distribution should provide:
+   1. unzip, scons (version 2.51), git, and make
+   1. Development headers for libuuid, and glib2
+   1. A C compiler and a C++ compiler (gcc-5 or later)
+1. Clone this repository.
+1. cd `iotivity-node`
+1. Run `npm install`.
+
+* **On Windows ([video](https://www.youtube.com/watch?v=RgsZpv8IrWA))**
+
+1. Install [node][] 4 or later. As with Linux and OSX, make sure that node is called `node` and that it is on your `PATH`.
+0. In a PowerShell running as Administrator, run `npm install -g --production windows-build-tools`. This will install Python and the toolchain necessary for building iotivity-node. While this command runs, you can perform some of the following steps.
+0. Install [git][]
+0. Install [7-Zip][]
+0. The installation of the `windows-build-tools` package eventually indicates that it has installed Python. After that message appears, you can perform some of the steps below.
+0. In a command prompt, append the python folder, the python scripts folder, and the 7-Zip folder to your PATH. The paths you append are based on your Windows user name, so replace "yourusernamehere" in the example below with your actual Windows user name.
 
       ```
       setx PATH "%PATH%;c:\Users\yourusernamehere\.windows-build-tools\python27;c:\Users\yourusernamehere\.windows-build-tools\python27\scripts;c:\Program Files\7-Zip"
       ```
-  0. Close the command prompt and reopen it.
-  0. In the command prompt, run `pip install --egg "scons<3.0.0"` to install scons (a python package)
-  0. Wait for the installation of the `windows-build-tools` to complete. Afterwards, you can perform the remaining steps.
-  0. Clone this repository and the change directory into it
-  0. Run `npm install` to build iotivity-node.
-  0. After the successful completion of the above command, you are ready to use iotivity-node. You can use the usual npm process of adding iotivity-node to the `dependencies` section of your package's `package.json` file.
+0. Close the command prompt and reopen it.
+0. In the command prompt, run `pip install --egg "scons<3.0.0"` to install scons (a python package)
+0. Wait for the installation of the `windows-build-tools` to complete. Afterwards, you can perform the remaining steps.
+0. Clone this repository and the change directory into it
+0. Run `npm install` to build iotivity-node.
+0. After the successful completion of the above command, you are ready to use iotivity-node. You can use the usual npm process of adding iotivity-node to the `dependencies` section of your package's `package.json` file.
 
 After installation using the steps above, you may want to run the iotivity-node test suite. To do so, perform the following steps from the iotivity-node repository root. The steps apply to all platforms:
 
-0. Run `npm -g install grunt-cli`
+1. Run `npm -g install grunt-cli`
 0. Run `grunt test`
 
 The file [appveyor.yml](./appveyor.yml) provides an example of the commands necessary for setting up a Windows environment, and the file [.travis.yml](./.travis.yml) provides an example of the commands necessary for setting up the Linux and OSX environments.
@@ -59,7 +62,7 @@ iotivity-node requires a compiler that implements the C++11 standard.
 
 During compilation, iotivity-node downloads iotivity from its git repository, builds it, and links against it. If you wish to build iotivity separately, set the environment variable `OCTBSTACK_CFLAGS` to contain the compiler arguments necessary for building against iotivity, and also set the environment variable `OCTBSTACK_LIBS` to contain the linker arguments necessary for linking against iotivity. If both variables are set to non-empty values, iotivity-node will skip the step of downloading and building iotivity from sources. If you choose to build iotivity separately, you can use the following procedure:
 
-0. Grab a [snapshot][] of iotivity from its git repository and unpack it locally.
+1. Grab a [snapshot][] of iotivity from its git repository and unpack it locally.
 0. Make sure a build toolchain, [scons][] (a build tool), and the headers for the above-mentioned library dependencies are installed. Your distribution should provide all these tools and libraries.
 0. `cd iotivity`
 0. If you're building against version 1.3.0 of iotivity on OSX or Windows, you will first need to apply all the downstream patches which iotivity-node provides in the `patches/` subdirectory except the patch which removes the boost dependency. The latter patch serves only to improve build time by eliminating the ability to build targets which require boost. You can apply the patches with `git apply <path-to-patch>`. All these patches except the boost elmination patch are on track to appear in later versions of iotivity, so they will disappear from later versions of iotivity-node.
