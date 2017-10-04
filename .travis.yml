@@ -1,5 +1,6 @@
 sudo: false
 language: cpp
+
 matrix:
   fast_finish: true
   include:
@@ -76,7 +77,11 @@ install:
 - npm install --ignore-scripts
 script:
 - grunt "${TEST_SCRIPT}" --ci
+
+# Send a notification to chat.freenode.net#iotivity-node
+# The server#channel-name is encrypted so notifications are only sent from the
+# main repo and not from forks or PRs.
 notifications:
   irc:
     channels:
-    - chat.freenode.net#iotivity-node
+    - secure: i1PXMQry2x9WqT2Iv9Lq66+VHkettjrDhiC1C6ha/yPI5P9sNGZmad0hiBtg7Z8NfmaFuWUqwFI5fnw/iM1hqQKMQVIuYLsLdagZLldtYcUR3Un+2yVsn9PFj5PnS2kd9aUBOO+7YOt1v6snRGGJQsjlD5cAKaZ7QZrw2OpMVsjLmS1TjrOZz6jPkZUqixVo+lnnWTKIWjx7LIkaCiihPUn1CDV5ke3s9BLp/9NhCe77wa2qq1AXIjrjUYPif9kogqnIKJW/KTqvgcixOTxJqjNIC/dKWU8UEyH3ZeH9JxeSrZwxztTOHCgfcDklanZrI9uCUOMOa1Vs/MxW8FLxr09SsjYWH4GYjQpb5RRzHvRLYlL1VukdUz1M5nr0riImrDDumigxxGNpmgLprQ9w1jkMK1AnDtAhA8CBkad+D0gkuwRej53izi285zPu9MV/DTSW1zGmYo33GoyV3pbkuItdCEERmC7aoY4cRTLjjdOL8dJUjpZ8R7mGJRZWEtDl629eSbDhciA8LM9SCiXLrT73wiHtSO/fE/BPJy2QBOQfbtEx7HCQ3yNyPFmvkE/cZts0dtF5WAOhw6xSDXuNKq+rdk3bv133GOoqoTZ7rs1R11fKPOZG6MKDyyGrSHB3vG6u1L+9blq9CYTvfncka/u7HVh9RV1cuzCuYfY7yog=
