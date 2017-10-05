@@ -8,3 +8,4 @@ Hans Bakker <hansmbakker+github@gmail.com>
 Philippe Coval <philippe.coval@osg.samsung.com>
 Rami Alshafi <ramialshafi@gmail.com>
 Tonny Tzeng <tonny.tzeng@gmail.com>
+Geoffroy Van Cutsem <geoffroy.vancutsem@intel.com>
