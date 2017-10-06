@@ -12,31 +12,32 @@ module.exports = function produceServerContent( item, creds, resourceUuid ) {
 	var index;
 	var result = produceClientContent( item, creds );
 
-	result.acl.aclist2 = result.acl.aclist2.concat( generateACEList( [
+	result.acl.aclist2 = result.acl.aclist2.concat( generateACEList(
+		Array.isArray( resourceUuid ) ? resourceUuid: [
 
-		// Resource names used during testing
-		// 1. iotivity-node
-		{
-			href: "/a/" + resourceUuid + "-xyzzy"
-		},
+			// Resource names used during testing
+			// 1. iotivity-node
+			{
+				href: "/a/" + resourceUuid + "-xyzzy"
+			},
 
-		// 2. iot-js-api
-		{
-			href: "/a/" + resourceUuid
-		},
-		{
-			href: "/direct"
-		},
-		{
-			href: "/target-resource"
-		},
-		{
-			href: "/disable-presence"
-		},
-		{
-			href: "/some/new/resource"
-		}
-	] ) );
+			// 2. iot-js-api
+			{
+				href: "/a/" + resourceUuid
+			},
+			{
+				href: "/direct"
+			},
+			{
+				href: "/target-resource"
+			},
+			{
+				href: "/disable-presence"
+			},
+			{
+				href: "/some/new/resource"
+			}
+		] ) );
 
 	// Finalize aceid property
 	for ( index = 0; index < result.acl.aclist2.length; index++ ) {
