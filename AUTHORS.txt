@@ -1,11 +1,14 @@
-Gabriel Schulhof <gabriel.schulhof@intel.com>
-Sakari Poussa <sakari.poussa@intel.com>
-Srinivasa Ragavan <srinivasa.ragavan.venkateswaran@intel.com>
-Sudarsana Nagineni <sudarsana.nagineni@intel.com>
-Zhiqiang Zhang <zhiqiang.zhang@intel.com>
-Zoltan Kis <zoltan.kis@intel.com>
-Hans Bakker <hansmbakker+github@gmail.com>
-Philippe Coval <philippe.coval@osg.samsung.com>
-Rami Alshafi <ramialshafi@gmail.com>
-Tonny Tzeng <tonny.tzeng@gmail.com>
-Geoffroy Van Cutsem <geoffroy.vancutsem@intel.com>
+binmiao  <bin.miao@intel.com>
+Gabriel Schulhof  <gabriel.schulhof@intel.com>
+Geoffroy Van Cutsem  <geoffroy.vancutsem@intel.com>
+Hans Bakker  <hansmbakker+github@gmail.com>
+Philippe Coval  <philippe.coval@osg.samsung.com>
+Rami Alshafi  <ramialshafi@gmail.com>
+Sakari Poussa  <sakari.poussa@intel.com>
+Srinivasa Ragavan  <srinivasa.ragavan.venkateswaran@intel.com>
+Sudarsana Nagineni  <sudarsana.nagineni@intel.com>
+Tonny Tzeng  <tonny.tzeng@gmail.com>
+Trevor Bramwell  <tbramwell@linuxfoundation.org>
+wanghongjuan  <hongjuanx.wang@intel.com>
+Zhiqiang Zhang  <zhiqiang.zhang@intel.com>
+Zoltan Kis  <zoltan.kis@intel.com>
