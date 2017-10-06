@@ -99,6 +99,7 @@ iotivity.OCDoResource(
 					iotivity.OCQualityOfService.OC_HIGH_QOS,
 					getResponseHandler,
 					null );
+					return iotivity.OCStackApplicationResult.OC_STACK_DELETE_TRANSACTION;
 			}
 		}
 
