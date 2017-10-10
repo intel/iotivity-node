@@ -47,6 +47,14 @@ function serverCred( item, index ) {
 	} );
 }
 
+// Create provisioning information for a set of clients and a set of servers such
+// that any of the clients may connect to any of the servers.
+// options:
+//   location: string - absolute path to iotivity-node package root
+//   clientPaths: array of strings - absolute paths of clients
+//   serverPaths: array of strings - absolute paths of servers
+//   uuid: - string - UUID that will be used for the recognition resource
+//         - array of objects - entries to add to the ACL of all servers
 module.exports = function provision( options ) {
 	var index;
 
