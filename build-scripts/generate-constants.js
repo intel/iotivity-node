@@ -39,7 +39,10 @@ function parseFileForConstants( fileName ) {
 
 						// Do what awk does - split into tokens by whitespace
 						fields = line.match( /\S+/g );
-						if ( fields.length > 2 && !fields[ 1 ].match( /[()]/ ) ) {
+						if ( fields.length > 2 && !fields[ 1 ].match( /[()]/ ) &&
+
+								// Constants we don't want
+								fields[ 1 ] !== "OC_RSRVD_DEVICE_TTL" ) {
 							return "SET_CONSTANT_" +
 								( fields[ 2 ][ 0 ] === "\"" ? "STRING" : "NUMBER" ) +
 								" " + fields[ 1 ];
