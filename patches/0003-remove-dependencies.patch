@@ -1,46 +1,50 @@
 diff --git a/SConstruct b/SConstruct
-index 38bf323..ed2b173 100644
+index 0da7e319c..75d0372ab 100644
 --- a/SConstruct
 +++ b/SConstruct
-@@ -53,36 +53,6 @@ build_dir = env.get('BUILD_DIR')
+@@ -62,40 +62,3 @@ build_dir = env.get('BUILD_DIR')
+ 
  # Build 'resource' sub-project
  SConscript(build_dir + 'resource/SConscript')
- 
+-
 -if target_os not in ['arduino','darwin','ios', 'android', 'msys_nt', 'windows']:
--	SConscript(build_dir + 'examples/OICMiddle/SConscript')
+-    SConscript(build_dir + 'examples/OICMiddle/SConscript')
 -
 -java_build = None
--if (env.get('BUILD_JAVA') == True  and env.get('JAVA_HOME') != None) or target_os == 'android':
--        java_build = SConscript(build_dir + 'java/SConscript')
+-if (env.get('BUILD_JAVA') and env.get('JAVA_HOME')) or target_os == 'android':
+-    java_build = SConscript(build_dir + 'java/SConscript')
 -
 -# Build 'service' sub-project
 -service_build = SConscript(build_dir + 'service/SConscript')
 -
--if (env.get('BUILD_JAVA') == True and env.get('JAVA_HOME') != None) or target_os == 'android':
--        Depends(service_build, java_build)
+-if java_build:
+-    Depends(service_build, java_build)
 -
--# Build "cloud" sub-project
--SConscript(build_dir + 'cloud/SConscript')
+-# Build other sub-projects
+-SConscript(dirs=[
+-    build_dir + 'cloud',
+-    build_dir + 'plugins',
+-    build_dir + 'bridging',
+-])
 -
--# Build "plugin interface" sub-project
--SConscript(build_dir + 'plugins/SConscript')
--
--# Build "bridging" sub-project
--SConscript(build_dir + 'bridging/SConscript')
--
- # Append targets information to the help information, to see help info, execute command line:
- #     $ scon [options] -h
- env.PrintTargets()
+-# Append target information to the help information (if needed)
+-# To see help info, execute:
+-#     $ scons [options] -h
+-# Note some help is option-dependent, e.g. java-related options are
+-# not added to the help unless BUILD_JAVA is seen
+-#
+-# This is not really needed unless requesting help, consider adding check:
+-#if env.GetOption('help'):
+-env.PrintTargets()
 -
 -# Print bin upload command line (arduino only)
 -if target_os == 'arduino':
--	env.UploadHelp()
+-    env.UploadHelp()
 -
 -# to install the generated pc file into custom prefix location
 -env.UserInstallTargetPCFile('iotivity.pc', 'iotivity.pc')
--
 diff --git a/resource/SConscript b/resource/SConscript
-index 3ec5999..c111734 100644
+index 3ec59999c..c11173486 100644
 --- a/resource/SConscript
 +++ b/resource/SConscript
 @@ -42,21 +42,3 @@ SConscript('csdk/SConscript')
@@ -66,13 +70,13 @@ index 3ec5999..c111734 100644
 -    # Build C/C++ unit tests
 -    SConscript('unit_tests.scons')
 diff --git a/resource/csdk/resource-directory/SConscript b/resource/csdk/resource-directory/SConscript
-index af6d3ff..f05cefe 100755
+index f28a5f3db..857eb04ad 100644
 --- a/resource/csdk/resource-directory/SConscript
 +++ b/resource/csdk/resource-directory/SConscript
-@@ -120,15 +120,3 @@ if 'CLIENT' in rd_mode:
- if 'SERVER' in rd_mode:
-     rd_env.UserInstallTargetHeader('include/rd_server.h', 'resource', 'rd_server.h')
-     rd_env.UserInstallTargetHeader('include/rd_database.h', 'resource', 'rd_database.h')
+@@ -125,15 +125,3 @@ if 'SERVER' in rd_mode:
+         'include/rd_server.h', 'resource', 'rd_server.h')
+     rd_env.UserInstallTargetHeader(
+         'include/rd_database.h', 'resource', 'rd_database.h')
 -
 -######################################################################
 -# Samples for the resource directory

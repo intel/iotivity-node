@@ -186,7 +186,7 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 	.concat( process.env.npm_config_debug === "true" ?
 		[ "RELEASE=False", "LOGGING=False" ] : [] )
 	.concat( [ "logger", "octbstack", "connectivity_abstraction", "coap", "c_common", "ocsrm",
-		"routingmanager", "json2cbor"
+		"routingmanager", "resource/csdk/security/tool"
 	] );
 
 	// Node 5 on Windows seems unable to run batch files
@@ -222,13 +222,19 @@ shelljs.cp(
 	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocstackconfig.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocstack.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "include", "octypes.h" ),
-	path.join( repoPaths.iotivity, "resource", "csdk", "security", "include",
+	path.join( repoPaths.iotivity, "resource", "csdk", "security", "include", "experimental",
 		"securevirtualresourcetypes.h" ),
-	path.join( repoPaths.iotivity, "resource", "c_common", "byte_array.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "iotivity_config.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "platform_features.h" ),
 	path.join( repoPaths.iotivity, "extlibs", "tinycbor", "tinycbor", "src", "cbor.h" ),
 	repoPaths.installHeaders );
+
+shelljs.mkdir( "-p", path.join( repoPaths.installHeaders, "experimental" ) );
+shelljs.cp(
+	path.join( repoPaths.iotivity, "resource", "c_common", "experimental", "byte_array.h" ),
+	path.join( repoPaths.iotivity, "resource", "csdk", "security", "include", "experimental",
+		"securevirtualresourcetypes.h" ),
+	path.join( repoPaths.installHeaders, "experimental" ) );
 
 if ( process.platform.match( /^win/ ) ) {
 	installWinHeaders = path.join( repoPaths.installHeaders, "windows" );

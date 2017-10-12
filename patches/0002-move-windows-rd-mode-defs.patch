@@ -1,23 +1,5 @@
-commit f4fb7430a9b9a6601b80634d96b8a08fed42802b
-Author: Gabriel Schulhof <gabriel.schulhof@intel.com>
-Date:   Tue Jul 11 23:52:25 2017 +0300
-
-    Relocate rd-mode-dependent functions in .def files
-    
-    OCBindResourceInsToResource and OCGetResourceIns are only defined if
-    RD_MODE is either "client" or "server", but not if it is "none". Thus,
-    octbstack_product.def must not include those functions.
-    
-    Bug: https://jira.iotivity.org/browse/IOT-2500
-    Change-Id: I88bbf033006e82d1655d39d7f3127a1e40a1d4e7
-    Signed-off-by: Gabriel Schulhof <gabriel.schulhof@intel.com>
-    Reviewed-on: https://gerrit.iotivity.org/gerrit/21395
-    Reviewed-by: Alex Kelley <alexke@microsoft.com>
-    Tested-by: jenkins-iotivity <jenkins@iotivity.org>
-    Reviewed-by: Dan Mihai <Daniel.Mihai@microsoft.com>
-
 diff --git a/resource/csdk/stack/octbstack_product.def b/resource/csdk/stack/octbstack_product.def
-index 528f08b..7df2204 100644
+index 0d73f32e7..56021c559 100644
 --- a/resource/csdk/stack/octbstack_product.def
 +++ b/resource/csdk/stack/octbstack_product.def
 @@ -14,7 +14,6 @@ convertTriggerEnumToString
@@ -28,7 +10,7 @@ index 528f08b..7df2204 100644
  OCBindResourceInterfaceToResource
  OCBindResourceTypeToResource
  OCByteStringCopy
-@@ -65,7 +64,6 @@ OCGetResourceInterfaceName
+@@ -62,7 +61,6 @@ OCGetResourceInterfaceName
  OCGetResourceProperties
  OCGetResourceTypeName
  OCGetResourceUri
@@ -37,7 +19,7 @@ index 528f08b..7df2204 100644
  OCGetSupportedEndpointTpsFlags
  OCInit
 diff --git a/resource/csdk/stack/octbstack_rd_client.def b/resource/csdk/stack/octbstack_rd_client.def
-index 0e322c9..5534a29 100644
+index 0e322c976..5534a29b4 100644
 --- a/resource/csdk/stack/octbstack_rd_client.def
 +++ b/resource/csdk/stack/octbstack_rd_client.def
 @@ -1,5 +1,7 @@
@@ -49,7 +31,7 @@ index 0e322c9..5534a29 100644
  OCRDDeleteWithDeviceId
  OCRDDiscover
 diff --git a/resource/csdk/stack/octbstack_rd_server.def b/resource/csdk/stack/octbstack_rd_server.def
-index 8cdba70..c679c95 100644
+index 8cdba702f..c679c9536 100644
 --- a/resource/csdk/stack/octbstack_rd_server.def
 +++ b/resource/csdk/stack/octbstack_rd_server.def
 @@ -1,5 +1,7 @@
