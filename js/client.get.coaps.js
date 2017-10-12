@@ -30,6 +30,25 @@ intervalId = setInterval( function() {
 	iotivity.OCProcess();
 }, 1000 );
 
+function assembleRequestUrl( eps, path ) {
+	var endpoint;
+	var endpointIndex;
+	var result;
+	for ( endpointIndex in eps ) {
+		endpoint = eps[ endpointIndex ];
+		if ( endpoint.tps  === "coaps" ) {
+			result = ( endpoint.tps + "://" +
+				( endpoint.family & iotivity.OCTransportFlags.OC_IP_USE_V6 ? "[" : "" ) +
+				endpoint.addr.replace( /[%].*$/, "" ) +
+				( endpoint.family & iotivity.OCTransportFlags.OC_IP_USE_V6 ? "]" : "" ) +
+				":" + endpoint.port ) + path;
+			console.log( "GET request to " + result );
+			return result;
+		}
+	}
+	throw new Error( "No secure endpoint found!" );
+}
+
 console.log( "Issuing discovery request" );
 
 // Discover resources and list them
@@ -54,7 +73,6 @@ iotivity.OCDoResource(
 		console.log( "Received response to DISCOVER request:" );
 		console.log( JSON.stringify( response, null, 4 ) );
 		var index,
-			destination = response.addr,
 			getHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
 			resourceCount = resources ? resources.length : 0,
@@ -70,24 +88,7 @@ iotivity.OCDoResource(
 				iotivity.OCDoResource(
 					getHandleReceptacle,
 					iotivity.OCMethod.OC_REST_GET,
-					( function() {
-						var endpoint;
-						var endpointIndex;
-						var result;
-						for ( endpointIndex in resources[ index ].eps ) {
-							endpoint = resources[ index ].eps[ endpointIndex ];
-							if ( endpoint.tps  === "coaps" ) {
-								result = ( endpoint.tps + "://" +
-									( endpoint.family & iotivity.OCTransportFlags.OC_IP_USE_V6 ? "[" : "" ) +
-									endpoint.addr.replace( /[%].*$/, "" ) +
-									( endpoint.family & iotivity.OCTransportFlags.OC_IP_USE_V6 ? "]" : "" ) +
-									":" + endpoint.port ) + sampleUri;
-								console.log( "GET request to " + result );
-								return result;
-							}
-						}
-						throw new Error( "No secure endpoint found!" );
-					})(),
+					assembleRequestUrl( resources[ index ].eps, sampleUri ),
 					null,
 					{
 						type: iotivity.OCPayloadType.PAYLOAD_TYPE_REPRESENTATION,

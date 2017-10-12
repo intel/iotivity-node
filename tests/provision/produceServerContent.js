@@ -13,7 +13,7 @@ module.exports = function produceServerContent( item, creds, resourceUuid ) {
 	var result = produceClientContent( item, creds );
 
 	result.acl.aclist2 = result.acl.aclist2.concat( generateACEList(
-		Array.isArray( resourceUuid ) ? resourceUuid: [
+		Array.isArray( resourceUuid ) ? resourceUuid : [
 
 			// Resource names used during testing
 			// 1. iotivity-node
