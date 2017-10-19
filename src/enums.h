@@ -19,6 +19,10 @@
 
 #include <v8.h>
 
+extern "C" {
+#include <ocstack.h>
+}
+
 void InitEnums(v8::Handle<v8::Object> exports);
 
 #define SET_CONSTANT_NUMBER(destination, name)                           \

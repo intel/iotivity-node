@@ -18,10 +18,6 @@
 
 #include "enums.h"
 
-extern "C" {
-#include <ocstack.h>
-}
-
 using namespace v8;
 
 // The rest of this file is generated
