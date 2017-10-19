@@ -33,7 +33,7 @@ function parseFileForEnums( destination, fileName ) {
 		.forEach( function( line ) {
 			var fields, enumName;
 
-			if ( line === "typedef enum" ) {
+			if ( line.match( /^typedef\s+enum(\s+\S+\s+{)?/ ) ) {
 				print = true;
 			}
 			if ( print ) {
