@@ -15,7 +15,7 @@ diff --git a/resource/csdk/stack/include/internal/tree.h b/resource/csdk/stack/i
 index 203ecfd..2151f49 100644
 --- a/resource/csdk/stack/include/internal/tree.h
 +++ b/resource/csdk/stack/include/internal/tree.h
-@@ -745,6 +745,66 @@ name##_RB_MINMAX(struct name *head, int val)				\
+@@ -745,6 +745,67 @@ name##_RB_MINMAX(struct name *head, int val)				\
  	    ((x) != NULL) && ((y) = name##_RB_PREV(x), 1);		\
  	     (x) = (y))
  
@@ -71,8 +71,9 @@ index 203ecfd..2151f49 100644
 +  } else {								\
 +									\
 +    /* The element is the head of the linked list without any links */	\
-+    RB_REMOVE(name, head, elm);						\
++    return RB_REMOVE(name, head, elm);						\
 +  }									\
++  return elm;								\
 +}
 +
 +#define RBL_INSERT(name, x, y)	name##_RBL_INSERT(x, y)
