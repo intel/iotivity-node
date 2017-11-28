@@ -224,13 +224,13 @@ shelljs.cp(
 	path.join( repoPaths.iotivity, "resource", "csdk", "include", "octypes.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "security", "include", "experimental",
 		"securevirtualresourcetypes.h" ),
-	path.join( repoPaths.iotivity, "resource", "c_common", "iotivity_config.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "platform_features.h" ),
 	path.join( repoPaths.iotivity, "extlibs", "tinycbor", "tinycbor", "src", "cbor.h" ),
 	repoPaths.installHeaders );
 
 shelljs.mkdir( "-p", path.join( repoPaths.installHeaders, "experimental" ) );
 shelljs.cp(
+	path.join( binariesSource, "resource", "c_common", "iotivity_config.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "experimental", "byte_array.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "security", "include", "experimental",
 		"securevirtualresourcetypes.h" ),
