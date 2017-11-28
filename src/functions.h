@@ -20,7 +20,7 @@
 #include <nan.h>
 
 #define SET_FUNCTION(destination, functionName)                             \
-  Nan::ForceSet(                                                            \
+  Nan::DefineOwnProperty(                                                            \
       (destination), Nan::New(#functionName).ToLocalChecked(),              \
       Nan::GetFunction(Nan::New<v8::FunctionTemplate>(bind_##functionName)) \
           .ToLocalChecked(),                                                \

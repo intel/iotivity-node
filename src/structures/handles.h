@@ -92,7 +92,7 @@ class CallbackInfo {
     if (!jsHandle.IsEmpty()) {
       v8::Local<v8::Object> theObject = Nan::New(jsHandle);
       Nan::SetInternalFieldPointer(theObject, 0, 0);
-      Nan::ForceSet(theObject, Nan::New("stale").ToLocalChecked(),
+      Nan::DefineOwnProperty(theObject, Nan::New("stale").ToLocalChecked(),
                     Nan::New(true),
                     (v8::PropertyAttribute)(v8::ReadOnly | v8::DontDelete));
       jsHandle.Reset();
