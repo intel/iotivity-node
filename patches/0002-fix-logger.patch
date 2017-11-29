@@ -1,0 +1,21 @@
+diff --git a/resource/csdk/logger/src/logger.c b/resource/csdk/logger/src/logger.c
+index e7a80d8e1..f0d479dd2 100644
+--- a/resource/csdk/logger/src/logger.c
++++ b/resource/csdk/logger/src/logger.c
+@@ -30,6 +30,7 @@
+ #define _POSIX_C_SOURCE 200809L
+ #endif
+ 
++#include <stdlib.h>
+ #include "iotivity_config.h"
+ 
+ // Pull in _POSIX_TIMERS feature test macro to check for
+@@ -328,7 +329,7 @@ void OCLog(int level, const char * tag, const char * logStr)
+                ms = now.tv_usec * 1000;
+            }
+    #endif
+-           printf("%02d:%02d.%03d %s: %s: %s\n", min, sec, ms, LEVEL[level], tag, logStr);
++           fprintf(stderr, "%s: %02d:%02d.%03d %s: %s: %s\n", getenv("LOG_PREFIX"), min, sec, ms, LEVEL[level], tag, logStr);
+        }
+    #endif
+    }
