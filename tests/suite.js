@@ -57,7 +57,8 @@ function spawnOne( assert, options ) {
 
 	theChild = childProcess.spawn(
 		"node", commandLine, {
-			stdio: [ process.stdin, "pipe", process.stderr, "ipc" ]
+			stdio: [ process.stdin, "pipe", process.stderr, "ipc" ],
+			env: _.extend( {}, process.env, { LOG_PREFIX: options.name } )
 		} );
 	runningProcesses.push( theChild );
 
