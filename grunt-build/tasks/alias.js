@@ -20,7 +20,7 @@ grunt.registerTask( "default", [ "test" ] );
 
 grunt.registerTask( "test", [ "lint" ]
 	.concat( grunt.option( "ci" ) ? [ "testdist" ] : [] )
-	.concat( [ "testsuite", "iot-js-api:plain" ] ) );
+	.concat( [ "iot-js-api:plain", "testsuite" ] ) );
 
 grunt.registerTask( "format", [ "esformatter", "clangformat" ] );
 
