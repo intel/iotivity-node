@@ -22,12 +22,12 @@ var results = require( "../../../tests/getresult" );
 var packageRoot = path.join( require( "bindings" ).getRoot( __filename ) );
 var preamblePath = path.join( packageRoot, "tests", "preamble" );
 var generateSpawn = function( spawnFinal ) {
-	return function( interpreter, commandLine ) {
+	return function( interpreter, commandLine, name ) {
 		commandLine[ 2 ] = grunt.option( "ci" ) ?
 			path.dirname( require.resolve( "iotivity-node" ) ) :
 			packageRoot;
 		require( preamblePath ).apply( this, commandLine );
-		return spawnFinal( interpreter, commandLine );
+		return spawnFinal( interpreter, commandLine, name );
 	};
 };
 var plain = {

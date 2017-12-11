@@ -175,6 +175,7 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 	var sconsArguments = [
 		"SECURED=1",
 		"RD_MODE=all",
+		"LOGGING=True",
 		"EXC_PROV_SUPPORT=1"
 	]
 	.concat( ( process.env.V === "1" || process.env.npm_config_verbose === "true" ) ?
