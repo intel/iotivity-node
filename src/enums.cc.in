@@ -24,9 +24,9 @@ extern "C" {
 
 using namespace v8;
 
-#define SET_ENUM(destination, enumName)                              \
-  Nan::ForceSet((destination), Nan::New(#enumName).ToLocalChecked(), \
-                bind_##enumName(),                                   \
-                (v8::PropertyAttribute)(v8::ReadOnly | v8::DontDelete));
+#define SET_ENUM(destination, enumName)                                       \
+  Nan::DefineOwnProperty(                                                     \
+      (destination), Nan::New(#enumName).ToLocalChecked(), bind_##enumName(), \
+      (v8::PropertyAttribute)(v8::ReadOnly | v8::DontDelete));
 
 // The rest of this file is generated
