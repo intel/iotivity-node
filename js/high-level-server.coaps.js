@@ -51,7 +51,11 @@ function errorHandler( error ) {
 
 console.log( "Acquiring OCF device" );
 
-require( "iotivity-node" ).server
+var ocf = require( "iotivity-node" );
+
+ocf.device.coreSpecVersion = "ocf.1.1.0";
+
+ocf.server
   .register( {
     resourcePath: "/a/light",
     resourceTypes: [ "core.light" ],

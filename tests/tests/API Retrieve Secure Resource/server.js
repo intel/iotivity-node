@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var server = require( process.argv[ 3 ] ).server;
+var ocf = require( process.argv[ 3 ] );
+var server = ocf.server;
+
+ocf.device.coreSpecVersion = "ocf.1.1.0";
 
 console.log( JSON.stringify( { assertionCount: 5 } ) );
 
