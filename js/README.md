@@ -27,7 +27,7 @@ please follow the steps below:
     ```
 
 0. Copy the file
-    `$iotivityRoot/resource/csdk/stack/security/provisioning/sample/oic_svr_db_server_justworks.dat`
+    `$iotivityRoot/resource/csdk/security/provisioning/sample/oic_svr_db_server_justworks.dat`
     to `${HOME}/.iotivity-node/$serverHash/oic_svr_db.dat`
 
 0. Start the server
