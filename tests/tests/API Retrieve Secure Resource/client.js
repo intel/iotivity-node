@@ -13,33 +13,31 @@
 // limitations under the License.
 
 var client = require( process.argv[ 3 ] ).client;
-
-var lastRequest;
-
-var csdk = require( process.argv[ 3 ] + "/lowlevel" );
-
-csdk.OCDoResource = ( function( original ) {
-	return function( receptacle, method, requestUri ) {
-		lastRequest = requestUri;
-		return original.apply( this, arguments );
-	};
-} )( csdk.OCDoResource );
+var url = require( "url" );
 
 console.log( JSON.stringify( { assertionCount: 5 } ) );
 
 function resourcefound( resource ) {
+
+	// Find the first secure endpoint.
+	var endpoint = resource.endpoints.reduce( function findSecureEndpoint( current, candidate ) {
+		var parsedUrl = url.parse( candidate );
+		return ( null === current ? ( parsedUrl.protocol.substr( -1 ) ? candidate : null ) : current );
+	}, null );
+
+	console.log( JSON.stringify( { "assertion": "notStrictEqual", arguments: [
+		endpoint, null, "Client: Resource has at least one secure endpoint"
+	] } ) );
+
 	console.log( JSON.stringify( { "assertion": "strictEqual", arguments: [
 		resource.secure, true, "Client: Resource is marked as secure"
 	] } ) );
+
 	client
 		.removeListener( "resourcefound", resourcefound )
-		.retrieve( resource )
+		.retrieve( resource, undefined, undefined, endpoint )
 		.then(
 			function( retrievedResource ) {
-				console.log( JSON.stringify( { assertion: "strictEqual", arguments: [
-					lastRequest.split( ":" )[ 0 ].substr( -1 ), "s",
-					"Client: Retrieve request is made to a secure protocol"
-				] } ) );
 				console.log( JSON.stringify( { assertion: "ok", arguments: [
 					retrievedResource === resource,
 					"Client: Retrieved resource is the discovered resource"
