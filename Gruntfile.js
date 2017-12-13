@@ -32,6 +32,7 @@ suites = grunt.option( "ocf-suites" ) ?
 
 if ( suites ) {
 	grunt.config.set( "iot-js-api.plain.tests", suites );
+	grunt.config.set( "iot-js-api.secure.tests", suites );
 	grunt.config.set( "iot-js-api.coverage.tests", suites );
 }
 

@@ -73,8 +73,8 @@ module.exports = function provision( options ) {
 			produceClientContent( clientData[ index ], serverData.map( clientCred ) );
 	}
 	for ( index in serverData ) {
-		serverData[ index ].fileContents =
-			produceServerContent( serverData[ index ], clientData.map( serverCred ), options.uuid );
+		serverData[ index ].fileContents = produceServerContent( serverData[ index ],
+			clientData.map( serverCred ), options.uuid );
 	}
 
 	// Write out the .json and .dat files

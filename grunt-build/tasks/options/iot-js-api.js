@@ -23,10 +23,19 @@ var packageRoot = path.join( require( "bindings" ).getRoot( __filename ) );
 var preamblePath = path.join( packageRoot, "tests", "preamble" );
 var generateSpawn = function( spawnFinal ) {
 	return function( interpreter, commandLine ) {
+		var preambleCommandLine;
+
 		commandLine[ 2 ] = grunt.option( "ci" ) ?
 			path.dirname( require.resolve( "iotivity-node" ) ) :
 			packageRoot;
-		require( preamblePath ).apply( this, commandLine );
+
+		preambleCommandLine = commandLine.slice();
+
+		// argv[ 4 ] for the preamble means to clobber or not, not secure or not. Let's
+		// make sure we clobber any previous test ACLs.
+		preambleCommandLine[ 3 ] = false;
+
+		require( preamblePath ).apply( this, preambleCommandLine );
 		return spawnFinal( interpreter, commandLine );
 	};
 };
@@ -56,6 +65,17 @@ var coverage = assignIn( {}, plain, {
 	} )
 } );
 
+var basicOptions = {
+	api: "ocf",
+	apiVersion: "oic1.1.0-1"
+};
+
+var plainOptions = assignIn( {
+	client: plain,
+	server: plain,
+	single: plain
+}, basicOptions );
+
 // Shim the default log() and done() to also record results in JSON
 ocfRunner.defaultCallbacks.done = ( function( originalDone ) {
 	return function() {
@@ -72,20 +92,13 @@ ocfRunner.defaultCallbacks.log = ( function( originalLog ) {
 } )( ocfRunner.defaultCallbacks.log );
 
 return {
-	plain: {
-		api: "ocf",
-		apiVersion: "oic1.1.0-0",
-		client: plain,
-		server: plain,
-		single: plain
-	},
-	coverage: {
-		api: "ocf",
-		apiVersion: "oic1.1.0-0",
+	plain: plainOptions,
+	secure: assignIn( { secure: true }, plainOptions ),
+	coverage: assignIn( {
 		client: coverage,
 		server: coverage,
 		single: coverage
-	}
+	}, basicOptions )
 };
 
 };
