@@ -16,7 +16,7 @@ var intervalId,
 	handleReceptacle = {},
 
 	// This is the same value as server.get.js
-	sampleUri = "/a/iotivity-node-get-sample",
+	sampleUri = "/oic/res",
 	iotivity = require( "iotivity-node/lowlevel" );
 
 console.log( "Starting OCF stack in client mode" );
@@ -51,7 +51,7 @@ iotivity.OCDoResource(
 	function( handle, response ) {
 		console.log( "Received response to DISCOVER request:" );
 		console.log( JSON.stringify( response, null, 4 ) );
-		var index,
+		var index = 0,
 			destination = response.addr,
 			getHandleReceptacle = {},
 			resources = response && response.payload && response.payload.resources,
@@ -63,8 +63,8 @@ iotivity.OCDoResource(
 			};
 
 		// If the sample URI is among the resources, issue the GET request to it
-		for ( index = 0; index < resourceCount; index++ ) {
-			if ( resources[ index ].uri === sampleUri ) {
+//		for ( index = 0; index < resourceCount; index++ ) {
+//			if ( resources[ index ].uri === sampleUri ) {
 				iotivity.OCDoResource(
 					getHandleReceptacle,
 					iotivity.OCMethod.OC_REST_GET,
@@ -80,8 +80,8 @@ iotivity.OCDoResource(
 					iotivity.OCQualityOfService.OC_HIGH_QOS,
 					getResponseHandler,
 					null );
-			}
-		}
+//			}
+//		}
 
 		return iotivity.OCStackApplicationResult.OC_STACK_KEEP_TRANSACTION;
 	},
