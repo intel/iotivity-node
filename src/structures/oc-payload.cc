@@ -36,6 +36,8 @@ static std::string js_OCEndpointPayload(napi_env env,
   C2J_SET_NUMBER_MEMBER_RETURN(env, *js_item, item, family);
   C2J_SET_NUMBER_MEMBER_RETURN(env, *js_item, item, port);
   C2J_SET_NUMBER_MEMBER_RETURN(env, *js_item, item, pri);
+
+  return std::string();
 }
 
 static std::string js_OCResourcePayload(napi_env env,
@@ -58,7 +60,7 @@ static std::string js_OCResourcePayload(napi_env env,
   C2J_SET_NUMBER_MEMBER_RETURN(env, *destination, payload, port);
 
   C2J_SET_LL_PROPERTY(env, *destination, payload, eps, OCEndpointPayload*,
-      HELPER_CALL_RETURN(env, js_OCEnpointPayload(env, current, &item)));
+      HELPER_CALL_RETURN(js_OCEndpointPayload(env, current, &item)));
   return std::string();
 }
 
