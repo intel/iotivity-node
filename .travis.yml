@@ -67,7 +67,6 @@ install:
   bash
 - source ~/.nvm/nvm.sh
 - nvm install "${NODE_VERSION}"
-- npm install -g npm@^2.14.2
 - |
   if test "x${TRAVIS_OS_NAME}x" = "xosxx"; then
     sudo easy_install pip
