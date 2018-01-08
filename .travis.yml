@@ -77,7 +77,10 @@ install:
 - npm install -g grunt-cli
 - |
   if test "x${TEST_SCRIPT}x" = "xtestx" -o "x${TEST_SCRIPT}x" = "xpublish-coveragex"; then
+    echo "Installing iotivity-node globally"
     npm install -g "$(npm pack)" && npm link iotivity-node
+  else
+    echo "Skipping global iotivity-node installation"
   fi
 - npm install --ignore-scripts
 script:
