@@ -8,7 +8,7 @@
 
 	"target_defaults": {
 		"include_dirs": [
-			"<!(node -e \"require( 'nan' );\")",
+			"<!@(node -p \"require('node-addon-api').include\")",
 			"<(module_root_dir)/src"
 		],
 		"conditions": [
@@ -64,12 +64,20 @@
 						]
 					} ]
 				]
-			} ],
+			} ]
+		],
+		"target_conditions": [
 
-			# OSX quirk
+			# OSX quirks backported from node 8.3.0 common.gypi
 
 			[ "OS=='mac'", {
-				"xcode_settings": { "OTHER_CFLAGS": [ '-std=c++11' ] }
+				"xcode_settings": {
+					"CLANG_CXX_LANGUAGE_STANDARD": "c++11",
+					"CLANG_CXX_LIBRARY": "libc++",
+					"MACOSX_DEPLOYMENT_TARGET": "10.7",
+					"OTHER_CFLAGS+": [ "-std=c++11", "-mmacosx-version-min=10.7" ],
+					"OTHER_LDFLAGS+": [ "-std=c++11", "-mmacosx-version-min=10.7" ]
+				}
 			} ]
 		],
 		"cflags_cc": [ '-std=c++11' ],
@@ -195,6 +203,7 @@
 				"generated/enums.cc",
 				"generated/functions.cc",
 				"src/common.cc",
+				"src/functions/entity-handler.cc",
 				"src/functions/oc-create-delete-resource.cc",
 				"src/functions/oc-do-resource.cc",
 				"src/functions/oc-register-persistent-storage-handler.cc",
@@ -208,11 +217,18 @@
 				"src/structures/oc-client-response.cc",
 				"src/structures/oc-dev-addr.cc",
 				"src/structures/oc-entity-handler-response.cc",
-				"src/structures/oc-header-option-array.cc",
 				"src/structures/oc-identity.cc",
-				"src/structures/oc-payload.cc"
+				"src/structures/oc-payload.cc",
+				"src/structures/oc-rep-payload/to-c.cc",
+				"src/structures/oc-rep-payload/to-js.cc"
 			],
-			"dependencies": [ "csdk", "generateconstants", "generateenums", "generatefunctions" ]
+			"dependencies": [
+                          "csdk",
+                          "generateconstants",
+                          "generateenums",
+                          "generatefunctions",
+                          "<!(node -p \"require('node-addon-api').gyp\")"
+                        ]
 		}
 	]
 }

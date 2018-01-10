@@ -17,13 +17,14 @@
 #ifndef __IOTIVITY_NODE_OCIDENTITY_H__
 #define __IOTIVITY_NODE_OCIDENTITY_H__
 
-#include <v8.h>
+#include "../common.h"
 extern "C" {
 #include <ocstack.h>
 }
 
-// Fills in @identity
-bool c_OCIdentity(v8::Local<v8::Array> jsIdentity, OCIdentity *identity);
-v8::Local<v8::Array> js_OCIdentity(OCIdentity *identity);
+std::string c_OCIdentity(napi_env env, napi_value source,
+                         OCIdentity *destination);
+std::string js_OCIdentity(napi_env env, OCIdentity *source,
+                          napi_value *destination);
 
 #endif /* __IOTIVITY_NODE_OCIDENTITY_H__ */

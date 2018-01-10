@@ -17,15 +17,13 @@
 #ifndef __IOTIVITY_NODE_FUNCTIONS_H__
 #define __IOTIVITY_NODE_FUNCTIONS_H__
 
-#include <nan.h>
+#include "common.h"
 
-#define SET_FUNCTION(destination, functionName)                             \
-  Nan::DefineOwnProperty(                                                   \
-      (destination), Nan::New(#functionName).ToLocalChecked(),              \
-      Nan::GetFunction(Nan::New<v8::FunctionTemplate>(bind_##functionName)) \
-          .ToLocalChecked(),                                                \
-      (v8::PropertyAttribute)(v8::DontDelete));
+#define SET_FUNCTION(env, destination, functionName)                     \
+  C2J_SET_PROPERTY_RETURN((env), (destination), #functionName, function, \
+                          #functionName, NAPI_AUTO_LENGTH,               \
+                          bind_##functionName, 0)
 
-NAN_MODULE_INIT(InitFunctions);
+std::string InitFunctions(napi_env env, napi_value exports);
 
 #endif /* __IOTIVITY_NODE_FUNCTIONS_H__ */

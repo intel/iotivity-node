@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <nan.h>
-
 extern "C" {
 #include <string.h>
 }
@@ -24,54 +22,60 @@ extern "C" {
 #include "structures.h"
 #include "structures/handles.h"
 #include "structures/oc-dev-addr.h"
-#include "structures/oc-header-option-array.h"
 #include "structures/oc-payload.h"
 
-using namespace v8;
-
-Local<Object> js_OCEntityHandlerRequest(OCEntityHandlerRequest *request) {
-  Local<Object> jsRequest = Nan::New<Object>();
+std::string js_OCEntityHandlerRequest(napi_env env,
+                                      OCEntityHandlerRequest *request,
+                                      napi_value *result) {
+  NAPI_CALL_RETURN(env, napi_create_object(env, result));
 
   // The resource may be null if the request refers to a non-existing resource
   // and is being passed to the default device entity handler
   if (request->resource) {
-    if (JSOCResourceHandle::handles[request->resource]->IsEmpty()) {
-      Nan::ThrowError(
-          "Conveying OCEntityHandlerRequest to JS: "
-          "Failed to find JS resource handle");
-    } else {
-      Nan::Set(jsRequest, Nan::New("resource").ToLocalChecked(),
-               Nan::New(*(JSOCResourceHandle::handles[request->resource])));
+    napi_ref jsRef = JSOCResourceHandle::handles[request->resource];
+    if (!jsRef) {
+      return LOCAL_MESSAGE("resource handle not found");
     }
+    C2J_SET_PROPERTY_CALL_RETURN(
+        env, *result, "resource",
+        NAPI_CALL_RETURN(env, napi_get_reference_value(env, jsRef, &jsValue)));
   }
 
   if (request->requestHandle) {
-    Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
-             JSOCRequestHandle::New(request->requestHandle));
+    napi_value jsHandle;
+    JSOCRequestHandle *cData;
+    HELPER_CALL_RETURN(JSOCRequestHandle::New(env, &jsHandle, &cData));
+    cData->data = request->requestHandle;
+    HELPER_CALL_RETURN(cData->Init(env, nullptr, jsHandle));
+    NAPI_CALL_RETURN(
+        env, napi_set_named_property(env, *result, "requestHandle", jsHandle));
   } else {
-    Nan::Set(jsRequest, Nan::New("requestHandle").ToLocalChecked(),
-             Nan::Null());
+    C2J_SET_PROPERTY_CALL_RETURN(
+        env, *result, "requestHandle",
+        NAPI_CALL_RETURN(env, napi_get_null(env, &jsValue)));
   }
 
-  SET_VALUE_ON_OBJECT(jsRequest, request, method, Number);
-  SET_STRING_IF_NOT_NULL(jsRequest, request, query);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *result, request, method);
+  C2J_SET_PROPERTY_CALL_RETURN(
+      env, *result, "devAddr",
+      HELPER_CALL_RETURN(js_OCDevAddr(env, &(request->devAddr), &jsValue)));
+  C2J_SET_STRING_IF_NOT_NULL_RETURN(env, *result, request, query);
 
-  Local<Object> obsInfo = Nan::New<Object>();
-  SET_VALUE_ON_OBJECT(obsInfo, &(request->obsInfo), action, Number);
-  SET_VALUE_ON_OBJECT(obsInfo, &(request->obsInfo), obsId, Number);
-  Nan::Set(jsRequest, Nan::New("obsInfo").ToLocalChecked(), obsInfo);
+  napi_value jsObsInfo;
+  NAPI_CALL_RETURN(env, napi_create_object(env, &jsObsInfo));
+  C2J_SET_NUMBER_MEMBER_RETURN(env, jsObsInfo, &(request->obsInfo), action);
+  C2J_SET_NUMBER_MEMBER_RETURN(env, jsObsInfo, &(request->obsInfo), obsId);
+  NAPI_CALL_RETURN(env,
+                   napi_set_named_property(env, *result, "obsInfo", jsObsInfo));
 
-  Nan::Set(jsRequest,
-           Nan::New("rcvdVendorSpecificHeaderOptions").ToLocalChecked(),
-           js_OCHeaderOption(request->rcvdVendorSpecificHeaderOptions,
-                             request->numRcvdVendorSpecificHeaderOptions));
-
-  Nan::Set(jsRequest, Nan::New("devAddr").ToLocalChecked(),
-           js_OCDevAddr(&(request->devAddr)));
+  C2J_SET_NUMBER_MEMBER_RETURN(env, *result, request, messageID);
   if (request->payload) {
-    Nan::Set(jsRequest, Nan::New("payload").ToLocalChecked(),
-             js_OCPayload(request->payload));
+    C2J_SET_PROPERTY_CALL_RETURN(
+        env, *result, "payload",
+        HELPER_CALL_RETURN(js_OCPayload(env, request->payload, &jsValue)));
   }
 
-  return jsRequest;
+  // "rcvdVendorSpecificHeaderOptions" ignored
+
+  return std::string();
 }

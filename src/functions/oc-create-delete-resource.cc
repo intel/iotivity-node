@@ -14,148 +14,108 @@
  * limitations under the License.
  */
 
-#include <nan.h>
 #include <map>
 
 #include "../common.h"
-#include "../structures.h"
 #include "../structures/handles.h"
+#include "entity-handler.h"
+#include "oc-server-resource-utils.h"
 
 extern "C" {
 #include <ocstack.h>
 }
 
-using namespace v8;
-
 static OCEntityHandlerResult defaultEntityHandler(
-    OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *context) {
-  CALL_JS(
-      &(((CallbackInfo<OCResourceHandle> *)context)->callback),
-      Nan::GetCurrentContext()->Global(), 2, OC_EH_ERROR, IsUint32,
-      "OCEntityHandler return value",
-      return ((OCEntityHandlerResult)(Nan::To<uint32_t>(jsReturn).FromJust())),
-      Nan::New(flag), js_OCEntityHandlerRequest(request));
+    OCEntityHandlerFlag flag, OCEntityHandlerRequest *request, void *data) {
+  JSOCResourceHandle *cData = (JSOCResourceHandle *)data;
+  EH_BODY(cData->env, flag, request, nullptr, cData->callback);
 }
 
-NAN_METHOD(bind_OCCreateResource) {
-  VALIDATE_ARGUMENT_COUNT(info, 6);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
-  VALIDATE_ARGUMENT_TYPE(info, 2, IsString);
-  VALIDATE_ARGUMENT_TYPE(info, 3, IsString);
-  VALIDATE_ARGUMENT_TYPE(info, 4, IsFunction);
-  VALIDATE_ARGUMENT_TYPE(info, 5, IsUint32);
+napi_value bind_OCCreateResource(napi_env env, napi_callback_info info) {
+  J2C_DECLARE_ARGUMENTS(env, info, 6);
 
-  CallbackInfo<OCResourceHandle> *callbackInfo =
-      new CallbackInfo<OCResourceHandle>;
-  if (!callbackInfo) {
-    Nan::ThrowError("Failed to allocate memory for callback info");
-    return;
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "handle");
+  J2C_GET_STRING_TRACKED_JS_THROW(type, env, arguments[1], false, "type");
+  J2C_GET_STRING_TRACKED_JS_THROW(iface, env, arguments[2], false, "interface");
+  J2C_GET_STRING_TRACKED_JS_THROW(uri, env, arguments[3], false, "uri");
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[4], napi_function, "callback");
+  J2C_DECLARE_VALUE_JS_THROW(OCResourceProperty, properties, env, arguments[5],
+                             napi_number, "properties", uint32, uint32_t);
+
+  JSOCResourceHandle *cData;
+  napi_value jsHandle;
+  HELPER_CALL_THROW(env, JSOCResourceHandle::New(env, &jsHandle, &cData));
+
+  OCStackResult result =
+      OCCreateResource(&(cData->data), type, iface, uri, defaultEntityHandler,
+                       cData, properties);
+
+  if (result == OC_STACK_OK) {
+    HELPER_CALL_THROW(env, cData->Init(env, arguments[4], jsHandle));
+    NAPI_CALL_THROW(
+        env, napi_set_named_property(env, arguments[0], "handle", jsHandle));
   }
-
-  OCStackResult returnValue = OCCreateResource(
-      &(callbackInfo->handle), (const char *)*String::Utf8Value(info[1]),
-      (const char *)*String::Utf8Value(info[2]),
-      (const char *)*String::Utf8Value(info[3]), defaultEntityHandler,
-      (void *)callbackInfo, (uint8_t)Nan::To<uint32_t>(info[5]).FromJust());
-
-  if (returnValue == OC_STACK_OK) {
-    Nan::Set(Nan::To<Object>(info[0]).ToLocalChecked(),
-             Nan::New("handle").ToLocalChecked(),
-             callbackInfo->Init(JSOCResourceHandle::New(callbackInfo),
-                                Local<Function>::Cast(info[4])));
-    JSOCResourceHandle::handles[callbackInfo->handle] =
-        &(callbackInfo->jsHandle);
-  } else {
-    delete callbackInfo;
-  }
-
-  info.GetReturnValue().Set(Nan::New(returnValue));
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)result));
 }
 
-NAN_METHOD(bind_OCDeleteResource) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+napi_value bind_OCDeleteResource(napi_env env, napi_callback_info info) {
+  FIRST_ARGUMENT_IS_HANDLE(1);
 
-  OCStackResult returnValue;
-
-  CallbackInfo<OCResourceHandle> *callbackInfo;
-  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
-                           Nan::To<Object>(info[0]).ToLocalChecked());
-
-  // Delete the resource identified by the handle
-  returnValue = OCDeleteResource(callbackInfo->handle);
-
-  if (returnValue == OC_STACK_OK) {
-    JSOCResourceHandle::handles.erase(callbackInfo->handle);
-    delete callbackInfo;
+  OCStackResult result = OCDeleteResource(cData->data);
+  if (result == OC_STACK_OK) {
+    HELPER_CALL_THROW(env, JSOCResourceHandle::Destroy(env, cData));
   }
 
-  info.GetReturnValue().Set(Nan::New(returnValue));
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)result));
 }
 
 // This is not really a binding since it only replaces the JS entity handler
-NAN_METHOD(bind_OCBindResourceHandler) {
-  VALIDATE_ARGUMENT_COUNT(info, 2);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsFunction);
+napi_value bind_OCBindResourceHandler(napi_env env, napi_callback_info info) {
+  FIRST_ARGUMENT_IS_HANDLE(2);
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[1], napi_function,
+                                "entity handler");
 
-  CallbackInfo<OCResourceHandle> *callbackInfo;
-  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
-                           Nan::To<Object>(info[0]).ToLocalChecked());
-  callbackInfo->callback.Reset(Local<Function>::Cast(info[1]));
+  NAPI_CALL_THROW(env, napi_delete_reference(env, cData->callback));
+  NAPI_CALL_THROW(
+      env, napi_create_reference(env, arguments[1], 1, &(cData->callback)));
 
-  info.GetReturnValue().Set(Nan::New(OC_STACK_OK));
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)OC_STACK_OK));
 }
 
-#define BIND_UNBIND_RESOURCE(api)                                        \
-  do {                                                                   \
-    VALIDATE_ARGUMENT_COUNT(info, 2);                                    \
-    VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                           \
-    VALIDATE_ARGUMENT_TYPE(info, 1, IsObject);                           \
-    CallbackInfo<OCResourceHandle> *parentInfo;                          \
-    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, parentInfo,             \
-                             Nan::To<Object>(info[0]).ToLocalChecked()); \
-    CallbackInfo<OCResourceHandle> *childInfo;                           \
-    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, childInfo,              \
-                             Nan::To<Object>(info[1]).ToLocalChecked()); \
-    info.GetReturnValue().Set(                                           \
-        Nan::New(api(parentInfo->handle, childInfo->handle)));           \
-  } while (0)
+#define BIND_STRING_TO_RESOURCE(api, message)                              \
+  FIRST_ARGUMENT_IS_HANDLE(2);                                             \
+  J2C_GET_STRING_TRACKED_JS_THROW(item, env, arguments[1], true, message); \
+  C2J_SET_RETURN_VALUE(env, info, double, (double)api(cData->data, item));
 
-NAN_METHOD(bind_OCBindResource) { BIND_UNBIND_RESOURCE(OCBindResource); }
-
-NAN_METHOD(bind_OCUnBindResource) { BIND_UNBIND_RESOURCE(OCUnBindResource); }
-
-#define BIND_STRING_TO_RESOURCE(api)                                        \
-  do {                                                                      \
-    VALIDATE_ARGUMENT_COUNT(info, 2);                                       \
-    VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);                              \
-    VALIDATE_ARGUMENT_TYPE(info, 1, IsString);                              \
-    CallbackInfo<OCResourceHandle> *callbackInfo;                           \
-    JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,              \
-                             Nan::To<Object>(info[0]).ToLocalChecked());    \
-    info.GetReturnValue().Set(Nan::New(api(                                 \
-        callbackInfo->handle, (const char *)*String::Utf8Value(info[1])))); \
-  } while (0)
-
-NAN_METHOD(bind_OCBindResourceInterfaceToResource) {
-  BIND_STRING_TO_RESOURCE(OCBindResourceInterfaceToResource);
+napi_value bind_OCBindResourceTypeToResource(napi_env env,
+                                             napi_callback_info info) {
+  BIND_STRING_TO_RESOURCE(OCBindResourceTypeToResource, "resource type");
 }
 
-NAN_METHOD(bind_OCBindResourceTypeToResource) {
-  BIND_STRING_TO_RESOURCE(OCBindResourceTypeToResource);
+napi_value bind_OCBindResourceInterfaceToResource(napi_env env,
+                                                  napi_callback_info info) {
+  BIND_STRING_TO_RESOURCE(OCBindResourceInterfaceToResource, "interface");
 }
 
 // This is not actually a binding. We get the resource handler from the
 // JS handle.
-NAN_METHOD(bind_OCGetResourceHandler) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+napi_value bind_OCGetResourceHandler(napi_env env, napi_callback_info info) {
+  FIRST_ARGUMENT_IS_HANDLE(1);
+  napi_value jsCB;
+  NAPI_CALL_THROW(env, napi_get_reference_value(env, cData->callback, &jsCB));
+  return jsCB;
+}
 
-  CallbackInfo<OCResourceHandle> *callbackInfo;
-  JSCALLBACKHANDLE_RESOLVE(JSOCResourceHandle, callbackInfo,
-                           Nan::To<Object>(info[0]).ToLocalChecked());
+#define BIND_UNBIND_RESOURCE(api)                                    \
+  FIRST_ARGUMENT_IS_HANDLE(2);                                       \
+  DECLARE_HANDLE_DATA(childData, env, arguments[1], "child handle"); \
+  C2J_SET_RETURN_VALUE(env, info, double,                            \
+                       (double)api(cData->data, childData->data));
 
-  info.GetReturnValue().Set(*(callbackInfo->callback));
+napi_value bind_OCBindResource(napi_env env, napi_callback_info info) {
+  BIND_UNBIND_RESOURCE(OCBindResource);
+}
+
+napi_value bind_OCUnBindResource(napi_env env, napi_callback_info info) {
+  BIND_UNBIND_RESOURCE(OCUnBindResource);
 }

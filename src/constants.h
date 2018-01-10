@@ -17,8 +17,8 @@
 #ifndef __IOTIVITY_NODE_CONSTANTS_H__
 #define __IOTIVITY_NODE_CONSTANTS_H__
 
-#include <v8.h>
+#include "common.h"
 
-NAN_MODULE_INIT(InitConstants);
+std::string InitConstants(napi_env env, napi_value exports);
 
 #endif /* __IOTIVITY_NODE_CONSTANTS_H__ */

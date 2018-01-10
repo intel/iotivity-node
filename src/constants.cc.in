@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-#include <nan.h>
-
-#include "enums.h"
-
-using namespace v8;
+#include <string.h>
+#include "common.h"
 
 // The rest of this file is generated

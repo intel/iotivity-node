@@ -45,7 +45,7 @@ function parseFileForEnums( destination, fileName ) {
 				if ( !fields[ 0 ].match( /^[{}]/ ) && fields[ 0 ] !== "typedef" ) {
 					if ( fields[ 0 ].match( /^[A-Z]/ ) ) {
 						fields[ 0 ] = fields[ 0 ].replace( /,/g, "" );
-						output += "  SET_CONSTANT_NUMBER(returnValue, " + fields[ 0 ] + ");\n";
+						output += "  SET_CONSTANT(env, *jsEnum, " + fields[ 0 ] + ", double);\n";
 					} else if ( fields[ 0 ].match( /^#(if|endif)/ ) ) {
 						output += line + "\n";
 					}
@@ -54,11 +54,12 @@ function parseFileForEnums( destination, fileName ) {
 						.replace( startingBraceRegex, "" )
 						.replace( /\s*;.*$/, "" );
 					if ( exceptions.indexOf( enumName ) < 0 ) {
-						enumList.push( "  SET_ENUM(target, " + enumName + ");" );
+						enumList.push( "  SET_ENUM(env, exports, " + enumName + ");" );
 						fs.writeFileSync( destination,
 							[
-								"static Local<Object> bind_" + enumName + "() {",
-								"  Local<Object> returnValue = Nan::New<Object>();"
+								"static std::string bind_" + enumName +
+								"(napi_env env, napi_value *jsEnum) {",
+								"  NAPI_CALL_RETURN(env, napi_create_object(env, jsEnum));"
 							].join( "\n" ) + "\n",
 							{ flag: "a" } );
 					}
@@ -70,7 +71,7 @@ function parseFileForEnums( destination, fileName ) {
 				if ( line.match( /;$/ ) ) {
 					print = false;
 					if ( exceptions.indexOf( enumName ) < 0 ) {
-						fs.writeFileSync( destination, output + "\n  return returnValue;\n}\n",
+						fs.writeFileSync( destination, output + "\n  return std::string();\n}\n",
 							{ flag: "a" } );
 					}
 					output = "";
@@ -89,9 +90,10 @@ fs.writeFileSync( enumsCC,
 	{ flag: "a" } );
 
 fs.writeFileSync( enumsCC, [
-		"NAN_MODULE_INIT(InitEnums) {",
+		"std::string InitEnums(napi_env env, napi_value exports) {",
 		parseFileForEnums( enumsCC, includePaths[ "octypes.h" ] ),
 		parseFileForEnums( enumsCC, includePaths[ "ocpresence.h" ] ),
+		"  return std::string();",
 		"}"
 	].join( "\n" ) + "\n",
 	{ flag: "a" } );
