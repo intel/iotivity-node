@@ -14,8 +14,7 @@
     "iot"
   ],
   "scripts": {
-    "test": "grunt test",
-    "postinstall": "node build-scripts/postinstall.js"
+    "test": "grunt test"
   },
   "gypfile": true,
   "dependencies": {

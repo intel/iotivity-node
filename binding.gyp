@@ -228,6 +228,7 @@
 				"src/structures/oc-rep-payload/to-c.cc",
 				"src/structures/oc-rep-payload/to-js.cc"
 			],
+			"type": "shared_library",
 			"dependencies": [
                           "csdk",
                           "generateconstants",

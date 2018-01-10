@@ -1,96 +1,43 @@
-sudo: false
+sudo: required
+
 language: cpp
 
-matrix:
-  fast_finish: true
-  include:
-  - env: NODE_VERSION=4.0 TEST_SCRIPT=lint
-    os: linux
-  - env: NODE_VERSION=lts/argon TEST_SCRIPT=test
-    os: linux
-    addons: &1
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - libcurl4-openssl-dev
-        - uuid-dev
-        - g++-4.8
-        - libboost-all-dev
-  - env: NODE_VERSION=lts/argon TEST_SCRIPT=test
-    os: osx
-    osx_image: xcode8.2
-  - env: NODE_VERSION=lts/boron TEST_SCRIPT=test
-    os: linux
-    addons: *1
-  - env: NODE_VERSION=lts/boron TEST_SCRIPT=test
-    os: osx
-    osx_image: xcode8.2
-  - env: NODE_VERSION=5.5.0 TEST_SCRIPT=test
-    os: linux
-    addons: *1
-  - env: NODE_VERSION=5.5.0 TEST_SCRIPT=test
-    os: osx
-    osx_image: xcode8.2
-  - env: NODE_VERSION=stable TEST_SCRIPT=test
-    os: linux
-    addons: *1
-  - env: NODE_VERSION=stable TEST_SCRIPT=test
-    os: osx
-    osx_image: xcode8.2
-  - env: NODE_VERSION=7 TEST_SCRIPT=test
-    os: linux
-    addons: *1
-  - env: NODE_VERSION=7 TEST_SCRIPT=test
-    os: osx
-    osx_image: xcode8.2
-  - env: NODE_VERSION=stable TEST_SCRIPT=publish-coverage
-    os: linux
-    addons: *1
-  - env: NODE_VERSION=8.4.0 TEST_SCRIPT=test SET_NODE_OPTIONS=--napi-modules
-    os: linux
-    addons: *1
-  - env: NODE_VERSION=8.4.0 TEST_SCRIPT=test SET_NODE_OPTIONS=--napi-modules
-    os: osx
-    osx_image: xcode8.2
-  allow_failures:
-  - env: NODE_VERSION=stable TEST_SCRIPT=publish-coverage
-    os: linux
-    addons: *1
-install:
-- |
-  if test "x${TRAVIS_OS_NAME}x" = "xlinuxx"; then
-    export CXX="g++-4.8" CC="gcc-4.8"
-  fi
-- rm -rf ~/.nvm
-- wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.31.7/install.sh |
-  bash
-- source ~/.nvm/nvm.sh
-- nvm install "${NODE_VERSION}"
-- |
-  if test "x${TRAVIS_OS_NAME}x" = "xosxx"; then
-    sudo easy_install pip
-    sudo pip install --egg 'scons<3.0.0'
-  fi
-- node --version
-- npm --version
-- npm install -g grunt-cli
-- |
-  if test "x${TEST_SCRIPT}x" = "xtestx" -o "x${TEST_SCRIPT}x" = "xpublish-coveragex"; then
-    npm install -g "$(npm pack)"
-  fi
-- npm install --ignore-scripts
-- |
-  if test "x${TEST_SCRIPT}x" = "xtestx" -o "x${TEST_SCRIPT}x" = "xpublish-coveragex"; then
-    npm link iotivity-node
-  fi
-script:
-- NODE_OPTIONS="${SET_NODE_OPTIONS}" grunt "${TEST_SCRIPT}" --ci
+os: linux
 
-# Send a notification to chat.freenode.net#iotivity-node
-# The server#channel-name is encrypted so notifications are only sent from the
-# main repo and not from forks or PRs.
-notifications:
-  irc:
-    channels:
-    - secure: i1PXMQry2x9WqT2Iv9Lq66+VHkettjrDhiC1C6ha/yPI5P9sNGZmad0hiBtg7Z8NfmaFuWUqwFI5fnw/iM1hqQKMQVIuYLsLdagZLldtYcUR3Un+2yVsn9PFj5PnS2kd9aUBOO+7YOt1v6snRGGJQsjlD5cAKaZ7QZrw2OpMVsjLmS1TjrOZz6jPkZUqixVo+lnnWTKIWjx7LIkaCiihPUn1CDV5ke3s9BLp/9NhCe77wa2qq1AXIjrjUYPif9kogqnIKJW/KTqvgcixOTxJqjNIC/dKWU8UEyH3ZeH9JxeSrZwxztTOHCgfcDklanZrI9uCUOMOa1Vs/MxW8FLxr09SsjYWH4GYjQpb5RRzHvRLYlL1VukdUz1M5nr0riImrDDumigxxGNpmgLprQ9w1jkMK1AnDtAhA8CBkad+D0gkuwRej53izi285zPu9MV/DTSW1zGmYo33GoyV3pbkuItdCEERmC7aoY4cRTLjjdOL8dJUjpZ8R7mGJRZWEtDl629eSbDhciA8LM9SCiXLrT73wiHtSO/fE/BPJy2QBOQfbtEx7HCQ3yNyPFmvkE/cZts0dtF5WAOhw6xSDXuNKq+rdk3bv133GOoqoTZ7rs1R11fKPOZG6MKDyyGrSHB3vG6u1L+9blq9CYTvfncka/u7HVh9RV1cuzCuYfY7yog=
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "hGuLid4OBUhZmy1phVoNkycc1QjoMHXLpSK5mnglEgx1/pGPOxmaZ4Aik625iTkQNFtl4yj1a7Y1Dd/kIjjut8ohjvg3Eu08FZ+Ug5suLpqHPxlECZHYuHT4diuHO3ZFMLQeS3A+q1I07azN06zJvqtNFQYPmMFHE/5+pA/8Baq3MdmEdUxXioFBCOnEqJmlzEp+PByxeKDRZrE9lDXSWLZUEN+5H8tPjpPBR7qjyWdXmPo9G2HM3JzyclJ4MhSzE0REj11q4mkNKygWOJMOl4b2by/Csm2rZH6gciY2aPJLFkukKqDQERt/PI4lyqspqmVw8aJfp1NIhqkk11H6qXE0ypBOdc9xPT5I/A55ydnvPJxD1W34oSnex5L5MpfThw0UAuY6I7xdwAccEtUODFE2s280BmAfC2u7ktwbvkIi+KUfCfE69BWp1eD4i2/exTwd+GRmDUEJIRiJF0yJKm+m+YSAIljoTytFtVyjfG/ge1pC12SEZ8XUFFPewIq/qz7e841inV4glgW8vqBIEH41QIUbPXe94RM1TvqPNMIrIz8Gaikl5nrvLw4bwmRNnioxMBM9pHUbCiMqFy2qhXIfnt8nUFAcp+E4eV6bANf6waMyEBpTIBUxoJD4K+dH8t816kPhWev/RrbsLBuokWCTtLSNXCpsUYgWHQicT/c="
+   - COVERITY_SCAN_PROJECT_NAME=otcshare/iotivity-node
+   - COVERITY_SCAN_NOTIFICATION_EMAIL=gabriel.schulhof@intel.com
+   - COVERITY_SCAN_BRANCH_PATTERN="${TRAVIS_BRANCH}"
+   - COVERITY_SCAN_BUILD_COMMAND="npm install"
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - libcurl4-openssl-dev
+    - uuid-dev
+    - g++-4.8
+    - libboost-all-dev
+
+before_install:
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+install:
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 20
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20
+  - sudo update-alternatives --config gcc
+  - sudo update-alternatives --config g++
+  - gcc --version
+  - g++ --version
+  - rm -rf ~/.nvm
+  - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.31.7/install.sh | bash
+  - source ~/.nvm/nvm.sh
+  - nvm install stable
+
+script:
+  - wget -qO- 'https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh' | bash
