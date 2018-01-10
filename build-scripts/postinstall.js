@@ -47,12 +47,14 @@ if ( !isDependency ) {
 shelljs.mv( addonAbsoluteName, repoPaths.root );
 if ( os.platform() === "win32" ) {
 	shelljs.mv( path.join( addonAbsolutePath, "octbstack.dll" ), repoPaths.root );
+	shelljs.mv( path.join( addonAbsolutePath, "resource_directory.dll" ), repoPaths.root );
 }
 shelljs.rm( "-rf", path.join( repoPaths.root, "build" ) );
 shelljs.mkdir( "-p", addonAbsolutePath );
 shelljs.mv( path.join( repoPaths.root, addonName ), addonAbsolutePath );
 if ( os.platform() === "win32" ) {
 	shelljs.mv( path.join( repoPaths.root, "octbstack.dll" ), addonAbsolutePath );
+	shelljs.mv( path.join( repoPaths.root, "resource_directory.dll" ), addonAbsolutePath );
 }
 
 // Purge any and all files not needed after building

@@ -20,6 +20,7 @@
 
 extern "C" {
 #include <ocstack.h>
+#include <rd_server.h>
 }
 
 std::string getDateCtor(napi_env env, napi_value *result) {
@@ -70,6 +71,14 @@ napi_value bind_OCStartPresence(napi_env env, napi_callback_info info) {
 
 napi_value bind_OCStopPresence(napi_env env, napi_callback_info info) {
   C2J_SET_RETURN_VALUE(env, info, double, ((double)OCStopPresence()));
+}
+
+napi_value bind_OCRDStart(napi_env env, napi_callback_info info) {
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)OCRDStart()));
+}
+
+napi_value bind_OCRDStop(napi_env env, napi_callback_info info) {
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)OCRDStop()));
 }
 
 napi_value bind_OCGetNumberOfResources(napi_env env, napi_callback_info info) {

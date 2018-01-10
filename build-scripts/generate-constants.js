@@ -74,8 +74,10 @@ fs.writeFileSync( constantsCC, [
 	"std::string InitConstants(napi_env env, napi_value exports) {",
 	"  // ocstackconfig.h: Stack configuration",
 	parseFileForConstants( includePaths[ "ocstackconfig.h" ] ),
-	"  // octypes.h: Definitions",
+	"  // octypes.h: Type definitions",
 	parseFileForConstants( includePaths[ "octypes.h" ] ),
+	"  // octypes.h: Type definitions",
+	parseFileForConstants( includePaths[ "rd_client.h" ] ),
 	"  return std::string();",
 	"}"
 ].join( "\n" ) );
