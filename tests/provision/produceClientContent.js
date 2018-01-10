@@ -24,6 +24,22 @@ module.exports = function produceClientContent( item, creds ) {
 						{ href: "/oic/sec/doxm" }
 					],
 					permission: 2
+				},
+				{
+					aceid: 3,
+					subject: { conntype: "anon-clear" },
+					resources: [
+						{ href: "/oic/rd" }
+					],
+					permission: 31
+				},
+				{
+					aceid: 4,
+					subject: { conntype: "auth-crypt" },
+					resources: [
+						{ href: "/oic/rd" }
+					],
+					permission: 31
 				}
 			],
 			rowneruuid: item.deviceUuid

@@ -193,7 +193,7 @@ if ( buildIotivity ) {
 	.concat( process.env.npm_config_debug === "true" ?
 		[ "RELEASE=False", "LOGGING=False" ] : [] )
 	.concat( [ "logger", "octbstack", "connectivity_abstraction", "coap", "c_common", "ocsrm",
-		"routingmanager", "resource/csdk/security/tool"
+		"routingmanager", "resource/csdk/security/tool", "resource_directory"
 	] );
 
 	// Node 5 on Windows seems unable to run batch files
@@ -229,6 +229,12 @@ shelljs.cp(
 	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocstackconfig.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "stack", "include", "ocstack.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "include", "octypes.h" ),
+	path.join( repoPaths.iotivity, "resource", "csdk", "resource-directory", "include",
+		"rd_client.h" ),
+	path.join( repoPaths.iotivity, "resource", "csdk", "resource-directory", "include",
+		"rd_server.h" ),
+	path.join( repoPaths.iotivity, "resource", "csdk", "resource-directory", "include",
+		"rd_database.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "security", "include", "experimental",
 		"securevirtualresourcetypes.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "platform_features.h" ),
