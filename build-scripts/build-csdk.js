@@ -76,6 +76,8 @@ function checkRevision() {
 var binariesSource, installWinHeaders, tinycborPath, userAgentParts, platform, localArch,
 	targetArch, sysVersion, installBinaries, mbedtlsPath;
 
+var buildIotivity = ( process.argv[ 2 ] === "build" );
+
 // Map npm arch to iotivity arch - different mapping in each OS, it seems :/
 // This can get complicated ...
 var archMap = {
@@ -103,7 +105,7 @@ var csdkRevision = process.env.CSDK_REVISION ||
 		.replace(  /^([^-]*-)pre-(.*$)/, "$2" );
 
 // We assume that, if the path is there, its contents are also ready to go
-if ( checkRevision() && fs.existsSync( repoPaths.installPrefix ) ) {
+if ( checkRevision() && fs.existsSync( repoPaths.installPrefix ) && !buildIotivity ) {
 	return;
 }
 
@@ -130,9 +132,11 @@ if ( platform === "darwin" ) {
 	sysVersion = null;
 }
 
-// If the iotivity source tree is in place, we assume it's build and ready to go. This reduces this
-// script to an install.
+// If the iotivity source tree is in place, we assume it's built and ready to go. This reduces this
+// script to an install, unless buildIotivity was explicitly set by passing "build" on the command
+// line.
 if ( !fs.existsSync( repoPaths.iotivity ) ) {
+	buildIotivity = true;
 
 	if ( csdkRevision.match( /[0-9a-f]{40}/ ) ) {
 
@@ -169,6 +173,9 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 	// Check out known-good commitid of tinycbor
 	run( "git", [ "checkout", "31c7f81d45d115d2007b1c881cbbd3a19618465c" ],
 		{ cwd: tinycborPath } );
+}
+
+if ( buildIotivity ) {
 
 		// Build
 	var sconsCommand = "scons";
