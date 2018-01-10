@@ -17,13 +17,15 @@
 #ifndef __IOTIVITY_NODE_OCDEVADDR_H__
 #define __IOTIVITY_NODE_OCDEVADDR_H__
 
-#include <v8.h>
+#include "../common.h"
+
 extern "C" {
 #include <ocstack.h>
 }
 
-// Fills in @address
-bool c_OCDevAddr(v8::Local<v8::Object> jsDevAddr, OCDevAddr *address);
-v8::Local<v8::Object> js_OCDevAddr(OCDevAddr *address);
+std::string c_OCDevAddr(napi_env env, napi_value source,
+                        OCDevAddr *destination);
+std::string js_OCDevAddr(napi_env env, OCDevAddr *source,
+                         napi_value *destination);
 
 #endif /* __IOTIVITY_NODE_OCDEVADDR_H__ */

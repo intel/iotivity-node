@@ -17,12 +17,14 @@
 #ifndef __IOTIVITY_NODE_OCPAYLOAD_H__
 #define __IOTIVITY_NODE_OCPAYLOAD_H__
 
-#include <v8.h>
+#include "../common.h"
+
 extern "C" {
 #include <ocstack.h>
 }
 
-v8::Local<v8::Value> js_OCPayload(OCPayload *payload);
-bool c_OCPayload(v8::Local<v8::Object> jsPayload, OCPayload **p_payload);
+std::string js_OCPayload(napi_env env, OCPayload *payload, napi_value *result);
+std::string c_OCPayload(napi_env env, napi_value source,
+                        OCPayload **destination);
 
 #endif /* __IOTIVITY_NODE_OCCLIENTRESPONSE_H__ */

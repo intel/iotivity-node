@@ -17,12 +17,12 @@
 #ifndef __IOTIVITY_NODE_OCENTITYHANDLERRESPONSE_H__
 #define __IOTIVITY_NODE_OCENTITYHANDLERRESPONSE_H__
 
-#include <v8.h>
+#include "../common.h"
 extern "C" {
 #include <ocstack.h>
 }
 
-bool c_OCEntityHandlerResponse(v8::Local<v8::Object>,
-                               OCEntityHandlerResponse *p_response);
+std::string c_OCEntityHandlerResponse(napi_env env, napi_value value,
+                                      OCEntityHandlerResponse *response);
 
 #endif /* __IOTIVITY_NODE_OCENTITYHANDLERRESPONSE_H__ */

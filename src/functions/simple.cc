@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <nan.h>
+#include <node_api.h>
 #include <string>
 #include "../common.h"
 
@@ -22,176 +22,153 @@ extern "C" {
 #include <ocstack.h>
 }
 
-using namespace v8;
+std::string getDateCtor(napi_env env, napi_value *result) {
+  napi_value global;
+  NAPI_CALL_RETURN(env, napi_get_global(env, &global));
+  NAPI_CALL_RETURN(env, napi_get_named_property(env, global, "Date", result));
+
+  return std::string();
+}
 
 // From
 // http://stackoverflow.com/questions/34158318/are-there-some-v8-functions-to-create-a-c-v8date-object-from-a-string-like#answer-36200373
-Local<Date> dateFromString(const char *str) {
-  static Nan::Callback dateConstructor;
-  if (dateConstructor.IsEmpty()) {
-    Local<Date> date = Nan::New<Date>(0).ToLocalChecked();
-    dateConstructor.Reset(Local<Function>::Cast(
-        Nan::Get(date, Nan::New("constructor").ToLocalChecked())
-            .ToLocalChecked()));
-  }
-  Local<Value> jsString = Nan::New(str).ToLocalChecked();
-  return Local<Date>::Cast(
-      Nan::NewInstance(*dateConstructor, 1, &jsString).ToLocalChecked());
+std::string dateFromString(napi_env env, const char *str, napi_value *result) {
+  napi_value dateCtor, string;
+  HELPER_CALL_RETURN(getDateCtor(env, &dateCtor));
+  NAPI_CALL_RETURN(env, napi_create_string_utf8(env, str, -1, &string));
+  NAPI_CALL_RETURN(env, napi_new_instance(env, dateCtor, 1, &string, result));
+
+  return std::string();
 }
 
-NAN_METHOD(bind_OCInit) {
-  VALIDATE_ARGUMENT_COUNT(info, 3);
-  VALIDATE_ARGUMENT_TYPE_OR_NULL(info, 0, IsString);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsUint32);
-  VALIDATE_ARGUMENT_TYPE(info, 2, IsUint32);
-
-  info.GetReturnValue().Set(Nan::New(OCInit(
-      (const char *)(info[0]->IsString() ? (*String::Utf8Value(info[0])) : 0),
-      (uint16_t)Nan::To<uint32_t>(info[1]).FromJust(),
-      (OCMode)Nan::To<uint32_t>(info[2]).FromJust())));
+napi_value bind_OCInit(napi_env env, napi_callback_info info) {
+  J2C_DECLARE_ARGUMENTS(env, info, 3);
+  J2C_GET_STRING_TRACKED_JS_THROW(ip, env, arguments[0], true, "address");
+  J2C_DECLARE_VALUE_JS_THROW(uint16_t, port, env, arguments[1], napi_number,
+                             "port", uint32, uint32_t);
+  J2C_DECLARE_VALUE_JS_THROW(OCMode, mode, env, arguments[2], napi_number,
+                             "mode", uint32, uint32_t);
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)OCInit(ip, port, mode)));
 }
 
-NAN_METHOD(bind_OCStop) { info.GetReturnValue().Set(Nan::New(OCStop())); }
-
-NAN_METHOD(bind_OCProcess) { info.GetReturnValue().Set(Nan::New(OCProcess())); }
-
-NAN_METHOD(bind_OCStartPresence) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
-
-  info.GetReturnValue().Set(Nan::New(
-      OCStartPresence((uint32_t)Nan::To<uint32_t>(info[0]).FromJust())));
+napi_value bind_OCStop(napi_env env, napi_callback_info info) {
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)OCStop()));
 }
 
-NAN_METHOD(bind_OCStopPresence) {
-  info.GetReturnValue().Set(Nan::New(OCStopPresence()));
+napi_value bind_OCProcess(napi_env env, napi_callback_info info) {
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)OCProcess()));
 }
 
-NAN_METHOD(bind_OCGetNumberOfResources) {
-  VALIDATE_ARGUMENT_COUNT(info, 1);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsObject);
+napi_value bind_OCStartPresence(napi_env env, napi_callback_info info) {
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
 
-  OCStackResult result;
-  uint8_t resourceCount = 0;
+  J2C_DECLARE_VALUE_JS_THROW(uint32_t, ttl, env, arguments[0], napi_number,
+                             "ttl", uint32, uint32_t);
 
-  result = OCGetNumberOfResources(&resourceCount);
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)OCStartPresence(ttl)));
+}
+
+napi_value bind_OCStopPresence(napi_env env, napi_callback_info info) {
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)OCStopPresence()));
+}
+
+napi_value bind_OCGetNumberOfResources(napi_env env, napi_callback_info info) {
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[0], napi_object, "receptacle");
+
+  uint8_t resourceCount;
+  OCStackResult result = OCGetNumberOfResources(&resourceCount);
 
   if (result == OC_STACK_OK) {
-    Nan::Set(Nan::To<Object>(info[0]).ToLocalChecked(),
-             Nan::New("count").ToLocalChecked(), Nan::New(resourceCount));
+    C2J_SET_PROPERTY_THROW(env, arguments[0], "count", double,
+                           ((double)resourceCount));
   }
 
-  info.GetReturnValue().Set(Nan::New(result));
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)result));
 }
 
-NAN_METHOD(bind_OCGetServerInstanceIDString) {
-  VALIDATE_ARGUMENT_COUNT(info, 0);
-
-  const char *idString = OCGetServerInstanceIDString();
-
-  info.GetReturnValue().Set(idString ? (Nan::New(idString).ToLocalChecked())
-                                     : Nan::EmptyString());
+napi_value bind_OCGetServerInstanceIDString(napi_env env,
+                                            napi_callback_info info) {
+  const char *uuid = OCGetServerInstanceIDString();
+  C2J_SET_RETURN_VALUE(env, info, string_utf8, uuid, strlen(uuid));
 }
 
-NAN_METHOD(bind_OCGetPropertyValue) {
-  VALIDATE_ARGUMENT_COUNT(info, 3);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
-  VALIDATE_ARGUMENT_TYPE(info, 2, IsObject);
+napi_value bind_OCGetPropertyValue(napi_env env, napi_callback_info info) {
+  J2C_DECLARE_ARGUMENTS(env, info, 3);
+  J2C_DECLARE_VALUE_JS_THROW(OCPayloadType, payloadType, env, arguments[0],
+                             napi_number, "payload type", uint32, uint32_t);
+  J2C_GET_STRING_TRACKED_JS_THROW(prop_name, env, arguments[1], true,
+                                  "property name");
+  J2C_VALIDATE_VALUE_TYPE_THROW(env, arguments[2], napi_object, "receptacle");
 
-  String::Utf8Value propName(info[1]);
-  OCPayloadType payloadType =
-      (OCPayloadType)Nan::To<uint32_t>(info[0]).FromJust();
   OCStackResult returnValue;
   void *result = nullptr;
+  napi_value jsResult = nullptr;
 
-  Local<Value> jsResult;
-
-  returnValue =
-      OCGetPropertyValue(payloadType, (const char *)*propName, &result);
+  returnValue = OCGetPropertyValue(payloadType, prop_name, &result);
 
   if (returnValue == OC_STACK_OK) {
     // string conditions
     if ((payloadType == PAYLOAD_TYPE_DEVICE &&
-         !strcmp(*propName, OC_RSRVD_SPEC_VERSION)) ||
+         !strcmp(prop_name, OC_RSRVD_SPEC_VERSION)) ||
         (payloadType == PAYLOAD_TYPE_DEVICE &&
-         !strcmp(*propName, OC_RSRVD_DEVICE_NAME)) ||
+         !strcmp(prop_name, OC_RSRVD_DEVICE_NAME)) ||
         (payloadType == PAYLOAD_TYPE_PLATFORM &&
-         !strcmp(*propName, OC_RSRVD_MFG_URL)) ||
+         !strcmp(prop_name, OC_RSRVD_MFG_URL)) ||
         (payloadType == PAYLOAD_TYPE_PLATFORM &&
-         !strcmp(*propName, OC_RSRVD_MFG_NAME))) {
-      jsResult = Nan::New((char *)result).ToLocalChecked();
+         !strcmp(prop_name, OC_RSRVD_MFG_NAME))) {
+      NAPI_CALL_THROW(env, napi_create_string_utf8(env, (const char *)result,
+                                                   -1, &jsResult));
 
       // string list conditions
     } else if (payloadType == PAYLOAD_TYPE_DEVICE &&
-               !strcmp(*propName, OC_RSRVD_DATA_MODEL_VERSION)) {
-      jsResult = js_StringArray((OCStringLL *)result);
+               !strcmp(prop_name, OC_RSRVD_DATA_MODEL_VERSION)) {
+      HELPER_CALL_THROW(env,
+                        js_StringArray(env, (OCStringLL *)result, &jsResult));
 
       // date conditions
     } else if ((payloadType == PAYLOAD_TYPE_PLATFORM &&
-                !strcmp(*propName, OC_RSRVD_MFG_DATE)) ||
+                !strcmp(prop_name, OC_RSRVD_MFG_DATE)) ||
                (payloadType == PAYLOAD_TYPE_PLATFORM &&
-                !strcmp(*propName, OC_RSRVD_SYSTEM_TIME))) {
-      jsResult = dateFromString((const char *)result);
+                !strcmp(prop_name, OC_RSRVD_SYSTEM_TIME))) {
+      HELPER_CALL_THROW(env,
+                        dateFromString(env, (const char *)result, &jsResult));
     }
 
-    Nan::Set(Local<Object>::Cast(info[2]), Nan::New("value").ToLocalChecked(),
-             jsResult);
+    NAPI_CALL_THROW(
+        env, napi_set_named_property(env, arguments[2], "value", jsResult));
   }
-  info.GetReturnValue().Set(Nan::New(returnValue));
+
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)returnValue));
 }
 
-NAN_METHOD(bind_OCSetPropertyValue) {
-  VALIDATE_ARGUMENT_COUNT(info, 3);
-  VALIDATE_ARGUMENT_TYPE(info, 0, IsUint32);
-  VALIDATE_ARGUMENT_TYPE(info, 1, IsString);
-  if (!(info[2]->IsString() || info[2]->IsArray() || info[2]->IsDate())) {
-    return Nan::ThrowTypeError(
-        (std::string("Property value ") +
-         std::string((const char *)*String::Utf8Value(info[1])) +
-         std::string(" must be a string, an array, or a date"))
-            .c_str());
+napi_value bind_OCSetPropertyValue(napi_env env, napi_callback_info info) {
+  J2C_DECLARE_ARGUMENTS(env, info, 3);
+  J2C_DECLARE_VALUE_JS_THROW(OCPayloadType, payloadType, env, arguments[0],
+                             napi_number, "payload type", uint32, uint32_t);
+  J2C_GET_STRING_TRACKED_JS_THROW(prop_name, env, arguments[1], true,
+                                  "property name");
+
+  napi_valuetype prop_type = napi_undefined;
+  NAPI_CALL_THROW(env, napi_typeof(env, arguments[2], &prop_type));
+  if (prop_type != napi_string) {
+    bool is_date = false;
+    napi_value dateCtor;
+    HELPER_CALL_THROW(env, getDateCtor(env, &dateCtor));
+    NAPI_CALL_THROW(env,
+                    napi_instanceof(env, arguments[2], dateCtor, &is_date));
+    JS_ASSERT(is_date == true,
+              std::string("Property value ") + std::string(prop_name) +
+                  std::string(" must be a string or a date"),
+              THROW_BODY(env, nullptr));
+    NAPI_CALL_THROW(env,
+                    napi_coerce_to_string(env, arguments[2], &arguments[2]));
   }
 
-  OCStackResult returnValue;
+  J2C_GET_STRING_TRACKED_JS_THROW(prop_value, env, arguments[2], true,
+                                  "property value");
+  OCStackResult returnValue =
+      OCSetPropertyValue(payloadType, prop_name, (const void *)prop_value);
 
-  if (info[2]->IsString()) {
-    returnValue =
-        OCSetPropertyValue((OCPayloadType)Nan::To<uint32_t>(info[0]).FromJust(),
-                           (const char *)*String::Utf8Value(info[1]),
-                           (const void *)*String::Utf8Value(info[2]));
-  } else if (info[2]->IsArray()) {
-    OCStringLL *start = 0, *current = 0, *previous = 0;
-    Local<Array> jsList = Local<Array>::Cast(info[2]);
-    size_t index, length = jsList->Length();
-    for (index = 0; index < length; index++) {
-      current = new OCStringLL;
-      current->value = strdup((const char *)*String::Utf8Value(
-          Nan::Get(jsList, index).ToLocalChecked()));
-      current->next = 0;
-      if (previous) {
-        previous->next = current;
-      }
-      previous = current;
-      if (!start) {
-        start = previous;
-      }
-    }
-    returnValue = OCSetPropertyValue(
-        (OCPayloadType)Nan::To<uint32_t>(info[0]).FromJust(),
-        (const char *)*String::Utf8Value(info[1]), (const void *)start);
-
-    for (current = start; start; current = start) {
-      free(current->value);
-      start = current->next;
-      delete current;
-    }
-  } else {
-    returnValue =
-        OCSetPropertyValue((OCPayloadType)Nan::To<uint32_t>(info[0]).FromJust(),
-                           (const char *)*String::Utf8Value(info[1]),
-                           (const char *)*String::Utf8Value(
-                               Nan::To<String>(info[2]).ToLocalChecked()));
-  }
-  info.GetReturnValue().Set(Nan::New(returnValue));
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)returnValue));
 }

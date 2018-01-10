@@ -15,8 +15,17 @@
  */
 
 #include "handles.h"
+
+napi_value JSHandle_constructor(napi_env env, napi_callback_info info) {
+  return 0;
+}
+
+std::map<OCResourceHandle, napi_ref> JSOCResourceHandle::handles;
+
+/*
 #include <nan.h>
 #include "../common.h"
+#include "handles.h"
 
 using namespace v8;
 
@@ -51,3 +60,4 @@ bool fillCArrayFromJSArray(unsigned char *bytes, uint32_t length,
 
   return true;
 }
+*/

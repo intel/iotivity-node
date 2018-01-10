@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-#include <nan.h>
-
 #include "enums.h"
 
-using namespace v8;
+extern "C" {
+#include <ocstack.h>
+}
 
-#define SET_ENUM(destination, enumName)                                       \
-  Nan::DefineOwnProperty(                                                     \
-      (destination), Nan::New(#enumName).ToLocalChecked(), bind_##enumName(), \
-      (v8::PropertyAttribute)(v8::ReadOnly | v8::DontDelete));
+#define SET_CONSTANT(env, destination, name, type) \
+  C2J_SET_PROPERTY_RETURN((env), (destination), #name, type, name)
+
+#define SET_ENUM(env, destination, enumName)                              \
+  do {                                                                    \
+    napi_value jsEnum;                                                    \
+    HELPER_CALL_RETURN(bind_##enumName((env), &jsEnum));                  \
+    NAPI_CALL_RETURN((env), napi_set_named_property((env), (destination), \
+                                                    #enumName, jsEnum));  \
+  } while (0)
 
 // The rest of this file is generated
