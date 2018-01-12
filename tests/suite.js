@@ -19,6 +19,7 @@ var QUnit,
 		map: require( "lodash.map" ),
 		each: require( "lodash.foreach" ),
 		bind: require( "lodash.bind" ),
+		without: require( "lodash.without" ),
 		extend: require( "lodash.assignin" )
 	},
 	childProcess = require( "child_process" ),
@@ -33,18 +34,6 @@ var QUnit,
 		}
 		return QUnit;
 	};
-
-function havePromises() {
-	var nodeVersion = _.map(
-		process.versions.node.split( "." ),
-		function( item ) {
-			return +item;
-		} );
-
-	return ( nodeVersion.length > 1 &&
-		( nodeVersion[ 0 ] > 0 ||
-		nodeVersion[ 0 ] === 0 && nodeVersion[ 1 ] > 11 ) );
-}
 
 // Spawn a single child and process its stdout.
 function spawnOne( assert, options ) {
@@ -270,12 +259,27 @@ function runTestSuites( files ) {
 }
 
 // Run tests. If no tests were specified on the command line, we scan the tests directory and run
-// all the tests we find therein.
-runTestSuites( ( ( process.argv.length > 3 ) ?
-	( _.map( process.argv[ 3 ].split( "," ), function( item ) {
+// all the tests we find therein. If the command line starts with a "!", we subtract from the
+// contents of the tests/ the list specified on the command line.
+runTestSuites( ( function assembleTestList( inSubdirectory ) {
+		return ( process.argv.length > 3 ) ?
+			( process.argv[ 3 ].substr( 0, 1 ) === "!" ) ?
+
+				// Test list was given and starts with a "!" - subtract tests from list.
+				_.without.apply( _,
+					[ inSubdirectory ].concat( process.argv[ 3 ].substr( 1 ).split( "," ) ) ) :
+
+				// Test list was given and does not start with a "!" - use.
+				process.argv[ 3 ].split( "," ) :
+
+			// Test list was not given - use subdirectory contents.
+			inSubdirectory;
+	} )( fs.readdirSync( path.join( __dirname, "tests" ) ) )
+
+	// Convert test list to list of absolute paths to the test directories.
+	.map( function( item ) {
 		return path.join( __dirname, "tests", item );
-	} ) ) :
-	( glob.sync( path.join( __dirname, "tests", ( havePromises() ? "" : "!(API)" ) + "*" ) ) ) ) );
+	} ) );
 
 process.on( "exit", function() {
 	var childIndex;
