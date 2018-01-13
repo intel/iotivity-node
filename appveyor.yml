@@ -29,6 +29,6 @@ test_script:
   - ps: npm install -g "$(npm pack)"
   - npm install --ignore-scripts
   - npm link iotivity-node
-  - grunt test --ci
+  - grunt test --suites="!API Retrieve Secure Resource" --ci
 
 build: off
