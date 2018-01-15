@@ -19,11 +19,7 @@
 
 #include <map>
 #include <memory>
-
-#include "../common.h"
-extern "C" {
-#include <ocstack.h>
-}
+#include "common.h"
 
 napi_value JSHandle_constructor(napi_env env, napi_callback_info info);
 
@@ -62,18 +58,15 @@ class JSHandle {
   }
 
   static std::string Get(napi_env env, napi_value jsValue, jsType **cData) {
-    napi_valuetype theType;
-    NAPI_CALL_RETURN(env, napi_typeof(env, jsValue, &theType));
-    if (theType != napi_object) {
-      return LOCAL_MESSAGE("Not an object");
-    }
+    J2C_VALIDATE_VALUE_TYPE_RETURN(env, jsValue, napi_object, "Handle");
+
     napi_value jsConstructor;
     HELPER_CALL_RETURN(InitClass(env, &jsConstructor));
     bool isInstanceOf;
     NAPI_CALL_RETURN(
         env, napi_instanceof(env, jsValue, jsConstructor, &isInstanceOf));
     if (!isInstanceOf) {
-      return LOCAL_MESSAGE(std::string("Not an object of type ") +
+      return LOCAL_MESSAGE(std::string("Handle is not an object of type ") +
                            jsType::jsClassName());
     }
     void *nativeDataRaw;
