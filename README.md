@@ -53,6 +53,7 @@ After installation using the steps above, you may want to run the iotivity-node 
 1. Run `npm -g install grunt-cli`
 0. Run `grunt test`
 
+On windows, run all the test suite except "API Retrieve Secure Resource" by command `grunt test --suites="!API Retrieve Secure Resource"`.
 The file [appveyor.yml](./appveyor.yml) provides an example of the commands necessary for setting up a Windows environment, and the file [.travis.yml](./.travis.yml) provides an example of the commands necessary for setting up the Linux and OSX environments.
 
 ### In more detail:
