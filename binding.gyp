@@ -110,11 +110,6 @@
 								"files": [
 									"<(module_root_dir)/iotivity-installed/lib/octbstack.dll"
 								]
-							}, {
-								"destination": "<(PRODUCT_DIR)",
-								"files": [
-									"<(module_root_dir)/iotivity-installed/lib/resource_directory.dll"
-								]
 							} ]
 						} ]
 					]
