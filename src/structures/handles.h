@@ -81,6 +81,7 @@ class JSHandle {
       NAPI_CALL_RETURN(env, napi_delete_reference(env, cData->callback));
     }
     if (cData->self) {
+      void *data = nullptr;
       if (!jsHandle) {
         NAPI_CALL_RETURN(env,
                          napi_get_reference_value(env, cData->self, &jsHandle));
@@ -89,8 +90,7 @@ class JSHandle {
           env, jsHandle, "stale",
           NAPI_CALL_RETURN(env, napi_get_boolean(env, true, &jsValue)));
       NAPI_CALL_RETURN(env, napi_delete_reference(env, cData->self));
-      NAPI_CALL_RETURN(
-          env, napi_wrap(env, jsHandle, nullptr, nullptr, nullptr, nullptr));
+      NAPI_CALL_RETURN(env, napi_remove_wrap(env, jsHandle, &data));
     }
     delete cData;
     return std::string();

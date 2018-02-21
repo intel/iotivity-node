@@ -28,13 +28,12 @@ extern "C" {
 
 // A line that looks like a stack frame from a JS exception
 #define SOURCE_LOCATION                                        \
-  (std::string("    at ") + std::string(__func__) +            \
+  (std::string("\n    at ") + std::string(__func__) +          \
    std::string(" (" __FILE__ ":") + std::to_string(__LINE__) + \
-   std::string(")\n"))
+   std::string(")"))
 
 // The top of what looks like a JS exception, but with native addresses
-#define LOCAL_MESSAGE(message) \
-  (std::string("") + message + "\n" + SOURCE_LOCATION)
+#define LOCAL_MESSAGE(message) (std::string("") + message + SOURCE_LOCATION)
 
 // Appends a frame to what looks like a JS exception. __resultingStatus is a
 // variable that carries the stack trace information. Most of the time
@@ -43,29 +42,27 @@ extern "C" {
 #define FAIL_STATUS (__resultingStatus + SOURCE_LOCATION)
 
 // Goes down the bail-with-stack-trace-like-string path if the condition fails.
-#define JS_ASSERT(condition, message, ...)                \
-  do {                                                    \
-    std::string __resultingStatus;                        \
-    if (!((condition))) {                                 \
-      __resultingStatus = std::string() + message + "\n"; \
-      __VA_ARGS__;                                        \
-    }                                                     \
+#define JS_ASSERT(condition, message, ...)         \
+  do {                                             \
+    std::string __resultingStatus;                 \
+    if (!((condition))) {                          \
+      __resultingStatus = std::string() + message; \
+      __VA_ARGS__;                                 \
+    }                                              \
   } while (0)
 
 // Converts a non-napi_ok status to a string that looks like an exception.
-#define NAPI_CALL(env, theCall, ...)                     \
-  do {                                                   \
-    napi_status status = theCall;                        \
-    if (status != napi_ok) {                             \
-      const napi_extended_error_info *error_info = 0;    \
-      napi_get_last_error_info((env), &error_info);      \
-      std::string __resultingStatus =                    \
-          std::string((status == napi_pending_exception) \
-                          ? PENDING_EXCEPTION            \
-                          : error_info->error_message) + \
-          "\n";                                          \
-      __VA_ARGS__;                                       \
-    }                                                    \
+#define NAPI_CALL(env, theCall, ...)                                       \
+  do {                                                                     \
+    napi_status status = theCall;                                          \
+    if (status != napi_ok) {                                               \
+      const napi_extended_error_info *error_info = 0;                      \
+      napi_get_last_error_info((env), &error_info);                        \
+      std::string __resultingStatus = std::string(                         \
+          (status == napi_pending_exception) ? PENDING_EXCEPTION           \
+                                             : error_info->error_message); \
+      __VA_ARGS__;                                                         \
+    }                                                                      \
   } while (0)
 
 // Bails if a helper returns a non-empty std::string. The __VA_ARGS__ either
@@ -178,44 +175,50 @@ extern "C" {
 
 // Macros used in helpers - they cause the function to return a std::string
 
-#define NAPI_CALL_RETURN(env, theCall) NAPI_CALL((env), theCall, FAIL_STATUS)
+#define NAPI_CALL_RETURN(env, theCall) \
+  NAPI_CALL((env), theCall, return FAIL_STATUS)
 
-#define HELPER_CALL_RETURN(theCall) HELPER_CALL(theCall, FAIL_STATUS)
+#define HELPER_CALL_RETURN(theCall) HELPER_CALL(theCall, return FAIL_STATUS)
 
 #define DECLARE_VALUE_TYPE_RETURN(varName, env, value) \
-  DECLARE_VALUE_TYPE(varName, (env), (value), FAIL_STATUS)
+  DECLARE_VALUE_TYPE(varName, (env), (value), return FAIL_STATUS)
 
 #define J2C_ASSIGN_PROPERTY_JS_RETURN(env, source, name, destination) \
-  J2C_ASSIGN_PROPERTY_JS((env), (source), (name), (destination), FAIL_STATUS)
+  J2C_ASSIGN_PROPERTY_JS((env), (source), (name), (destination),      \
+                         return FAIL_STATUS)
 
 #define J2C_DECLARE_PROPERTY_JS_RETURN(varName, env, source, name) \
-  J2C_DECLARE_PROPERTY_JS(varName, env, source, name, FAIL_STATUS)
+  J2C_DECLARE_PROPERTY_JS(varName, env, source, name, return FAIL_STATUS)
 
 #define J2C_VALIDATE_VALUE_TYPE_RETURN(env, value, typecheck, message) \
-  J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck), message, FAIL_STATUS)
+  J2C_VALIDATE_VALUE_TYPE((env), (value), (typecheck), message,        \
+                          return FAIL_STATUS)
 
 #define J2C_VALIDATE_IS_ARRAY_RETURN(env, theValue, nullOk, message) \
-  J2C_VALIDATE_IS_ARRAY((env), (theValue), (nullOk), message, FAIL_STATUS)
+  J2C_VALIDATE_IS_ARRAY((env), (theValue), (nullOk), message,        \
+                        return FAIL_STATUS)
 
 #define J2C_GET_STRING_RETURN(env, destination, source, nullOk, name) \
-  J2C_GET_STRING((env), (destination), (source), (nullOk), name, FAIL_STATUS)
+  J2C_GET_STRING((env), (destination), (source), (nullOk), name,      \
+                 return FAIL_STATUS)
 
 #define J2C_ASSIGN_STRING_JS_RETURN(env, destination, source, message) \
-  J2C_ASSIGN_STRING_JS((env), (destination), (source), message, FAIL_STATUS)
+  J2C_ASSIGN_STRING_JS((env), (destination), (source), message,        \
+                       return FAIL_STATUS)
 
 #define J2C_GET_STRING_JS_RETURN(env, destination, source, nullOk, message) \
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,      \
-                    FAIL_STATUS)
+                    return FAIL_STATUS)
 
 #define J2C_DECLARE_VALUE_JS_RETURN(cType, variableName, env, source, jsType, \
                                     message, getterSuffix, jsParameterType)   \
   J2C_DECLARE_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
-                       getterSuffix, jsParameterType, FAIL_STATUS)
+                       getterSuffix, jsParameterType, return FAIL_STATUS)
 
 #define J2C_ASSIGN_VALUE_JS_RETURN(cType, destination, env, source, jsType, \
                                    message, getterSuffix, jsParameterType)  \
   J2C_ASSIGN_VALUE_JS(cType, destination, env, source, jsType, message,     \
-                      getterSuffix, jsParameterType, FAIL_STATUS)
+                      getterSuffix, jsParameterType, return FAIL_STATUS)
 
 #define J2C_ASSIGN_MEMBER_VALUE_RETURN(env, destination, source, cType, name, \
                                        jsType, message, getterSuffix,         \
@@ -224,7 +227,7 @@ extern "C" {
     J2C_DECLARE_PROPERTY_JS_RETURN(jsValue, (env), (source), #name);          \
     J2C_ASSIGN_VALUE_JS(cType, (destination)->name, (env), jsValue, jsType,   \
                         std::string() + message + "." + #name, getterSuffix,  \
-                        jsParameterType, FAIL_STATUS);                        \
+                        jsParameterType, return FAIL_STATUS);                 \
   } while (0)
 
 #define C2J_SET_PROPERTY_CALL_RETURN(env, destination, name, call)        \
@@ -253,7 +256,7 @@ extern "C" {
 #define J2C_GET_STRING_TRACKED_JS_RETURN(varName, env, source, nullOk,   \
                                          message)                        \
   J2C_GET_STRING_TRACKED_JS(varName, (env), (source), (nullOk), message, \
-                            FAIL_STATUS)
+                            return FAIL_STATUS)
 
 // Macros used in bindings - they cause the function to throw and return void
 
