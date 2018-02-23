@@ -18,6 +18,8 @@ matrix:
   fast_finish: true
 
 install:
+  - ps: Get-NetAdapterBinding | where {$_.componentid -like "ms_tcpip6"} | Disable-NetAdapterBinding
+  - ps: Get-NetAdapterBinding
   - ps: Install-Product node $env:nodejs_version x64
   - pip install --egg "scons<3.0.0"
   - node --version
@@ -29,6 +31,6 @@ test_script:
   - ps: npm install -g "$(npm pack)"
   - npm install --ignore-scripts
   - npm link iotivity-node
-  - grunt test --suites="!API Retrieve Secure Resource" --ci
+  - grunt test --ci
 
 build: off
