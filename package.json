@@ -1,6 +1,6 @@
 {
   "name": "iotivity-node",
-  "version": "1.3.1-0",
+  "version": "1.3.1-1",
   "description": "IoTivity bindings",
   "repository": "https://github.com/otcshare/iotivity-node/",
   "license": "Apache-2.0",
@@ -54,7 +54,7 @@
     "grunt-esformatter": "^1.0.1",
     "grunt-eslint": "18.1.0",
     "grunt-istanbul": "^0.7.1",
-    "iot-js-api": "git+https://github.com/gabrielschulhof/iot-js-api-test-suite.git#secure-tests",
+    "iot-js-api": "git+https://github.com/intel/iot-js-api/#65d6995a15756715ec69a5e2ac4a644aca3c623d",
     "istanbul": "^0.4.5",
     "load-grunt-config": "^0.17.2",
     "load-grunt-tasks": "^3.2.0",
