@@ -26,7 +26,7 @@ var result, countReceptacle, initialResourceCount,
 	};
 
 // Report assertion count
-console.log( JSON.stringify( { assertionCount: 33 } ) );
+console.log( JSON.stringify( { assertionCount: 35 } ) );
 
 // Init
 result = iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
@@ -197,5 +197,11 @@ result = iotivity.OCDeleteResource( resourceHandleReceptacle.handle );
 testUtils.stackOKOrDie( "OCDeleteResource(parent)", result );
 testUtils.assert( "strictEqual", resourceHandleReceptacle.handle.stale, true,
 	"Resource handle is marked stale after deletion" );
+
+// Retrieve /oic/d by path and verify that it is /oic/d by checking its resource type
+result = iotivity.OCGetResourceHandleAtUri( "/oic/d" );
+testUtils.assert( "ok", !!result, "Able to retrieve /oic/d" );
+testUtils.assert( "strictEqual", iotivity.OCGetResourceTypeName( result, 0 ), "oic.wk.d",
+	"Resource retrieved by URI '/oic/d' has interface 'oic.wk.d'" );
 
 process.exit( 0 );

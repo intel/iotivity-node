@@ -53,9 +53,18 @@ napi_value bind_OCGetResourceProperties(napi_env env, napi_callback_info info) {
   do {                                                                      \
     OCResourceHandle localHandle = (handle);                                \
     if (localHandle) {                                                      \
-      napi_ref existingHandle = JSOCResourceHandle::handles[localHandle];   \
-      JS_ASSERT(existingHandle, "JS handle not found for native handle",    \
+      if (JSOCResourceHandle::handles.count(handle) == 0) {                 \
+        JSOCResourceHandle *cData = nullptr;                                \
+        napi_value jsHandle;                                                \
+        HELPER_CALL_THROW(env,                                              \
+                          JSOCResourceHandle::New(env, &jsHandle, &cData)); \
+        cData->data = handle;                                               \
+        HELPER_CALL_THROW(env, cData->Init(env, nullptr, jsHandle));        \
+      }                                                                     \
+      JS_ASSERT(JSOCResourceHandle::handles.count(localHandle) == 1,        \
+                "JS handle not found for native handle",                    \
                 THROW_BODY((env), 0));                                      \
+      napi_ref existingHandle = JSOCResourceHandle::handles[localHandle];   \
       napi_value jsHandle;                                                  \
       NAPI_CALL_THROW(                                                      \
           env, napi_get_reference_value((env), existingHandle, &jsHandle)); \
@@ -96,6 +105,13 @@ napi_value bind_OCGetResourceHandle(napi_env env, napi_callback_info info) {
   J2C_DECLARE_VALUE_JS_THROW(uint8_t, index, env, arguments[0], napi_number,
                              "index", uint32, uint32_t);
   RETURN_RESOURCE_HANDLE(env, OCGetResourceHandle(index));
+}
+
+napi_value bind_OCGetResourceHandleAtUri(napi_env env,
+                                         napi_callback_info info) {
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
+  J2C_GET_STRING_TRACKED_JS_THROW(uri, env, arguments[0], false, "uri");
+  RETURN_RESOURCE_HANDLE(env, OCGetResourceHandleAtUri(uri));
 }
 
 #define GET_COUNT_FROM_RESOURCE(api)                                           \
