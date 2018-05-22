@@ -23,21 +23,30 @@
 
 napi_value JSHandle_constructor(napi_env env, napi_callback_info info);
 
-template <class jsType, typename T>
-class JSHandle {
+class JSCallback {
  public:
-  T data;
   napi_ref callback;
-  napi_ref self;
   napi_env env;
-
-  JSHandle() : data(nullptr), callback(nullptr), self(nullptr), env(nullptr) {}
-
-  std::string Init(napi_env env, napi_value _callback, napi_value _self) {
+  JSCallback() : callback(nullptr), env(nullptr) {}
+  std::string Init(napi_env env, napi_value _callback) {
     if (_callback) {
       NAPI_CALL_RETURN(env,
-                       napi_create_reference(env, _callback, 1, &callback));
+          napi_create_reference(env, _callback, 1, &callback));
     }
+    return std::string();
+  }
+};
+
+template <class jsType, typename T>
+class JSHandle : public JSCallback {
+ public:
+  T data;
+  napi_ref self;
+
+  JSHandle() : JSCallback(), data(nullptr), self(nullptr) {}
+
+  std::string Init(napi_env env, napi_value _callback, napi_value _self) {
+    HELPER_CALL_RETURN(JSCallback::Init(env, _callback));
     if (_self) {
       NAPI_CALL_RETURN(env, napi_create_reference(env, _self, 1, &self));
     }
