@@ -1,13 +1,13 @@
 diff --git a/SConstruct b/SConstruct
-index 0da7e319c..75d0372ab 100644
+index 7908ecfdd..b76c0e90e 100644
 --- a/SConstruct
 +++ b/SConstruct
-@@ -62,40 +62,3 @@ build_dir = env.get('BUILD_DIR')
+@@ -62,36 +62,3 @@ build_dir = env.get('BUILD_DIR')
  
  # Build 'resource' sub-project
  SConscript(build_dir + 'resource/SConscript')
 -
--if target_os not in ['arduino','darwin','ios', 'android', 'msys_nt', 'windows']:
+-if target_os not in ['darwin','ios', 'android', 'msys_nt', 'windows']:
 -    SConscript(build_dir + 'examples/OICMiddle/SConscript')
 -
 -java_build = None
@@ -37,18 +37,14 @@ index 0da7e319c..75d0372ab 100644
 -#if env.GetOption('help'):
 -env.PrintTargets()
 -
--# Print bin upload command line (arduino only)
--if target_os == 'arduino':
--    env.UploadHelp()
--
 -# to install the generated pc file into custom prefix location
 -env.UserInstallTargetPCFile('iotivity.pc', 'iotivity.pc')
 diff --git a/resource/SConscript b/resource/SConscript
-index 3ec59999c..c11173486 100644
+index ef3785b5b..7e5adfaff 100644
 --- a/resource/SConscript
 +++ b/resource/SConscript
-@@ -42,21 +42,3 @@ SConscript('csdk/SConscript')
- if target_os not in ['arduino', 'darwin', 'ios']:
+@@ -44,23 +44,3 @@ if target_os not in ['darwin']:
+ 
      # Build liboc_logger
      SConscript('oc_logger/SConscript')
 -
@@ -59,21 +55,61 @@ index 3ec59999c..c11173486 100644
 -    # Build IoTivity Procedural Client API
 -    SConscript('IPCA/SConscript')
 -
--if target_os not in ['arduino','darwin','ios','android']:
+-if target_os not in ['darwin', 'ios', 'android']:
 -    # Build examples
 -    SConscript('examples/SConscript')
 -
 -if target_os in ['linux', 'windows', 'darwin', 'msys_nt']:
 -    if target_os == 'darwin':
--        env.Command('#/out/darwin/iotivity-csdk.framework', None, '#/tools/darwin/mkfwk_osx.sh')
+-        env.Command('#/out/darwin/iotivity-csdk.framework', None,
+-                    '#/tools/darwin/mkfwk_osx.sh')
 -
 -    # Build C/C++ unit tests
--    SConscript('unit_tests.scons')
+-    if env.get('WITH_TEST'):
+-        SConscript('unit_tests.scons')
 diff --git a/resource/csdk/resource-directory/SConscript b/resource/csdk/resource-directory/SConscript
-index f28a5f3db..857eb04ad 100644
+index 8f79b707c..3048c1311 100644
 --- a/resource/csdk/resource-directory/SConscript
 +++ b/resource/csdk/resource-directory/SConscript
-@@ -125,15 +125,3 @@ if 'SERVER' in rd_mode:
+@@ -54,7 +54,7 @@ if 'SERVER' in rd_mode:
+     rd_env.AppendUnique(CPPDEFINES=['RD_SERVER'])
+ 
+ rd_env.PrependUnique(
+-    LIBS=['octbstack', 'oc', 'oc_logger', 'connectivity_abstraction'])
++    LIBS=['octbstack', 'oc_logger', 'connectivity_abstraction'])
+ 
+ if target_os not in ['windows']:
+     rd_env.AppendUnique(
+@@ -83,7 +83,6 @@ if target_os in ['tizen']:
+ ######################################################################
+ RD_SRC_DIR = 'src/'
+ rd_src_c = []
+-rd_src_cpp = []
+ 
+ if 'SERVER' in rd_mode:
+     rd_src_c += [
+@@ -98,19 +97,13 @@ if 'CLIENT' in rd_mode:
+ 
+ rd_src_all = rd_src_c
+ 
+-if target_os not in ['darwin', 'ios']:
+-    rd_src_cpp += [RD_SRC_DIR + 'RDClient.cpp']
+-    if 'CLIENT' in rd_mode:
+-        rd_src_all += rd_src_cpp
+-
+ if target_os not in ['darwin', 'ios', 'msys_nt', 'windows']:
+     rdsdk_shared = rd_env.SharedLibrary('resource_directory', rd_src_all)
+     rdsdk_static = rd_env.StaticLibrary('resource_directory', rd_src_all)
+     rdsdk = Flatten([rdsdk_static, rdsdk_shared])
+ elif target_os in ['msys_nt', 'windows']:
+     rdsdk_c = rd_env.StaticLibrary('resource_directory_internal', rd_src_c)
+-    rdsdk_cpp = rd_env.StaticLibrary('resource_directory', rd_src_cpp)
+-    rdsdk = Flatten([rdsdk_c, rdsdk_cpp])
++    rdsdk = Flatten([rdsdk_c])
+ else:
+     rdsdk = rd_env.StaticLibrary('resource_directory', rd_src_all)
+ 
+@@ -128,15 +121,3 @@ if 'SERVER' in rd_mode:
          'include/rd_server.h', 'resource', 'rd_server.h')
      rd_env.UserInstallTargetHeader(
          'include/rd_database.h', 'resource', 'rd_database.h')

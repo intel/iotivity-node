@@ -1,8 +1,8 @@
 diff --git a/build_common/windows/SConscript b/build_common/windows/SConscript
-index fbd8b8d11..4f1b09a3f 100644
+index a6613b89d..04a34681f 100644
 --- a/build_common/windows/SConscript
 +++ b/build_common/windows/SConscript
-@@ -159,7 +159,7 @@ if env['CC'] == 'cl':
+@@ -189,7 +189,7 @@ if env['CC'] == 'cl':
          '/wd4232', '/wd4503', '/wd4512', '/wd4706'])
  
      # Enabling /W4 warnings globally for Windows builds.

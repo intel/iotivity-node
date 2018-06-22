@@ -164,14 +164,14 @@ if ( !fs.existsSync( repoPaths.iotivity ) ) {
 	run( "git", [ "clone", "https://github.com/ARMmbed/mbedtls.git", mbedtlsPath ] );
 
 	// Check out known-good commitid of mbedtls
-	run( "git", [ "checkout", "ad249f509fd62a3bbea7ccd1fef605dbd482a7bd" ], { cwd: mbedtlsPath } );
+	run( "git", [ "checkout", "59ae96f167a19f4d04dc6db61f6587b37ccd429f" ], { cwd: mbedtlsPath } );
 
 
 	// Clone tinycbor inside iotivity
 	run( "git", [ "clone", "https://github.com/01org/tinycbor.git", tinycborPath ] );
 
 	// Check out known-good commitid of tinycbor
-	run( "git", [ "checkout", "31c7f81d45d115d2007b1c881cbbd3a19618465c" ],
+	run( "git", [ "checkout", "ae64a3d9da39f3bf310b9a7b38427c096d8bcd43" ],
 		{ cwd: tinycborPath } );
 }
 
@@ -245,12 +245,13 @@ shelljs.cp(
 		"pinoxmcommon.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "platform_features.h" ),
 	path.join( binariesSource, "resource", "c_common", "iotivity_config.h" ),
-	path.join( repoPaths.iotivity, "resource", "c_common", "ocrandom", "include", "ocrandom.h" ),
 	path.join( repoPaths.iotivity, "extlibs", "tinycbor", "tinycbor", "src", "cbor.h" ),
 	repoPaths.installHeaders );
 
 shelljs.mkdir( "-p", path.join( repoPaths.installHeaders, "experimental" ) );
 shelljs.cp(
+	path.join( repoPaths.iotivity, "resource", "c_common", "ocrandom", "include", "experimental",
+		"ocrandom.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "experimental", "byte_array.h" ),
 	path.join( repoPaths.iotivity, "resource", "csdk", "security", "include", "experimental",
 		"securevirtualresourcetypes.h" ),
