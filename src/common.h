@@ -22,6 +22,7 @@
 extern "C" {
 #include <node_api.h>
 #include <ocstack.h>
+#include <pinoxmcommon.h>
 }
 
 #define PENDING_EXCEPTION "Pending exception"

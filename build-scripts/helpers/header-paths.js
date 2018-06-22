@@ -17,7 +17,14 @@ var path = require( "path" );
 
 var index, fileIndex, completeFileName;
 
-var filesToFind = [ "octypes.h", "ocpresence.h", "ocstackconfig.h", "rd_client.h" ];
+var filesToFind = [
+	"casecurityinterface.h",
+	"octypes.h",
+	"ocpresence.h",
+	"ocstackconfig.h",
+	"pinoxmcommon.h",
+	"rd_client.h"
+];
 
 var paths = {};
 

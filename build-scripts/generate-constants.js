@@ -39,7 +39,9 @@ function parseFileForConstants( fileName ) {
 
 						// Do what awk does - split into tokens by whitespace
 						fields = line.match( /\S+/g );
-						if ( fields.length > 2 && !fields[ 1 ].match( /[()]/ ) &&
+						if ( fields.length > 2 &&
+								!( fields[ 1 ].match( /[()]/ ) &&
+										!fields[ 1 ].match( /[(][0-9+][)]/ ) ) &&
 
 								// Constants we don't want
 								fields[ 1 ] !== "OC_RSRVD_DEVICE_TTL" ) {
@@ -76,7 +78,9 @@ fs.writeFileSync( constantsCC, [
 	parseFileForConstants( includePaths[ "ocstackconfig.h" ] ),
 	"  // octypes.h: Type definitions",
 	parseFileForConstants( includePaths[ "octypes.h" ] ),
-	"  // octypes.h: Type definitions",
+	"  // pinoxmcommon.h: Type definitions",
+	parseFileForConstants( includePaths[ "pinoxmcommon.h" ] ),
+	"  // rd_client.h: Type definitions",
 	parseFileForConstants( includePaths[ "rd_client.h" ] ),
 	"  return std::string();",
 	"}"

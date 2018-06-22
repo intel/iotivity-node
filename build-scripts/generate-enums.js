@@ -93,6 +93,8 @@ fs.writeFileSync( enumsCC, [
 		"std::string InitEnums(napi_env env, napi_value exports) {",
 		parseFileForEnums( enumsCC, includePaths[ "octypes.h" ] ),
 		parseFileForEnums( enumsCC, includePaths[ "ocpresence.h" ] ),
+		parseFileForEnums( enumsCC, includePaths[ "pinoxmcommon.h" ] ),
+		parseFileForEnums( enumsCC, includePaths[ "casecurityinterface.h" ] ),
 		"  return std::string();",
 		"}"
 	].join( "\n" ) + "\n",

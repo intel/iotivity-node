@@ -34,6 +34,8 @@ var intervalId,
 		return returnValue;
 	} )();
 
+iotivity.OCRegisterPersistentStorageHandler( require( "../lib/StorageHandler" )() );
+
 console.log( "Starting OCF stack in client mode" );
 
 // Start iotivity and set up the processing loop

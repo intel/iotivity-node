@@ -18,6 +18,7 @@
 
 extern "C" {
 #include <ocstack.h>
+#include <pinoxmcommon.h>
 }
 
 #define SET_CONSTANT(env, destination, name, type) \

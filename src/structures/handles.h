@@ -28,10 +28,17 @@ class JSCallback {
   napi_ref callback;
   napi_env env;
   JSCallback() : callback(nullptr), env(nullptr) {}
-  std::string Init(napi_env env, napi_value _callback) {
+  std::string Init(napi_env _env, napi_value _callback) {
     if (_callback) {
       NAPI_CALL_RETURN(env,
-          napi_create_reference(env, _callback, 1, &callback));
+          napi_create_reference(_env, _callback, 1, &callback));
+    }
+    env = _env;
+    return std::string();
+  }
+  static std::string Destroy(napi_env env, JSCallback* data) {
+    if (data != nullptr && data->callback) {
+      NAPI_CALL_RETURN(env, napi_delete_reference(env, data->callback));
     }
     return std::string();
   }
@@ -86,22 +93,22 @@ class JSHandle : public JSCallback {
 
   static std::string Destroy(napi_env env, jsType *cData,
                              napi_value jsHandle = nullptr) {
-    if (cData->callback) {
-      NAPI_CALL_RETURN(env, napi_delete_reference(env, cData->callback));
-    }
-    if (cData->self) {
-      void *data = nullptr;
-      if (!jsHandle) {
-        NAPI_CALL_RETURN(env,
-                         napi_get_reference_value(env, cData->self, &jsHandle));
+    if (cData != nullptr) {
+      JSCallback::Destroy(env, cData);
+      if (cData->self) {
+        void *data = nullptr;
+        if (!jsHandle) {
+          NAPI_CALL_RETURN(env,
+                           napi_get_reference_value(env, cData->self, &jsHandle));
+        }
+        C2J_SET_PROPERTY_CALL_RETURN(
+            env, jsHandle, "stale",
+            NAPI_CALL_RETURN(env, napi_get_boolean(env, true, &jsValue)));
+        NAPI_CALL_RETURN(env, napi_delete_reference(env, cData->self));
+        NAPI_CALL_RETURN(env, napi_remove_wrap(env, jsHandle, &data));
       }
-      C2J_SET_PROPERTY_CALL_RETURN(
-          env, jsHandle, "stale",
-          NAPI_CALL_RETURN(env, napi_get_boolean(env, true, &jsValue)));
-      NAPI_CALL_RETURN(env, napi_delete_reference(env, cData->self));
-      NAPI_CALL_RETURN(env, napi_remove_wrap(env, jsHandle, &data));
+      delete cData;
     }
-    delete cData;
     return std::string();
   }
 
