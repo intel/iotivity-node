@@ -36,7 +36,7 @@
 					[ "OS=='win'", {
 						"libraries": [
 							"<(module_root_dir)/iotivity-installed/lib/octbstack.lib",
-							"<(module_root_dir)/iotivity-installed/lib/connectivity_abstraction.lib"
+							"<(module_root_dir)/iotivity-installed/lib/connectivity_abstraction_internal.lib"
 						]
 					}, {
 
