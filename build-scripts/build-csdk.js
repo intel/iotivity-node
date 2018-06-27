@@ -216,9 +216,6 @@ shelljs.cp(
 		"json2cbor" + ( process.platform.match( /^win/ ) ? ".exe" : "" ) ),
 	installBinaries );
 
-run( "dumpbin", [ "/exports", path.join( binariesSource, "octbstack.dll" ) ] );
-console.error( JSON.stringify( shelljs.ls( binariesSource ), null, 4 ) );
-
 // Install the libraries
 shelljs.cp( "-r", path.join( binariesSource, "*" ), repoPaths.installLibraries );
 shelljs.rm( "-rf", path.join( repoPaths.installLibraries, "extlibs" ) );
