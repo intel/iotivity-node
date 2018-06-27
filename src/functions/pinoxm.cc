@@ -140,13 +140,6 @@ napi_value bind_UnsetDisplayPinWithContextCB(napi_env env,
   return nullptr;
 }
 
-napi_value bind_UnsetClosePinCB(napi_env env, napi_callback_info info) {
-  UnsetClosePinCB();
-  JSCallback::Destroy(env, SetClosePinDisplayCB_data);
-  SetClosePinDisplayCB_data = nullptr;
-  return nullptr;
-}
-
 napi_value bind_GeneratePin(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 1);
   bool is_buffer;
