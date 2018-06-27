@@ -1,0 +1,18 @@
+diff --git a/resource/c_common/ocrandom/include/experimental/ocrandom.h b/resource/c_common/ocrandom/include/experimental/ocrandom.h
+index 4aef970..c8cac5c 100644
+--- a/resource/c_common/ocrandom/include/experimental/ocrandom.h
++++ b/resource/c_common/ocrandom/include/experimental/ocrandom.h
+@@ -88,7 +88,12 @@ bool OCGenerateUuid(uint8_t uuid[UUID_SIZE]);
+  *              representation of the input UUID.
+  * @retval true for success, otherwise false and an error is logged
+  */
+-bool OCConvertUuidToString(const uint8_t uuid[UUID_SIZE],
++#ifdef _WIN32
++#define DO_EXTERN __declspec(dllexport)
++#else
++#define DO_EXTERN /* nothing */
++#endif
++DO_EXTERN bool OCConvertUuidToString(const uint8_t uuid[UUID_SIZE],
+         char uuidString[UUID_STRING_SIZE]);
+ 
+ /**
