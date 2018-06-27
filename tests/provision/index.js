@@ -55,6 +55,7 @@ function serverCred( item, index ) {
 //   serverPaths: array of strings - absolute paths of servers
 //   uuid: - string - UUID that will be used for the recognition resource
 //         - array of objects - entries to add to the ACL of all servers
+//         - undefined - UUID for the recognition resource will be generated
 module.exports = function provision( options ) {
 	var index;
 

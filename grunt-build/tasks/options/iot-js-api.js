@@ -18,24 +18,13 @@ var assignIn = require( "lodash.assignin" );
 var path = require( "path" );
 var ocfRunner = require( "iot-js-api" );
 var results = require( "../../../tests/getresult" );
+var provision = require( "../../../tests/provision" );
 
 var packageRoot = path.join( require( "bindings" ).getRoot( __filename ) );
-var preamblePath = path.join( packageRoot, "tests", "preamble" );
 var generateSpawn = function( spawnFinal ) {
 	return function( interpreter, commandLine ) {
-		var preambleCommandLine;
+		commandLine[ 2 ] = require( "../../location" )( grunt );
 
-		commandLine[ 2 ] = grunt.option( "ci" ) ?
-			path.dirname( require.resolve( "iotivity-node" ) ) :
-			packageRoot;
-
-		preambleCommandLine = commandLine.slice();
-
-		// argv[ 4 ] for the preamble means to clobber or not, not secure or not. Let's
-		// make sure we clobber any previous test ACLs.
-		preambleCommandLine[ 3 ] = false;
-
-		require( preamblePath ).apply( this, preambleCommandLine );
 		return spawnFinal( interpreter, commandLine );
 	};
 };
@@ -73,7 +62,24 @@ var basicOptions = {
 var plainOptions = assignIn( {
 	client: plain,
 	server: plain,
-	single: plain
+	single: plain,
+	globalPreamble: function( testName, clientPaths, serverPaths, uuid ) {
+
+		// Swap client and server paths, because in this test, the server is really the client and
+		// vice versa.
+		if ( testName === "Presence - Resource" ) {
+			var swap = serverPaths;
+			serverPaths = clientPaths;
+			clientPaths = swap;
+		}
+
+		provision( {
+			clientPaths: clientPaths,
+			serverPaths: serverPaths,
+			location: require( "../../location" )( grunt ),
+			uuid: uuid
+		} );
+	}
 }, basicOptions );
 
 // Shim the default log() and done() to also record results in JSON

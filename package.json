@@ -54,7 +54,7 @@
     "grunt-esformatter": "^1.0.1",
     "grunt-eslint": "18.1.0",
     "grunt-istanbul": "^0.7.1",
-    "iot-js-api": "git+https://github.com/intel/iot-js-api/#65d6995a15756715ec69a5e2ac4a644aca3c623d",
+    "iot-js-api": "git+https://github.com/intel/iot-js-api/#a4a44596821a37bd4992e44bd85595b073dbe1a8",
     "istanbul": "^0.4.5",
     "load-grunt-config": "^0.17.2",
     "load-grunt-tasks": "^3.2.0",

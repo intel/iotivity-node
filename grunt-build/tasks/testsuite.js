@@ -24,10 +24,7 @@ grunt.task.registerTask( "testsuite", "Run the test suite", function() {
 		[ path.join( process.cwd(), "tests", "suite.js" ) ]
 
 			// The argument to pass to require() in order to obtain iotivity-node
-			.concat( [ grunt.option( "ci" ) ?
-				path.dirname( require.resolve( "iotivity-node" ) ) :
-				process.cwd()
-			] )
+			.concat( [ require( "../location" )( grunt ) ] )
 
 			// The suites to run, or no argument if suites are not specified
 			.concat( grunt.option( "suites" ) ? [ grunt.option( "suites" ) ] : [] ),
