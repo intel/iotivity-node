@@ -70,7 +70,7 @@ install:
 - |
   if test "x${TRAVIS_OS_NAME}x" = "xosxx"; then
     sudo easy_install pip
-    sudo pip install --egg 'scons<3.0.0'
+    sudo pip install 'scons'
   fi
 - node --version
 - npm --version

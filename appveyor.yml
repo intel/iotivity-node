@@ -21,7 +21,9 @@ install:
   - ps: Get-NetAdapterBinding | where {$_.componentid -like "ms_tcpip6"} | Disable-NetAdapterBinding
   - ps: Get-NetAdapterBinding
   - ps: Install-Product node $env:nodejs_version x64
-  - pip install --egg "scons<3.0.0"
+  - pip install -U setuptools
+  - pip install -U wheel
+  - pip install scons
   - node --version
   - npm -g install npm@5.3.0
   - npm --version
