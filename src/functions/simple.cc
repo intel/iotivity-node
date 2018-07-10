@@ -102,6 +102,32 @@ napi_value bind_OCGetServerInstanceIDString(napi_env env,
   C2J_SET_RETURN_VALUE(env, info, string_utf8, uuid, strlen(uuid));
 }
 
+napi_value bind_OCSetDeviceId(napi_env env, napi_callback_info info)
+{
+    OCUUIdentity    *ocid = NULL;
+    OCStackResult   res = OC_STACK_INVALID_PARAM;
+    char            byte[2] = {0};
+
+    J2C_DECLARE_ARGUMENTS(env, info, 1);
+    J2C_GET_STRING_TRACKED_JS_THROW(uuid, env, arguments[0], true, "uuid");
+    if (!uuid)
+        C2J_SET_RETURN_VALUE(env, info, double, ((double)res));
+    ocid = (OCUUIdentity*)malloc(sizeof(*ocid));
+    if (!ocid)
+        C2J_SET_RETURN_VALUE(env, info, double, ((double)OC_STACK_NO_MEMORY));
+    memset(ocid, 0, UUID_IDENTITY_SIZE);
+    for (unsigned int i = 0, k = 0, len = strlen(uuid); i < len; i += 2, ++k) {
+        if (uuid[i] == '-')
+            ++i;
+        strncpy(&byte[0], &uuid[i], 2);
+        ocid->id[k] = strtol(byte, NULL, 16);
+    }
+    res = OCSetDeviceId(ocid);
+    if (ocid)
+        free(ocid);
+    C2J_SET_RETURN_VALUE(env, info, double, ((double)res));
+}
+
 napi_value bind_OCGetPropertyValue(napi_env env, napi_callback_info info) {
   J2C_DECLARE_ARGUMENTS(env, info, 3);
   J2C_DECLARE_VALUE_JS_THROW(OCPayloadType, payloadType, env, arguments[0],
