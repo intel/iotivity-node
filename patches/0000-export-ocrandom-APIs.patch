@@ -1,5 +1,5 @@
 diff --git a/resource/c_common/ocrandom/include/experimental/ocrandom.h b/resource/c_common/ocrandom/include/experimental/ocrandom.h
-index 4aef970..c8cac5c 100644
+index 4aef970..bf6b3d2 100644
 --- a/resource/c_common/ocrandom/include/experimental/ocrandom.h
 +++ b/resource/c_common/ocrandom/include/experimental/ocrandom.h
 @@ -88,7 +88,12 @@ bool OCGenerateUuid(uint8_t uuid[UUID_SIZE]);
@@ -14,5 +14,14 @@ index 4aef970..c8cac5c 100644
 +#endif
 +DO_EXTERN bool OCConvertUuidToString(const uint8_t uuid[UUID_SIZE],
          char uuidString[UUID_STRING_SIZE]);
+ 
+ /**
+@@ -101,7 +106,7 @@ bool OCConvertUuidToString(const uint8_t uuid[UUID_SIZE],
+  *              The 16 byte array filled with UUID data
+  * @retval true for success, otherwise false and an error is logged
+  */
+-bool OCConvertStringToUuid(const char uuidString[UUID_STRING_SIZE],
++DO_EXTERN bool OCConvertStringToUuid(const char uuidString[UUID_STRING_SIZE],
+                                          uint8_t uuid[UUID_SIZE]);
  
  /**
