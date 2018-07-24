@@ -2,7 +2,7 @@ var util = require( "../assert-to-console" );
 
 var iotivity = require(process.argv[3]+"/lowlevel");
 
-const uuids = ["af000000-000f-000f-000f-000000000001",
+var uuids = ["af000000-000f-000f-000f-000000000001",
                "AF000000-000f-000f-000f-000000000002",
                "AF000000-000F-000F-000F-000000000003",
               ];
