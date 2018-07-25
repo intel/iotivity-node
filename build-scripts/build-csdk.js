@@ -238,6 +238,7 @@ shelljs.cp(
 	path.join( repoPaths.iotivity, "resource", "csdk", "security", "include", "experimental",
 		"securevirtualresourcetypes.h" ),
 	path.join( repoPaths.iotivity, "resource", "c_common", "platform_features.h" ),
+	path.join( repoPaths.iotivity, "resource", "c_common", "ocrandom", "include", "ocrandom.h" ),
 	path.join( repoPaths.iotivity, "extlibs", "tinycbor", "tinycbor", "src", "cbor.h" ),
 	repoPaths.installHeaders );
 
