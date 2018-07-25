@@ -8,26 +8,22 @@ var uuids = [ "af000000-000f-000f-000f-000000000001",
             ];
 
 console.log( "Launch unit test for the OCServer Identity configuration" );
-
-setImmediate(function ( )
-  {
+setImmediate( function ( ) {
     iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER );
-    
-     /* TEST SUITE */
-  
     for ( var i = 0; i < uuids.length; ++i )
     {
         iotivity.OCSetDeviceId( uuids[ i ] );
         util.assert( "strictEqual", uuids[ i ], iotivity.OCGetServerInstanceIDString( ),
                     "OCSetDeviceId failed, still have ServerInstanceIDString : " +
                     iotivity.OCGetServerInstanceIDString( ) );
-        if ( i+1 === uuids.length )
+        if ( ( i + 1 ) === uuids.length )
         {
             i = -1;
             console.log( "Register persistent storage handler." );
-            iotivity.OCRegisterPersistentStorageHandler( require( process.argv[ 3 ] + "lib/StorageHandler" )( ) );
+            iotivity.OCRegisterPersistentStorageHandler(
+              require( process.argv[ 3 ] + "lib/StorageHandler" )( ) );
         }
         iotivity.OCProcess( );
     }
     iotivity.OCStop( );
-});
+} );
