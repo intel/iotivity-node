@@ -8,7 +8,7 @@ var uuids = ["af000000-000f-000f-000f-000000000001",
               ];
 
 console.log("Launch unit test for the OCServer Identity configuration")
-setImmediate(() => {
+setImmediate(function () {
     iotivity.OCInit( null, 0, iotivity.OCMode.OC_SERVER);
     /* TEST SUITE */
 
