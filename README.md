@@ -42,7 +42,11 @@ This project provides a Javascript API for [OCF][] functionality. The API follow
       setx PATH "%PATH%;c:\Users\yourusernamehere\.windows-build-tools\python27;c:\Users\yourusernamehere\.windows-build-tools\python27\scripts;c:\Program Files\7-Zip"
       ```
 0. Close the command prompt and reopen it.
-0. In the command prompt, run `pip install --egg "scons<3.0.0"` to install scons (a python package)
+0. In the command prompt, run the followings to update `pip`:
+    * `pip install -U setuptools`
+    * `python -m pip install --upgrade pip`
+    * `pip install -U wheel`
+0. Run `pip install "scons"` to install scons (a python package)
 0. Wait for the installation of the `windows-build-tools` to complete. Afterwards, you can perform the remaining steps.
 0. Clone this repository and the change directory into it
 0. Run `npm install` to build iotivity-node.
