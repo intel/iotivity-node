@@ -53,10 +53,30 @@ matrix:
   - env: NODE_VERSION=8.4.0 TEST_SCRIPT=test SET_NODE_OPTIONS=--napi-modules
     os: osx
     osx_image: xcode8.2
+
   allow_failures:
+  - env: NODE_VERSION=8.4.0 TEST_SCRIPT=test SET_NODE_OPTIONS=--napi-modules
+    os: osx
+    osx_image: xcode8.2
+  - env: NODE_VERSION=7 TEST_SCRIPT=test
+    os: osx
+    osx_image: xcode8.2
+  - env: NODE_VERSION=stable TEST_SCRIPT=test
+    os: osx
+    osx_image: xcode8.2
+  - env: NODE_VERSION=5.5.0 TEST_SCRIPT=test
+    os: osx
+    osx_image: xcode8.2
+  - env: NODE_VERSION=lts/boron TEST_SCRIPT=test
+    os: osx
+    osx_image: xcode8.2
   - env: NODE_VERSION=stable TEST_SCRIPT=publish-coverage
     os: linux
     addons: *1
+  - env: NODE_VERSION=lts/argon TEST_SCRIPT=test
+    os: osx
+    osx_image: xcode8.2
+
 install:
 - |
   if test "x${TRAVIS_OS_NAME}x" = "xlinuxx"; then
