@@ -139,7 +139,7 @@ testUtils.assert( "strictEqual",
 testUtils.assert( "deepEqual",
 	testUtils.lookupBitfieldValueNames( "OCResourceProperty",
 		iotivity.OCGetResourceProperties( resourceHandleReceptacle.handle ) ),
-	{ OC_SLOW: true, OC_ACTIVE: true, OC_NONSECURE: true },
+	{ OC_SLOW: true, OC_ACTIVE: true, OC_SECURE: true },
 	"OCGetResourceProperties correctly returns properties set on resource" );
 
 testUtils.assert( "deepEqual", resourceHandleReceptacle.handle,
