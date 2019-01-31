@@ -376,7 +376,8 @@ std::string c_OCRepPayload(napi_env env, napi_value source,
 
   // reppayload.uri
   J2C_DECLARE_PROPERTY_JS_RETURN(jsUri, env, source, "uri");
-  J2C_GET_STRING_TRACKED_JS_RETURN(uri, env, jsUri, true, "payload.uri");
+  J2C_GET_STRING_TRACKED_JS(uri, env, jsUri, true, "payload.uri",
+                            return FAIL_STATUS);
   if (uri) {
     if (!OCRepPayloadSetUri(payload.get(), uri)) {
       return std::string("Failed to set payload.uri");
@@ -420,7 +421,8 @@ std::string c_OCRepPayload(napi_env env, napi_value source,
       msg = std::string("payload.values item[") + std::to_string(index) + "]";
       J2C_GET_STRING_JS_RETURN(env, propName, jsKey, false, msg);
       propNameTracker.reset(propName);
-      J2C_ASSIGN_PROPERTY_JS_RETURN(env, jsValues, propName, &jsValue);
+      J2C_ASSIGN_PROPERTY_JS(env, jsValues, propName, &jsValue,
+                             return FAIL_STATUS);
       NAPI_CALL_RETURN(env, napi_typeof(env, jsValue, &jsValueType));
       msg = std::string("payload.values[\"") + propName + "\"]";
       if (jsValueType == napi_null) {

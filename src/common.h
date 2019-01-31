@@ -148,14 +148,6 @@ extern "C" {
     }                                                                         \
   } while (0)
 
-#define J2C_GET_STRING(env, destination, source, nullOk, name, ...)       \
-  do {                                                                    \
-    (destination) = nullptr;                                              \
-    J2C_DECLARE_PROPERTY_JS(jsValue, (env), (source), name, __VA_ARGS__); \
-    J2C_GET_STRING_JS((env), (destination), jsValue, (nullOk),            \
-                      #destination "." name, __VA_ARGS__);                \
-  } while (0)
-
 #define J2C_GET_STRING_TRACKED_JS(varName, env, source, nullOk, message, ...)  \
   std::unique_ptr<char> __##varName##__tracker;                                \
   char *varName = nullptr;                                                     \
@@ -184,10 +176,6 @@ extern "C" {
 #define DECLARE_VALUE_TYPE_RETURN(varName, env, value) \
   DECLARE_VALUE_TYPE(varName, (env), (value), return FAIL_STATUS)
 
-#define J2C_ASSIGN_PROPERTY_JS_RETURN(env, source, name, destination) \
-  J2C_ASSIGN_PROPERTY_JS((env), (source), (name), (destination),      \
-                         return FAIL_STATUS)
-
 #define J2C_DECLARE_PROPERTY_JS_RETURN(varName, env, source, name) \
   J2C_DECLARE_PROPERTY_JS(varName, env, source, name, return FAIL_STATUS)
 
@@ -200,8 +188,13 @@ extern "C" {
                         return FAIL_STATUS)
 
 #define J2C_GET_STRING_RETURN(env, destination, source, nullOk, name) \
-  J2C_GET_STRING((env), (destination), (source), (nullOk), name,      \
-                 return FAIL_STATUS)
+  do {                                                                \
+    (destination) = nullptr;                                          \
+    J2C_DECLARE_PROPERTY_JS(jsValue, (env), (source), name,           \
+                            return FAIL_STATUS);                      \
+    J2C_GET_STRING_JS((env), (destination), jsValue, (nullOk),        \
+                      #destination "." name, return FAIL_STATUS);     \
+  } while (0)
 
 #define J2C_ASSIGN_STRING_JS_RETURN(env, destination, source, message) \
   J2C_ASSIGN_STRING_JS((env), (destination), (source), message,        \
@@ -210,11 +203,6 @@ extern "C" {
 #define J2C_GET_STRING_JS_RETURN(env, destination, source, nullOk, message) \
   J2C_GET_STRING_JS((env), (destination), (source), (nullOk), message,      \
                     return FAIL_STATUS)
-
-#define J2C_DECLARE_VALUE_JS_RETURN(cType, variableName, env, source, jsType, \
-                                    message, getterSuffix, jsParameterType)   \
-  J2C_DECLARE_VALUE_JS(cType, variableName, (env), (source), jsType, message, \
-                       getterSuffix, jsParameterType, return FAIL_STATUS)
 
 #define J2C_ASSIGN_VALUE_JS_RETURN(cType, destination, env, source, jsType, \
                                    message, getterSuffix, jsParameterType)  \
@@ -253,11 +241,6 @@ extern "C" {
     C2J_SET_PROPERTY_RETURN((env), (destination), #name, string_utf8,     \
                             (source)->name, strlen((source)->name));      \
   }
-
-#define J2C_GET_STRING_TRACKED_JS_RETURN(varName, env, source, nullOk,   \
-                                         message)                        \
-  J2C_GET_STRING_TRACKED_JS(varName, (env), (source), (nullOk), message, \
-                            return FAIL_STATUS)
 
 // Macros used in bindings - they cause the function to throw and return void
 
@@ -303,9 +286,6 @@ extern "C" {
 #define J2C_VALIDATE_IS_ARRAY_THROW(env, theValue, nullOk, message) \
   J2C_VALIDATE_IS_ARRAY((env), (theValue), (nullOk), message,       \
                         THROW_BODY((env), 0))
-
-#define J2C_DECLARE_PROPERTY_JS_THROW(varName, env, source, name) \
-  J2C_DECLARE_PROPERTY_JS(varName, env, source, name, THROW_BODY((env), 0))
 
 #define C2J_SET_PROPERTY_THROW(env, destination, name, type, ...)              \
   do {                                                                         \

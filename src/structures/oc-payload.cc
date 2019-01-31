@@ -144,9 +144,11 @@ std::string c_OCPayload(napi_env env, napi_value source,
     return std::string();
   }
 
-  J2C_DECLARE_PROPERTY_JS_RETURN(jsPayloadType, env, source, "type");
-  J2C_DECLARE_VALUE_JS_RETURN(OCPayloadType, payloadType, env, jsPayloadType,
-                              napi_number, "payload.type", uint32, uint32_t);
+  J2C_DECLARE_PROPERTY_JS(jsPayloadType, env, source, "type",
+                          return FAIL_STATUS);
+  J2C_DECLARE_VALUE_JS(OCPayloadType, payloadType, env, jsPayloadType,
+                       napi_number, "payload.type", uint32, uint32_t,
+                       return FAIL_STATUS);
 
   if (payloadType == PAYLOAD_TYPE_REPRESENTATION) {
     HELPER_CALL_RETURN(

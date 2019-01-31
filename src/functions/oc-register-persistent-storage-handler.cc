@@ -144,10 +144,11 @@ static int defaultUnlink(const char *path) {
   }                                                                \
   NAPI_CALL_THROW(env, napi_create_reference(env, (local), 1, &(reference)));
 
-#define GET_AND_VALIDATE(varNameSuffix, env, source, name)                    \
-  J2C_DECLARE_PROPERTY_JS_THROW(local##varNameSuffix, (env), (source), name); \
-  J2C_VALIDATE_VALUE_TYPE_THROW((env), local##varNameSuffix, napi_function,   \
-                                "handler." name);                             \
+#define GET_AND_VALIDATE(varNameSuffix, env, source, name)                  \
+  J2C_DECLARE_PROPERTY_JS(local##varNameSuffix, (env), (source), name,      \
+                          THROW_BODY((env), 0));                            \
+  J2C_VALIDATE_VALUE_TYPE_THROW((env), local##varNameSuffix, napi_function, \
+                                "handler." name);                           \
   UPDATE_REFERENCE(env, js##varNameSuffix, local##varNameSuffix)
 
 static OCPersistentStorage storage = {defaultOpen, defaultRead, defaultWrite,
