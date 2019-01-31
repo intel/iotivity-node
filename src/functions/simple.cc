@@ -19,8 +19,8 @@
 #include "../common.h"
 
 extern "C" {
-#include <ocstack.h>
 #include <experimental/ocrandom.h>
+#include <ocstack.h>
 #include <rd_server.h>
 }
 
@@ -103,16 +103,16 @@ napi_value bind_OCGetServerInstanceIDString(napi_env env,
   C2J_SET_RETURN_VALUE(env, info, string_utf8, uuid, strlen(uuid));
 }
 
-napi_value bind_OCSetDeviceId(napi_env env, napi_callback_info info)
-{
-    OCUUIdentity ocid;
+napi_value bind_OCSetDeviceId(napi_env env, napi_callback_info info) {
+  OCUUIdentity ocid;
 
-    memset(&ocid, 0, UUID_IDENTITY_SIZE);
-    J2C_DECLARE_ARGUMENTS(env, info, 1);
-    J2C_GET_STRING_TRACKED_JS_THROW(uuid, env, arguments[0], false, "uuid");
-    JS_ASSERT(OCConvertStringToUuid(uuid, ocid.id), "Unable to convert UUID String UUID to OCUUIdentity",
-           THROW_BODY(env, 0));
-    C2J_SET_RETURN_VALUE(env, info, double, ((double)OCSetDeviceId(&ocid)));
+  memset(&ocid, 0, UUID_IDENTITY_SIZE);
+  J2C_DECLARE_ARGUMENTS(env, info, 1);
+  J2C_GET_STRING_TRACKED_JS_THROW(uuid, env, arguments[0], false, "uuid");
+  JS_ASSERT(OCConvertStringToUuid(uuid, ocid.id),
+            "Unable to convert UUID String UUID to OCUUIdentity",
+            THROW_BODY(env, 0));
+  C2J_SET_RETURN_VALUE(env, info, double, ((double)OCSetDeviceId(&ocid)));
 }
 
 napi_value bind_OCGetPropertyValue(napi_env env, napi_callback_info info) {

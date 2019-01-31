@@ -31,12 +31,12 @@ class JSCallback {
   std::string Init(napi_env _env, napi_value _callback) {
     if (_callback) {
       NAPI_CALL_RETURN(env,
-          napi_create_reference(_env, _callback, 1, &callback));
+                       napi_create_reference(_env, _callback, 1, &callback));
     }
     env = _env;
     return std::string();
   }
-  static std::string Destroy(napi_env env, JSCallback* data) {
+  static std::string Destroy(napi_env env, JSCallback *data) {
     if (data != nullptr && data->callback) {
       NAPI_CALL_RETURN(env, napi_delete_reference(env, data->callback));
     }
@@ -98,8 +98,8 @@ class JSHandle : public JSCallback {
       if (cData->self) {
         void *data = nullptr;
         if (!jsHandle) {
-          NAPI_CALL_RETURN(env,
-                           napi_get_reference_value(env, cData->self, &jsHandle));
+          NAPI_CALL_RETURN(
+              env, napi_get_reference_value(env, cData->self, &jsHandle));
         }
         C2J_SET_PROPERTY_CALL_RETURN(
             env, jsHandle, "stale",
