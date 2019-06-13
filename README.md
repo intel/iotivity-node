@@ -1,5 +1,21 @@
 # iotivity-node
 
+**DISCONTINUATION OF PROJECT.  This project will no longer be maintained by Intel.  Intel will not provide or guarantee development of or support for this project, including but not limited to, maintenance, bug fixes, new releases or updates.  Patches to this project are no longer accepted by Intel.  If you have an ongoing need to use this project, are interested in independently developing it, or would like to maintain patches for the community, please create your own fork of the project.**
+
+To create a fork of this project it is best not to use GitHub's "Fork" feature, because that restricts one's ability to maintain issues and a Wiki. Nevertheless, these steps may be followed:
+
+0. Create a new, empty GitHub repository of which you are the owner.
+0. Clone this archived repository.
+0. Change directories into the clone.
+    ```sh
+    cd iotivity-node
+    ```
+0. Push to the empty repository you created:
+    ```sh
+    git push -f git@github.com:<your-organization>/<your-repository> master
+    ```
+0. Maintain your fork at `https://github.com/<your-organization>/<your-repository> complete with issues, PRs, and a Wiki.
+
 ## Description
 This project provides a Javascript API for [OCF][] functionality. The API follows a maintained [specification][] and is implemented as a native addon using [iotivity][] as its backend.
 
